@@ -40,8 +40,3 @@ htmlcov/
 
 # virtualenv
 .venv
-
-# certificates and keys
-*.csr
-*.crt
-*.key
