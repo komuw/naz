@@ -8,7 +8,7 @@
 naz is an SMPP client.           
 It's name is derived from Kenyan hip hop artiste, Nazizi.                             
 
-> SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC). - https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer
+> SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC). - [Wikipedia](https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer)
 
 naz currently only supports the SMPP version 3.4.
 
