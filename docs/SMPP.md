@@ -21,7 +21,7 @@ An ESME has unbound from the SMSC and has closed the network connection. The SMS
 **NB:** we are ignoring the other states since we are only concerning ourselves with an ESME in `Transceiver` mode.
 
 The purpose of the `outbind` operation is to allow the SMSC signal an ESME to originate a `bind_receiver` request to the SMSC. An example of where such a facility might be applicable would be where the SMSC had outstanding messages for delivery to the ESME.
-SMSC should bind to the ESME by issuing an `outbind` request. The ESME responds with a `bind_receiver` request to which the SMSC will reply with a `bind_receiver_resp`. If the ESME does not accept the outbind session (e.g. because of an illegal system_id orpassword etc.) the ESME should disconnect the network connection. Once the SMPP session is established the characteristics of the session are that of a normal SMPP receiver session.
+SMSC should bind to the ESME by issuing an `outbind` request. The ESME responds with a `bind_receiver` request to which the SMSC will reply with a `bind_receiver_resp`. If the ESME does not accept the outbind session (e.g. because of an illegal system_id orpassword etc.) the ESME should disconnect the network connection. Once the SMPP session is established the characteristics of the session are that of a normal SMPP receiver session.                 
 **question:** does ESME have to respond with a `bind_receiver` or can it send a `bind_transceiver` ??
 
 #### 2.3 PDUS
