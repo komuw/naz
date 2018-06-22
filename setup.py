@@ -60,7 +60,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     # What does your project relate to?
-    keywords='naz, smpp',
+    keywords='naz, smpp, smpp-client, smpp-protocol, smpp-library',
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # packages=['naz'],
