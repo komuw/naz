@@ -1,0 +1,47 @@
+# Compiled Python modules
+*.pyo
+*.pyc
+
+# SQLite
+*.db
+*.s3db
+*.sqlite3
+
+# Vagrant private files
+.vagrant/*
+.vagrant*
+
+#logs
+*.log
+*.log.*
+
+#pids
+*.pid
+
+#ppa public keys
+*.asc*
+
+# markdown preview
+README.html
+
+# vscode editor
+.vscode/
+
+#Coverage
+.coverage
+htmlcov/
+
+# Setuptools distribution folder.
+/dist/
+/build/
+
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+
+# virtualenv
+.venv
+
+# certificates and keys
+*.csr
+*.crt
+*.key
