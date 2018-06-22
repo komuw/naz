@@ -76,7 +76,7 @@ setup(
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
-    # $ pip3 install -e .[dev,test]
+    # $ pip install -e .[dev,test]
     extras_require={
         'dev': ['coverage', 'pypandoc', 'twine', 'wheel'],
         'test': ['flake8==3.5.0', 'mock', 'pylint==1.8.2', 'pycodestyle==2.3.1'],
@@ -110,12 +110,13 @@ setup(
 # python packaging documentation:
 # 1. https://python-packaging.readthedocs.io/en/latest/index.html
 # 2. https://python-packaging-user-guide.readthedocs.io/tutorials/distributing-packages
-# a) pip3 install wheel twine
-# b) pip3 install -e .
+# a) pip install wheel twine
+# b) pip install -e .
 # c) python setup.py sdist
 # d) python setup.py bdist_wheel
 # e) DONT use python setup.py register and python setup.py upload. They use http
 # f) twine upload dist/* -r testpypi
-# g) pip3 install -i https://testpypi.python.org/pypi <package name>
+# g) pip install -i https://testpypi.python.org/pypi <package name>
 # h) twine upload dist/*   # prod pypi
-# i) pip3 install <package name>
+# i) pip install <package name>
+# pip install -e .[dev,test]

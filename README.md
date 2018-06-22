@@ -18,7 +18,7 @@ naz is in active development and it's API may change in backward incompatible wa
 ## Installation
 
 ```shell
-pip3 install naz
+pip install naz
 ```           
 
 
@@ -60,7 +60,7 @@ naz --help
 - open an issue on this repo. In your issue, outline what it is you want to add and why.
 - install pre-requiste software:             
 ```shell
-apt-get -y install pandoc && pip3 install -e .[dev,test]
+apt-get -y install pandoc && pip install -e .[dev,test]
 ```                   
 - make the changes you want on your fork.
 - your changes should have backward compatibility in mind unless it is impossible to do so.
