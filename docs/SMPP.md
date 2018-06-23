@@ -140,7 +140,7 @@ command-length | command-id | command-status |sequence-number | PDU-Body
 ```python
 import struct
 body = b'smppclient1\x00password\x00\x00\x00\x00\x004\x00\x00\x00'
-command_length = len(body) + 16 #16 is for headers
+command_length = 16 + len(body)  #16 is for headers
 command_code = 0x00000009 #the command code for `bind_transceiver` see section 5.1.2.1
 status =  0x00000000 #the status for success see section 5.1.3
 sequence = 0x00000001
@@ -185,7 +185,7 @@ body = body + \
 ####################
 
 ### create header ####
-command_length = len(body) + 16 #16 is for headers
+command_length = 16 + len(body) #16 is for headers
 command_code = 0x00000009 #the command code for `bind_transceiver` see section 5.1.2.1
 status =  0x00000000 #the status for success see section 5.1.3
 sequence = 0x00000001
