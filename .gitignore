@@ -26,7 +26,7 @@ README.html
 
 # vscode editor
 .vscode/
-.DS_Store
+*.DS_Store
 
 #Coverage
 .coverage
