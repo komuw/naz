@@ -80,5 +80,41 @@ The ESME must request an SMSC Delivery Receipt in the `submit_sm` operation usin
 
 Look at section 2.11 of spec document to learn more about Message Types.
 
+Look at 3.1 for SMPP PDU - Type Definitions, especially around NULLs.
+
+#### 3.2 SMPP PDU Format - Overview
+SMPP PDU consists of a PDU header followed by a PDU body.      
+
+Header:        
+- command_length, 4octets, Integer - The command_length field defines the total octet length of the SMPP PDU packet including the length field.
+- command_id, 4octets, Integer - The command_id field identifies the particular SMPP PDU, e.g., submit_sm, query_sm, etc.
+  each SMPP request PDU has a unique command_id in the range 0x00000000 to 0x000001FF
+  each SMPP response PDU has a unique command_id in the range 0x80000000 to 0x800001FF.
+  eg: `submit_sm` is command_id `0x00000004` while `submit_sm_resp` is `0x80000004`
+  Look at chapter 5 of spec document.
+- command_status, 4octets, Integer - The command_status field indicates the success or failure of an SMPP request.
+  it should be set to NULL for smpp requests, it only applies to responses.
+- sequence_number, 4octets, Integer - number which allows SMPP requests and responses to be correlated. should increase monotonically.
+  **ought to be in 0x00000001 to 0x7FFFFFFF range.**
+
+Body:
+- Mandatory Parameters, variable octet, mixed Type - A list of mandatory parameters corresponding to that SMPP PDU defined in the command_id
+  Look at section 4 of spec document to learn more about Message Types.
+- Optional Parameters, variable octet, mixed Type - list of Optional Parameters corresponding to that SMPP PDU defined in the command_id
+
+**NB:** Some SMPP PDUs may only have a Header part only, for example, the `enquire_link`     
+**NB:** 1octet == 8bits == 1byte. so 4 octets == 32bytes. so for `submit_sm_resp` is `0x80000004`
+```python
+>>> x=0x80000004
+>>> x
+2147483652
+>>> type(x)
+<class 'int'>
+>>> sys.getsizeof(x)
+32 # 32bytes which is 4octets.
+```
+
+
+
 
 
