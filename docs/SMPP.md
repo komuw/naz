@@ -155,6 +155,7 @@ look at section 4.1.5 for `bind_transceiver` Syntax.
 
 ```python
 # see section 4.1.5 for BIND_TRANSCEIVER Syntax
+# set asyncio debug. ie export PYTHONASYNCIODEBUG=1 && python aha.py
 import socket
 import struct
 
