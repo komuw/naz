@@ -147,3 +147,63 @@ sequence = 0x00000001
 header = struct.pack(">IIII", command_length, command_code, status, sequence) # will be the same if we used `">LLLL"` as format string
 item_to_send_down_the_wire = header + body
 ```
+
+
+#### Example
+Here's a full example of sending a `bind_transceiver` request.             
+look at section 4.1.5 for `bind_transceiver` Syntax.
+
+```python
+# see section 4.1.5 for BIND_TRANSCEIVER Syntax
+import socket
+import struct
+
+### setup socket ####
+_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+_socket.settimeout(5)
+_socket.connect(('127.0.0.1', 2775))
+####################
+
+### create body ####
+body = b''
+system_id = 'smppclient1'
+password = 'password'
+system_type = ''
+interface_version = 34
+addr_ton = 0
+addr_npi = 0
+address_range = ''
+
+body = body + \
+       bytes(system_id + chr(0), 'utf8') + \
+       bytes(password + chr(0), 'utf8') + \
+       bytes(system_type + chr(0), 'utf8') + \
+       struct.pack('>I', interface_version) + \
+       struct.pack('>I', addr_ton) + \
+       struct.pack('>I', addr_npi) + \
+      bytes(address_range + chr(0), 'utf8')
+####################
+
+### create header ####
+command_length = len(body) + 16 #16 is for headers
+command_code = 0x00000009 #the command code for `bind_transceiver` see section 5.1.2.1
+status =  0x00000000 #the status for success see section 5.1.3
+sequence = 0x00000001
+header = struct.pack(">IIII", command_length, command_code, status, sequence)
+######################
+
+#### send
+item_to_send_down_the_wire = header + body
+sent_last = _socket.send(item_to_send_down_the_wire[0:])
+```
+and SMSC logs look like:
+```bash
+BIND_TRANSCEIVER:
+3 cmd_len=51,cmd_id=9,cmd_status=0,seq_no=1,system_id=smppclient1
+password=password,system_type=,interface_version=0,addr_ton=0,addr_npi=0, address_range=''
+StandardProtocolHandler: setting address range to
+New transceiver session bound to SMPPSim
+
+BIND_TRANSCEIVER_RESP:
+cmd_len=0,cmd_id=-2147483639,cmd_status=0,seq_no=1,system_id=SMPPSim
+```

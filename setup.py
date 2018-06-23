@@ -72,7 +72,7 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['uvloop==0.10.1',],
+    install_requires=[],
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
@@ -102,7 +102,7 @@ setup(
     # },
     entry_points={
         'console_scripts': [
-            'naz=naz.cli:main',
+            'naz-cli=naz.cli:main',
         ],
     },
 )
