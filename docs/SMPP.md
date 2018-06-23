@@ -80,7 +80,36 @@ The ESME must request an SMSC Delivery Receipt in the `submit_sm` operation usin
 
 Look at section 2.11 of spec document to learn more about Message Types.
 
-Look at 3.1 for SMPP PDU - Type Definitions, especially around NULLs.
+#### 3.1 SMPP PDU - Type Definitions
+The following SMPP PDU data type definitions are used to define the SMPP parameters:
+- Integer - An **unsigned** value with the defined number of octets. The octets will always be transmitted MSB first (Big Endian).       
+**NB:** todo this in python use:
+```python
+## https://stackoverflow.com/a/846045/2768067
+## https://docs.python.org/3.6/library/struct.html#format-characters
+import struct
+print struct.pack('>I', 134) # '>I' is a format string. > means big endian and I means unsigned int
+```              
+**NB:** the format string depends on the size allowed. as an example `interface_version` is an Integer whose size should be `1 octet` (section 4.1.5)
+```python
+import struct
+interface_version = 34
+struct.pack('>B', interface_version) # here we use `B` because has size 1 see; https://docs.python.org/3.6/library/struct.html#format-characters
+```
+
+- C-Octet String - A series of **ASCII characters** terminated with the **NULL** character. eg `system_id` is a C-Octet String.            
+**NB:** in python;
+```python
+import six
+system_id = 'smppclient1' 
+six.b( system_id + chr(0)) # b'smppclient1\x00'
+# alternative: bytes(system_id + chr(0), 'utf8') but we would have to check on encoding
+```
+- C-Octet Strin(Decimal) - A series of ASCII characters, each character **representing** a decimal digit (0 - 9) and terminated with the NULL character.
+- C-Octet String(Hex) - A series of ASCII characters, each character representing a hexadecimal digit (0 - F) and terminated with the NULL character.
+- Octet String - A series of octets, not necessarily NULL terminated.                    
+**NB:** look at the caveats at the end of section 3.1
+
 
 #### 3.2 SMPP PDU Format - Overview
 SMPP PDU consists of a PDU header followed by a PDU body.      
@@ -95,26 +124,26 @@ Header:
 - command_status, 4octets, Integer - The command_status field indicates the success or failure of an SMPP request.
   it should be set to NULL for smpp requests, it only applies to responses.
 - sequence_number, 4octets, Integer - number which allows SMPP requests and responses to be correlated. should increase monotonically.
-  **ought to be in 0x00000001 to 0x7FFFFFFF range.**
+  **ought to be in 0x00000001 to 0x7FFFFFFF range.**                    
 
 Body:
 - Mandatory Parameters, variable octet, mixed Type - A list of mandatory parameters corresponding to that SMPP PDU defined in the command_id
   Look at section 4 of spec document to learn more about Message Types.
-- Optional Parameters, variable octet, mixed Type - list of Optional Parameters corresponding to that SMPP PDU defined in the command_id
+- Optional Parameters, variable octet, mixed Type - list of Optional Parameters corresponding to that SMPP PDU defined in the command_id          
+They are laid out as follows;               
+
+command-length | command-id | command-status |sequence-number | PDU-Body            
+
 
 **NB:** Some SMPP PDUs may only have a Header part only, for example, the `enquire_link`     
 **NB:** 1octet == 8bits == 1byte. so 4 octets == 32bytes. so for `submit_sm_resp` is `0x80000004`
 ```python
->>> x=0x80000004
->>> x
-2147483652
->>> type(x)
-<class 'int'>
->>> sys.getsizeof(x)
-32 # 32bytes which is 4octets.
+import struct
+body = b'smppclient1\x00password\x00\x00\x00\x00\x004\x00\x00\x00'
+command_length = len(body) + 16 #16 is for headers
+command_code = 0x00000009 #the command code for `bind_transceiver` see section 5.1.2.1
+status =  0x00000000 #the status for success see section 5.1.3
+sequence = 0x00000001
+header = struct.pack(">IIII", command_length, command_code, status, sequence) # will be the same if we used `">LLLL"` as format string
+item_to_send_down_the_wire = header + body
 ```
-
-
-
-
-
