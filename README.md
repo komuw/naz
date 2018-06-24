@@ -49,12 +49,12 @@ loop.close()
 naz also ships with a commandline interface(called `naz`.            
 run:                
 ```shell
-naz ....
+naz-cli ....
 ```              
 
 To see help:
 ```shell
-naz --help                 
+naz-cli --help                 
 ```
 
 
