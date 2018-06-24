@@ -238,7 +238,7 @@ class Client:
 
 
 
-
+##### SAMPLE USAGE #######
 loop = asyncio.get_event_loop()
 cli = Client(async_loop=loop,
              SMSC_HOST='127.0.0.1',
@@ -251,7 +251,6 @@ reader, writer = loop.run_until_complete(cli.connect())
 loop.run_until_complete(cli.tranceiver_bind())
 
 received = loop.run_until_complete(cli.receive_data())
-# received = cli.myreceive()
 print("received", received)
 loop.run_forever()
 loop.close()
