@@ -24,6 +24,7 @@ pip install naz
 
 ## Usage
 
+#### 1. As a library
 ```python
 import naz
 import asyncio
@@ -47,7 +48,7 @@ loop.close()
 ```
 
 
-## CLI
+#### 2. As a cli app
 naz also ships with a commandline interface(called `naz`.            
 run:                
 ```shell
