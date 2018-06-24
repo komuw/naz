@@ -36,6 +36,9 @@ class Client:
     """
     """
     def __init__(self,
+                 async_loop,
+                 SMSC_HOST,
+                 SMSC_PORT,
                  system_id,
                  password,
                  system_type='',
@@ -45,6 +48,9 @@ class Client:
                  encoding='utf8',
                  interface_version=34,
                  sequence_generator=None):
+        self.async_loop = async_loop
+        self.SMSC_HOST = SMSC_HOST
+        self.SMSC_PORT = SMSC_PORT
         self.system_id = system_id
         self.password = password 
         self.system_type = system_type
@@ -67,8 +73,13 @@ class Client:
             'ESME_ROK': 0x00000000,
         }
 
-    async def connect(self, loop, host, port):
-        reader, writer = await asyncio.open_connection(host, port, loop=loop)
+        self.reader = None
+        self.writer = None
+
+    async def connect(self):
+        reader, writer = await asyncio.open_connection(self.SMSC_HOST, self.SMSC_PORT, loop=self.async_loop)
+        self.reader = reader
+        self.writer = writer
         return reader, writer
 
     async def tranceiver_bind(self):
@@ -94,6 +105,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
+        await self.send_data(full_pdu, self.writer)
         return full_pdu
 
     async def send_data(self, msg, writer):
@@ -127,12 +139,16 @@ class Client:
         return full_pdu_data
 
 
-cli = Client()
 loop = asyncio.get_event_loop()
-reader, writer = loop.run_until_complete(cli.connect(loop, '127.0.0.1', 2775))
+cli = Client(async_loop=loop,
+             SMSC_HOST='127.0.0.1',
+             SMSC_PORT=2775,
+             system_id='smppclient1',
+             password='password')
 
-item_to_send = tranceiver()
-loop.run_until_complete(cli.send_data(item_to_send, writer))
+reader, writer = loop.run_until_complete(cli.connect())
+
+loop.run_until_complete(cli.tranceiver_bind())
 
 received = loop.run_until_complete(cli.receive_data(reader))
 # received = cli.myreceive()
