@@ -61,6 +61,10 @@ class Client:
             'ESME_ROK': 0x00000000,
         }
 
+    async def connect(self, loop, host, port):
+        reader, writer = await asyncio.open_connection(host, port, loop=loop)
+        return reader, writer
+
     async def tranceiver_bind(self):
         # body
         body = b''
@@ -85,10 +89,6 @@ class Client:
 
         full_pdu = header + body
         return full_pdu
-
-    async def connect(self, loop, host, port):
-        reader, writer = await asyncio.open_connection(host, port, loop=loop)
-        return reader, writer
 
     async def send_data(self, msg, writer):
         """
