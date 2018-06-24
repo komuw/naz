@@ -53,6 +53,9 @@ class Client:
                  sequence_generator=None,
                  LOG_LEVEL='INFO',
                  log_metadata=None):
+        """
+        todo: add docs
+        """
         if LOG_LEVEL.upper() not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
             raise ValueError(
                 """LOG_LEVEL should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(LOG_LEVEL))
