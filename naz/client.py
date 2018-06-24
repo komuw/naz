@@ -48,6 +48,7 @@ class Client:
                  encoding='utf8',
                  interface_version=34,
                  sequence_generator=None):
+        # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
         self.SMSC_HOST = SMSC_HOST
         self.SMSC_PORT = SMSC_PORT
@@ -66,6 +67,16 @@ class Client:
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
             'bind_transceiver': 0x00000009,
+            'bind_transceiver_resp': 0x80000009,
+            'unbind': 0x00000006,
+            'unbind_resp': 0x80000006,
+            'submit_sm': 0x00000004,
+            'submit_sm_resp': 0x80000004,
+            'deliver_sm': 0x00000005,
+            'deliver_sm_resp': 0x80000005,
+            'enquire_link': 0x00000015,
+            'enquire_link_resp': 0x80000015,
+            'generic_nack': 0x80000000,
         }
 
         # see section 5.1.3 of smpp ver 3.4 spec document
@@ -75,6 +86,12 @@ class Client:
 
         self.reader = None
         self.writer = None
+    
+    def search_by_command_id_code(self, command_id_code):
+        for key, val in self.command_ids.items():
+            if val == command_id_code:
+                return key
+        return None
 
     async def connect(self):
         reader, writer = await asyncio.open_connection(self.SMSC_HOST, self.SMSC_PORT, loop=self.async_loop)
@@ -136,7 +153,54 @@ class Client:
             chunks.append(chunk)
             bytes_recd = bytes_recd + len(chunk)
         full_pdu_data = command_length_header_data + b''.join(chunks) 
+        await self.parse_pdu(full_pdu_data)
         return full_pdu_data
+
+    async def parse_pdu(self, pdu):
+        """
+        """
+        header_data = pdu[:16]
+        command_length_header_data = header_data[:4]
+        total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
+
+        command_id_header_data = header_data[4:8] 
+        command_status_header_data = header_data[8:12]
+        sequence_number_header_data = header_data[12:16]
+
+        command_id = struct.unpack('>I', command_id_header_data)[0]
+        command_status = struct.unpack('>I', command_status_header_data)[0]
+        sequence_number = struct.unpack('>I', sequence_number_header_data)[0]
+
+        command_id_name = self.search_by_command_id_code(command_id)
+        if not command_id_name:
+            raise ValueError('the command_id: {0} is unknown.'.format(command_id))
+        # import pdb;pdb.set_trace()
+        pdu_body = b''
+        if total_pdu_length>16:
+            pdu_body = pdu[16:]
+        await self.speficic_handlers(command_id_name=command_id_name,
+                                      sequence_number=sequence_number,
+                                      unparsed_pdu_body=pdu_body)
+        
+        
+        print("dd")
+        print("dd")
+        print("dd")
+    
+    async def speficic_handlers(self,
+                               command_id_name,
+                               sequence_number,
+                               unparsed_pdu_body):
+        """
+        this handles parsing speficic
+        """
+        if command_id_name == 'bind_transceiver_resp':
+            # the body of this only has `system_id` which is a C-Octet String of variable length upto size 16
+            pdu_body = unparsed_pdu_body
+            print("pdu_body:::", pdu_body)
+        pass
+
+
 
 
 loop = asyncio.get_event_loop()
