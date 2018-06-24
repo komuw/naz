@@ -119,18 +119,18 @@ class Client:
         writer.write(msg)
         await writer.drain()
 
-    async def receive_data(self, reader):
+    async def receive_data(self):
         """
         """
         # todo: look at `pause_reading` and `resume_reading` methods
-        command_length_header_data = await reader.read(4)
+        command_length_header_data = await self.reader.read(4)
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
 
         MSGLEN = total_pdu_length - 4
         chunks = []
         bytes_recd = 0
         while bytes_recd < MSGLEN:
-            chunk = await reader.read(min(MSGLEN - bytes_recd, 2048))
+            chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
             if chunk == b'':
                 raise RuntimeError("socket connection broken")
             chunks.append(chunk)
@@ -150,7 +150,7 @@ reader, writer = loop.run_until_complete(cli.connect())
 
 loop.run_until_complete(cli.tranceiver_bind())
 
-received = loop.run_until_complete(cli.receive_data(reader))
+received = loop.run_until_complete(cli.receive_data())
 # received = cli.myreceive()
 print("received", received)
 loop.run_forever()

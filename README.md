@@ -34,11 +34,10 @@ cli = naz.Client(async_loop=loop,
                 SMSC_PORT=2775,
                 system_id='smppclient1',
                 password='password')
-
 reader, writer = loop.run_until_complete(cli.connect())
 loop.run_until_complete(cli.tranceiver_bind())
-received = loop.run_until_complete(cli.receive_data(reader))
-# received = cli.myreceive()
+
+received = loop.run_until_complete(cli.receive_data())
 print("received", received)
 loop.run_forever()
 loop.close()
