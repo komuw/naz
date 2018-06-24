@@ -107,7 +107,7 @@ class Client:
         # see section 5.1.3 of smpp ver 3.4 spec document
         CommandStatus = collections.namedtuple('CommandStatus', 'code description')
         self.command_statuses = {
-            'ESME_ROK': CommandStatus(0x00000000, 'No Error'),
+            'ESME_ROK': CommandStatus(0x00000000, 'Success'),
             'ESME_RINVMSGLEN': CommandStatus(0x00000001, 'Message Length is invalid'),
             'ESME_RINVCMDLEN': CommandStatus(0x00000002, 'Command Length is invalid'),
             'ESME_RINVCMDID': CommandStatus(0x00000003, 'Invalid Command ID'),
@@ -190,6 +190,12 @@ class Client:
             if val == command_id_code:
                 return key
         return None
+
+    def search_by_command_status_code(self, command_status_code):
+        for key, val in self.command_statuses.items():
+            if val.code == command_status_code:
+                return key, val
+        return None, None
 
     async def connect(self):
         self.logger.debug('network connecting')
@@ -309,14 +315,100 @@ class Client:
         self.logger.info(
             'pdu response handling. command_id={0}. command_status={1}. sequence_number={2}'.format(
                 command_id_name, command_status, sequence_number))
+        # todo: pliz find a better way of doing this.
+        # this will cause global warming with useless computation
+        command_status_name, command_status_value = self.search_by_command_status_code(
+            command_status)
 
-        if command_id_name == 'bind_transceiver_resp':
+        if command_status != self.command_statuses['ESME_ROK'].code:
+            # we got an error from SMSC
+            self.logger.error(
+                'smsc_response_error. command_id={0}. sequence_number={1}. error_code={2}. error_description={3}'.format(
+                    command_id_name,
+                    sequence_number,
+                    command_status_value.code,
+                    command_status_value.description))
+
+        if command_id_name == 'bind_transceiver':
+            # we never have to handle this
+            pass
+        elif command_id_name == 'bind_transceiver_resp':
             # the body of this only has `system_id` which is a C-Octet String of
-            # variable length upto size 16
+            # variable length upto 16 octets
             pdu_body = unparsed_pdu_body
             print("pdu_body:::", pdu_body)
-        pass
+            pass
+        elif command_id_name == 'unbind':
+            # we need to handle this since we need to send unbind_resp
+            # it has no body
+            self.queue_unbind_resp()
 
+        elif command_id_name == 'unbind_resp':
+            # we never have to handle this
+            # has no body
+            pass
+        elif command_id_name == 'submit_sm':
+            # we never have to handle this. We dont expect SMSC to send this to us.
+            pass
+        elif command_id_name == 'submit_sm_resp':
+            # the body of this only has `message_id` which is a C-Octet String of
+            # variable length upto 65 octets.
+            # This field contains the SMSC message_id of the submitted message.
+            # It may be used at a later stage to query the status of a message, cancel
+            # or replace the message.
+            pdu_body = unparsed_pdu_body
+            print("pdu_body:::", pdu_body)
+            pass
+        elif command_id_name == 'deliver_sm':
+            # see section 4.6.1 of smpp v3.4 spec
+            # we want to handle this pdu, bcoz we are expected to send back deliver_sm_resp
+            # the body of this has the following params
+            # service_type, C-Octet String, max 6 octets
+            # source_addr_ton, Int, 1 octet, can be NULL
+            # source_addr_npi, Int, 1 octet, can be NULL
+            # source_addr, C-Octet String, max 21 octet, can be NULL
+            # dest_addr_ton, Int, 1 octet
+            # dest_addr_npi, Int, 1 octet
+            # destination_addr,  C-Octet String, max 21 octet
+            # esm_class, Int, 1 octet
+            # protocol_id, Int, 1 octet
+            # priority_flag, Int, 1 octet
+            # schedule_delivery_time, C-Octet String, 1 octet, must be set to NULL.
+            # validity_period, C-Octet String, 1 octet, must be set to NULL.
+            # registered_delivery, Int, 1 octet
+            # replace_if_present_flag, Int, 1 octet, must be set to NULL.
+            # data_coding, Int, 1 octet
+            # sm_default_msg_id, Int, 1 octet, must be set to NULL.
+            # sm_length, Int, 1 octet.It is length of short message user data in octets.
+            # short_message, C-Octet String, 0-254 octet
+
+            self.queue_deliver_sm_resp()
+            pass
+        elif command_id_name == 'deliver_sm_resp':
+            # we will never send a deliver_sm request to SMSC
+            # which means we never have to handle deliver_sm_resp
+            pass
+        elif command_id_name == 'enquire_link':
+            # we have to handle this. we have to return enquire_link_resp
+            # it has no body
+            self.queue_enquire_link_resp()
+            pass
+        elif command_id_name == 'enquire_link_resp':
+            # we never have to handle this
+            # it has no body
+            pass
+        elif command_id_name == 'generic_nack':
+            # we can ignore this for now
+            # it has no body
+            pass
+        else:
+            self.logger.error(
+                'unknown_command. command_id={0}. sequence_number={1}. error_code={2}. error_description={3}'.format(
+                    command_id_name,
+                    sequence_number,
+                    command_status_value.code,
+                    command_status_value.description))
+        pass
 
 
 ##### SAMPLE USAGE #######
