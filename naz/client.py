@@ -3,6 +3,13 @@ import socket
 import struct
 import asyncio
 
+
+
+# todo:
+# 1. add configurable retries
+# 2. add configurable rate limits. our rate limits should be tight
+# 3. metrics, what is happening
+
 class DefaultSequenceGenerator(object):
     """
     sequence_number are 4 octets Integers which allows SMPP requests and responses to be correlated.
@@ -23,7 +30,6 @@ class DefaultSequenceGenerator(object):
         else:
             self.sequence_number += 1
         return self.sequence_number
-
 
 
 class Client:
