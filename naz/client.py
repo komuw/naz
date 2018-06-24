@@ -198,15 +198,15 @@ class Client:
         return None, None
 
     async def connect(self):
-        self.logger.debug('network connecting')
+        self.logger.debug('network_connecting')
         reader, writer = await asyncio.open_connection(self.SMSC_HOST, self.SMSC_PORT, loop=self.async_loop)
         self.reader = reader
         self.writer = writer
-        self.logger.debug('network connected')
+        self.logger.debug('network_connected')
         return reader, writer
 
     async def tranceiver_bind(self):
-        self.logger.debug('tranceiver binding')
+        self.logger.debug('tranceiver_binding')
         # body
         body = b''
         body = body + \
@@ -233,7 +233,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(full_pdu, self.writer)
-        self.logger.debug('tranceiver bound')
+        self.logger.debug('tranceiver_bound')
         return full_pdu
 
     async def send_data(self, msg, writer):
@@ -241,18 +241,18 @@ class Client:
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
         """
-        self.logger.debug('data sending')
+        self.logger.debug('data_sending')
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         if isinstance(msg, str):
             msg = bytes(msg, 'utf8')
         writer.write(msg)
         await writer.drain()
-        self.logger.debug('data sent')
+        self.logger.debug('data_sent')
 
     async def receive_data(self):
         """
         """
-        self.logger.debug('receiving data')
+        self.logger.debug('receiving_data')
         # todo: look at `pause_reading` and `resume_reading` methods
         command_length_header_data = await self.reader.read(4)
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
@@ -268,13 +268,13 @@ class Client:
             bytes_recd = bytes_recd + len(chunk)
         full_pdu_data = command_length_header_data + b''.join(chunks)
         await self.parse_pdu(full_pdu_data)
-        self.logger.debug('data received')
+        self.logger.debug('data_received')
         return full_pdu_data
 
     async def parse_pdu(self, pdu):
         """
         """
-        self.logger.debug('pdu parsing')
+        self.logger.debug('pdu_parsing')
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
@@ -298,7 +298,7 @@ class Client:
                                      command_status=command_status,
                                      sequence_number=sequence_number,
                                      unparsed_pdu_body=pdu_body)
-        self.logger.debug('pdu parsed')
+        self.logger.debug('pdu_parsed')
 
         print("dd")
         print("dd")
@@ -313,7 +313,7 @@ class Client:
         this handles parsing speficic
         """
         self.logger.info(
-            'pdu response handling. command_id={0}. command_status={1}. sequence_number={2}'.format(
+            'pdu_response_handling. command_id={0}. command_status={1}. sequence_number={2}'.format(
                 command_id_name, command_status, sequence_number))
         # todo: pliz find a better way of doing this.
         # this will cause global warming with useless computation
