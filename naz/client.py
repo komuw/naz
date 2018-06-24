@@ -61,7 +61,7 @@ class Client:
             'ESME_ROK': 0x00000000,
         }
 
-    async def construct_tranceiver_req(self):
+    async def tranceiver_bind(self):
         # body
         body = b''
         body = body + \
