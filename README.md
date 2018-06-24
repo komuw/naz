@@ -49,7 +49,7 @@ loop.close()
 
 
 #### 2. As a cli app
-naz also ships with a commandline interface(called `naz`.            
+naz also ships with a commandline interface app called `naz-cli`.            
 run:                
 ```shell
 naz-cli ....
