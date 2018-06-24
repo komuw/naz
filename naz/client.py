@@ -26,7 +26,7 @@ class DefaultSequenceGenerator(object):
 
 
 
-class MySocket:
+class Client:
     """
     """
     def __init__(self,
@@ -86,12 +86,11 @@ class MySocket:
         full_pdu = header + body
         return full_pdu
 
-
     async def connect(self, loop, host, port):
         reader, writer = await asyncio.open_connection(host, port, loop=loop)
         return reader, writer
 
-    async def mysend(self, msg, writer):
+    async def send_data(self, msg, writer):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -101,7 +100,7 @@ class MySocket:
         writer.write(msg)
         await writer.drain()
 
-    async def myreceive(self, reader):
+    async def receive_data(self, reader):
         command_length_header_data = await reader.read(4)
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
 
@@ -118,14 +117,14 @@ class MySocket:
         return full_pdu_data
 
 
-cli = MySocket()
+cli = Client()
 loop = asyncio.get_event_loop()
 reader, writer = loop.run_until_complete(cli.connect(loop, '127.0.0.1', 2775))
 
 item_to_send = tranceiver()
-loop.run_until_complete(cli.mysend(item_to_send, writer))
+loop.run_until_complete(cli.send_data(item_to_send, writer))
 
-received = loop.run_until_complete(cli.myreceive(reader))
+received = loop.run_until_complete(cli.receive_data(reader))
 # received = cli.myreceive()
 print("received", received)
 loop.run_forever()
