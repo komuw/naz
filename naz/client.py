@@ -95,12 +95,16 @@ class Client:
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
         """
+        # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         if isinstance(msg, str):
             msg = bytes(msg, 'utf8')
         writer.write(msg)
         await writer.drain()
 
     async def receive_data(self, reader):
+        """
+        """
+        # todo: look at `pause_reading` and `resume_reading` methods
         command_length_header_data = await reader.read(4)
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
 
