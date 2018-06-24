@@ -103,7 +103,6 @@ class Client:
 
         # see section 5.1.3 of smpp ver 3.4 spec document
         CommandStatus = collections.namedtuple('CommandStatus', 'code description')
-
         self.command_statuses = {
             'ESME_ROK': CommandStatus(0x00000000, 'No Error'),
             'ESME_RINVMSGLEN': CommandStatus(0x00000001, 'Message Length is invalid'),
