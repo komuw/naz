@@ -1,8 +1,7 @@
-
 import socket
 import struct
 import asyncio
-
+import logging
 
 
 # todo:
@@ -47,7 +46,15 @@ class Client:
                  address_range='',
                  encoding='utf8',
                  interface_version=34,
-                 sequence_generator=None):
+                 sequence_generator=None,
+                 LOG_LEVEL='INFO',
+                 log_metadata=None):
+        if LOG_LEVEL.upper() not in ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']:
+            raise ValueError("""LOG_LEVEL should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(LOG_LEVEL))
+        elif not isinstance(log_metadata, (type(None), dict)):
+            raise ValueError("""log_metadata should be of type:: None or dict. You entered {0}""".format(type(log_metadata)))
+
+
         # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
         self.SMSC_HOST = SMSC_HOST
@@ -60,9 +67,18 @@ class Client:
         self.addr_npi = addr_npi
         self.address_range = address_range
         self.encoding = encoding
-        if not sequence_generator:
+        self.sequence_generator = sequence_generator
+        if not self.sequence_generator:
             self.sequence_generator = DefaultSequenceGenerator()
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
+        self.LOG_LEVEL = LOG_LEVEL.upper()
+        self.log_metadata = log_metadata
+        if not self.log_metadata:
+            self.log_metadata = {}
+        self.log_metadata.update({
+                                 'SMSC_HOST': self.SMSC_HOST,
+                                 'system_id': system_id,
+                                 })
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -86,7 +102,17 @@ class Client:
 
         self.reader = None
         self.writer = None
-    
+
+        extra_log_data = {'log_metadata': self.log_metadata}
+        self.logger = logging.getLogger()
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(message)s. log_metadata: %(log_metadata)s')
+        handler.setFormatter(formatter)
+        if not self.logger.handlers:
+            self.logger.addHandler(handler)
+        self.logger.setLevel(self.LOG_LEVEL)
+        self.logger = logging.LoggerAdapter(self.logger, extra_log_data)
+
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
             if val == command_id_code:
@@ -94,12 +120,15 @@ class Client:
         return None
 
     async def connect(self):
+        self.logger.debug('network connecting')
         reader, writer = await asyncio.open_connection(self.SMSC_HOST, self.SMSC_PORT, loop=self.async_loop)
         self.reader = reader
         self.writer = writer
+        self.logger.debug('network connected')
         return reader, writer
 
     async def tranceiver_bind(self):
+        self.logger.debug('tranceiver binding')
         # body
         body = b''
         body = body + \
@@ -123,6 +152,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(full_pdu, self.writer)
+        self.logger.debug('tranceiver bound')
         return full_pdu
 
     async def send_data(self, msg, writer):
@@ -130,15 +160,18 @@ class Client:
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
         """
+        self.logger.debug('data sending')
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         if isinstance(msg, str):
             msg = bytes(msg, 'utf8')
         writer.write(msg)
         await writer.drain()
+        self.logger.debug('data sent')
 
     async def receive_data(self):
         """
         """
+        self.logger.debug('receiving data')
         # todo: look at `pause_reading` and `resume_reading` methods
         command_length_header_data = await self.reader.read(4)
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
@@ -154,11 +187,13 @@ class Client:
             bytes_recd = bytes_recd + len(chunk)
         full_pdu_data = command_length_header_data + b''.join(chunks) 
         await self.parse_pdu(full_pdu_data)
+        self.logger.debug('data received')
         return full_pdu_data
 
     async def parse_pdu(self, pdu):
         """
         """
+        self.logger.debug('pdu parsing')
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
@@ -172,6 +207,7 @@ class Client:
         sequence_number = struct.unpack('>I', sequence_number_header_data)[0]
 
         command_id_name = self.search_by_command_id_code(command_id)
+        self.logger.info('parse_pdu. command_id={0}'.format(command_id_name))
         if not command_id_name:
             raise ValueError('the command_id: {0} is unknown.'.format(command_id))
         # import pdb;pdb.set_trace()
@@ -181,7 +217,7 @@ class Client:
         await self.speficic_handlers(command_id_name=command_id_name,
                                       sequence_number=sequence_number,
                                       unparsed_pdu_body=pdu_body)
-        
+        self.logger.debug('pdu parsed')
         
         print("dd")
         print("dd")
