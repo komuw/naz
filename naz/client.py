@@ -637,10 +637,10 @@ for i in range(0, 4):
 
 
 reader, writer = loop.run_until_complete(cli.connect())
-
 loop.run_until_complete(cli.tranceiver_bind())
-loop.run_until_complete(cli.send_forever())
-received = loop.run_until_complete(cli.receive_data())
-print("received", received)
+
+gathering = asyncio.gather(cli.send_forever(), cli.receive_data())
+loop.run_until_complete(gathering)
+
 loop.run_forever()
 loop.close()
