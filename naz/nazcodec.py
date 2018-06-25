@@ -180,7 +180,7 @@ class NazCodec(object):
 
         ncodec.encode("Zoë", "utf-16be")
         ncodec.encode("Zoë", "utf-8")
-        ncodec.encode("HÜLK", "gsm0338")
+        ncodec.encode("HÜLK", 'gsm0338')
 
         ncodec.decode(b'Zo\xc3\xab', 'gsm0338', 'ignore')
         ncodec.decode(b'Zo\xc3\xab', 'utf8')

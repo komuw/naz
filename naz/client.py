@@ -4,6 +4,9 @@ import asyncio
 import logging
 import collections
 
+import nazcodec
+
+
 # todo:
 # 1. add configurable retries
 # 2. add configurable rate limits. our rate limits should be tight
@@ -38,13 +41,16 @@ class DefaultOutboundQueue(object):
     """
     this allows users to provide their own queue managers eg redis etc.
     """
+
     def __init__(self, maxsize, loop):
         """
         maxsize is the max number of items(not size) that can be put in the queue.
         """
-        self.queue = asyncio.Queue(maxsize=maxsize,loop=loop)
+        self.queue = asyncio.Queue(maxsize=maxsize, loop=loop)
+
     def enqueue(self, item):
         self.queue.put_nowait(item)
+
     def dequeue(self):
         return self.queue.get()
 
@@ -63,12 +69,14 @@ class Client:
                  addr_ton=0,
                  addr_npi=0,
                  address_range='',
-                 encoding='utf8',
+                 encoding='gsm0338',
                  interface_version=34,
                  sequence_generator=None,
                  outboundqueue=None,
                  LOG_LEVEL='DEBUG',
-                 log_metadata=None):
+                 log_metadata=None,
+                 codec_class=None,
+                 codec_errors_level='strict'):
         """
         todo: add docs
         """
@@ -97,7 +105,7 @@ class Client:
             self.sequence_generator = DefaultSequenceGenerator()
         self.outboundqueue = outboundqueue
         if not self.outboundqueue:
-            self.outboundqueue = DefaultOutboundQueue(maxsize=5,loop=self.async_loop)
+            self.outboundqueue = DefaultOutboundQueue(maxsize=5, loop=self.async_loop)
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
@@ -108,6 +116,10 @@ class Client:
                                  'SMSC_HOST': self.SMSC_HOST,
                                  'system_id': system_id,
                                  })
+        self.codec_class = codec_class
+        self.codec_errors_level = codec_errors_level
+        if not self.codec_class:
+            self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -192,6 +204,31 @@ class Client:
             # Reserved 0x00000500 - 0xFFFFFFFF Reserved
         }
 
+        # see section 5.2.19
+        # DataCoding = collections.namedtuple('DataCoding', 'code description')
+        # self.data_codings = {
+        #     0x00000000 SMSC Default Alphabet
+        #     0x00000001 IA5(CCITT T.50) / ASCII(ANSI X3.4)
+        #     0x00000010 Octet unspecified(8 - bit binary)
+        #     0x00000011 Latin 1 (ISO - 8859 - 1)
+        #     0x00000100 Octet unspecified(8 - bit binary)
+        #     0x00000101 JIS(X 0208 - 1990)
+        #     0x00000110 Cyrllic(ISO - 8859 - 5)
+        #     0x00000111 Latin / Hebrew(ISO - 8859 - 8)
+        #     0x00001000 UCS2(ISO / IEC - 10646)
+        #     0x00001001 Pictogram Encoding
+        #     0x00001010 ISO - 2022 - JP(Music Codes)
+        #     0x00001011 reserved
+        #     0x00001100 reserved
+        #     0x00001101 Extended Kanji JIS(X 0212 - 1990)
+        #     0x00001110 KS C 5601
+        #     # 00001111 - 10111111 reserved
+        #     # 0x1100xxxx GSM MWI control - see [GSM 03.38]
+        #     # 0x1101xxxx GSM MWI control - see [GSM 03.38]
+        #     # 0x1110xxxx reserved
+        #     # 0x1111xxxx GSM message class control - see [GSM 03.38]
+        # }
+
         self.reader = None
         self.writer = None
 
@@ -230,13 +267,13 @@ class Client:
         # body
         body = b''
         body = body + \
-            bytes(self.system_id + chr(0), self.encoding) + \
-            bytes(self.password + chr(0), self.encoding) + \
-            bytes(self.system_type + chr(0), self.encoding) + \
+            self.codec_class.encode(self.system_id, self.encoding) + chr(0).encode("latin-1") + \
+            self.codec_class.encode(self.password, self.encoding) + chr(0).encode("latin-1") + \
+            self.codec_class.encode(self.system_type, self.encoding) + chr(0).encode("latin-1") + \
             struct.pack('>I', self.interface_version) + \
             struct.pack('>I', self.addr_ton) + \
             struct.pack('>I', self.addr_npi) + \
-            bytes(self.address_range + chr(0), self.encoding)
+            self.codec_class.encode(self.address_range, self.encoding) + chr(0).encode("latin-1")
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
@@ -257,16 +294,16 @@ class Client:
         return full_pdu
 
     async def submit_sm(self, msg, correlation_id, destination_addr):
-        self.service_type = 'CMT' # section 5.2.11
-        self.source_addr_ton = 0x00000001 # section 5.2.5
-        self.source_addr_npi =  0x00000001
+        self.service_type = 'CMT'  # section 5.2.11
+        self.source_addr_ton = 0x00000001  # section 5.2.5
+        self.source_addr_npi = 0x00000001
         self.dest_addr_ton = 0x00000001
         self.dest_addr_npi = 0x00000001
         self.source_addr = ''
         # xxxxxx00 store-and-forward
         # xx0010xx Short Message contains ESME Delivery Acknowledgement
         # 00xxxxxx No specific features selected
-        self.esm_class = 0x00001000 # section 5.2.12
+        self.esm_class = 0x00001000  # section 5.2.12
         self.protocol_id = 0x00000000
         self.priority_flag = 0x00000000
         self.schedule_delivery_time = ''
@@ -275,10 +312,9 @@ class Client:
         # xxxx01xx SME Delivery Acknowledgement requested
         # xxx0xxxx No Intermediate notification requested
         # all other values reserved
-        self.registered_delivery = 0x00000101 # see section 5.2.17
+        self.registered_delivery = 0x00000101  # see section 5.2.17
         self.replace_if_present_flag = 0x00001000
-        self.data_coding = # see section 5.2.19
-
+        # self.data_coding =  # see section 5.2.19
 
         # submit_sm has the following pdu body
         # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
@@ -293,8 +329,7 @@ class Client:
         # validity_period, c-octet str, 1 or 17 octets.  NULL for SMSC default.
         # registered_delivery, int, 1octet
         # replace_if_present_flag, int, 1octet
-        # data_coding, int, 1octet
-
+        # data_coding, int, 1octet. Defines the encoding scheme of the short message user data
 
         item_to_enqueue = {
             'correlation_id': correlation_id,
@@ -311,7 +346,7 @@ class Client:
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
         if isinstance(msg, str):
-            msg = bytes(msg, 'utf8')
+            msg = self.codec_class.encode(msg, self.encoding)
         self.writer.write(msg)
         await self.writer.drain()
         self.logger.debug('data_sent')
@@ -375,13 +410,17 @@ class Client:
         """
         this handles parsing speficic
         """
-        self.logger.info(
-            'pdu_response_handling. command_id={0}. command_status={1}. sequence_number={2}'.format(
-                command_id_name, command_status, sequence_number))
         # todo: pliz find a better way of doing this.
         # this will cause global warming with useless computation
         command_status_name, command_status_value = self.search_by_command_status_code(
             command_status)
+
+        self.logger.info(
+            'pdu_response_handling. command_id={0}. sequence_number={1}. command_status={2}. command_description={3}'.format(
+                command_id_name,
+                sequence_number,
+                command_status,
+                command_status_value.description))
 
         if command_status != self.command_statuses['ESME_ROK'].code:
             # we got an error from SMSC
