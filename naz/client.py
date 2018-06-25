@@ -472,6 +472,12 @@ class Client:
             self.logger.debug("receiving_data")
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
+            if command_length_header_data == b"":
+                self.logger.debug("receiving_data. empty_header")
+                # todo: sleep in an exponetial manner upto a maximum then wrap around.
+                await asyncio.sleep(3)
+                continue
+
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
 
             MSGLEN = total_pdu_length - 4
