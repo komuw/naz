@@ -330,14 +330,18 @@ class Client:
                     command_status_value.description))
 
         if command_id_name in [
-                                'bind_transceiver',
-                                'bind_transceiver_resp', # the body of this only has `system_id` which is a C-Octet String of variable length upto 16 octets 
-                                'unbind_resp',
-                                'submit_sm', # We dont expect SMSC to send this to us.
-                                'deliver_sm_resp', #we will never send a deliver_sm request to SMSC, which means we never have to handle deliver_sm_resp
-                                'enquire_link_resp',
-                                'generic_nack', # we can ignore this
-            ]:
+            'bind_transceiver',
+            'bind_transceiver_resp',
+            # the body of `bind_transceiver_resp` only has `system_id` which is a
+            # C-Octet String of variable length upto 16 octets
+            'unbind_resp',
+            'submit_sm',  # We dont expect SMSC to send `submit_sm` to us.
+            'deliver_sm_resp',
+            # we will never send a deliver_sm request to SMSC, which means we never
+            # have to handle deliver_sm_resp
+            'enquire_link_resp',
+            'generic_nack',  # we can ignore this
+        ]:
             # we never have to handle this
             pass
         elif command_id_name == 'unbind':
@@ -347,7 +351,8 @@ class Client:
         elif command_id_name == 'submit_sm_resp':
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
-            # It may be used at a later stage to query the status of a message, cancel or replace the message.
+            # It may be used at a later stage to query the status of a message, cancel
+            # or replace the message.
             pdu_body = unparsed_pdu_body
             print("pdu_body:::", pdu_body)
             pass
