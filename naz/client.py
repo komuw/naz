@@ -298,14 +298,14 @@ class Client:
         self.logger.debug('tranceiver_bound')
         return full_pdu
 
-    async def submit_sm(self, msg, correlation_id, destination_addr):
+    async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
         """
         # submit_sm has the following pdu body. They should be put in the body in the order presented here.
         # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
         # source_addr_ton, int , 1octet,
         # source_addr_npi, int, 1octet
-        # source_addr, c-octet str, max 21octet
-        # destination_addr,  C-Octet String, max 21 octet
+        # source_addr, c-octet str, max 21octet. eg; This is usually the senders phone Number
+        # destination_addr,  C-Octet String, max 21 octet. eg; This is usually the recipients phone Number
         # esm_class, int, 1octet
         # protocol_id, int, 1octet
         # priority_flag, int, 1octet
@@ -327,7 +327,7 @@ class Client:
         self.source_addr_npi = 0x00000001
         self.dest_addr_ton = 0x00000001
         self.dest_addr_npi = 0x00000001
-        self.source_addr = ''
+        source_addr = source_addr
         destination_addr = destination_addr
         # xxxxxx00 store-and-forward
         # xx0010xx Short Message contains ESME Delivery Acknowledgement
@@ -358,7 +358,7 @@ class Client:
             struct.pack('>I', self.source_addr_npi) + \
             struct.pack('>I', self.dest_addr_ton) + \
             struct.pack('>I', self.dest_addr_npi) + \
-            self.codec_class.encode(self.source_addr, self.encoding) + chr(0).encode("latin-1") + \
+            self.codec_class.encode(source_addr, self.encoding) + chr(0).encode("latin-1") + \
             self.codec_class.encode(destination_addr, self.encoding) + chr(0).encode("latin-1") + \
             struct.pack('>I', self.esm_class) + \
             struct.pack('>I', self.protocol_id) + \
@@ -571,7 +571,7 @@ cli = Client(async_loop=loop,
 
 for i in range(0,4):
     print("submit_sm round:", i)
-    loop.run_until_complete(cli.submit_sm(msg="Hello World", correlation_id="myid12345", destination_addr="254725082545"))
+    loop.run_until_complete(cli.submit_sm(msg="Hello World", correlation_id="myid12345", source_addr="254725000111", destination_addr="254725082545"))
 
 
 reader, writer = loop.run_until_complete(cli.connect())
