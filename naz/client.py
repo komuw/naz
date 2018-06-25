@@ -475,7 +475,7 @@ class Client:
             if command_length_header_data == b"":
                 self.logger.debug("receiving_data. empty_header")
                 # todo: sleep in an exponetial manner upto a maximum then wrap around.
-                await asyncio.sleep(3)
+                await asyncio.sleep(8)
                 continue
 
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
