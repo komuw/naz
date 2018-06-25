@@ -243,6 +243,7 @@ class Client:
         """
         self.logger.debug('data_sending')
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
+        # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
         if isinstance(msg, str):
             msg = bytes(msg, 'utf8')
         writer.write(msg)
