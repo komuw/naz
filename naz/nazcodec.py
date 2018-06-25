@@ -193,7 +193,7 @@ class NazCodec(object):
     def __init__(self, errors='strict'):
         self.errors = errors
 
-    def encode(self, unicode_string, encoding=None, errors=None'):
+    def encode(self, unicode_string, encoding=None, errors=None):
         """
         you should call encode on a string. ie in python3 we write;
           'sss'.encode() # b'sss'
