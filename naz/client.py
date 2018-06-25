@@ -178,7 +178,7 @@ class Client:
         extra_log_data = {'log_metadata': self.log_metadata}
         self.logger = logging.getLogger()
         handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(message)s. log_metadata: %(log_metadata)s')
+        formatter = logging.Formatter('%(message)s. log_metadata=%(log_metadata)s')
         handler.setFormatter(formatter)
         if not self.logger.handlers:
             self.logger.addHandler(handler)
@@ -329,33 +329,25 @@ class Client:
                     command_status_value.code,
                     command_status_value.description))
 
-        if command_id_name == 'bind_transceiver':
+        if command_id_name in [
+                                'bind_transceiver',
+                                'bind_transceiver_resp', # the body of this only has `system_id` which is a C-Octet String of variable length upto 16 octets 
+                                'unbind_resp',
+                                'submit_sm', # We dont expect SMSC to send this to us.
+                                'deliver_sm_resp', #we will never send a deliver_sm request to SMSC, which means we never have to handle deliver_sm_resp
+                                'enquire_link_resp',
+                                'generic_nack', # we can ignore this
+            ]:
             # we never have to handle this
-            pass
-        elif command_id_name == 'bind_transceiver_resp':
-            # the body of this only has `system_id` which is a C-Octet String of
-            # variable length upto 16 octets
-            pdu_body = unparsed_pdu_body
-            print("pdu_body:::", pdu_body)
             pass
         elif command_id_name == 'unbind':
             # we need to handle this since we need to send unbind_resp
             # it has no body
             self.queue_unbind_resp()
-
-        elif command_id_name == 'unbind_resp':
-            # we never have to handle this
-            # has no body
-            pass
-        elif command_id_name == 'submit_sm':
-            # we never have to handle this. We dont expect SMSC to send this to us.
-            pass
         elif command_id_name == 'submit_sm_resp':
-            # the body of this only has `message_id` which is a C-Octet String of
-            # variable length upto 65 octets.
+            # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
-            # It may be used at a later stage to query the status of a message, cancel
-            # or replace the message.
+            # It may be used at a later stage to query the status of a message, cancel or replace the message.
             pdu_body = unparsed_pdu_body
             print("pdu_body:::", pdu_body)
             pass
@@ -381,25 +373,12 @@ class Client:
             # sm_default_msg_id, Int, 1 octet, must be set to NULL.
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
-
             self.queue_deliver_sm_resp()
-            pass
-        elif command_id_name == 'deliver_sm_resp':
-            # we will never send a deliver_sm request to SMSC
-            # which means we never have to handle deliver_sm_resp
             pass
         elif command_id_name == 'enquire_link':
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             self.queue_enquire_link_resp()
-            pass
-        elif command_id_name == 'enquire_link_resp':
-            # we never have to handle this
-            # it has no body
-            pass
-        elif command_id_name == 'generic_nack':
-            # we can ignore this for now
-            # it has no body
             pass
         else:
             self.logger.error(
