@@ -53,18 +53,19 @@ class GSM7BitCodec(codecs.Codec):
     gsm_basic_charset = (
         "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%&'()*+,-./0123456789:;"
         "<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäö"
-        "ñüà")
+        "ñüà"
+    )
 
-    gsm_basic_charset_map = dict(
-        (l, i) for i, l in enumerate(gsm_basic_charset))
+    gsm_basic_charset_map = dict((l, i) for i, l in enumerate(gsm_basic_charset))
 
     gsm_extension = (
         "````````````````````^```````````````````{}`````\\````````````[~]`"
-        "|````````````````````````````````````€``````````````````````````")
+        "|````````````````````````````````````€``````````````````````````"
+    )
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, unicode_string, errors='strict'):
+    def encode(self, unicode_string, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         eg:
@@ -84,10 +85,9 @@ class GSM7BitCodec(codecs.Codec):
             if idx is not None:
                 result.append(chr(27) + chr(idx))
             else:
-                result.append(
-                    self.handle_encode_error(c, errors, position, unicode_string))
+                result.append(self.handle_encode_error(c, errors, position, unicode_string))
 
-        obj = ''.join(result)
+        obj = "".join(result)
         # this is equivalent to;
         # import six; six.b('someString')
         # see:
@@ -96,23 +96,21 @@ class GSM7BitCodec(codecs.Codec):
         return (obj, len(obj))
 
     def handle_encode_error(self, char, handler_type, position, obj):
-        handler = getattr(
-            self, 'handle_encode_%s_error' % (handler_type,), None)
+        handler = getattr(self, "handle_encode_%s_error" % (handler_type,), None)
         if handler is None:
-            raise NazCodecException(
-                'Invalid errors type %s for GSM7BitCodec', handler_type)
+            raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
         return handler(char, position, obj)
 
     def handle_encode_strict_error(self, char, position, obj):
-        raise UnicodeEncodeError('gsm0338', char, position, position + 1, repr(obj))
+        raise UnicodeEncodeError("gsm0338", char, position, position + 1, repr(obj))
 
     def handle_encode_ignore_error(self, char, position, obj):
-        return ''
+        return ""
 
     def handle_encode_replace_error(self, char, position, obj):
-        return chr(self.gsm_basic_charset_map.get('?'))
+        return chr(self.gsm_basic_charset_map.get("?"))
 
-    def decode(self, byte_string, errors='strict'):
+    def decode(self, byte_string, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         """
@@ -127,37 +125,28 @@ class GSM7BitCodec(codecs.Codec):
                     result.append(self.gsm_basic_charset[c])
             except IndexError as indexErrorException:
                 result.append(
-                    self.handle_decode_error(
-                        c,
-                        errors,
-                        position,
-                        byte_string,
-                        indexErrorException))
+                    self.handle_decode_error(c, errors, position, byte_string, indexErrorException)
+                )
 
-        obj = ''.join(result)
+        obj = "".join(result)
         return (obj, len(obj))
 
     def handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
-        handler = getattr(
-            self, 'handle_decode_%s_error' % (handler_type,), None)
+        handler = getattr(self, "handle_decode_%s_error" % (handler_type,), None)
         if handler is None:
-            raise NazCodecException(
-                'Invalid errors type %s for GSM7BitCodec', handler_type)
+            raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
         return handler(char, position, obj, indexErrorException)
 
     def handle_decode_strict_error(self, char, position, obj, indexErrorException):
         raise UnicodeDecodeError(
-            'gsm0338',
-            chr(char).encode('latin-1'),
-            position,
-            position + 1,
-            repr(obj)) from indexErrorException
+            "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj)
+        ) from indexErrorException
 
     def handle_decode_ignore_error(self, char, position, obj, indexErrorException):
-        return ''
+        return ""
 
     def handle_decode_replace_error(self, char, position, obj, indexErrorException):
-        return '?'
+        return "?"
 
 
 class UCS2Codec(codecs.Codec):
@@ -166,10 +155,10 @@ class UCS2Codec(codecs.Codec):
     big endian UTF16.
     """
 
-    def encode(self, input, errors='strict'):
+    def encode(self, input, errors="strict"):
         return codecs.utf_16_be_encode(input, errors)
 
-    def decode(self, input, errors='strict'):
+    def decode(self, input, errors="strict"):
         return codecs.utf_16_be_decode(input, errors)
 
 
@@ -185,12 +174,10 @@ class NazCodec(object):
         ncodec.decode(b'Zo\xc3\xab', 'gsm0338', 'ignore')
         ncodec.decode(b'Zo\xc3\xab', 'utf8')
     """
-    custom_codecs = {
-        'gsm0338': GSM7BitCodec(),
-        'ucs2': UCS2Codec()
-    }
 
-    def __init__(self, errors='strict'):
+    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
+
+    def __init__(self, errors="strict"):
         self.errors = errors
 
     def encode(self, unicode_string, encoding=None, errors=None):
@@ -202,8 +189,7 @@ class NazCodec(object):
             errors = self.errors
 
         if not isinstance(unicode_string, str):
-            raise NazCodecException(
-                'Only Unicode strings accepted for encoding.')
+            raise NazCodecException("Only Unicode strings accepted for encoding.")
         encoding = encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             encoder = self.custom_codecs[encoding].encode
@@ -221,7 +207,7 @@ class NazCodec(object):
             errors = self.errors
 
         if not isinstance(byte_string, (bytes, bytearray)):
-            raise NazCodecException('Only bytestrings accepted for decoding.')
+            raise NazCodecException("Only bytestrings accepted for decoding.")
         encoding = encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             decoder = self.custom_codecs[encoding].decode
