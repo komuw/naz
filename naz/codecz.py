@@ -86,22 +86,22 @@ class GSM7BitCodec(codecs.Codec):
                     result.append(self.gsm_extension[c])
                 else:
                     result.append(self.gsm_basic_charset[c])
-            except IndexError:
-                result.append(self.handle_decode_error(c, errors, position, byte_string))
+            except IndexError as indexErrorException:
+                result.append(self.handle_decode_error(c, errors, position, byte_string, indexErrorException))
 
         obj = ''.join(result)
         return (obj, len(obj))
 
-    def handle_decode_error(self, char, handler_type, position, obj):
+    def handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
         handler = getattr(
             self, 'handle_decode_%s_error' % (handler_type,), None)
         if handler is None:
             raise VumiCodecException(
                 'Invalid errors type %s for GSM7BitCodec', handler_type)
-        return handler(char, position, obj)
+        return handler(char, position, obj, indexErrorException)
 
-    def handle_decode_strict_error(self, char, position, obj):
-        raise UnicodeDecodeError('gsm0338', chr(char).encode('latin-1'), position, position + 1, repr(obj))
+    def handle_decode_strict_error(self, char, position, obj, indexErrorException):
+        raise UnicodeDecodeError('gsm0338', chr(char).encode('latin-1'), position, position + 1, repr(obj)) from indexErrorException
                            
 
     def handle_decode_ignore_error(self, char, position, obj):
@@ -164,6 +164,7 @@ class VumiCodec(object):
         return obj
 
 xcodec = VumiCodec()
+xcodec.decode(b'Zo\xc3\xab', 'gsm0338')
 xcodec.encode('Привет мир!\n', "gsm0338")
 # import pdb;pdb.set_trace()
 # xcodec.decode('Zo\xc3\xab', 'gsm0338')
