@@ -9,16 +9,16 @@ class GSM7BitCodec(codecs.Codec):
     """
 
     gsm_basic_charset = (
-        u"@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%&'()*+,-./0123456789:;"
-        u"<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäö"
-        u"ñüà")
+        "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\"#¤%&'()*+,-./0123456789:;"
+        "<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäö"
+        "ñüà")
 
     gsm_basic_charset_map = dict(
         (l, i) for i, l in enumerate(gsm_basic_charset))
 
     gsm_extension = (
-        u"````````````````````^```````````````````{}`````\\````````````[~]`"
-        u"|````````````````````````````````````€``````````````````````````")
+        "````````````````````^```````````````````{}`````\\````````````[~]`"
+        "|````````````````````````````````````€``````````````````````````")
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
@@ -72,7 +72,7 @@ class GSM7BitCodec(codecs.Codec):
                 result.append(
                     self.handle_decode_error(c, errors, position, byte_string))
 
-        obj = u''.join(result)
+        obj = ''.join(result)
         return (obj, len(obj))
 
     def handle_decode_error(self, char, handler_type, position, obj):
@@ -88,10 +88,10 @@ class GSM7BitCodec(codecs.Codec):
             'gsm0338', char, position, position + 1, obj)
 
     def handle_decode_ignore_error(self, char, position, obj):
-        return u''
+        return ''
 
     def handle_decode_replace_error(self, char, position, obj):
-        return u'?'
+        return '?'
 
 
 class UCS2Codec(codecs.Codec):
@@ -113,7 +113,7 @@ class VumiCodec(object):
     }
 
     def encode(self, unicode_string, encoding=None, errors='strict'):
-        if not isinstance(unicode_string, unicode):
+        if not isinstance(unicode_string, str):
             raise VumiCodecException(
                 'Only Unicode strings accepted for encoding.')
         encoding = encoding or sys.getdefaultencoding()
@@ -137,7 +137,7 @@ class VumiCodec(object):
         return obj
 
 xcodec = VumiCodec()
-xcodec.encode(u"Zoë", "utf-16be")
+xcodec.encode("Zoë", "utf-16be")
 # import pdb;pdb.set_trace()
 # xcodec.encode(u"Zoë", "utf-16be")
 # xcodec.encode(u"HÜLK", "gsm0338")
