@@ -38,6 +38,10 @@ import sys
 # todo: port the testcases found at:
 # https://github.com/praekelt/vumi/blob/master/vumi/codecs/tests/test_vumi_codecs.py
 
+# todo: An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
+# however, since I'm guessingvumi has been in use longer, then we should go with it.
+
+
 class NazCodecException(Exception):
     pass
 
@@ -186,11 +190,17 @@ class NazCodec(object):
         'ucs2': UCS2Codec()
     }
 
-    def encode(self, unicode_string, encoding=None, errors='strict'):
+    def __init__(self, errors='strict'):
+        self.errors = errors
+
+    def encode(self, unicode_string, encoding=None, errors=None'):
         """
         you should call encode on a string. ie in python3 we write;
           'sss'.encode() # b'sss'
         """
+        if not errors:
+            errors = self.errors
+
         if not isinstance(unicode_string, str):
             raise NazCodecException(
                 'Only Unicode strings accepted for encoding.')
@@ -202,11 +212,14 @@ class NazCodec(object):
         obj, length = encoder(unicode_string, errors)
         return obj
 
-    def decode(self, byte_string, encoding=None, errors='strict'):
+    def decode(self, byte_string, encoding=None, errors=None):
         """
         you should call decode on a byte. ie in python3 we write;
           b'sss'.decode() # 'sss'
         """
+        if not errors:
+            errors = self.errors
+
         if not isinstance(byte_string, (bytes, bytearray)):
             raise NazCodecException('Only bytestrings accepted for decoding.')
         encoding = encoding or sys.getdefaultencoding()
