@@ -205,29 +205,34 @@ class Client:
         }
 
         # see section 5.2.19
-        # DataCoding = collections.namedtuple('DataCoding', 'code description')
-        # self.data_codings = {
-        #     0x00000000 SMSC Default Alphabet
-        #     0x00000001 IA5(CCITT T.50) / ASCII(ANSI X3.4)
-        #     0x00000010 Octet unspecified(8 - bit binary)
-        #     0x00000011 Latin 1 (ISO - 8859 - 1)
-        #     0x00000100 Octet unspecified(8 - bit binary)
-        #     0x00000101 JIS(X 0208 - 1990)
-        #     0x00000110 Cyrllic(ISO - 8859 - 5)
-        #     0x00000111 Latin / Hebrew(ISO - 8859 - 8)
-        #     0x00001000 UCS2(ISO / IEC - 10646)
-        #     0x00001001 Pictogram Encoding
-        #     0x00001010 ISO - 2022 - JP(Music Codes)
-        #     0x00001011 reserved
-        #     0x00001100 reserved
-        #     0x00001101 Extended Kanji JIS(X 0212 - 1990)
-        #     0x00001110 KS C 5601
-        #     # 00001111 - 10111111 reserved
-        #     # 0x1100xxxx GSM MWI control - see [GSM 03.38]
-        #     # 0x1101xxxx GSM MWI control - see [GSM 03.38]
-        #     # 0x1110xxxx reserved
-        #     # 0x1111xxxx GSM message class control - see [GSM 03.38]
-        # }
+        DataCoding = collections.namedtuple('DataCoding', 'code description')
+        # the keys to the `data_codings` dict are the names of the codecs as defined in https://docs.python.org/3.6/library/codecs.html
+        # that is if they exist in that document.
+        self.data_codings = {
+            'gsm0338': DataCoding(0b00000000, 'SMSC Default Alphabet'),
+            'ascii': DataCoding(0b00000001, 'IA5(CCITT T.50) / ASCII(ANSI X3.4)'),
+            'octet_unspecified_I': DataCoding(0b00000010, 'Octet unspecified(8 - bit binary)'),
+            'latin_1': DataCoding(0b00000011, 'Latin 1 (ISO - 8859 - 1)'),
+            'octet_unspecified_II': DataCoding(0b00000100, 'Octet unspecified(8 - bit binary)'),
+            # iso2022_jp, iso2022jp and iso-2022-jp are aliases
+            'iso2022_jp': DataCoding(0b00000101, 'JIS(X 0208 - 1990)'), # see: https://stackoverflow.com/a/43240579/2768067
+            'iso8859_5': DataCoding(0b00000110, 'Cyrllic(ISO - 8859 - 5)'),
+            'iso8859_8': DataCoding(0b00000111, 'Latin / Hebrew(ISO - 8859 - 8)'),
+            'utf_16_be': DataCoding(0b00001000, 'UCS2(ISO / IEC - 10646)'), # see: https://stackoverflow.com/a/14488478/2768067
+            'ucs2': DataCoding(0b00001000, 'UCS2(ISO / IEC - 10646)'),
+            'shift_jis': DataCoding(0b00001001, 'Pictogram Encoding'),
+            'iso2022jp': DataCoding(0b00001010, 'ISO - 2022 - JP(Music Codes)'),
+            'reservedI': DataCoding(0b00001011, 'reserved'),
+            'reservedII': DataCoding(0b00001100, 'reserved'),
+            'iso-2022-jp': DataCoding(0b00001101, 'Extended Kanji JIS(X 0212 - 1990)'), #not the same as iso2022_jp but ...
+            'euc_kr': DataCoding(0b00001110, 'KS C 5601'),
+            # 00001111 - 10111111 reserved
+            # 0b1100xxxx GSM MWI control - see [GSM 03.38]
+            # 0b1101xxxx GSM MWI control - see [GSM 03.38]
+            # 0b1110xxxx reserved
+            # 0b1111xxxx GSM message class control - see [GSM 03.38]
+        }
+        # also see: https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260
 
         self.reader = None
         self.writer = None
@@ -294,29 +299,8 @@ class Client:
         return full_pdu
 
     async def submit_sm(self, msg, correlation_id, destination_addr):
-        self.service_type = 'CMT'  # section 5.2.11
-        self.source_addr_ton = 0x00000001  # section 5.2.5
-        self.source_addr_npi = 0x00000001
-        self.dest_addr_ton = 0x00000001
-        self.dest_addr_npi = 0x00000001
-        self.source_addr = ''
-        # xxxxxx00 store-and-forward
-        # xx0010xx Short Message contains ESME Delivery Acknowledgement
-        # 00xxxxxx No specific features selected
-        self.esm_class = 0x00001000  # section 5.2.12
-        self.protocol_id = 0x00000000
-        self.priority_flag = 0x00000000
-        self.schedule_delivery_time = ''
-        self.validity_period = ''
-        # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
-        # xxxx01xx SME Delivery Acknowledgement requested
-        # xxx0xxxx No Intermediate notification requested
-        # all other values reserved
-        self.registered_delivery = 0x00000101  # see section 5.2.17
-        self.replace_if_present_flag = 0x00001000
-        # self.data_coding =  # see section 5.2.19
-
-        # submit_sm has the following pdu body
+        """
+        # submit_sm has the following pdu body. They should be put in the body in the order presented here.
         # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
         # source_addr_ton, int , 1octet,
         # source_addr_npi, int, 1octet
@@ -329,13 +313,85 @@ class Client:
         # validity_period, c-octet str, 1 or 17 octets.  NULL for SMSC default.
         # registered_delivery, int, 1octet
         # replace_if_present_flag, int, 1octet
-        # data_coding, int, 1octet. Defines the encoding scheme of the short message user data
+        # data_coding, int, 1octet. Defines the encoding scheme of the short message user data. Bits 7 6 5 4 3 2 1 0
+        # sm_default_msg_id, int, 1octet. SMSC index of a pre-defined(`canned`) message.  If not using an SMSC canned message, set to NULL
+        # sm_length, int, 1octet. Length in octets of the `short_message`. 
+        # short_message, Octet-String(NOT c-octet str), 0-254 octets. 
+        NB: 1. Applications which need to send messages longer than 254 octets should use the `message_payload` optional parameter. In this case the `sm_length` field should be set to zero
+               u cant use both `short_message` and `message_payload`
+            2. Octet String - A series of octets, not necessarily NULL terminated.
+        """
+        self.logger.debug('submit_sm_enqueue. correlation_id={0}. destination_addr={1}'.format(correlation_id, destination_addr))
+        self.service_type = 'CMT'  # section 5.2.11
+        self.source_addr_ton = 0x00000001  # section 5.2.5
+        self.source_addr_npi = 0x00000001
+        self.dest_addr_ton = 0x00000001
+        self.dest_addr_npi = 0x00000001
+        self.source_addr = ''
+        destination_addr = destination_addr
+        # xxxxxx00 store-and-forward
+        # xx0010xx Short Message contains ESME Delivery Acknowledgement
+        # 00xxxxxx No specific features selected
+        self.esm_class = 0b00001000  # section 5.2.12
+        self.protocol_id = 0x00000000
+        self.priority_flag = 0x00000000
+        self.schedule_delivery_time = ''
+        self.validity_period = ''
+        # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
+        # xxxx01xx SME Delivery Acknowledgement requested
+        # xxx0xxxx No Intermediate notification requested
+        # all other values reserved
+        self.registered_delivery = 0b00000101  # see section 5.2.17
+        self.replace_if_present_flag = 0x00000000
+        self.data_coding =  self.data_codings[self.encoding].code # see section 5.2.19
+        self.sm_default_msg_id = 0x00000000
 
+        short_message = msg
+        encoded_short_message = self.codec_class.encode(short_message, self.encoding)
+        sm_length = len(encoded_short_message)
+
+        # body
+        body = b''
+        body = body + \
+            self.codec_class.encode(self.service_type, self.encoding) + chr(0).encode("latin-1") + \
+            struct.pack('>I', self.source_addr_ton) + \
+            struct.pack('>I', self.source_addr_npi) + \
+            struct.pack('>I', self.dest_addr_ton) + \
+            struct.pack('>I', self.dest_addr_npi) + \
+            self.codec_class.encode(self.source_addr, self.encoding) + chr(0).encode("latin-1") + \
+            self.codec_class.encode(destination_addr, self.encoding) + chr(0).encode("latin-1") + \
+            struct.pack('>I', self.esm_class) + \
+            struct.pack('>I', self.protocol_id) + \
+            struct.pack('>I', self.priority_flag) + \
+            self.codec_class.encode(self.schedule_delivery_time, self.encoding) + chr(0).encode("latin-1") + \
+            self.codec_class.encode(self.validity_period, self.encoding) + chr(0).encode("latin-1") + \
+            struct.pack('>I', self.registered_delivery) + \
+            struct.pack('>I', self.replace_if_present_flag) + \
+            struct.pack('>I', self.data_coding) + \
+            struct.pack('>I', self.sm_default_msg_id) + \
+            struct.pack('>I', sm_length) + \
+            self.codec_class.encode(short_message, self.encoding)
+
+        # header
+        command_length = 16 + len(body)  # 16 is for headers
+        command_id = self.command_ids['bind_transceiver']
+        # the status for success see section 5.1.3
+        command_status = self.command_statuses['ESME_ROK'].code
+        sequence_number = self.sequence_generator.next_sequence()
+        if sequence_number > self.MAX_SEQUENCE_NUMBER:
+            # prevent third party sequence_generators from ruining our party
+            raise ValueError(
+                'the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.'.format(
+                    sequence_number, self.MAX_SEQUENCE_NUMBER))
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
         item_to_enqueue = {
             'correlation_id': correlation_id,
-            'pdu': pdu
+            'pdu': full_pdu
         }
-        self.outboundqueue.queue(item_to_enqueue)
+        self.outboundqueue.enqueue(item_to_enqueue)
+        self.logger.debug('submit_sm_enqueued. correlation_id={0}. destination_addr={1}'.format(correlation_id, destination_addr))
 
     async def send_data(self, msg):
         """
@@ -350,6 +406,15 @@ class Client:
         self.writer.write(msg)
         await self.writer.drain()
         self.logger.debug('data_sent')
+
+    async def send_forever(self):
+        while True:
+            self.logger.debug('send_forever')
+            item_to_dequeue = self.outboundqueue.dequeue()
+            correlation_id = item_to_dequeue['correlation_id']
+            full_pdu = item_to_dequeue['pdu']
+            await self.send_data(full_pdu)
+            self.logger.debug('sent_forever. correlation_id={0}'.format(correlation_id))
 
     async def receive_data(self):
         """
@@ -392,7 +457,6 @@ class Client:
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
             raise ValueError('the command_id: {0} is unknown.'.format(command_id))
-        # import pdb;pdb.set_trace()
         pdu_body = b''
         if total_pdu_length > 16:
             pdu_body = pdu[16:]
@@ -505,9 +569,15 @@ cli = Client(async_loop=loop,
              system_id='smppclient1',
              password='password')
 
+for i in range(0,3):
+    print("submit_sm:", i)
+    loop.run_until_complete(cli.submit_sm(msg="Hello World", correlation_id="myid12345", destination_addr="254725082545"))
+
+
 reader, writer = loop.run_until_complete(cli.connect())
 
 loop.run_until_complete(cli.tranceiver_bind())
+loop.run_until_complete(cli.send_forever())
 
 received = loop.run_until_complete(cli.receive_data())
 print("received", received)
