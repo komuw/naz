@@ -1,6 +1,8 @@
 import codecs
 import sys
 
+# todo: add licensing
+
 class VumiCodecException(Exception):
     pass
 
