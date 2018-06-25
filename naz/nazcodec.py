@@ -207,9 +207,6 @@ class NazCodec(object):
         you should call decode on a byte. ie in python3 we write;
           b'sss'.decode() # 'sss'
         """
-        # if not isinstance(byte_string, str):
-        #     raise NazCodecException(
-        #         'Only bytestrings accepted for decoding.')
         if not isinstance(byte_string, (bytes, bytearray)):
             raise NazCodecException('Only bytestrings accepted for decoding.')
         encoding = encoding or sys.getdefaultencoding()
