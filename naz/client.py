@@ -374,7 +374,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids['bind_transceiver']
+        command_id = self.command_ids['submit_sm']
         # the status for success see section 5.1.3
         command_status = self.command_statuses['ESME_ROK'].code
         sequence_number = self.sequence_generator.next_sequence()
@@ -578,7 +578,6 @@ reader, writer = loop.run_until_complete(cli.connect())
 
 loop.run_until_complete(cli.tranceiver_bind())
 loop.run_until_complete(cli.send_forever())
-
 received = loop.run_until_complete(cli.receive_data())
 print("received", received)
 loop.run_forever()
