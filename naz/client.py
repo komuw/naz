@@ -569,8 +569,8 @@ cli = Client(async_loop=loop,
              system_id='smppclient1',
              password='password')
 
-for i in range(0,3):
-    print("submit_sm:", i)
+for i in range(0,4):
+    print("submit_sm round:", i)
     loop.run_until_complete(cli.submit_sm(msg="Hello World", correlation_id="myid12345", destination_addr="254725082545"))
 
 
