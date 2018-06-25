@@ -82,7 +82,7 @@ Look at section 2.11 of spec document to learn more about Message Types.
 
 #### 3.1 SMPP PDU - Type Definitions
 The following SMPP PDU data type definitions are used to define the SMPP parameters:
-- Integer - An **unsigned** value with the defined number of octets. The octets will always be transmitted MSB first (Big Endian).       
+- Integer - An **unsigned** value with the defined number of octets. The octets will always be transmitted MSB first (Big Endian). NULL is zero.      
 **NB:** todo this in python use:
 ```python
 ## https://stackoverflow.com/a/846045/2768067

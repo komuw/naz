@@ -34,6 +34,21 @@ class DefaultSequenceGenerator(object):
         return self.sequence_number
 
 
+class DefaultOutboundQueue(object):
+    """
+    this allows users to provide their own queue managers eg redis etc.
+    """
+    def __init__(self, maxsize, loop):
+        """
+        maxsize is the max number of items(not size) that can be put in the queue.
+        """
+        self.queue = asyncio.Queue(maxsize=maxsize,loop=loop)
+    def enqueue(self, item):
+        self.queue.put_nowait(item)
+    def dequeue(self):
+        return self.queue.get()
+
+
 class Client:
     """
     """
@@ -51,6 +66,7 @@ class Client:
                  encoding='utf8',
                  interface_version=34,
                  sequence_generator=None,
+                 outboundqueue=None,
                  LOG_LEVEL='DEBUG',
                  log_metadata=None):
         """
@@ -79,6 +95,10 @@ class Client:
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
             self.sequence_generator = DefaultSequenceGenerator()
+        self.outboundqueue = outboundqueue
+        if not self.outboundqueue:
+            self.outboundqueue = DefaultOutboundQueue(maxsize=5,loop=self.async_loop)
+
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
         self.log_metadata = log_metadata
@@ -235,6 +255,52 @@ class Client:
         await self.send_data(full_pdu)
         self.logger.debug('tranceiver_bound')
         return full_pdu
+
+    async def submit_sm(self, msg, correlation_id, destination_addr):
+        self.service_type = 'CMT' # section 5.2.11
+        self.source_addr_ton = 0x00000001 # section 5.2.5
+        self.source_addr_npi =  0x00000001
+        self.dest_addr_ton = 0x00000001
+        self.dest_addr_npi = 0x00000001
+        self.source_addr = ''
+        # xxxxxx00 store-and-forward
+        # xx0010xx Short Message contains ESME Delivery Acknowledgement
+        # 00xxxxxx No specific features selected
+        self.esm_class = 0x00001000 # section 5.2.12
+        self.protocol_id = 0x00000000
+        self.priority_flag = 0x00000000
+        self.schedule_delivery_time = ''
+        self.validity_period = ''
+        # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
+        # xxxx01xx SME Delivery Acknowledgement requested
+        # xxx0xxxx No Intermediate notification requested
+        # all other values reserved
+        self.registered_delivery = 0x00000101 # see section 5.2.17
+        self.replace_if_present_flag = 0x00001000
+        self.data_coding = # see section 5.2.19
+
+
+        # submit_sm has the following pdu body
+        # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
+        # source_addr_ton, int , 1octet,
+        # source_addr_npi, int, 1octet
+        # source_addr, c-octet str, max 21octet
+        # destination_addr,  C-Octet String, max 21 octet
+        # esm_class, int, 1octet
+        # protocol_id, int, 1octet
+        # priority_flag, int, 1octet
+        # schedule_delivery_time, c-octet str, 1 or 17 octets. NULL for immediate message delivery.
+        # validity_period, c-octet str, 1 or 17 octets.  NULL for SMSC default.
+        # registered_delivery, int, 1octet
+        # replace_if_present_flag, int, 1octet
+        # data_coding, int, 1octet
+
+
+        item_to_enqueue = {
+            'correlation_id': correlation_id,
+            'pdu': pdu
+        }
+        self.outboundqueue.queue(item_to_enqueue)
 
     async def send_data(self, msg):
         """
