@@ -457,6 +457,7 @@ class Client:
         self.logger.debug("data_sent")
 
     async def send_forever(self):
+        # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
             item_to_dequeue = await self.outboundqueue.dequeue()
