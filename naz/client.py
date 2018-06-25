@@ -51,7 +51,7 @@ class Client:
                  encoding='utf8',
                  interface_version=34,
                  sequence_generator=None,
-                 LOG_LEVEL='INFO',
+                 LOG_LEVEL='DEBUG',
                  log_metadata=None):
         """
         todo: add docs
@@ -232,11 +232,11 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        await self.send_data(full_pdu, self.writer)
+        await self.send_data(full_pdu)
         self.logger.debug('tranceiver_bound')
         return full_pdu
 
-    async def send_data(self, msg, writer):
+    async def send_data(self, msg):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -246,36 +246,36 @@ class Client:
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
         if isinstance(msg, str):
             msg = bytes(msg, 'utf8')
-        writer.write(msg)
-        await writer.drain()
+        self.writer.write(msg)
+        await self.writer.drain()
         self.logger.debug('data_sent')
 
     async def receive_data(self):
         """
         """
-        self.logger.debug('receiving_data')
-        # todo: look at `pause_reading` and `resume_reading` methods
-        command_length_header_data = await self.reader.read(4)
-        total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
+        while True:
+            self.logger.debug('receiving_data')
+            # todo: look at `pause_reading` and `resume_reading` methods
+            command_length_header_data = await self.reader.read(4)
+            total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
 
-        MSGLEN = total_pdu_length - 4
-        chunks = []
-        bytes_recd = 0
-        while bytes_recd < MSGLEN:
-            chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
-            if chunk == b'':
-                raise RuntimeError("socket connection broken")
-            chunks.append(chunk)
-            bytes_recd = bytes_recd + len(chunk)
-        full_pdu_data = command_length_header_data + b''.join(chunks)
-        await self.parse_pdu(full_pdu_data)
-        self.logger.debug('data_received')
-        return full_pdu_data
+            MSGLEN = total_pdu_length - 4
+            chunks = []
+            bytes_recd = 0
+            while bytes_recd < MSGLEN:
+                chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                if chunk == b'':
+                    raise RuntimeError("socket connection broken")
+                chunks.append(chunk)
+                bytes_recd = bytes_recd + len(chunk)
+            full_pdu_data = command_length_header_data + b''.join(chunks)
+            await self.parse_pdu(full_pdu_data)
+            self.logger.debug('data_received')
 
     async def parse_pdu(self, pdu):
         """
         """
-        self.logger.debug('pdu_parsing')
+        self.logger.debug('pdu_parsing. pdu={0}'.format(pdu))
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
         total_pdu_length = struct.unpack('>I', command_length_header_data)[0]
@@ -300,10 +300,6 @@ class Client:
                                      sequence_number=sequence_number,
                                      unparsed_pdu_body=pdu_body)
         self.logger.debug('pdu_parsed')
-
-        print("dd")
-        print("dd")
-        print("dd")
 
     async def speficic_handlers(self,
                                 command_id_name,
