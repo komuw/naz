@@ -51,8 +51,8 @@ class DefaultOutboundQueue(object):
     def enqueue(self, item):
         self.queue.put_nowait(item)
 
-    def dequeue(self):
-        return self.queue.get()
+    async def dequeue(self):
+        return await self.queue.get()
 
 
 class Client:
@@ -410,7 +410,7 @@ class Client:
     async def send_forever(self):
         while True:
             self.logger.debug('send_forever')
-            item_to_dequeue = self.outboundqueue.dequeue()
+            item_to_dequeue = await self.outboundqueue.dequeue()
             correlation_id = item_to_dequeue['correlation_id']
             full_pdu = item_to_dequeue['pdu']
             await self.send_data(full_pdu)
