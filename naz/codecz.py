@@ -1,6 +1,8 @@
 import codecs
 import sys
 
+class VumiCodecException(Exception):
+    pass
 
 class GSM7BitCodec(codecs.Codec):
     """
@@ -23,6 +25,15 @@ class GSM7BitCodec(codecs.Codec):
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
     def encode(self, unicode_string, errors='strict'):
+        """
+        errors can be 'strict', 'replace' or 'ignore'
+        eg:
+            xcodec.encode("Zoë","gsm0338") will fail with UnicodeEncodeError
+            but
+            xcodec.encode("Zoë","gsm0338", 'replace') will return b'Zo?'
+            and
+            xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'
+        """
         result = []
         for position, c in enumerate(unicode_string):
             idx = self.gsm_basic_charset_map.get(c)
@@ -34,10 +45,13 @@ class GSM7BitCodec(codecs.Codec):
                 result.append(chr(27) + chr(idx))
             else:
                 result.append(
-                    self.handle_encode_error(
-                        c, errors, position, unicode_string))
+                    self.handle_encode_error( c, errors, position, unicode_string))
 
         obj = ''.join(result)
+        # this is equivalent to;
+        # import six; six.b('someString')
+        # see: https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625
+        obj = obj.encode("latin-1")
         return (obj, len(obj))
 
     def handle_encode_error(self, char, handler_type, position, obj):
@@ -49,8 +63,7 @@ class GSM7BitCodec(codecs.Codec):
         return handler(char, position, obj)
 
     def handle_encode_strict_error(self, char, position, obj):
-        raise UnicodeEncodeError(
-            'gsm0338', char, position, position + 1, repr(obj))
+        raise UnicodeEncodeError('gsm0338', char, position, position + 1, repr(obj))
 
     def handle_encode_ignore_error(self, char, position, obj):
         return ''
@@ -59,18 +72,20 @@ class GSM7BitCodec(codecs.Codec):
         return chr(self.gsm_basic_charset_map.get('?'))
 
     def decode(self, byte_string, errors='strict'):
+        """
+        errors can be 'strict', 'replace' or 'ignore'
+        """
         res = iter(byte_string)
         result = []
         for position, c in enumerate(res):
             try:
-                if c == chr(27):
+                if c == 27:
                     c = next(res)
-                    result.append(self.gsm_extension[ord(c)])
+                    result.append(self.gsm_extension[c])
                 else:
-                    result.append(self.gsm_basic_charset[ord(c)])
+                    result.append(self.gsm_basic_charset[c])
             except IndexError:
-                result.append(
-                    self.handle_decode_error(c, errors, position, byte_string))
+                result.append(self.handle_decode_error(c, errors, position, byte_string))
 
         obj = ''.join(result)
         return (obj, len(obj))
@@ -84,8 +99,8 @@ class GSM7BitCodec(codecs.Codec):
         return handler(char, position, obj)
 
     def handle_decode_strict_error(self, char, position, obj):
-        raise UnicodeDecodeError(
-            'gsm0338', char, position, position + 1, obj)
+        raise UnicodeDecodeError('gsm0338', chr(char).encode('latin-1'), position, position + 1, repr(obj))
+                           
 
     def handle_decode_ignore_error(self, char, position, obj):
         return ''
@@ -113,6 +128,10 @@ class VumiCodec(object):
     }
 
     def encode(self, unicode_string, encoding=None, errors='strict'):
+        """
+        you should call encode on a string. ie in python3 we write;
+          'sss'.encode() # b'sss'
+        """
         if not isinstance(unicode_string, str):
             raise VumiCodecException(
                 'Only Unicode strings accepted for encoding.')
@@ -125,9 +144,15 @@ class VumiCodec(object):
         return obj
 
     def decode(self, byte_string, encoding=None, errors='strict'):
-        if not isinstance(byte_string, str):
-            raise VumiCodecException(
-                'Only bytestrings accepted for decoding.')
+        """
+        you should call decode on a byte. ie in python3 we write;
+          b'sss'.decode() # 'sss'
+        """
+        # if not isinstance(byte_string, str):
+        #     raise VumiCodecException(
+        #         'Only bytestrings accepted for decoding.')
+        if not isinstance(byte_string, (bytes, bytearray)):
+            raise VumiCodecException('Only bytestrings accepted for decoding.')
         encoding = encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             decoder = self.custom_codecs[encoding].decode
@@ -137,11 +162,14 @@ class VumiCodec(object):
         return obj
 
 xcodec = VumiCodec()
-xcodec.encode("Zoë", "utf-16be")
+xcodec.encode('Привет мир!\n', "gsm0338")
 # import pdb;pdb.set_trace()
-# xcodec.encode(u"Zoë", "utf-16be")
-# xcodec.encode(u"HÜLK", "gsm0338")
+# xcodec.decode('Zo\xc3\xab', 'gsm0338')
+# import pdb;pdb.set_trace()
+# xcodec.encode("Zoë", "utf-16be")
+# xcodec.encode("HÜLK", "gsm0338")
 #  xcodec.encode('Привет мир!\n', "gsm0338") 
+# xcodec.decode('Zo\xc3\xab', 'gsm0338')
 print("cool")
 print("cool")
 print("cool")
