@@ -78,6 +78,26 @@ class Client:
         log_metadata=None,
         codec_class=None,
         codec_errors_level="strict",
+        service_type="CMT",  # section 5.2.11
+        source_addr_ton=0x00000001,  # section 5.2.5
+        source_addr_npi=0x00000001,
+        dest_addr_ton=0x00000001,
+        dest_addr_npi=0x00000001,
+        # xxxxxx00 store-and-forward
+        # xx0010xx Short Message contains ESME Delivery Acknowledgement
+        # 00xxxxxx No specific features selected
+        esm_class=0b00001000,  # section 5.2.12
+        protocol_id=0x00000000,
+        priority_flag=0x00000000,
+        schedule_delivery_time="",
+        validity_period="",
+        # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
+        # xxxx01xx SME Delivery Acknowledgement requested
+        # xxx0xxxx No Intermediate notification requested
+        # all other values reserved
+        registered_delivery=0b00000101,  # see section 5.2.17
+        replace_if_present_flag=0x00000000,
+        sm_default_msg_id=0x00000000,
     ):
         """
         todo: add docs
@@ -124,6 +144,21 @@ class Client:
         self.codec_errors_level = codec_errors_level
         if not self.codec_class:
             self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
+
+        self.service_type = service_type
+        self.source_addr_ton = source_addr_ton
+        self.source_addr_npi = source_addr_npi
+        self.dest_addr_ton = dest_addr_ton
+        self.dest_addr_npi = dest_addr_npi
+        self.esm_class = esm_class
+        self.protocol_id = protocol_id
+        self.priority_flag = priority_flag
+        self.schedule_delivery_time = schedule_delivery_time
+        self.validity_period = validity_period
+        self.registered_delivery = registered_delivery
+        self.replace_if_present_flag = replace_if_present_flag
+        self.sm_default_msg_id = sm_default_msg_id
+        self.data_coding = self.data_codings[self.encoding].code
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -352,39 +387,18 @@ class Client:
         # sm_default_msg_id, int, 1octet. SMSC index of a pre-defined(`canned`) message.  If not using an SMSC canned message, set to NULL
         # sm_length, int, 1octet. Length in octets of the `short_message`.
         # short_message, Octet-String(NOT c-octet str), 0-254 octets.
-        NB: 1. Applications which need to send messages longer than 254 octets should use the `message_payload` optional parameter. In this case the `sm_length` field should be set to zero
+        NB: 1. Applications which need to send messages longer than 254 octets should use the `message_payload` optional parameter.
+               In this case the `sm_length` field should be set to zero
                u cant use both `short_message` and `message_payload`
             2. Octet String - A series of octets, not necessarily NULL terminated.
         """
         self.logger.debug(
-            "submit_sm_enqueue. correlation_id={0}. destination_addr={1}".format(
-                correlation_id, destination_addr
+            "submit_sm_enqueue. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
+                correlation_id, source_addr, destination_addr
             )
         )
-        self.service_type = "CMT"  # section 5.2.11
-        self.source_addr_ton = 0x00000001  # section 5.2.5
-        self.source_addr_npi = 0x00000001
-        self.dest_addr_ton = 0x00000001
-        self.dest_addr_npi = 0x00000001
         source_addr = source_addr
         destination_addr = destination_addr
-        # xxxxxx00 store-and-forward
-        # xx0010xx Short Message contains ESME Delivery Acknowledgement
-        # 00xxxxxx No specific features selected
-        self.esm_class = 0b00001000  # section 5.2.12
-        self.protocol_id = 0x00000000
-        self.priority_flag = 0x00000000
-        self.schedule_delivery_time = ""
-        self.validity_period = ""
-        # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
-        # xxxx01xx SME Delivery Acknowledgement requested
-        # xxx0xxxx No Intermediate notification requested
-        # all other values reserved
-        self.registered_delivery = 0b00000101  # see section 5.2.17
-        self.replace_if_present_flag = 0x00000000
-        self.data_coding = self.data_codings[self.encoding].code  # see section 5.2.19
-        self.sm_default_msg_id = 0x00000000
-
         short_message = msg
         encoded_short_message = self.codec_class.encode(short_message, self.encoding)
         sm_length = len(encoded_short_message)
