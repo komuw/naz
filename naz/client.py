@@ -709,6 +709,8 @@ cli = Client(
     password="password",
 )
 
+# `enquire_link`` pdu works. If you comment out this submit_sm request everything works.
+# `submit_sm` on the other hand is failing
 for i in range(0, 4):
     print("submit_sm round:", i)
     loop.run_until_complete(
