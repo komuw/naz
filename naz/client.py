@@ -11,6 +11,8 @@ import nazcodec
 # 2. add configurable rate limits. our rate limits should be tight
 # 3. metrics, what is happening
 # 4. propagate correlation_id, and pdu event to all/most log events
+# 5. allow user's hooks. we should correlate user's supplied correlation_id and sequence_number
+#    users should be able to supply a class/interface/func?? that gets called for various events, eg; everytime SMSC sends us a `delivery_sm` or `submit_sm_resp` etc
 
 
 class DefaultSequenceGenerator(object):
@@ -458,7 +460,7 @@ class Client:
         command_length, int, 4octet
         command_id, int, 4octet. `submit_sm`
         command_status, int, 4octet. Not used. Set to NULL
-        sequence_number, int, 4octet.
+        sequence_number, int, 4octet.  The associated submit_sm_resp PDU will echo this sequence number.
 
         BODY::
         # submit_sm has the following pdu body. They should be put in the body in the order presented here.
@@ -641,11 +643,12 @@ class Client:
             command_status=command_status,
             sequence_number=sequence_number,
             unparsed_pdu_body=pdu_body,
+            total_pdu_length=total_pdu_length,
         )
         self.logger.debug("response_pdu_parsed")
 
     async def speficic_handlers(
-        self, command_id_name, command_status, sequence_number, unparsed_pdu_body
+        self, command_id_name, command_status, sequence_number, unparsed_pdu_body, total_pdu_length
     ):
         """
         this handles parsing speficic
@@ -657,8 +660,12 @@ class Client:
         )
 
         self.logger.info(
-            "pdu_response_handling. command_id={0}. sequence_number={1}. command_status={2}. command_description={3}".format(
-                command_id_name, sequence_number, command_status, command_status_value.description
+            "pdu_response_handling. command_id={0}. sequence_number={1}. command_status={2}. command_description={3}. total_pdu_length={4}.".format(
+                command_id_name,
+                sequence_number,
+                command_status,
+                command_status_value.description,
+                total_pdu_length,
             )
         )
 
@@ -699,8 +706,16 @@ class Client:
             # or replace the message.
             pdu_body = unparsed_pdu_body
             print("pdu_body:::", pdu_body)
+            # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
         elif command_id_name == "deliver_sm":
+            # HEADER::
+            # command_length, int, 4octet
+            # command_id, int, 4octet. `deliver_sm`
+            # command_status, int, 4octet. Unused, Set to NULL.
+            # sequence_number, int, 4octet. The associated `deliver_sm_resp` PDU should echo the same sequence_number.
+
+            # BODY::
             # see section 4.6.1 of smpp v3.4 spec
             # we want to handle this pdu, bcoz we are expected to send back deliver_sm_resp
             # the body of this has the following params
@@ -722,7 +737,15 @@ class Client:
             # sm_default_msg_id, Int, 1 octet, must be set to NULL.
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
-            self.queue_deliver_sm_resp()
+            import pdb
+
+            pdb.set_trace()
+            # command_id_name, command_status, sequence_number, unparsed_pdu_body, total_pdu_length
+            print("hee")
+            print("hee")
+            print("hee")
+            # self.queue_deliver_sm_resp()
+            # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
