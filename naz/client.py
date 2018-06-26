@@ -49,7 +49,7 @@ class DefaultOutboundQueue(object):
         """
         self.queue = asyncio.Queue(maxsize=maxsize, loop=loop)
 
-    def enqueue(self, item):
+    async def enqueue(self, item):
         self.queue.put_nowait(item)
 
     async def dequeue(self):
@@ -370,6 +370,51 @@ class Client:
         self.logger.debug("tranceiver_bound")
         return full_pdu
 
+    async def enquire_link(self, correlation_id=None):
+        """
+        HEADER::
+        # enquire_link has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `enquire_link`
+        command_status, int, 4octet. Not used. Set to NULL
+        sequence_number, int, 4octet.
+
+        `enquire_link` has no body.
+        """
+        while True:
+            # body
+            body = b""
+
+            # header
+            command_length = 16 + len(body)  # 16 is for headers
+            command_id = self.command_ids["enquire_link"]
+            command_status = 0x00000000  # not used for `enquire_link`
+            sequence_number = self.sequence_generator.next_sequence()
+            if sequence_number > self.MAX_SEQUENCE_NUMBER:
+                # prevent third party sequence_generators from ruining our party
+                raise ValueError(
+                    "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
+                        sequence_number, self.MAX_SEQUENCE_NUMBER
+                    )
+                )
+            header = struct.pack(
+                ">IIII", command_length, command_id, command_status, sequence_number
+            )
+
+            full_pdu = header + body
+            item_to_enqueue = {
+                "correlation_id": correlation_id,
+                "pdu": full_pdu,
+                "event": "enquire_link",
+            }
+            await self.outboundqueue.enqueue(item_to_enqueue)
+            self.logger.debug(
+                "enquire_link_enqueued. correlation_id={0}. event=enquire_link".format(
+                    correlation_id
+                )
+            )
+            await asyncio.sleep(5)
+
     async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
         """
         HEADER::
@@ -459,9 +504,9 @@ class Client:
 
         full_pdu = header + body
         item_to_enqueue = {"correlation_id": correlation_id, "pdu": full_pdu, "event": "submit_sm"}
-        self.outboundqueue.enqueue(item_to_enqueue)
+        await self.outboundqueue.enqueue(item_to_enqueue)
         self.logger.debug(
-            "submit_sm_enqueued. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
+            "submit_sm_enqueued. event=submit_sm. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
                 correlation_id, source_addr, destination_addr
             )
         )
@@ -679,7 +724,7 @@ for i in range(0, 4):
 reader, writer = loop.run_until_complete(cli.connect())
 loop.run_until_complete(cli.tranceiver_bind())
 
-gathering = asyncio.gather(cli.send_forever(), cli.receive_data())
+gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
 loop.run_until_complete(gathering)
 
 loop.run_forever()
