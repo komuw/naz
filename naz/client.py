@@ -99,6 +99,7 @@ class Client:
         registered_delivery=0b00000101,  # see section 5.2.17
         replace_if_present_flag=0x00000000,
         sm_default_msg_id=0x00000000,
+        enquire_link_interval=90,
     ):
         """
         todo: add docs
@@ -159,6 +160,7 @@ class Client:
         self.registered_delivery = registered_delivery
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
+        self.enquire_link_interval = enquire_link_interval
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -413,7 +415,7 @@ class Client:
                     correlation_id
                 )
             )
-            await asyncio.sleep(5)
+            await asyncio.sleep(self.enquire_link_interval)
 
     async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
         """
