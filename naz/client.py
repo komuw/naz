@@ -372,6 +372,14 @@ class Client:
 
     async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
         """
+        HEADER::
+        # submit_sm has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `submit_sm`
+        command_status, int, 4octet. Not used. Set to NULL
+        sequence_number, int, 4octet.
+
+        BODY::
         # submit_sm has the following pdu body. They should be put in the body in the order presented here.
         # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
         # source_addr_ton, int , 1octet,
@@ -438,7 +446,7 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids["submit_sm"]
         # the status for success see section 5.1.3
-        command_status = self.command_statuses["ESME_ROK"].code
+        command_status = 0x00000000  # not used for `submit_sm`
         sequence_number = self.sequence_generator.next_sequence()
         if sequence_number > self.MAX_SEQUENCE_NUMBER:
             # prevent third party sequence_generators from ruining our party
