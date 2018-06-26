@@ -520,9 +520,15 @@ class Client:
         """
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
+        log_msg = ""
+        try:
+            log_msg = self.codec_class.decode(msg, self.encoding)
+        except Exception:
+            pass
+
         self.logger.debug(
             "data_sending. event={0}. msg={1}. correlation_id={2}".format(
-                event, self.codec_class.decode(msg, self.encoding), correlation_id
+                event, log_msg, correlation_id
             )
         )
         if isinstance(msg, str):
@@ -531,7 +537,7 @@ class Client:
         await self.writer.drain()
         self.logger.debug(
             "data_sent. event={0}. msg={1}. correlation_id={2}".format(
-                event, self.codec_class.decode(msg, self.encoding), correlation_id
+                event, log_msg, correlation_id
             )
         )
 
