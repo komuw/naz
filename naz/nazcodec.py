@@ -65,7 +65,7 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, unicode_string, errors="strict"):
+    def encode(self, string_to_encode, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         eg:
@@ -76,7 +76,7 @@ class GSM7BitCodec(codecs.Codec):
             xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'
         """
         result = []
-        for position, c in enumerate(unicode_string):
+        for position, c in enumerate(string_to_encode):
             idx = self.gsm_basic_charset_map.get(c)
             if idx is not None:
                 result.append(chr(idx))
@@ -85,7 +85,7 @@ class GSM7BitCodec(codecs.Codec):
             if idx is not None:
                 result.append(chr(27) + chr(idx))
             else:
-                result.append(self.handle_encode_error(c, errors, position, unicode_string))
+                result.append(self.handle_encode_error(c, errors, position, string_to_encode))
 
         obj = "".join(result)
         # this is equivalent to;
@@ -180,7 +180,7 @@ class NazCodec(object):
     def __init__(self, errors="strict"):
         self.errors = errors
 
-    def encode(self, unicode_string, encoding=None, errors=None):
+    def encode(self, string_to_encode, encoding=None, errors=None):
         """
         you should call encode on a string. ie in python3 we write;
           'sss'.encode() # b'sss'
@@ -188,14 +188,14 @@ class NazCodec(object):
         if not errors:
             errors = self.errors
 
-        if not isinstance(unicode_string, str):
-            raise NazCodecException("Only Unicode strings accepted for encoding.")
+        if not isinstance(string_to_encode, str):
+            raise NazCodecException("Only strings accepted for encoding.")
         encoding = encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        obj, length = encoder(unicode_string, errors)
+        obj, length = encoder(string_to_encode, errors)
         return obj
 
     def decode(self, byte_string, encoding=None, errors=None):
