@@ -13,6 +13,10 @@ import nazcodec
 # 4. propagate correlation_id, and pdu event to all/most log events
 # 5. allow user's hooks. we should correlate user's supplied correlation_id and sequence_number
 #    users should be able to supply a class/interface/func?? that gets called for various events, eg; everytime SMSC sends us a `delivery_sm` or `submit_sm_resp` etc
+# 6. add tests
+# 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
+#    even better if we can find a hosted SMSC provider with a free tier to test against.
+# 8. run end-to-end integration tests in ci.
 
 
 class DefaultSequenceGenerator(object):
