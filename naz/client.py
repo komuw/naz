@@ -417,6 +417,40 @@ class Client:
             )
             await asyncio.sleep(self.enquire_link_interval)
 
+    async def enquire_link_resp(self, sequence_number, correlation_id=None):
+        """
+        HEADER::
+        # enquire_link_resp has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `enquire_link_resp`
+        command_status, int, 4octet. ESME_ROK (Success)
+        sequence_number, int, 4octet. Set to the same sequence number of original `enquire_link` PDU
+
+        `enquire_link_resp` has no body.
+        """
+        # body
+        body = b""
+
+        # header
+        command_length = 16 + len(body)  # 16 is for headers
+        command_id = self.command_ids["enquire_link_resp"]
+        command_status = self.command_statuses["ESME_ROK"].code
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        item_to_enqueue = {
+            "correlation_id": correlation_id,
+            "pdu": full_pdu,
+            "event": "enquire_link_resp",
+        }
+        await self.outboundqueue.enqueue(item_to_enqueue)
+        self.logger.debug(
+            "enquire_link_resp_enqueued. correlation_id={0}. event=enquire_link_resp".format(
+                correlation_id
+            )
+        )
+
     async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
         """
         HEADER::
@@ -693,8 +727,7 @@ class Client:
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
-            self.queue_enquire_link_resp()
-            pass
+            self.enquire_link_resp(sequence_number=sequence_number)
         else:
             self.logger.error(
                 "unknown_command. command_id={0}. sequence_number={1}. error_code={2}. error_description={3}".format(
