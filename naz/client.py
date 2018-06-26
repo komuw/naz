@@ -10,6 +10,7 @@ import nazcodec
 # 1. add configurable retries
 # 2. add configurable rate limits. our rate limits should be tight
 # 3. metrics, what is happening
+# 4. propagate correlation_id, and pdu event to all/most log events
 
 
 class DefaultSequenceGenerator(object):
@@ -365,7 +366,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        await self.send_data(full_pdu)
+        await self.send_data("bind_transceiver", full_pdu)
         self.logger.debug("tranceiver_bound")
         return full_pdu
 
@@ -449,27 +450,35 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        item_to_enqueue = {"correlation_id": correlation_id, "pdu": full_pdu}
+        item_to_enqueue = {"correlation_id": correlation_id, "pdu": full_pdu, "event": "submit_sm"}
         self.outboundqueue.enqueue(item_to_enqueue)
         self.logger.debug(
-            "submit_sm_enqueued. correlation_id={0}. destination_addr={1}".format(
-                correlation_id, destination_addr
+            "submit_sm_enqueued. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
+                correlation_id, source_addr, destination_addr
             )
         )
 
-    async def send_data(self, msg):
+    async def send_data(self, event, msg, correlation_id=None):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
         """
-        self.logger.debug("data_sending")
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
+        self.logger.debug(
+            "data_sending. event={0}. msg={1}. correlation_id={2}".format(
+                event, self.codec_class.decode(msg, self.encoding), correlation_id
+            )
+        )
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding)
         self.writer.write(msg)
         await self.writer.drain()
-        self.logger.debug("data_sent")
+        self.logger.debug(
+            "data_sent. event={0}. msg={1}. correlation_id={2}".format(
+                event, self.codec_class.decode(msg, self.encoding), correlation_id
+            )
+        )
 
     async def send_forever(self):
         # todo: check sending rate and sleep if you are near limits
@@ -477,9 +486,10 @@ class Client:
             self.logger.debug("send_forever")
             item_to_dequeue = await self.outboundqueue.dequeue()
             correlation_id = item_to_dequeue["correlation_id"]
+            event = item_to_dequeue["event"]
             full_pdu = item_to_dequeue["pdu"]
-            await self.send_data(full_pdu)
-            self.logger.debug("sent_forever. correlation_id={0}".format(correlation_id))
+            await self.send_data(event, full_pdu, correlation_id)
+            self.logger.debug("sent_forever.")
 
     async def receive_data(self):
         """
@@ -506,13 +516,13 @@ class Client:
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
-            await self.parse_pdu(full_pdu_data)
+            await self.parse_response_pdu(full_pdu_data)
             self.logger.debug("data_received")
 
-    async def parse_pdu(self, pdu):
+    async def parse_response_pdu(self, pdu):
         """
         """
-        self.logger.debug("pdu_parsing. pdu={0}".format(pdu))
+        self.logger.debug("response_pdu_parsing. pdu={0}".format(pdu))
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
         total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
@@ -527,7 +537,7 @@ class Client:
 
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
-            raise ValueError("the command_id: {0} is unknown.".format(command_id))
+            raise ValueError("command_id:{0} is unknown.".format(command_id))
         pdu_body = b""
         if total_pdu_length > 16:
             pdu_body = pdu[16:]
@@ -537,7 +547,7 @@ class Client:
             sequence_number=sequence_number,
             unparsed_pdu_body=pdu_body,
         )
-        self.logger.debug("pdu_parsed")
+        self.logger.debug("response_pdu_parsed")
 
     async def speficic_handlers(
         self, command_id_name, command_status, sequence_number, unparsed_pdu_body
@@ -650,7 +660,7 @@ for i in range(0, 4):
     print("submit_sm round:", i)
     loop.run_until_complete(
         cli.submit_sm(
-            msg="Hello World",
+            msg="Hello World-{0}".format(str(i)),
             correlation_id="myid12345",
             source_addr="254725000111",
             destination_addr="254725082545",
