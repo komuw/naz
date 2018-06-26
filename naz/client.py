@@ -158,7 +158,6 @@ class Client:
         self.registered_delivery = registered_delivery
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
-        self.data_coding = self.data_codings[self.encoding].code
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -293,6 +292,8 @@ class Client:
         }
         # also see:
         # https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260
+
+        self.data_coding = self.data_codings[self.encoding].code
 
         self.reader = None
         self.writer = None
