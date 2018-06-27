@@ -49,8 +49,8 @@ for i in range(0, 4):
         cli.submit_sm(
             msg="Hello World-{0}".format(str(i)),
             correlation_id="myid12345",
-            source_addr="254725000111",
-            destination_addr="254725082545",
+            source_addr="254722111111",
+            destination_addr="254722999999",
         )
     )
 
