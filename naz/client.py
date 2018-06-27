@@ -27,6 +27,7 @@ class RateLimiter:
     """
     simple implementation of a token bucket rate limiting algo.
     https://en.wikipedia.org/wiki/Token_bucket
+    todo: check that the algo actually works.
 
     Usage:
         rateLimiter = RateLimiter(SEND_RATE=10, MAX_TOKENS=25)
@@ -34,18 +35,33 @@ class RateLimiter:
         send_messsages()
     """
 
-    def __init__(self, SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1):
+    def __init__(self, SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1, logger=None):
         self.SEND_RATE = SEND_RATE  # rate in seconds
         self.MAX_TOKENS = MAX_TOKENS  # start tokens
         self.DELAY_FOR_TOKENS = (
             DELAY_FOR_TOKENS
         )  # how long(seconds) to wait before checking for token availability after they had finished
 
+        self.logger = logger
+        if not self.logger:
+            self.logger = logging.getLogger()
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            if not self.logger.handlers:
+                self.logger.addHandler(handler)
+            self.logger.setLevel("DEBUG")
+
         self.tokens = self.MAX_TOKENS
         self.updated_at = time.monotonic()
 
     async def wait_for_token(self):
         while self.tokens < 1:
+            self.logger.info(
+                "rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}".format(
+                    self.SEND_RATE, self.DELAY_FOR_TOKENS
+                )
+            )
             self.add_new_tokens()
             # todo: sleep in an exponetial manner upto a maximum then wrap around.
             await asyncio.sleep(self.DELAY_FOR_TOKENS)
@@ -215,7 +231,7 @@ class Client:
         self.enquire_link_interval = enquire_link_interval
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
-            self.rateLimiter = RateLimiter(SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1)
+            self.rateLimiter = RateLimiter(SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1)
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -664,7 +680,7 @@ class Client:
         # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
-            # rate limit our selves
+            # rate limit ourselves
             await self.rateLimiter.wait_for_token()
 
             item_to_dequeue = await self.outboundqueue.dequeue()
@@ -843,6 +859,7 @@ class Client:
 
 
 #  SAMPLE USAGE #######
+rLimiter = RateLimiter(SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=8)
 loop = asyncio.get_event_loop()
 cli = Client(
     async_loop=loop,
@@ -850,6 +867,7 @@ cli = Client(
     SMSC_PORT=2775,
     system_id="smppclient1",
     password="password",
+    rateLimiter=rLimiter,
 )
 
 # `enquire_link`` pdu works. If you comment out this submit_sm request everything works.
