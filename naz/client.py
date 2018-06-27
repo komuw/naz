@@ -467,11 +467,13 @@ class Client:
         sequence_number, int, 4octet.  The associated submit_sm_resp PDU will echo this sequence number.
 
         BODY::
-        # submit_sm has the following pdu body. They should be put in the body in the order presented here.
+        # submit_sm has the following pdu body. NB: They SHOULD be put in the body in the ORDER presented here.
         # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
         # source_addr_ton, int , 1octet,
         # source_addr_npi, int, 1octet
         # source_addr, c-octet str, max 21octet. eg; This is usually the senders phone Number
+        # dest_addr_ton, int, 1octet
+        # dest_addr_npi, int, 1octet
         # destination_addr,  C-Octet String, max 21 octet. eg; This is usually the recipients phone Number
         # esm_class, int, 1octet
         # protocol_id, int, 1octet
@@ -508,10 +510,10 @@ class Client:
             + chr(0).encode("latin-1")
             + struct.pack(">I", self.source_addr_ton)
             + struct.pack(">I", self.source_addr_npi)
-            + struct.pack(">I", self.dest_addr_ton)
-            + struct.pack(">I", self.dest_addr_npi)
             + self.codec_class.encode(source_addr, self.encoding)
             + chr(0).encode("latin-1")
+            + struct.pack(">I", self.dest_addr_ton)
+            + struct.pack(">I", self.dest_addr_npi)
             + self.codec_class.encode(destination_addr, self.encoding)
             + chr(0).encode("latin-1")
             + struct.pack(">I", self.esm_class)
