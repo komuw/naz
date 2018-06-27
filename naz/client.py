@@ -18,6 +18,8 @@ import nazcodec
 # 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
 #    even better if we can find a hosted SMSC provider with a free tier to test against.
 # 8. run end-to-end integration tests in ci.
+# 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
+#    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
 
 
 class DefaultSequenceGenerator(object):
