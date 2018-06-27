@@ -415,17 +415,8 @@ class Client:
             )
 
             full_pdu = header + body
-            item_to_enqueue = {
-                "correlation_id": correlation_id,
-                "pdu": full_pdu,
-                "event": "enquire_link",
-            }
-            await self.outboundqueue.enqueue(item_to_enqueue)
-            self.logger.debug(
-                "enquire_link_enqueued. correlation_id={0}. event=enquire_link".format(
-                    correlation_id
-                )
-            )
+            # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+            await self.send_data("enquire_link", full_pdu)
             await asyncio.sleep(self.enquire_link_interval)
 
     async def enquire_link_resp(self, sequence_number, correlation_id=None):
