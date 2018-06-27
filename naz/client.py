@@ -12,7 +12,8 @@ import nazcodec
 # 3. metrics, what is happening
 # 4. propagate correlation_id, and pdu event to all/most log events
 # 5. allow user's hooks. we should correlate user's supplied correlation_id and sequence_number
-#    users should be able to supply a class/interface/func?? that gets called for various events, eg; everytime SMSC sends us a `delivery_sm` or `submit_sm_resp` etc
+#    users should be able to supply a class/interface/func?? that gets called for various events,
+#    eg; everytime SMSC sends us a `delivery_sm` or `submit_sm_resp` etc
 # 6. add tests
 # 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
 #    even better if we can find a hosted SMSC provider with a free tier to test against.
@@ -457,6 +458,43 @@ class Client:
             )
         )
 
+    async def deliver_sm_resp(self, sequence_number, correlation_id=None):
+        """
+        HEADER::
+        # deliver_sm_resp has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `deliver_sm_resp`
+        command_status, int, 4octet. Indicates outcome of deliver_sm request, eg. ESME_ROK (Success)
+        sequence_number, int, 4octet.  Set to the same sequence_number of `deliver_sm` PDU.
+
+        BODY::
+        message_id, c-octet String, 1octet. This field is unused and is set to NULL.
+        """
+        # body
+        body = b""
+        message_id = ""
+        body = body + self.codec_class.encode(message_id, self.encoding) + chr(0).encode("latin-1")
+
+        # header
+        command_length = 16 + len(body)  # 16 is for headers
+        command_id = self.command_ids["deliver_sm_resp"]
+        command_status = self.command_statuses["ESME_ROK"].code
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        item_to_enqueue = {
+            "correlation_id": correlation_id,
+            "pdu": full_pdu,
+            "event": "deliver_sm_resp",
+        }
+        await self.outboundqueue.enqueue(item_to_enqueue)
+        self.logger.debug(
+            "deliver_sm_resp_enqueued. correlation_id={0}. event=deliver_sm_resp".format(
+                correlation_id
+            )
+        )
+
     async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
         """
         HEADER::
@@ -743,16 +781,9 @@ class Client:
             # sm_default_msg_id, Int, 1 octet, must be set to NULL.
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
-            import pdb
 
-            pdb.set_trace()
-            # command_id_name, command_status, sequence_number, unparsed_pdu_body, total_pdu_length
-            print("hee")
-            print("hee")
-            print("hee")
-            # self.queue_deliver_sm_resp()
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
-            pass
+            self.deliver_sm_resp(sequence_number=sequence_number)
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
@@ -769,7 +800,7 @@ class Client:
         pass
 
 
-##### SAMPLE USAGE #######
+#  SAMPLE USAGE #######
 loop = asyncio.get_event_loop()
 cli = Client(
     async_loop=loop,
