@@ -18,6 +18,8 @@ import nazcodec
 # 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
 #    even better if we can find a hosted SMSC provider with a free tier to test against.
 # 8. run end-to-end integration tests in ci.
+# 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
+#    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
 
 
 class DefaultSequenceGenerator(object):
@@ -415,17 +417,8 @@ class Client:
             )
 
             full_pdu = header + body
-            item_to_enqueue = {
-                "correlation_id": correlation_id,
-                "pdu": full_pdu,
-                "event": "enquire_link",
-            }
-            await self.outboundqueue.enqueue(item_to_enqueue)
-            self.logger.debug(
-                "enquire_link_enqueued. correlation_id={0}. event=enquire_link".format(
-                    correlation_id
-                )
-            )
+            # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+            await self.send_data("enquire_link", full_pdu)
             await asyncio.sleep(self.enquire_link_interval)
 
     async def enquire_link_resp(self, sequence_number, correlation_id=None):
