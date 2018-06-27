@@ -143,7 +143,9 @@ class Client:
         self.outboundqueue = outboundqueue
         self.max_outboundqueue_size = max_outboundqueue_size
         if not self.outboundqueue:
-            self.outboundqueue = DefaultOutboundQueue(maxsize=self.max_outboundqueue_size, loop=self.async_loop)
+            self.outboundqueue = DefaultOutboundQueue(
+                maxsize=self.max_outboundqueue_size, loop=self.async_loop
+            )
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
