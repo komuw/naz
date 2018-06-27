@@ -1,3 +1,4 @@
+import time
 import struct
 import asyncio
 import logging
@@ -18,6 +19,61 @@ import nazcodec
 # 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
 #    even better if we can find a hosted SMSC provider with a free tier to test against.
 # 8. run end-to-end integration tests in ci.
+# 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
+#    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
+
+
+class RateLimiter:
+    """
+    simple implementation of a token bucket rate limiting algo.
+    https://en.wikipedia.org/wiki/Token_bucket
+    todo: check that the algo actually works.
+
+    Usage:
+        rateLimiter = RateLimiter(SEND_RATE=10, MAX_TOKENS=25)
+        await rateLimiter.wait_for_token()
+        send_messsages()
+    """
+
+    def __init__(self, SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1, logger=None):
+        self.SEND_RATE = SEND_RATE  # rate in seconds
+        self.MAX_TOKENS = MAX_TOKENS  # start tokens
+        self.DELAY_FOR_TOKENS = (
+            DELAY_FOR_TOKENS
+        )  # how long(seconds) to wait before checking for token availability after they had finished
+
+        self.logger = logger
+        if not self.logger:
+            self.logger = logging.getLogger()
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            if not self.logger.handlers:
+                self.logger.addHandler(handler)
+            self.logger.setLevel("DEBUG")
+
+        self.tokens = self.MAX_TOKENS
+        self.updated_at = time.monotonic()
+
+    async def wait_for_token(self):
+        while self.tokens < 1:
+            self.logger.info(
+                "rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}".format(
+                    self.SEND_RATE, self.DELAY_FOR_TOKENS
+                )
+            )
+            self.add_new_tokens()
+            # todo: sleep in an exponetial manner upto a maximum then wrap around.
+            await asyncio.sleep(self.DELAY_FOR_TOKENS)
+        self.tokens -= 1
+
+    def add_new_tokens(self):
+        now = time.monotonic()
+        time_since_update = now - self.updated_at
+        new_tokens = time_since_update * self.SEND_RATE
+        if new_tokens > 1:
+            self.tokens = min(self.tokens + new_tokens, self.MAX_TOKENS)
+            self.updated_at = now
 
 
 class DefaultSequenceGenerator(object):
@@ -108,6 +164,7 @@ class Client:
         replace_if_present_flag=0x00000000,
         sm_default_msg_id=0x00000000,
         enquire_link_interval=90,
+        rateLimiter=None,
     ):
         """
         todo: add docs
@@ -143,7 +200,9 @@ class Client:
         self.outboundqueue = outboundqueue
         self.max_outboundqueue_size = max_outboundqueue_size
         if not self.outboundqueue:
-            self.outboundqueue = DefaultOutboundQueue(maxsize=self.max_outboundqueue_size, loop=self.async_loop)
+            self.outboundqueue = DefaultOutboundQueue(
+                maxsize=self.max_outboundqueue_size, loop=self.async_loop
+            )
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
@@ -170,6 +229,9 @@ class Client:
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
         self.enquire_link_interval = enquire_link_interval
+        self.rateLimiter = rateLimiter
+        if not self.rateLimiter:
+            self.rateLimiter = RateLimiter(SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1)
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -413,17 +475,8 @@ class Client:
             )
 
             full_pdu = header + body
-            item_to_enqueue = {
-                "correlation_id": correlation_id,
-                "pdu": full_pdu,
-                "event": "enquire_link",
-            }
-            await self.outboundqueue.enqueue(item_to_enqueue)
-            self.logger.debug(
-                "enquire_link_enqueued. correlation_id={0}. event=enquire_link".format(
-                    correlation_id
-                )
-            )
+            # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+            await self.send_data("enquire_link", full_pdu)
             await asyncio.sleep(self.enquire_link_interval)
 
     async def enquire_link_resp(self, sequence_number, correlation_id=None):
@@ -627,6 +680,9 @@ class Client:
         # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
+            # rate limit ourselves
+            await self.rateLimiter.wait_for_token()
+
             item_to_dequeue = await self.outboundqueue.dequeue()
             correlation_id = item_to_dequeue["correlation_id"]
             event = item_to_dequeue["event"]
@@ -803,6 +859,7 @@ class Client:
 
 
 #  SAMPLE USAGE #######
+rLimiter = RateLimiter(SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=8)
 loop = asyncio.get_event_loop()
 cli = Client(
     async_loop=loop,
@@ -810,6 +867,7 @@ cli = Client(
     SMSC_PORT=2775,
     system_id="smppclient1",
     password="password",
+    rateLimiter=rLimiter,
 )
 
 # `enquire_link`` pdu works. If you comment out this submit_sm request everything works.
