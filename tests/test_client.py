@@ -94,3 +94,23 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
             self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "bind_transceiver")
+        # todo: test bind_response
+
+    def test_submit_sm_enqueue(self):
+        with mock.patch("naz.q.DefaultOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+            reader, writer = self._run(self.cli.connect())
+            self._run(self.cli.tranceiver_bind())
+            correlation_id = "12345"
+            self._run(
+                self.cli.submit_sm(
+                    msg="hello smpp",
+                    correlation_id=correlation_id,
+                    source_addr="9090",
+                    destination_addr="254722000111",
+                )
+            )
+            self.assertTrue(mock_naz_enqueue.mock.called)
+            self.assertEqual(
+                mock_naz_enqueue.mock.call_args[0][1]["correlation_id"], correlation_id
+            )
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "submit_sm")
