@@ -69,7 +69,7 @@ class TestClient(TestCase):
 
     def test_bad_instantiation(self):
         def mock_create_client():
-            cli = naz.Client(
+            naz.Client(
                 async_loop=self.loop,
                 SMSC_HOST="127.0.0.1",
                 SMSC_PORT=2775,
@@ -129,3 +129,57 @@ class TestClient(TestCase):
             self._run(self.cli.send_forever(TESTING=True))
 
             self.assertTrue(mock_naz_dequeue.mock.called)
+
+    def test_parse_response_pdu(self):
+        with mock.patch(
+            "naz.Client.speficic_handlers", new=AsyncMock()
+        ) as mock_naz_speficic_handlers:
+            self._run(
+                self.cli.parse_response_pdu(
+                    pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
+                )
+            )
+
+            self.assertTrue(mock_naz_speficic_handlers.mock.called)
+            self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+            self.assertEqual(
+                mock_naz_speficic_handlers.mock.call_args[1]["command_id_name"],
+                "bind_transceiver_resp",
+            )
+
+    def test_speficic_handlers(self):
+        with mock.patch(
+            "naz.Client.enquire_link_resp", new=AsyncMock()
+        ) as mock_naz_enquire_link_resp:
+            sequence_number = 3
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="enquire_link",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_naz_enquire_link_resp.mock.called)
+            self.assertEqual(
+                mock_naz_enquire_link_resp.mock.call_args[1]["sequence_number"], sequence_number
+            )
+
+    def test_speficic_handlers_unbind(self):
+        with mock.patch("naz.Client.unbind_resp", new=AsyncMock()) as mock_naz_unbind_resp:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="unbind",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+
+            self.assertTrue(mock_naz_unbind_resp.mock.called)
+            self.assertEqual(
+                mock_naz_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
+            )

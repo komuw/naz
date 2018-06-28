@@ -2,21 +2,15 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
-
-jobs:
-  build:
-    machine: true
 version: 2
 jobs:
   build:
     machine: true
-      # # specify the version you desire here
-      # # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
+      # TODO: move back to docker exceutor type.
+      # but currently we are limited by; https://circleci.com/docs/2.0/building-docker-images/#accessing-services
+      # specify the version you desire here
+      # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
       # - image: circleci/python:3.6
-      # # Specify service dependencies here if necessary
-      # # CircleCI maintains a library of pre-built images
-      # # documented at https://circleci.com/docs/2.0/circleci-images/
-      # # - image: circleci/postgres:9.4
 
     working_directory: ~/repo
 
@@ -27,7 +21,12 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            sudo apt-get -y install pandoc && sudo pip install -e .[dev,test]
+            cd /opt/circleci/.pyenv/plugins/python-build/../.. && git pull && cd -
+            cd ~/repo
+            pyenv install 3.6.5
+            pyenv global 3.6.5
+            sudo apt -y update; sudo apt-get -y install pandoc curl #&& sudo pip install -e .[dev,test]
+            pip install coverage pypandoc twine wheel flake8==3.5.0 mock pylint==1.8.2 pycodestyle==2.3.1 black docker==3.4.0
 
       # run tests!
       - run:
