@@ -17,11 +17,11 @@ uploadprod:
 	@pip install -U naz
 
 # you can run single testcase as;
-# python -m unittest naz.tests.test_Client.TestClient.test_something
+# python -m unittest -v tests.test_client.TestClient.test_can_connect
 test:
-	@printf "\n removing pyc files::\n" && find . -type f -name *.pyc -delete | echo
+	@printf "\n removing pyc files::\n" && find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
 	@printf "\n coverage erase::\n" && coverage erase
-	@printf "\n coverage run::\n" && coverage run --omit="*tests*,*.virtualenvs/*,*.venv/*,*__init__*,*/usr/local/lib/python2.7/dist-packages*" -m unittest discover
+	@printf "\n coverage run::\n" && coverage run --omit="*tests*,*.virtualenvs/*,*.venv/*,*__init__*" -m unittest discover -v -s .
 	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=85
 	@printf "\n run flake8::\n" && flake8 .
-	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y naz/
+	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/

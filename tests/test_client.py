@@ -11,8 +11,10 @@ import docker
 
 class TestClient(TestCase):
     """
-    NB: for most of this tests to run, the smpp-simluator needs to be running.
-        You can run the simluator via; docker-compose run
+    run tests as:
+        python -m unittest discover -v -s .
+    run one testcase as:
+        python -m unittest -v tests.test_client.TestClient.test_can_connect
     """
 
     def setUp(self):
