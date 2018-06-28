@@ -171,9 +171,11 @@ class Client:
             "ESME_RBINDFAIL": CommandStatus(0x0000000D, "Bind Failed"),
             "ESME_RINVPASWD": CommandStatus(0x0000000E, "Invalid Password"),
             "ESME_RINVSYSID": CommandStatus(0x0000000F, "Invalid System ID"),
-            "Reserved": CommandStatus(0x00000010, "Reserved"),
+            "REserved": CommandStatus(
+                0x00000010, "Reserved"
+            ),  # key has different capitalization to avoid clash
             "ESME_RCANCELFAIL": CommandStatus(0x00000011, "Cancel SM Failed"),
-            "Reserved": CommandStatus(0x00000012, "Reserved"),
+            "ReServed": CommandStatus(0x00000012, "Reserved"),
             "ESME_RREPLACEFAIL": CommandStatus(0x00000013, "Replace SM Failed"),
             "ESME_RMSGQFUL": CommandStatus(0x00000014, "Message Queue Full"),
             "ESME_RINVSERTYP": CommandStatus(0x00000015, "Invalid Service Type"),
@@ -184,7 +186,7 @@ class Client:
             "ESME_RINVDESTFLAG": CommandStatus(
                 0x00000040, "Destination flag is invalid (submit_multi)"
             ),
-            "Reserved": CommandStatus(0x00000041, "Reserved"),
+            "ResErved": CommandStatus(0x00000041, "Reserved"),
             "ESME_RINVSUBREP": CommandStatus(
                 0x00000042,
                 "Invalid (submit with replace) request(i.e. submit_sm with replace_if_present_flag set)",
@@ -197,7 +199,7 @@ class Client:
             "ESME_RINVSRCNPI": CommandStatus(0x00000049, "Invalid Source address NPI"),
             "ESME_RINVDSTTON": CommandStatus(0x00000050, "Invalid Destination address TON"),
             "ESME_RINVDSTNPI": CommandStatus(0x00000051, "Invalid Destination address NPI"),
-            "Reserved": CommandStatus(0x00000052, "Reserved"),
+            "ReseRved": CommandStatus(0x00000052, "Reserved"),
             "ESME_RINVSYSTYP": CommandStatus(0x00000053, "Invalid system_type field"),
             "ESME_RINVREPFLAG": CommandStatus(0x00000054, "Invalid replace_if_present flag"),
             "ESME_RINVNUMMSGS": CommandStatus(0x00000055, "Invalid number of messages"),

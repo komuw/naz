@@ -69,7 +69,7 @@ class TestClient(TestCase):
 
     def test_bad_instantiation(self):
         def mock_create_client():
-            cli = naz.Client(
+            naz.Client(
                 async_loop=self.loop,
                 SMSC_HOST="127.0.0.1",
                 SMSC_PORT=2775,
