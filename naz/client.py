@@ -417,6 +417,31 @@ class Client:
             )
         )
 
+    async def unbind_resp(self, sequence_number, correlation_id=None):
+        """
+        HEADER::
+        # unbind_resp has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `unbind_resp`
+        command_status, int, 4octet. Indicates outcome of original unbind request, eg ESME_ROK (Success)
+        sequence_number, int, 4octet. Set to the same sequence number of original `unbind` PDU
+
+        `unbind_resp` has no body.
+        """
+        # body
+        body = b""
+
+        # header
+        command_length = 16 + len(body)  # 16 is for headers
+        command_id = self.command_ids["unbind_resp"]
+        command_status = self.command_statuses["ESME_ROK"].code
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        # dont queue unbind_resp in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        await self.send_data("unbind_resp", full_pdu)
+
     async def deliver_sm_resp(self, sequence_number, correlation_id=None):
         """
         HEADER::
@@ -706,7 +731,7 @@ class Client:
         elif command_id_name == "unbind":
             # we need to handle this since we need to send unbind_resp
             # it has no body
-            self.queue_unbind_resp()
+            await self.unbind_resp(sequence_number=sequence_number)
         elif command_id_name == "submit_sm_resp":
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.

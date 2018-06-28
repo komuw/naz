@@ -167,9 +167,7 @@ class TestClient(TestCase):
             )
 
     def test_speficic_handlers_unbind(self):
-        with mock.patch(
-            "naz.Client.queue_unbind_resp", new=AsyncMock()
-        ) as mock_naz_queue_unbind_resp:
+        with mock.patch("naz.Client.unbind_resp", new=AsyncMock()) as mock_naz_unbind_resp:
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
@@ -180,7 +178,8 @@ class TestClient(TestCase):
                     total_pdu_length=16,
                 )
             )
-            self.assertTrue(mock_naz_queue_unbind_resp.mock.called)
+
+            self.assertTrue(mock_naz_unbind_resp.mock.called)
             self.assertEqual(
-                mock_naz_queue_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
+                mock_naz_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
             )
