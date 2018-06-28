@@ -165,3 +165,22 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_naz_enquire_link_resp.mock.call_args[1]["sequence_number"], sequence_number
             )
+
+    def test_speficic_handlers_unbind(self):
+        with mock.patch(
+            "naz.Client.queue_unbind_resp", new=AsyncMock()
+        ) as mock_naz_queue_unbind_resp:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="unbind",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_naz_queue_unbind_resp.mock.called)
+            self.assertEqual(
+                mock_naz_queue_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
+            )
