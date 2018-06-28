@@ -751,7 +751,7 @@ class Client:
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
-            self.enquire_link_resp(sequence_number=sequence_number)
+            await self.enquire_link_resp(sequence_number=sequence_number)
         else:
             self.logger.error(
                 "unknown_command. command_id={0}. sequence_number={1}. error_code={2}. error_description={3}".format(
