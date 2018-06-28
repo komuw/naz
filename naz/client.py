@@ -1,10 +1,12 @@
-import time
 import struct
 import asyncio
 import logging
 import collections
 
+import q
 import nazcodec
+import sequence
+import ratelimiter
 
 
 # todo:
@@ -21,102 +23,6 @@ import nazcodec
 # 8. run end-to-end integration tests in ci.
 # 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
 #    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
-
-
-class RateLimiter:
-    """
-    simple implementation of a token bucket rate limiting algo.
-    https://en.wikipedia.org/wiki/Token_bucket
-    todo: check that the algo actually works.
-
-    Usage:
-        rateLimiter = RateLimiter(SEND_RATE=10, MAX_TOKENS=25)
-        await rateLimiter.wait_for_token()
-        send_messsages()
-    """
-
-    def __init__(self, SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1, logger=None):
-        self.SEND_RATE = SEND_RATE  # rate in seconds
-        self.MAX_TOKENS = MAX_TOKENS  # start tokens
-        self.DELAY_FOR_TOKENS = (
-            DELAY_FOR_TOKENS
-        )  # how long(seconds) to wait before checking for token availability after they had finished
-
-        self.logger = logger
-        if not self.logger:
-            self.logger = logging.getLogger()
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(message)s")
-            handler.setFormatter(formatter)
-            if not self.logger.handlers:
-                self.logger.addHandler(handler)
-            self.logger.setLevel("DEBUG")
-
-        self.tokens = self.MAX_TOKENS
-        self.updated_at = time.monotonic()
-
-    async def wait_for_token(self):
-        while self.tokens < 1:
-            self.logger.info(
-                "rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}".format(
-                    self.SEND_RATE, self.DELAY_FOR_TOKENS
-                )
-            )
-            self.add_new_tokens()
-            # todo: sleep in an exponetial manner upto a maximum then wrap around.
-            await asyncio.sleep(self.DELAY_FOR_TOKENS)
-        self.tokens -= 1
-
-    def add_new_tokens(self):
-        now = time.monotonic()
-        time_since_update = now - self.updated_at
-        new_tokens = time_since_update * self.SEND_RATE
-        if new_tokens > 1:
-            self.tokens = min(self.tokens + new_tokens, self.MAX_TOKENS)
-            self.updated_at = now
-
-
-class DefaultSequenceGenerator(object):
-    """
-    sequence_number are 4 octets Integers which allows SMPP requests and responses to be correlated.
-    The sequence_number should increase monotonically.
-    And they ought to be in the range 0x00000001 to 0x7FFFFFFF
-    see section 3.2 of smpp ver 3.4 spec document.
-
-    You can supply your own sequence generator, so long as it respects the range defined in the SMPP spec.
-    """
-
-    MIN_SEQUENCE_NUMBER = 0x00000001
-    MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
-
-    def __init__(self):
-        self.sequence_number = self.MIN_SEQUENCE_NUMBER
-
-    def next_sequence(self):
-        if self.sequence_number == self.MAX_SEQUENCE_NUMBER:
-            # wrap around
-            self.sequence_number = self.MIN_SEQUENCE_NUMBER
-        else:
-            self.sequence_number += 1
-        return self.sequence_number
-
-
-class DefaultOutboundQueue(object):
-    """
-    this allows users to provide their own queue managers eg redis etc.
-    """
-
-    def __init__(self, maxsize, loop):
-        """
-        maxsize is the max number of items(not size) that can be put in the queue.
-        """
-        self.queue = asyncio.Queue(maxsize=maxsize, loop=loop)
-
-    async def enqueue(self, item):
-        self.queue.put_nowait(item)
-
-    async def dequeue(self):
-        return await self.queue.get()
 
 
 class Client:
@@ -138,7 +44,6 @@ class Client:
         interface_version=34,
         sequence_generator=None,
         outboundqueue=None,
-        max_outboundqueue_size=10000,
         LOG_LEVEL="DEBUG",
         log_metadata=None,
         codec_class=None,
@@ -196,13 +101,10 @@ class Client:
         self.encoding = encoding
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
-            self.sequence_generator = DefaultSequenceGenerator()
+            self.sequence_generator = sequence.DefaultSequenceGenerator()
         self.outboundqueue = outboundqueue
-        self.max_outboundqueue_size = max_outboundqueue_size
         if not self.outboundqueue:
-            self.outboundqueue = DefaultOutboundQueue(
-                maxsize=self.max_outboundqueue_size, loop=self.async_loop
-            )
+            self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
@@ -231,7 +133,9 @@ class Client:
         self.enquire_link_interval = enquire_link_interval
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
-            self.rateLimiter = RateLimiter(SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1)
+            self.rateLimiter = ratelimiter.RateLimiter(
+                SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1
+            )
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -859,7 +763,7 @@ class Client:
 
 
 #  SAMPLE USAGE #######
-rLimiter = RateLimiter(SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=8)
+rLimiter = ratelimiter.RateLimiter(SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=8)
 loop = asyncio.get_event_loop()
 cli = Client(
     async_loop=loop,
