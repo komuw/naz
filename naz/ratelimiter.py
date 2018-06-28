@@ -15,13 +15,16 @@ class RateLimiter:
         send_messsages()
     """
 
-    def __init__(self, SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1, logger=None):
+    def __init__(
+        self, SEND_RATE=10, MAX_TOKENS=25, DELAY_FOR_TOKENS=1, logger=None, LOG_LEVEL="DEBUG"
+    ):
         self.SEND_RATE = SEND_RATE  # rate in seconds
         self.MAX_TOKENS = MAX_TOKENS  # start tokens
         self.DELAY_FOR_TOKENS = (
             DELAY_FOR_TOKENS
         )  # how long(seconds) to wait before checking for token availability after they had finished
 
+        self.LOG_LEVEL = LOG_LEVEL
         self.logger = logger
         if not self.logger:
             self.logger = logging.getLogger()
@@ -30,7 +33,7 @@ class RateLimiter:
             handler.setFormatter(formatter)
             if not self.logger.handlers:
                 self.logger.addHandler(handler)
-            self.logger.setLevel("DEBUG")
+            self.logger.setLevel(self.LOG_LEVEL)
 
         self.tokens = self.MAX_TOKENS
         self.updated_at = time.monotonic()

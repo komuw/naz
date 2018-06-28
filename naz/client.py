@@ -4,6 +4,7 @@ import logging
 import collections
 
 from . import q
+from . import hooks
 from . import nazcodec
 from . import sequence
 from . import ratelimiter
@@ -23,6 +24,7 @@ from . import ratelimiter
 # 8. run end-to-end integration tests in ci.
 # 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
 #    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
+# 10. relate everything to a correlation_id
 
 
 class Client:
@@ -70,6 +72,7 @@ class Client:
         sm_default_msg_id=0x00000000,
         enquire_link_interval=90,
         rateLimiter=None,
+        hook=None,
     ):
         """
         todo: add docs
@@ -131,11 +134,6 @@ class Client:
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
         self.enquire_link_interval = enquire_link_interval
-        self.rateLimiter = rateLimiter
-        if not self.rateLimiter:
-            self.rateLimiter = ratelimiter.RateLimiter(
-                SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1
-            )
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -287,6 +285,19 @@ class Client:
             self.logger.addHandler(handler)
         self.logger.setLevel(self.LOG_LEVEL)
         self.logger = logging.LoggerAdapter(self.logger, extra_log_data)
+
+        self.rateLimiter = rateLimiter
+        if not self.rateLimiter:
+            self.rateLimiter = ratelimiter.RateLimiter(
+                SEND_RATE=1000,
+                MAX_TOKENS=250,
+                DELAY_FOR_TOKENS=1,
+                logger=self.logger,
+                LOG_LEVEL=self.LOG_LEVEL,
+            )
+        self.hook = hook
+        if not self.hook:
+            self.hook = hooks.DefaultHook(logger=self.logger, LOG_LEVEL=self.LOG_LEVEL)
 
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
@@ -599,6 +610,15 @@ class Client:
         )
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding)
+
+        # call user's hook for requests
+        try:
+            await self.hook.request(event=event, correlation_id=correlation_id)
+        except Exception as e:
+            self.logger.error(
+                "hook_error. hook_type=request. event={0}. error={1}".format(event, str(e))
+            )
+
         self.writer.write(msg)
         await self.writer.drain()
         self.logger.debug(
@@ -670,6 +690,19 @@ class Client:
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
             raise ValueError("command_id:{0} is unknown.".format(command_id))
+
+        # call user's hook for responses
+        try:
+            # todo: send correlation_id to response hook, when we are eventually able to relate
+            # everything to a correlation_id
+            await self.hook.response(event=command_id_name)
+        except Exception as e:
+            self.logger.error(
+                "hook_error. hook_type=response. event={0}. error={1}".format(
+                    command_id_name, str(e)
+                )
+            )
+
         pdu_body = b""
         if total_pdu_length > 16:
             pdu_body = pdu[16:]
