@@ -580,7 +580,7 @@ class Client:
             )
         )
 
-    async def send_forever(self):
+    async def send_forever(self, TESTING=False):
         # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
@@ -593,6 +593,8 @@ class Client:
             full_pdu = item_to_dequeue["pdu"]
             await self.send_data(event, full_pdu, correlation_id)
             self.logger.debug("sent_forever.")
+            if TESTING:
+                return item_to_dequeue
 
     async def receive_data(self):
         """
