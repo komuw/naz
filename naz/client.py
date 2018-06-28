@@ -44,7 +44,6 @@ class Client:
         interface_version=34,
         sequence_generator=None,
         outboundqueue=None,
-        max_outboundqueue_size=10000,
         LOG_LEVEL="DEBUG",
         log_metadata=None,
         codec_class=None,
@@ -104,11 +103,8 @@ class Client:
         if not self.sequence_generator:
             self.sequence_generator = sequence.DefaultSequenceGenerator()
         self.outboundqueue = outboundqueue
-        self.max_outboundqueue_size = max_outboundqueue_size
         if not self.outboundqueue:
-            self.outboundqueue = q.DefaultOutboundQueue(
-                maxsize=self.max_outboundqueue_size, loop=self.async_loop
-            )
+            self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
