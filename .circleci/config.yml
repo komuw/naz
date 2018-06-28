@@ -25,7 +25,8 @@ jobs:
             cd ~/repo
             pyenv install 3.6.5
             pyenv global 3.6.5
-            sudo apt -y update; sudo apt-get -y install pandoc curl && sudo pip install -e .[dev,test]
+            sudo apt -y update; sudo apt-get -y install pandoc curl #&& sudo pip install -e .[dev,test]
+            pip install coverage pypandoc twine wheel flake8==3.5.0 mock pylint==1.8.2 pycodestyle==2.3.1 black docker==3.4.0
 
       # run tests!
       - run:
