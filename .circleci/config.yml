@@ -23,8 +23,8 @@ jobs:
           command: |
             cd /opt/circleci/.pyenv/plugins/python-build/../.. && git pull && cd -
             cd ~/repo
-            pyenv install 3.7.0
-            pyenv global 3.7.0
+            pyenv install 3.6.5
+            pyenv global 3.6.5
             sudo apt -y update; sudo apt-get -y install pandoc curl && sudo pip install -e .[dev,test]
 
       # run tests!
