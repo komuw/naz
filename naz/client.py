@@ -3,7 +3,10 @@ import asyncio
 import logging
 import collections
 
+import q
 import nazcodec
+import sequence
+import ratelimiter
 
 
 # todo:
@@ -18,49 +21,8 @@ import nazcodec
 # 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
 #    even better if we can find a hosted SMSC provider with a free tier to test against.
 # 8. run end-to-end integration tests in ci.
-
-
-class DefaultSequenceGenerator(object):
-    """
-    sequence_number are 4 octets Integers which allows SMPP requests and responses to be correlated.
-    The sequence_number should increase monotonically.
-    And they ought to be in the range 0x00000001 to 0x7FFFFFFF
-    see section 3.2 of smpp ver 3.4 spec document.
-
-    You can supply your own sequence generator, so long as it respects the range defined in the SMPP spec.
-    """
-
-    MIN_SEQUENCE_NUMBER = 0x00000001
-    MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
-
-    def __init__(self):
-        self.sequence_number = self.MIN_SEQUENCE_NUMBER
-
-    def next_sequence(self):
-        if self.sequence_number == self.MAX_SEQUENCE_NUMBER:
-            # wrap around
-            self.sequence_number = self.MIN_SEQUENCE_NUMBER
-        else:
-            self.sequence_number += 1
-        return self.sequence_number
-
-
-class DefaultOutboundQueue(object):
-    """
-    this allows users to provide their own queue managers eg redis etc.
-    """
-
-    def __init__(self, maxsize, loop):
-        """
-        maxsize is the max number of items(not size) that can be put in the queue.
-        """
-        self.queue = asyncio.Queue(maxsize=maxsize, loop=loop)
-
-    async def enqueue(self, item):
-        self.queue.put_nowait(item)
-
-    async def dequeue(self):
-        return await self.queue.get()
+# 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
+#    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
 
 
 class Client:
@@ -82,7 +44,6 @@ class Client:
         interface_version=34,
         sequence_generator=None,
         outboundqueue=None,
-        max_outboundqueue_size=10000,
         LOG_LEVEL="DEBUG",
         log_metadata=None,
         codec_class=None,
@@ -108,6 +69,7 @@ class Client:
         replace_if_present_flag=0x00000000,
         sm_default_msg_id=0x00000000,
         enquire_link_interval=90,
+        rateLimiter=None,
     ):
         """
         todo: add docs
@@ -139,11 +101,10 @@ class Client:
         self.encoding = encoding
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
-            self.sequence_generator = DefaultSequenceGenerator()
+            self.sequence_generator = sequence.DefaultSequenceGenerator()
         self.outboundqueue = outboundqueue
-        self.max_outboundqueue_size = max_outboundqueue_size
         if not self.outboundqueue:
-            self.outboundqueue = DefaultOutboundQueue(maxsize=self.max_outboundqueue_size, loop=self.async_loop)
+            self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.LOG_LEVEL = LOG_LEVEL.upper()
@@ -170,6 +131,11 @@ class Client:
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
         self.enquire_link_interval = enquire_link_interval
+        self.rateLimiter = rateLimiter
+        if not self.rateLimiter:
+            self.rateLimiter = ratelimiter.RateLimiter(
+                SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1
+            )
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
@@ -413,17 +379,8 @@ class Client:
             )
 
             full_pdu = header + body
-            item_to_enqueue = {
-                "correlation_id": correlation_id,
-                "pdu": full_pdu,
-                "event": "enquire_link",
-            }
-            await self.outboundqueue.enqueue(item_to_enqueue)
-            self.logger.debug(
-                "enquire_link_enqueued. correlation_id={0}. event=enquire_link".format(
-                    correlation_id
-                )
-            )
+            # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+            await self.send_data("enquire_link", full_pdu)
             await asyncio.sleep(self.enquire_link_interval)
 
     async def enquire_link_resp(self, sequence_number, correlation_id=None):
@@ -627,6 +584,9 @@ class Client:
         # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
+            # rate limit ourselves
+            await self.rateLimiter.wait_for_token()
+
             item_to_dequeue = await self.outboundqueue.dequeue()
             correlation_id = item_to_dequeue["correlation_id"]
             event = item_to_dequeue["event"]
@@ -803,6 +763,7 @@ class Client:
 
 
 #  SAMPLE USAGE #######
+rLimiter = ratelimiter.RateLimiter(SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=8)
 loop = asyncio.get_event_loop()
 cli = Client(
     async_loop=loop,
@@ -810,18 +771,17 @@ cli = Client(
     SMSC_PORT=2775,
     system_id="smppclient1",
     password="password",
+    rateLimiter=rLimiter,
 )
 
-# `enquire_link`` pdu works. If you comment out this submit_sm request everything works.
-# `submit_sm` on the other hand is failing
 for i in range(0, 4):
     print("submit_sm round:", i)
     loop.run_until_complete(
         cli.submit_sm(
             msg="Hello World-{0}".format(str(i)),
             correlation_id="myid12345",
-            source_addr="254725000111",
-            destination_addr="254725082545",
+            source_addr="254722111111",
+            destination_addr="254722999999",
         )
     )
 
