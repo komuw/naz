@@ -9,6 +9,19 @@ import naz
 import docker
 
 
+def AsyncMock(*args, **kwargs):
+    """
+    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
+    """
+    m = mock.MagicMock(*args, **kwargs)
+
+    async def mock_coro(*args, **kwargs):
+        return m(*args, **kwargs)
+
+    mock_coro.mock = m
+    return mock_coro
+
+
 class TestClient(TestCase):
     """
     run tests as:
@@ -74,3 +87,10 @@ class TestClient(TestCase):
         reader, writer = self._run(self.cli.connect())
         self.assertTrue(hasattr(reader, "read"))
         self.assertTrue(hasattr(writer, "write"))
+
+    def test_can_bind(self):
+        with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self._run(self.cli.tranceiver_bind())
+            self.assertTrue(mock_naz_send_data.mock.called)
+            self.assertEqual(mock_naz_send_data.mock.call_count, 1)
+            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "bind_transceiver")
