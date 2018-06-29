@@ -1,6 +1,3 @@
-import logging
-
-
 class DefaultHook:
     """
     class with hook methods that are called before a request is sent to SMSC and
@@ -9,17 +6,8 @@ class DefaultHook:
     User's can provide their own hook classes
     """
 
-    def __init__(self, logger=None, LOG_LEVEL="DEBUG"):
-        self.LOG_LEVEL = LOG_LEVEL
+    def __init__(self, logger):
         self.logger = logger
-        if not self.logger:
-            self.logger = logging.getLogger()
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(message)s")
-            handler.setFormatter(formatter)
-            if not self.logger.handlers:
-                self.logger.addHandler(handler)
-            self.logger.setLevel(self.LOG_LEVEL)
 
     async def request(self, event, correlation_id=None):
         """

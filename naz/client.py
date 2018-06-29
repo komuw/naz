@@ -289,15 +289,11 @@ class Client:
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
             self.rateLimiter = ratelimiter.RateLimiter(
-                SEND_RATE=1000,
-                MAX_TOKENS=250,
-                DELAY_FOR_TOKENS=1,
-                logger=self.logger,
-                LOG_LEVEL=self.LOG_LEVEL,
+                SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1, logger=self.logger
             )
         self.hook = hook
         if not self.hook:
-            self.hook = hooks.DefaultHook(logger=self.logger, LOG_LEVEL=self.LOG_LEVEL)
+            self.hook = hooks.DefaultHook(logger=self.logger)
 
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
