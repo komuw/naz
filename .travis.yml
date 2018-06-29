@@ -10,8 +10,7 @@ install:
   - pwd; ls -lsha
   - pip install -e .[dev,test]
 
-#pip install coverage pypandoc twine wheel flake8==3.5.0 mock pylint==1.8.2 pycodestyle==2.3.1 black docker==3.4.0
-# command to run tests
+# run static analyzers, tests etc
 script:
   - export PYTHONASYNCIODEBUG='2'
   - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
