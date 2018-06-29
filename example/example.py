@@ -3,7 +3,6 @@ import asyncio
 import naz
 
 
-rLimiter = naz.ratelimiter.RateLimiter(SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=8)
 loop = asyncio.get_event_loop()
 cli = naz.Client(
     async_loop=loop,
@@ -11,7 +10,6 @@ cli = naz.Client(
     SMSC_PORT=2775,
     system_id="smppclient1",
     password="password",
-    rateLimiter=rLimiter,
 )
 
 for i in range(0, 4):
