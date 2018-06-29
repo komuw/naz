@@ -16,9 +16,6 @@ class DefaultHook:
         self.logger.debug(
             "request_hook_called. event={0}. correlation_id={1}".format(event, correlation_id)
         )
-        self.logger.debug(
-            "request_hook_called. event={0}. correlation_id={1}".format(event, correlation_id)
-        )
 
     async def response(self, event, correlation_id=None):
         """
