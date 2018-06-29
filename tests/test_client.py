@@ -1,6 +1,7 @@
 # do not to pollute the global namespace.
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
+import os
 import mock
 import asyncio
 from unittest import TestCase
@@ -64,8 +65,11 @@ class TestClient(TestCase):
         )
 
     def tearDown(self):
-        # self.smpp_simulator.remove()
-        pass
+        if os.environ.get("CI_ENVIRONMENT"):
+            print("\n\nrunning in CI env.\n")
+            self.smpp_simulator.remove(force=True)
+        else:
+            pass
 
     def _run(self, coro):
         """
@@ -132,7 +136,6 @@ class TestClient(TestCase):
                 "event": "submit_sm",
             }
             reader, writer = self._run(self.cli.connect())
-            self._run(self.cli.tranceiver_bind())
             self._run(self.cli.send_forever(TESTING=True))
 
             self.assertTrue(mock_naz_dequeue.mock.called)
