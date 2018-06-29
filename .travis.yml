@@ -1,0 +1,20 @@
+language: python
+python:
+  - "3.6"
+
+before_install:
+- apt-get -y update; apt-get -y install pandoc curl 
+
+install:
+  - pip install -e .[dev,test]
+
+#pip install coverage pypandoc twine wheel flake8==3.5.0 mock pylint==1.8.2 pycodestyle==2.3.1 black docker==3.4.0
+# command to run tests
+script:
+  - export PYTHONASYNCIODEBUG='2'
+  - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
+  - coverage erase
+  - coverage run --omit="*tests*,*.virtualenvs/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
+  - coverage report --show-missing --fail-under=85
+  - flake8 .
+  - pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/
