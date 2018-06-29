@@ -9,6 +9,12 @@ import naz
 import docker
 
 
+import sys
+import logging
+
+logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
+
+
 def AsyncMock(*args, **kwargs):
     """
     see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
@@ -58,7 +64,8 @@ class TestClient(TestCase):
         )
 
     def tearDown(self):
-        self.smpp_simulator.stop()
+        # self.smpp_simulator.remove()
+        pass
 
     def _run(self, coro):
         """
