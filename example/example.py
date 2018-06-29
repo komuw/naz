@@ -12,6 +12,7 @@ cli = naz.Client(
     password="password",
 )
 
+# queue messages to send
 for i in range(0, 4):
     print("submit_sm round:", i)
     loop.run_until_complete(
@@ -23,9 +24,12 @@ for i in range(0, 4):
         )
     )
 
+# connect to the SMSC host
 reader, writer = loop.run_until_complete(cli.connect())
+# bind to SMSC as a tranceiver
 loop.run_until_complete(cli.tranceiver_bind())
 
+# read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
 gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
 loop.run_until_complete(gathering)
 
