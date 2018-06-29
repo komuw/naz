@@ -65,7 +65,7 @@ class TestClient(TestCase):
         )
 
     def tearDown(self):
-        if os.environ["CI_ENVIRONMENT"]:
+        if os.environ.get("CI_ENVIRONMENT"):
             print("\n\nrunning in CI env.\n")
             self.smpp_simulator.remove(force=True)
         else:
@@ -136,7 +136,6 @@ class TestClient(TestCase):
                 "event": "submit_sm",
             }
             reader, writer = self._run(self.cli.connect())
-            self._run(self.cli.tranceiver_bind())
             self._run(self.cli.send_forever(TESTING=True))
 
             self.assertTrue(mock_naz_dequeue.mock.called)
