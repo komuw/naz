@@ -16,7 +16,7 @@ script:
   - export PYTHONASYNCIODEBUG='2'
   - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
   - coverage erase
-  - coverage run --omit="*tests*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
+  - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
   - coverage report --show-missing --fail-under=85
   - flake8 .
   - pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/
