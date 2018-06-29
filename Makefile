@@ -19,6 +19,7 @@ uploadprod:
 # you can run single testcase as;
 # python -m unittest -v tests.test_client.TestClient.test_can_connect
 test:
+	@export PYTHONASYNCIODEBUG='2'
 	@printf "\n removing pyc files::\n" && find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
 	@printf "\n coverage erase::\n" && coverage erase
 	@printf "\n coverage run::\n" && coverage run --omit="*tests*,*.virtualenvs/*,*.venv/*,*__init__*" -m unittest discover -v -s .
