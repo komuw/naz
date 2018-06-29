@@ -32,6 +32,7 @@ jobs:
       - run:
           name: run tests
           command: |
+            export PYTHONASYNCIODEBUG='2'
             find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
             coverage erase
             coverage run --omit="*tests*,*.virtualenvs/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
