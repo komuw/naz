@@ -3,9 +3,10 @@ python:
   - "3.6"
 
 before_install:
-- apt-get -y update; apt-get -y install pandoc curl 
+- pwd
 
 install:
+  - pwd; ls -lsha
   - pip install -e .[dev,test]
 
 #pip install coverage pypandoc twine wheel flake8==3.5.0 mock pylint==1.8.2 pycodestyle==2.3.1 black docker==3.4.0
