@@ -4,6 +4,7 @@ python:
 
 before_install:
 - pwd
+- sudo apt -y update; sudo apt-get -y install pandoc curl
 
 install:
   - pwd; ls -lsha
