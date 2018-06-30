@@ -107,7 +107,7 @@ setup(
     #         'sample=sample:main',
     #     ],
     # },
-    entry_points={"console_scripts": ["naz-cli=naz.cli:main"]},
+    entry_points={"console_scripts": ["naz-cli=cli.cli:main"]},
 )
 
 # python packaging documentation:
