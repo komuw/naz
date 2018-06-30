@@ -1,4 +1,5 @@
 import os
+import ast
 
 from setuptools import setup, find_packages
 
@@ -6,15 +7,10 @@ from setuptools import setup, find_packages
 import codecs
 
 here = os.path.abspath(os.path.dirname(__file__))
-about = {
-    "__title__": "naz",
-    "__description__": "Naz is an SMPP client.",
-    "__url__": "https://github.com/komuw/naz",
-    "__version__": "0.0.0.1",
-    "__author__": "komuW",
-    "__author_email__": "komuw05@gmail.com",
-    "__license__": "MIT",
-}
+about = {}
+with open(os.path.join(here, "naz", "__version__.py"), "r") as f:
+    about = ast.literal_eval(f.read())
+
 
 try:
     import pypandoc
