@@ -1,6 +1,7 @@
 import json
-import argparse
 import asyncio
+import logging
+import argparse
 
 import naz
 
@@ -12,7 +13,7 @@ def main():
         prog="naz",
         description="""naz is an SMPP client.
             naz-cli \
-            --config /path/to/config.json
+            --config /path/to/my_config.json
             """,
     )
     parser.add_argument(
@@ -20,6 +21,15 @@ def main():
         action="version",
         version="%(prog)s {version}".format(version=naz.__version__.about["__version__"]),
         help="The currently installed naz version.",
+    )
+    parser.add_argument(
+        "--loglevel",
+        type=str,
+        required=False,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="The log level to output log messages at. \
+        eg: --loglevel DEBUG",
     )
     parser.add_argument(
         "--config",
@@ -30,27 +40,43 @@ def main():
     )
 
     args = parser.parse_args()
-
+    loglevel = args.loglevel
     config = args.config
-
     config_contents = config.read()
     kwargs = json.loads(config_contents)
     # todo: validate that config_contents hold all the required params
+
+    log_metadata = kwargs.get("log_metadata")
+    if not log_metadata:
+        log_metadata = {}
+    log_metadata.update(
+        {"smsc_host": kwargs.get("smsc_host"), "system_id": kwargs.get("system_id")}
+    )
+
+    extra_log_data = {"log_metadata": log_metadata}
+    logger = logging.getLogger()
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("%(message)s. log_metadata=%(log_metadata)s")
+    handler.setFormatter(formatter)
+    if not logger.handlers:
+        logger.addHandler(handler)
+    logger.setLevel(loglevel.upper())
+    logger = logging.LoggerAdapter(logger, extra_log_data)
+
+    logger.info("\n\n\t Naz: the SMPP client. \n\n")
 
     # call naz api ###########
     loop = asyncio.get_event_loop()
     cli = naz.Client(async_loop=loop, **kwargs)
     # queue messages to send
-    for i in range(0, 4):
-        print("submit_sm round:", i)
-        loop.run_until_complete(
-            cli.submit_sm(
-                msg="Hello World-{0}".format(str(i)),
-                correlation_id="myid12345",
-                source_addr="254722111111",
-                destination_addr="254722999999",
-            )
+    loop.run_until_complete(
+        cli.submit_sm(
+            msg="Hello World.",
+            correlation_id="myid12345",
+            source_addr="254722111111",
+            destination_addr="254722999999",
         )
+    )
 
     # connect to the SMSC host
     reader, writer = loop.run_until_complete(cli.connect())

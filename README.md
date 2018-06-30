@@ -33,8 +33,8 @@ import naz
 loop = asyncio.get_event_loop()
 cli = naz.Client(
     async_loop=loop,
-    SMSC_HOST="127.0.0.1",
-    SMSC_PORT=2775,
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
     system_id="smppclient1",
     password="password",
 )
@@ -67,9 +67,20 @@ loop.close()
 
 #### 2. As a cli app
 naz also ships with a commandline interface app called `naz-cli`.            
+create a json config file, eg;            
+`/tmp/my_config.json`
+```
+{
+  "smsc_host": "127.0.0.1",
+  "smsc_port": 2775,
+  "system_id": "smppclient1",
+  "password": "password"
+}
+```
+then 
 run:                
 ```shell
-naz-cli ....
+naz-cli --config /tmp/my_config.json
 ```              
 
 To see help:

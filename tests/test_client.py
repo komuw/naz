@@ -41,8 +41,8 @@ class TestClient(TestCase):
         self.loop = asyncio.get_event_loop()
         self.cli = naz.Client(
             async_loop=self.loop,
-            SMSC_HOST="127.0.0.1",
-            SMSC_PORT=2775,
+            smsc_host="127.0.0.1",
+            smsc_port=2775,
             system_id="smppclient1",
             password="password",
         )
@@ -82,8 +82,8 @@ class TestClient(TestCase):
         def mock_create_client():
             naz.Client(
                 async_loop=self.loop,
-                SMSC_HOST="127.0.0.1",
-                SMSC_PORT=2775,
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
                 system_id="smppclient1",
                 password="password",
                 log_metadata="bad-Type",

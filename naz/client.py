@@ -34,8 +34,8 @@ class Client:
     def __init__(
         self,
         async_loop,
-        SMSC_HOST,
-        SMSC_PORT,
+        smsc_host,
+        smsc_port,
         system_id,
         password,
         system_type="",
@@ -46,7 +46,7 @@ class Client:
         interface_version=34,
         sequence_generator=None,
         outboundqueue=None,
-        LOG_LEVEL="DEBUG",
+        loglevel="DEBUG",
         log_metadata=None,
         codec_class=None,
         codec_errors_level="strict",
@@ -77,10 +77,10 @@ class Client:
         """
         todo: add docs
         """
-        if LOG_LEVEL.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        if loglevel.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
-                """LOG_LEVEL should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
-                    LOG_LEVEL
+                """loglevel should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
+                    loglevel
                 )
             )
         elif not isinstance(log_metadata, (type(None), dict)):
@@ -92,8 +92,8 @@ class Client:
 
         # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
-        self.SMSC_HOST = SMSC_HOST
-        self.SMSC_PORT = SMSC_PORT
+        self.smsc_host = smsc_host
+        self.smsc_port = smsc_port
         self.system_id = system_id
         self.password = password
         self.system_type = system_type
@@ -110,11 +110,11 @@ class Client:
             self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
-        self.LOG_LEVEL = LOG_LEVEL.upper()
+        self.loglevel = loglevel.upper()
         self.log_metadata = log_metadata
         if not self.log_metadata:
             self.log_metadata = {}
-        self.log_metadata.update({"SMSC_HOST": self.SMSC_HOST, "system_id": system_id})
+        self.log_metadata.update({"smsc_host": self.smsc_host, "system_id": system_id})
         self.codec_class = codec_class
         self.codec_errors_level = codec_errors_level
         if not self.codec_class:
@@ -283,7 +283,7 @@ class Client:
         handler.setFormatter(formatter)
         if not self.logger.handlers:
             self.logger.addHandler(handler)
-        self.logger.setLevel(self.LOG_LEVEL)
+        self.logger.setLevel(self.loglevel)
         self.logger = logging.LoggerAdapter(self.logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
@@ -310,7 +310,7 @@ class Client:
     async def connect(self):
         self.logger.debug("network_connecting")
         reader, writer = await asyncio.open_connection(
-            self.SMSC_HOST, self.SMSC_PORT, loop=self.async_loop
+            self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader = reader
         self.writer = writer
