@@ -9,7 +9,9 @@ import codecs
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
 with open(os.path.join(here, "naz", "__version__.py"), "r") as f:
-    about = ast.literal_eval(f.read())
+    x = f.read()
+    y = x.replace("about = ", "")
+    about = ast.literal_eval(y)
 
 
 try:

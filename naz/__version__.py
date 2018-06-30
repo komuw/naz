@@ -1,4 +1,4 @@
-{
+about = {
     "__title__": "naz",
     "__description__": "Naz is an SMPP client.",
     "__url__": "https://github.com/komuw/naz",

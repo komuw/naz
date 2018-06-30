@@ -19,7 +19,7 @@ def main():
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s {version}".format(version="67"),
+        version="%(prog)s {version}".format(version=naz.__version__.about["__version__"]),
         help="The currently installed naz version.",
     )
 
