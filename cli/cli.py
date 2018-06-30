@@ -8,8 +8,6 @@ import naz
 def main():
     """
     """
-    # TODO: enable people to specify the location where they want certificate and keys to be stored.
-    # currently, we store them in the directory from which sewer is ran
     parser = argparse.ArgumentParser(
         prog="naz",
         description="""naz is an SMPP client.
