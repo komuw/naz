@@ -91,7 +91,3 @@ def main():
     loop.run_forever()
     loop.close()
     # call naz api ###########
-
-
-# todo remove this call here
-main()
