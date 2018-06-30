@@ -79,13 +79,33 @@ create a json config file, eg;
 ```
 then 
 run:                
+`naz-cli --config /tmp/my_config.json`
 ```shell
-naz-cli --config /tmp/my_config.json
+	 Naz: the SMPP client.
+
+submit_sm_enqueue. correlation_id=myid12345. source_addr=254722111111. destination_addr=254722999999. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+submit_sm_enqueued. event=submit_sm. correlation_id=myid12345. source_addr=254722111111. destination_addr=254722999999. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+network_connecting. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+network_connected. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 ```              
 
 To see help:
-```shell
-naz-cli --help                 
+
+`naz-cli --help`   
+```shell         
+usage: naz [-h] [--version] [--loglevel {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
+           --config CONFIG
+
+naz is an SMPP client. example usage: naz-cli --config /path/to/my_config.json
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             The currently installed naz version.
+  --loglevel {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                        The log level to output log messages at. eg:
+                        --loglevel DEBUG
+  --config CONFIG       The config file to use. eg: --config
+                        /path/to/my_config.json
 ```
 
 

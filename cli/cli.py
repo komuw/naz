@@ -12,6 +12,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="naz",
         description="""naz is an SMPP client.
+            example usage:
             naz-cli \
             --config /path/to/my_config.json
             """,
