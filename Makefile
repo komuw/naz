@@ -25,4 +25,4 @@ test:
 	@printf "\n coverage run::\n" && coverage run --omit="*tests*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s .
 	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=70
 	@printf "\n run flake8::\n" && flake8 .
-	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/
+	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/ cli/

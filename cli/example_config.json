@@ -1,0 +1,6 @@
+{
+  "SMSC_HOST": "127.0.0.1",
+  "SMSC_PORT": 2775,
+  "system_id": "smppclient1",
+  "password": "password"
+}
