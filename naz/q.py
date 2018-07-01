@@ -7,7 +7,7 @@ class BaseOutboundQueue:
     """
     Interface that must be implemented to satisfy naz's outbound queue.
     User implementations should subclassing this class and 
-    implement the enqueue and dequeue methods with the type signatures hown.
+    implement the enqueue and dequeue methods with the type signatures shown.
     """
 
     async def enqueue(self, item: dict) -> None:
