@@ -113,12 +113,12 @@ def main():
     logger.info("\n\n\t Naz: the SMPP client. \n\n")
 
     # Load custom classes #######################
+    outboundqueue = kwargs["outboundqueue"]  # this is a mandatory param
+    kwargs["outboundqueue"] = load_class(outboundqueue)
+
     sequence_generator = kwargs.get("sequence_generator")
     if sequence_generator:
         kwargs["sequence_generator"] = load_class(sequence_generator)
-    outboundqueue = kwargs.get("outboundqueue")
-    if outboundqueue:
-        kwargs["outboundqueue"] = load_class(outboundqueue)
     codec_class = kwargs.get("codec_class")
     if codec_class:
         kwargs["codec_class"] = load_class(codec_class)
@@ -137,7 +137,7 @@ def main():
     for i in range(0, 20):
         loop.run_until_complete(
             cli.submit_sm(
-                msg="Hello World-{0}.".format(str(i)),
+                short_message="Hello World-{0}.".format(str(i)),
                 correlation_id="myid12345",
                 source_addr="254722111111",
                 destination_addr="254722999999",

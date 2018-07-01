@@ -44,7 +44,7 @@ for i in range(0, 4):
     print("submit_sm round:", i)
     loop.run_until_complete(
         cli.submit_sm(
-            msg="Hello World-{0}".format(str(i)),
+            short_message="Hello World-{0}".format(str(i)),
             correlation_id="myid12345",
             source_addr="254722111111",
             destination_addr="254722999999",

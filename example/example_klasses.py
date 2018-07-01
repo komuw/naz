@@ -1,6 +1,9 @@
 
 import time
 import asyncio
+import typing
+
+import naz
 
 
 class ExampleSeqGen(object):
@@ -56,3 +59,18 @@ class ExampleRateLimiter:
         if new_tokens > 1:
             self.tokens = min(self.tokens + new_tokens, self.MAX_TOKENS)
             self.updated_at = now
+
+
+class ExampleQueue(naz.q.BaseOutboundQueue):
+    def __init__(self, maxsize: int = 1000) -> None:
+        """
+        maxsize is the max number of items(not size) that can be put in the queue.
+        """
+        loop: asyncio.events.AbstractEventLoop = asyncio.get_event_loop()
+        self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize, loop=loop)
+
+    async def enqueue(self, item: dict) -> None:
+        self.queue.put_nowait(item)
+
+    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+        return await self.queue.get()

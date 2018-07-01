@@ -38,6 +38,7 @@ class Client:
         smsc_port,
         system_id,
         password,
+        outboundqueue,
         system_type="",
         addr_ton=0,
         addr_npi=0,
@@ -45,7 +46,6 @@ class Client:
         encoding="gsm0338",
         interface_version=34,
         sequence_generator=None,
-        outboundqueue=None,
         loglevel="DEBUG",
         log_metadata=None,
         codec_class=None,
@@ -111,10 +111,7 @@ class Client:
             self.sequence_generator = sequence_generator()
 
         self.outboundqueue = outboundqueue
-        if not self.outboundqueue:
-            self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
-        else:
-            self.outboundqueue = outboundqueue()
+        self.outboundqueue = outboundqueue()
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
@@ -503,7 +500,7 @@ class Client:
             )
         )
 
-    async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
+    async def submit_sm(self, short_message, correlation_id, source_addr, destination_addr):
         """
         HEADER::
         # submit_sm has the following pdu header:
@@ -542,9 +539,23 @@ class Client:
                 correlation_id, source_addr, destination_addr
             )
         )
-        source_addr = source_addr
-        destination_addr = destination_addr
-        short_message = msg
+        item_to_enqueue = {
+            "event": "submit_sm",
+            "short_message": short_message,
+            "correlation_id": correlation_id,
+            "source_addr": source_addr,
+            "destination_addr": destination_addr,
+        }
+        await self.outboundqueue.enqueue(item_to_enqueue)
+        self.logger.debug(
+            "submit_sm_enqueued. event=submit_sm. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
+                correlation_id, source_addr, destination_addr
+            )
+        )
+
+    async def build_submit_sm_pdu(
+        self, short_message, correlation_id, source_addr, destination_addr
+    ):
         encoded_short_message = self.codec_class.encode(short_message, self.encoding)
         sm_length = len(encoded_short_message)
 
@@ -591,15 +602,9 @@ class Client:
                 )
             )
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
-
         full_pdu = header + body
-        item_to_enqueue = {"correlation_id": correlation_id, "pdu": full_pdu, "event": "submit_sm"}
-        await self.outboundqueue.enqueue(item_to_enqueue)
-        self.logger.debug(
-            "submit_sm_enqueued. event=submit_sm. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
-                correlation_id, source_addr, destination_addr
-            )
-        )
+
+        return full_pdu
 
     async def send_data(self, event, msg, correlation_id=None):
         """
@@ -648,7 +653,17 @@ class Client:
             item_to_dequeue = await self.outboundqueue.dequeue()
             correlation_id = item_to_dequeue["correlation_id"]
             event = item_to_dequeue["event"]
-            full_pdu = item_to_dequeue["pdu"]
+            if event == "submit_sm":
+                short_message = item_to_dequeue["short_message"]
+                correlation_id = item_to_dequeue["correlation_id"]
+                source_addr = item_to_dequeue["source_addr"]
+                destination_addr = item_to_dequeue["destination_addr"]
+                full_pdu = await self.build_submit_sm_pdu(
+                    short_message, correlation_id, source_addr, destination_addr
+                )
+            else:
+                full_pdu = item_to_dequeue["pdu"]
+
             await self.send_data(event, full_pdu, correlation_id)
             self.logger.debug("sent_forever.")
             if TESTING:
