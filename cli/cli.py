@@ -1,9 +1,22 @@
+import sys
 import json
 import asyncio
 import logging
 import argparse
 
 import naz
+
+
+def load_class(dotted_path):
+    """
+    taken from: https://github.com/coleifer/huey/blob/4138d454cc6fd4d252c9350dbd88d74dd3c67dcb/huey/utils.py#L44
+    huey is released under MIT license a copy of which can be found at: https://github.com/coleifer/huey/blob/master/LICENSE
+    """
+    path, klass = dotted_path.rsplit(".", 1)
+    __import__(path)
+    mod = sys.modules[path]
+    attttr = getattr(mod, klass)
+    return attttr
 
 
 def main():
@@ -66,18 +79,37 @@ def main():
 
     logger.info("\n\n\t Naz: the SMPP client. \n\n")
 
+    # Load custom classes #######################
+    sequence_generator = kwargs.get("sequence_generator")
+    if sequence_generator:
+        kwargs["sequence_generator"] = load_class(sequence_generator)
+    outboundqueue = kwargs.get("outboundqueue")
+    if outboundqueue:
+        kwargs["outboundqueue"] = load_class(outboundqueue)
+    codec_class = kwargs.get("codec_class")
+    if codec_class:
+        kwargs["codec_class"] = load_class(codec_class)
+    rateLimiter = kwargs.get("rateLimiter")
+    if rateLimiter:
+        kwargs["rateLimiter"] = load_class(rateLimiter)
+    hook = kwargs.get("hook")
+    if hook:
+        kwargs["hook"] = load_class(hook)
+    # Load custom classes #######################
+
     # call naz api ###########
     loop = asyncio.get_event_loop()
     cli = naz.Client(async_loop=loop, **kwargs)
     # queue messages to send
-    loop.run_until_complete(
-        cli.submit_sm(
-            msg="Hello World.",
-            correlation_id="myid12345",
-            source_addr="254722111111",
-            destination_addr="254722999999",
+    for i in range(0, 20):
+        loop.run_until_complete(
+            cli.submit_sm(
+                msg="Hello World-{0}.".format(str(i)),
+                correlation_id="myid12345",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
         )
-    )
 
     # connect to the SMSC host
     reader, writer = loop.run_until_complete(cli.connect())

@@ -102,12 +102,19 @@ class Client:
         self.addr_npi = addr_npi
         self.address_range = address_range
         self.encoding = encoding
+
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
             self.sequence_generator = sequence.DefaultSequenceGenerator()
+        else:
+            # instantiate an object
+            self.sequence_generator = sequence_generator()
+
         self.outboundqueue = outboundqueue
         if not self.outboundqueue:
             self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
+        else:
+            self.outboundqueue = outboundqueue()
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
@@ -115,10 +122,13 @@ class Client:
         if not self.log_metadata:
             self.log_metadata = {}
         self.log_metadata.update({"smsc_host": self.smsc_host, "system_id": system_id})
-        self.codec_class = codec_class
+
         self.codec_errors_level = codec_errors_level
+        self.codec_class = codec_class
         if not self.codec_class:
             self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
+        else:
+            self.codec_class = codec_class(errors=self.codec_errors_level)
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -291,9 +301,14 @@ class Client:
             self.rateLimiter = ratelimiter.RateLimiter(
                 SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1, logger=self.logger
             )
+        else:
+            self.rateLimiter = rateLimiter()
+
         self.hook = hook
         if not self.hook:
             self.hook = hooks.DefaultHook(logger=self.logger)
+        else:
+            self.hook = hook(logger=self.logger)
 
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():

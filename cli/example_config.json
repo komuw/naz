@@ -4,7 +4,7 @@
     "system_id": "smppclient1",
     "password": "password",
     "encoding": "gsm0338",
-    "sequence_generator": "my.dotted.path.to.RedisSequencer",
+    "sequence_generator": "example.example_klasses.ExampleSeqGen",
     "loglevel": "INFO",
     "log_metadata": {
         "environment": "production",
@@ -12,5 +12,5 @@
     },
     "codec_errors_level": "ignore",
     "enquire_link_interval": 30,
-    "rateLimiter": "dotted.path.to.CustomRateLimiter"
+    "rateLimiter": "example.example_klasses.ExampleRateLimiter"
 }
