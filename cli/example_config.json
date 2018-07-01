@@ -2,5 +2,15 @@
     "smsc_host": "127.0.0.1",
     "smsc_port": 2775,
     "system_id": "smppclient1",
-    "password": "password"
+    "password": "password",
+    "encoding": "gsm0338",
+    "sequence_generator": "my.dotted.path.to.RedisSequencer",
+    "loglevel": "INFO",
+    "log_metadata": {
+        "environment": "production",
+        "release": "canary"
+    },
+    "codec_errors_level": "ignore",
+    "enquire_link_interval": 30,
+    "rateLimiter": "dotted.path.to.CustomRateLimiter"
 }
