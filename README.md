@@ -29,27 +29,28 @@ pip install naz
 import asyncio
 import naz
 
-
 loop = asyncio.get_event_loop()
+outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=loop)
 cli = naz.Client(
     async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
+    outboundqueue=outboundqueue,
 )
 
 # queue messages to send
 for i in range(0, 4):
     print("submit_sm round:", i)
-    loop.run_until_complete(
-        cli.submit_sm(
-            short_message="Hello World-{0}".format(str(i)),
-            correlation_id="myid12345",
-            source_addr="254722111111",
-            destination_addr="254722999999",
-        )
-    )
+    item_to_enqueue = {
+        "event": "submit_sm",
+        "short_message": "Hello World-{0}".format(str(i)),
+        "correlation_id": "myid12345",
+        "source_addr": "254722111111",
+        "destination_addr": "254722999999",
+    }
+    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
 
 # connect to the SMSC host
 reader, writer = loop.run_until_complete(cli.connect())
@@ -74,8 +75,24 @@ create a json config file, eg;
   "smsc_host": "127.0.0.1",
   "smsc_port": 2775,
   "system_id": "smppclient1",
-  "password": "password"
+  "password": "password",
+  "outboundqueue": "myfile.ExampleQueue",
 }
+```
+and a python file, `myfile.py` (in the current working directory) with the contents:
+
+```python
+import asyncio
+import naz
+
+class ExampleQueue(naz.q.BaseOutboundQueue):
+    def __init__(self):
+        loop = asyncio.get_event_loop()
+        self.queue = asyncio.Queue(maxsize=1000, loop=loop)
+    async def enqueue(self, item):
+        self.queue.put_nowait(item)
+    async def dequeue(self):
+        return await self.queue.get()
 ```
 then 
 run:                
