@@ -3,7 +3,21 @@ import asyncio
 import typing
 
 
-class DefaultOutboundQueue(object):
+class BaseOutboundQueue:
+    """
+    Interface that must be implemented to satisfy naz's outbound queue.
+    User implementations should subclassing this class and 
+    implement the enqueue and dequeue methods with the type signatures hown.
+    """
+
+    async def enqueue(self, item: dict) -> None:
+        raise NotImplementedError("enqueue method must be implemented.")
+
+    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+        raise NotImplementedError("dequeue method must be implemented.")
+
+
+class DefaultOutboundQueue(BaseOutboundQueue):
     """
     this allows users to provide their own queue managers eg redis etc.
     """
