@@ -86,11 +86,12 @@ def main():
     )
 
     args = parser.parse_args()
-    loglevel = args.loglevel
+
     config = args.config
     config_contents = config.read()
     kwargs = json.loads(config_contents)
     # todo: validate that config_contents hold all the required params
+    loglevel = kwargs.get("loglevel").upper() if kwargs.get("loglevel") else args.loglevel.upper()
 
     log_metadata = kwargs.get("log_metadata")
     if not log_metadata:
@@ -106,7 +107,7 @@ def main():
     handler.setFormatter(formatter)
     if not logger.handlers:
         logger.addHandler(handler)
-    logger.setLevel(loglevel.upper())
+    logger.setLevel(loglevel)
     logger = logging.LoggerAdapter(logger, extra_log_data)
 
     logger.info("\n\n\t Naz: the SMPP client. \n\n")
