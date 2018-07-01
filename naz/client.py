@@ -3,7 +3,6 @@ import asyncio
 import logging
 import collections
 
-from . import q
 from . import hooks
 from . import nazcodec
 from . import sequence
@@ -96,6 +95,7 @@ class Client:
         self.smsc_port = smsc_port
         self.system_id = system_id
         self.password = password
+        self.outboundqueue = outboundqueue
         self.system_type = system_type
         self.interface_version = interface_version
         self.addr_ton = addr_ton
@@ -106,12 +106,6 @@ class Client:
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
             self.sequence_generator = sequence.DefaultSequenceGenerator()
-        else:
-            # instantiate an object
-            self.sequence_generator = sequence_generator()
-
-        self.outboundqueue = outboundqueue
-        self.outboundqueue = outboundqueue()
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
@@ -124,8 +118,6 @@ class Client:
         self.codec_class = codec_class
         if not self.codec_class:
             self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
-        else:
-            self.codec_class = codec_class(errors=self.codec_errors_level)
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -298,14 +290,10 @@ class Client:
             self.rateLimiter = ratelimiter.RateLimiter(
                 SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1, logger=self.logger
             )
-        else:
-            self.rateLimiter = rateLimiter()
 
         self.hook = hook
         if not self.hook:
             self.hook = hooks.DefaultHook(logger=self.logger)
-        else:
-            self.hook = hook(logger=self.logger)
 
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():

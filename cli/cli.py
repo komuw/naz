@@ -114,20 +114,27 @@ def main():
 
     # Load custom classes #######################
     outboundqueue = kwargs["outboundqueue"]  # this is a mandatory param
-    kwargs["outboundqueue"] = load_class(outboundqueue)
+    outboundqueue = load_class(outboundqueue)
+    kwargs["outboundqueue"] = outboundqueue()
 
     sequence_generator = kwargs.get("sequence_generator")
     if sequence_generator:
-        kwargs["sequence_generator"] = load_class(sequence_generator)
+        sequence_generator = load_class(sequence_generator)
+        # instantiate an object
+        kwargs["sequence_generator"] = sequence_generator()
+
     codec_class = kwargs.get("codec_class")
     if codec_class:
-        kwargs["codec_class"] = load_class(codec_class)
+        codec_class = load_class(codec_class)
+        kwargs["codec_class"] = codec_class()
     rateLimiter = kwargs.get("rateLimiter")
     if rateLimiter:
-        kwargs["rateLimiter"] = load_class(rateLimiter)
+        rateLimiter = load_class(rateLimiter)
+        kwargs["rateLimiter"] = rateLimiter()
     hook = kwargs.get("hook")
     if hook:
-        kwargs["hook"] = load_class(hook)
+        hook = load_class(hook)
+        kwargs["hook"] = hook()
     # Load custom classes #######################
 
     # call naz api ###########
