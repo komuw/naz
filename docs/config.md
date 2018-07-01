@@ -28,7 +28,7 @@ replace_if_present_flag |  Flag indicating if submitted message should replace a
 sm_default_msg_id |  Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC | 0,
 
 
-*NB*: The canonical reference for these values is the SMPP version 3.4 spec document. It's is encouraged that you consult. 
+**NB**: The canonical reference for these values is the SMPP version 3.4 spec document. It's is encouraged that you consult. 
 Where anything differs with the SMPP spec document, you should consider the spec as the truth.        
 Any errors are my own doing, apologies in advance.          
 A copy of the SMPP spec is available at; https://github.com/komuw/naz/tree/master/docs         
@@ -53,7 +53,7 @@ hook | python class implemeting functionality/hooks to be called by `naz` just b
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
 
-*NB*: the only *mandatory* parameters are the ones marked N/A ie `smsc_host`, `smsc_port`, `system_id` and `password`          
+**NB**: the only *mandatory* parameters are the ones marked N/A ie `smsc_host`, `smsc_port`, `system_id` and `password`          
 
 #### Example
 An example config file is shown below.         

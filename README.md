@@ -120,37 +120,8 @@ optional arguments:
 
 
 ## Development setup
-- fork this repo.
-- you need to have python3 installed, this project is python3 only.
-- cd naz
-- sudo apt-get install pandoc
-- open an issue on this repo. In your issue, outline what it is you want to add and why.
-- install pre-requiste software:             
-```shell
-apt-get -y install pandoc && pip install -e .[dev,test]
-```                   
-- make the changes you want on your fork.
-- your changes should have backward compatibility in mind unless it is impossible to do so.
-- add your name and contact(optional) to CONTRIBUTORS.md
-- add tests
-- format your code using [black](https://github.com/ambv/black):                      
-```shell
-black --line-length=100 --py36 .
-```                      
-- run [flake8](https://pypi.python.org/pypi/flake8) on the code and fix any issues:                      
-```shell
-flake8 .
-```                      
-- run [pylint](https://pypi.python.org/pypi/pylint) on the code and fix any issues:                      
-```shell
-pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/ cli/
-```    
-- run tests and make sure everything is passing:
-```shell
-make test
-```
-- open a pull request on this repo.               
-NB: I make no commitment of accepting your pull requests.                 
+- see [documentation on contributing](.github/CONTRIBUTING.md)
+- **NB:** I make no commitment of accepting your pull requests.                 
 
 
 
