@@ -142,14 +142,14 @@ def main():
     cli = naz.Client(async_loop=loop, **kwargs)
     # queue messages to send
     for i in range(0, 20):
-        loop.run_until_complete(
-            cli.submit_sm(
-                short_message="Hello World-{0}.".format(str(i)),
-                correlation_id="myid12345",
-                source_addr="254722111111",
-                destination_addr="254722999999",
-            )
-        )
+        item_to_enqueue = {
+            "event": "submit_sm",
+            "short_message": "Hello World-{0}".format(str(i)),
+            "correlation_id": "myid12345",
+            "source_addr": "254722111111",
+            "destination_addr": "254722999999",
+        }
+    loop.run_until_complete(kwargs["outboundqueue"].enqueue(item_to_enqueue))
 
     # connect to the SMSC host
     reader, writer = loop.run_until_complete(cli.connect())
