@@ -17,5 +17,5 @@ class DefaultOutboundQueue(object):
     async def enqueue(self, item: dict) -> None:
         self.queue.put_nowait(item)
 
-    async def dequeue(self) -> typing.Any:
+    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
         return await self.queue.get()
