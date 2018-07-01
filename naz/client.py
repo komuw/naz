@@ -500,6 +500,7 @@ class Client:
             )
         )
 
+    # this method just enqueues a submit_sm msg to queue
     async def submit_sm(self, short_message, correlation_id, source_addr, destination_addr):
         """
         HEADER::
