@@ -86,6 +86,7 @@ setup(
             "pycodestyle==2.3.1",
             "black",
             "docker==3.4.0",
+            "mypy==0.610",
         ],
     },
     # If there are data files included in your packages that need to be

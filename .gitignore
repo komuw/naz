@@ -41,3 +41,6 @@ htmlcov/
 
 # virtualenv
 .venv
+
+# mypy
+*.mypy_cache/
