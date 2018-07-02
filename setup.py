@@ -64,7 +64,7 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # packages=['naz'],
-    packages=find_packages(exclude=["docs", "*tests*", "example"]),
+    packages=find_packages(exclude=["docs", "*tests*", "examples"]),
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
     #   py_modules=["my_module"],
