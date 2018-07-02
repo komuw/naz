@@ -356,7 +356,7 @@ class Client:
         self.logger.debug("tranceiver_bound")
         return full_pdu
 
-    async def enquire_link(self, correlation_id=None):
+    async def enquire_link(self, correlation_id=None, TESTING=False):
         """
         HEADER::
         # enquire_link has the following pdu header:
@@ -390,6 +390,8 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data("enquire_link", full_pdu)
+            if TESTING:
+                return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
 
     async def enquire_link_resp(self, sequence_number, correlation_id=None):
@@ -822,7 +824,7 @@ class Client:
             # short_message, C-Octet String, 0-254 octet
 
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
-            self.deliver_sm_resp(sequence_number=sequence_number)
+            await self.deliver_sm_resp(sequence_number=sequence_number)
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
