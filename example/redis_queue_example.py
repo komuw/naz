@@ -1,10 +1,8 @@
+import json
 import asyncio
 
 import naz
-
-
 import redis
-import json
 
 
 class RedisExampleQueue(naz.q.BaseOutboundQueue):
