@@ -13,6 +13,9 @@ class RedisExampleQueue(naz.q.BaseOutboundQueue):
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
     https://redis.io/commands/lpush
     https://redis.io/commands/brpop
+
+    Note that in practice, you would probaly want to use a non-blocking redis
+    client eg https://github.com/aio-libs/aioredis
     """
 
     def __init__(self):
