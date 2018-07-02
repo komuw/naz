@@ -1,3 +1,7 @@
+# The code in this file is copied from https://github.com/praekelt/vumi/blob/master/vumi/codecs/vumi_codecs.py
+# which is in turn largely copied from http://stackoverflow.com/questions/13130935/decode-7-bit-gsm
+# Vumi's license is included below:
+
 # Copyright (c) Praekelt Foundation and individual contributors.
 # All rights reserved.
 
@@ -27,19 +31,13 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# The code in this file is copied from https://github.com/praekelt/vumi/blob/master/vumi/codecs/vumi_codecs.py
-# which is in turn largely copied from http://stackoverflow.com/questions/13130935/decode-7-bit-gsm
-# Vumi's license is included at the top of this page.
 
 import codecs
 import sys
 
 
-# todo: port the testcases found at:
-# https://github.com/praekelt/vumi/blob/master/vumi/codecs/tests/test_vumi_codecs.py
-
-# todo: An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
-# however, since I'm guessingvumi has been in use longer, then we should go with it.
+# An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
+# however, I'm guessing that vumi has been in use longer and we should thus go with it.
 
 
 class NazCodecException(Exception):

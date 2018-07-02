@@ -9,7 +9,7 @@ class RateLimiter:
     todo: check that the algo actually works.
 
     Usage:
-        rateLimiter = RateLimiter(SEND_RATE=10, MAX_TOKENS=25)
+        rateLimiter = RateLimiter(logger=myLogger, SEND_RATE=10, MAX_TOKENS=25)
         await rateLimiter.wait_for_token()
         send_messsages()
     """
