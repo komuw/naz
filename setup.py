@@ -1,4 +1,5 @@
 import os
+import ast
 
 from setuptools import setup, find_packages
 
@@ -6,15 +7,12 @@ from setuptools import setup, find_packages
 import codecs
 
 here = os.path.abspath(os.path.dirname(__file__))
-about = {
-    "__title__": "naz",
-    "__description__": "Naz is an SMPP client.",
-    "__url__": "https://github.com/komuw/naz",
-    "__version__": "0.0.0.1",
-    "__author__": "komuW",
-    "__author_email__": "komuw05@gmail.com",
-    "__license__": "MIT",
-}
+about = {}
+with open(os.path.join(here, "naz", "__version__.py"), "r") as f:
+    x = f.read()
+    y = x.replace("about = ", "")
+    about = ast.literal_eval(y)
+
 
 try:
     import pypandoc
@@ -80,7 +78,7 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        "dev": ["coverage", "pypandoc", "twine", "wheel"],
+        "dev": ["coverage", "pypandoc", "twine", "wheel", "redis==2.10.6"],
         "test": [
             "flake8==3.5.0",
             "mock",
@@ -88,6 +86,7 @@ setup(
             "pycodestyle==2.3.1",
             "black",
             "docker==3.4.0",
+            "mypy==0.610",
         ],
     },
     # If there are data files included in your packages that need to be
@@ -109,7 +108,7 @@ setup(
     #         'sample=sample:main',
     #     ],
     # },
-    entry_points={"console_scripts": ["naz-cli=naz.cli:main"]},
+    entry_points={"console_scripts": ["naz-cli=cli.cli:main"]},
 )
 
 # python packaging documentation:

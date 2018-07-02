@@ -41,8 +41,8 @@ class TestClient(TestCase):
         self.loop = asyncio.get_event_loop()
         self.cli = naz.Client(
             async_loop=self.loop,
-            SMSC_HOST="127.0.0.1",
-            SMSC_PORT=2775,
+            smsc_host="127.0.0.1",
+            smsc_port=2775,
             system_id="smppclient1",
             password="password",
         )
@@ -82,8 +82,8 @@ class TestClient(TestCase):
         def mock_create_client():
             naz.Client(
                 async_loop=self.loop,
-                SMSC_HOST="127.0.0.1",
-                SMSC_PORT=2775,
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
                 system_id="smppclient1",
                 password="password",
                 log_metadata="bad-Type",
@@ -114,7 +114,7 @@ class TestClient(TestCase):
             correlation_id = "12345"
             self._run(
                 self.cli.submit_sm(
-                    msg="hello smpp",
+                    short_message="hello smpp",
                     correlation_id=correlation_id,
                     source_addr="9090",
                     destination_addr="254722000111",
@@ -129,10 +129,10 @@ class TestClient(TestCase):
     def test_submit_sm_sending(self):
         with mock.patch("naz.q.DefaultOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             correlation_id = "12345"
-            msg = "hello smpp"
+            short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
-                "pdu": msg,
+                "pdu": short_message,
                 "event": "submit_sm",
             }
             reader, writer = self._run(self.cli.connect())

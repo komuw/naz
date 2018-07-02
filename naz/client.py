@@ -3,7 +3,6 @@ import asyncio
 import logging
 import collections
 
-from . import q
 from . import hooks
 from . import nazcodec
 from . import sequence
@@ -34,10 +33,11 @@ class Client:
     def __init__(
         self,
         async_loop,
-        SMSC_HOST,
-        SMSC_PORT,
+        smsc_host,
+        smsc_port,
         system_id,
         password,
+        outboundqueue,
         system_type="",
         addr_ton=0,
         addr_npi=0,
@@ -45,8 +45,7 @@ class Client:
         encoding="gsm0338",
         interface_version=34,
         sequence_generator=None,
-        outboundqueue=None,
-        LOG_LEVEL="DEBUG",
+        loglevel="DEBUG",
         log_metadata=None,
         codec_class=None,
         codec_errors_level="strict",
@@ -77,10 +76,10 @@ class Client:
         """
         todo: add docs
         """
-        if LOG_LEVEL.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        if loglevel.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
-                """LOG_LEVEL should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
-                    LOG_LEVEL
+                """loglevel should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
+                    loglevel
                 )
             )
         elif not isinstance(log_metadata, (type(None), dict)):
@@ -92,31 +91,31 @@ class Client:
 
         # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
-        self.SMSC_HOST = SMSC_HOST
-        self.SMSC_PORT = SMSC_PORT
+        self.smsc_host = smsc_host
+        self.smsc_port = smsc_port
         self.system_id = system_id
         self.password = password
+        self.outboundqueue = outboundqueue
         self.system_type = system_type
         self.interface_version = interface_version
         self.addr_ton = addr_ton
         self.addr_npi = addr_npi
         self.address_range = address_range
         self.encoding = encoding
+
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
             self.sequence_generator = sequence.DefaultSequenceGenerator()
-        self.outboundqueue = outboundqueue
-        if not self.outboundqueue:
-            self.outboundqueue = q.DefaultOutboundQueue(maxsize=10000, loop=self.async_loop)
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
-        self.LOG_LEVEL = LOG_LEVEL.upper()
+        self.loglevel = loglevel.upper()
         self.log_metadata = log_metadata
         if not self.log_metadata:
             self.log_metadata = {}
-        self.log_metadata.update({"SMSC_HOST": self.SMSC_HOST, "system_id": system_id})
-        self.codec_class = codec_class
+        self.log_metadata.update({"smsc_host": self.smsc_host, "system_id": system_id})
+
         self.codec_errors_level = codec_errors_level
+        self.codec_class = codec_class
         if not self.codec_class:
             self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
 
@@ -283,7 +282,7 @@ class Client:
         handler.setFormatter(formatter)
         if not self.logger.handlers:
             self.logger.addHandler(handler)
-        self.logger.setLevel(self.LOG_LEVEL)
+        self.logger.setLevel(self.loglevel)
         self.logger = logging.LoggerAdapter(self.logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
@@ -291,6 +290,7 @@ class Client:
             self.rateLimiter = ratelimiter.RateLimiter(
                 SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1, logger=self.logger
             )
+
         self.hook = hook
         if not self.hook:
             self.hook = hooks.DefaultHook(logger=self.logger)
@@ -310,7 +310,7 @@ class Client:
     async def connect(self):
         self.logger.debug("network_connecting")
         reader, writer = await asyncio.open_connection(
-            self.SMSC_HOST, self.SMSC_PORT, loop=self.async_loop
+            self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader = reader
         self.writer = writer
@@ -488,7 +488,8 @@ class Client:
             )
         )
 
-    async def submit_sm(self, msg, correlation_id, source_addr, destination_addr):
+    # this method just enqueues a submit_sm msg to queue
+    async def submit_sm(self, short_message, correlation_id, source_addr, destination_addr):
         """
         HEADER::
         # submit_sm has the following pdu header:
@@ -527,9 +528,23 @@ class Client:
                 correlation_id, source_addr, destination_addr
             )
         )
-        source_addr = source_addr
-        destination_addr = destination_addr
-        short_message = msg
+        item_to_enqueue = {
+            "event": "submit_sm",
+            "short_message": short_message,
+            "correlation_id": correlation_id,
+            "source_addr": source_addr,
+            "destination_addr": destination_addr,
+        }
+        await self.outboundqueue.enqueue(item_to_enqueue)
+        self.logger.debug(
+            "submit_sm_enqueued. event=submit_sm. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
+                correlation_id, source_addr, destination_addr
+            )
+        )
+
+    async def build_submit_sm_pdu(
+        self, short_message, correlation_id, source_addr, destination_addr
+    ):
         encoded_short_message = self.codec_class.encode(short_message, self.encoding)
         sm_length = len(encoded_short_message)
 
@@ -576,15 +591,9 @@ class Client:
                 )
             )
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
-
         full_pdu = header + body
-        item_to_enqueue = {"correlation_id": correlation_id, "pdu": full_pdu, "event": "submit_sm"}
-        await self.outboundqueue.enqueue(item_to_enqueue)
-        self.logger.debug(
-            "submit_sm_enqueued. event=submit_sm. correlation_id={0}. source_addr={1}. destination_addr={2}".format(
-                correlation_id, source_addr, destination_addr
-            )
-        )
+
+        return full_pdu
 
     async def send_data(self, event, msg, correlation_id=None):
         """
@@ -633,7 +642,17 @@ class Client:
             item_to_dequeue = await self.outboundqueue.dequeue()
             correlation_id = item_to_dequeue["correlation_id"]
             event = item_to_dequeue["event"]
-            full_pdu = item_to_dequeue["pdu"]
+            if event == "submit_sm":
+                short_message = item_to_dequeue["short_message"]
+                correlation_id = item_to_dequeue["correlation_id"]
+                source_addr = item_to_dequeue["source_addr"]
+                destination_addr = item_to_dequeue["destination_addr"]
+                full_pdu = await self.build_submit_sm_pdu(
+                    short_message, correlation_id, source_addr, destination_addr
+                )
+            else:
+                full_pdu = item_to_dequeue["pdu"]
+
             await self.send_data(event, full_pdu, correlation_id)
             self.logger.debug("sent_forever.")
             if TESTING:
@@ -818,3 +837,37 @@ class Client:
                 )
             )
         pass
+
+    async def unbind(self, correlation_id=None):
+        """
+        HEADER::
+        # unbind has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `unbind`
+        command_status, int, 4octet. Not used. Set to NULL
+        sequence_number, int, 4octet.
+
+        `unbind` has no body.
+
+        clients/users should call this method when winding down.
+        """
+        # body
+        body = b""
+
+        # header
+        command_length = 16 + len(body)  # 16 is for headers
+        command_id = self.command_ids["unbind"]
+        command_status = 0x00000000  # not used for `unbind`
+        sequence_number = self.sequence_generator.next_sequence()
+        if sequence_number > self.MAX_SEQUENCE_NUMBER:
+            # prevent third party sequence_generators from ruining our party
+            raise ValueError(
+                "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
+                    sequence_number, self.MAX_SEQUENCE_NUMBER
+                )
+            )
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        # dont queue unbind in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        await self.send_data("unbind", full_pdu)
