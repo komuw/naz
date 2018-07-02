@@ -78,7 +78,7 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        "dev": ["coverage", "pypandoc", "twine", "wheel"],
+        "dev": ["coverage", "pypandoc", "twine", "wheel", "redis==2.10.6"],
         "test": [
             "flake8==3.5.0",
             "mock",

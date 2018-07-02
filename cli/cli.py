@@ -175,7 +175,8 @@ def main():
         gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
         loop.run_until_complete(gathering)
         loop.run_forever()
-    except Exception:
+    except Exception as e:
+        logger.exception("exception occured. error={0}".format(str(e)))
         pass
     finally:
         loop.run_until_complete(cli.unbind())

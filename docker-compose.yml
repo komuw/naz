@@ -5,3 +5,8 @@ services:
     ports:
     - 2775:2775
     - 8884:8884
+
+  redis:
+    image: 'redis:3.0-alpine'
+    ports:
+      - "6379:6379"
