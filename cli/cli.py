@@ -119,6 +119,7 @@ def main():
     # 2. python class instances
     # if the thing that the user passed in is a python class, we need to create a class instance.
     # we'll use `inspect.isclass` to do that
+    # todo: test the h** out of this logic
 
     outboundqueue = load_class(kwargs["outboundqueue"])  # this is a mandatory param
     if inspect.isclass(outboundqueue):
