@@ -199,3 +199,10 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_naz_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
             )
+
+    def test_unbind(self):
+        with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self._run(self.cli.unbind())
+            self.assertTrue(mock_naz_send_data.mock.called)
+            self.assertEqual(mock_naz_send_data.mock.call_count, 1)
+            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind")
