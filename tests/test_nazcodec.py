@@ -94,10 +94,10 @@ class TestNazCodec(TestCase):
         self.assertRaises(UnicodeEncodeError, self.codec.encode, "Zoë", "gsm0338")
 
     def test_encode_gsm0338_ignore(self):
-        self.assertEqual(self.codec.encode("Zoë", "gsm0338", "ignore"), "Zo")
+        self.assertEqual(self.codec.encode("Zoë", "gsm0338", "ignore"), b"Zo")
 
     def test_encode_gsm0338_replace(self):
-        self.assertEqual(self.codec.encode("Zoë", "gsm0338", "replace"), "Zo?")
+        self.assertEqual(self.codec.encode("Zoë", "gsm0338", "replace"), b"Zo?")
 
     def test_decode_gsm0338_strict(self):
         self.assertRaises(UnicodeDecodeError, self.codec.decode, "Zoë".encode("utf-8"), "gsm0338")
