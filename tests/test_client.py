@@ -135,9 +135,12 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
-                "pdu": short_message,
+                "short_message": short_message,
                 "event": "submit_sm",
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
             }
+
             reader, writer = self._run(self.cli.connect())
             self._run(self.cli.send_forever(TESTING=True))
 
