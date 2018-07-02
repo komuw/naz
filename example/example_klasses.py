@@ -74,3 +74,6 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
 
     async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
         return await self.queue.get()
+
+
+ExampleQueueInstance = ExampleQueue(maxsize=433)

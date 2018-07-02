@@ -3,6 +3,7 @@ import sys
 import json
 import asyncio
 import logging
+import inspect
 import argparse
 
 import naz
@@ -113,28 +114,40 @@ def main():
     logger.info("\n\n\t Naz: the SMPP client. \n\n")
 
     # Load custom classes #######################
-    outboundqueue = kwargs["outboundqueue"]  # this is a mandatory param
-    outboundqueue = load_class(outboundqueue)
-    kwargs["outboundqueue"] = outboundqueue()
+    # Users can either pass in:
+    # 1. python classes;
+    # 2. python class instances
+    # if the thing that the user passed in is a python class, we need to create a class instance.
+    # we'll use `inspect.isclass` to do that
+
+    outboundqueue = load_class(kwargs["outboundqueue"])  # this is a mandatory param
+    if inspect.isclass(outboundqueue):
+        # instantiate class instance
+        outboundqueue = outboundqueue()
+    kwargs["outboundqueue"] = outboundqueue
 
     sequence_generator = kwargs.get("sequence_generator")
     if sequence_generator:
         sequence_generator = load_class(sequence_generator)
-        # instantiate an object
-        kwargs["sequence_generator"] = sequence_generator()
+        if inspect.isclass(sequence_generator):
+            # instantiate an object
+            kwargs["sequence_generator"] = sequence_generator()
 
     codec_class = kwargs.get("codec_class")
     if codec_class:
         codec_class = load_class(codec_class)
-        kwargs["codec_class"] = codec_class()
+        if inspect.isclass(codec_class):
+            kwargs["codec_class"] = codec_class()
     rateLimiter = kwargs.get("rateLimiter")
     if rateLimiter:
         rateLimiter = load_class(rateLimiter)
-        kwargs["rateLimiter"] = rateLimiter()
+        if inspect.isclass(rateLimiter):
+            kwargs["rateLimiter"] = rateLimiter()
     hook = kwargs.get("hook")
     if hook:
         hook = load_class(hook)
-        kwargs["hook"] = hook()
+        if inspect.isclass(hook):
+            kwargs["hook"] = hook()
     # Load custom classes #######################
 
     # call naz api ###########
