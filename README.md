@@ -3,6 +3,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/616e5c6664dd4c1abb26f34f0bf566ae)](https://www.codacy.com/app/komuW/naz?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=komuw/naz&amp;utm_campaign=Badge_Grade)
 [![Build Status](https://travis-ci.com/komuw/naz.svg?branch=master)](https://travis-ci.com/komuw/naz)
 [![codecov](https://codecov.io/gh/komuw/naz/branch/master/graph/badge.svg)](https://codecov.io/gh/komuw/naz)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/komuw/naz) 
 
 
 naz is an SMPP client.           
@@ -10,7 +11,9 @@ It's name is derived from Kenyan hip hop artiste, Nazizi.
 
 > SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC). - [Wikipedia](https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer)
 
-naz currently only supports SMPP version 3.4.
+naz currently only supports SMPP version 3.4.       
+naz has no third-party dependencies. naz requires python version 3.6+
+
 
 naz is in active development and it's API may change in backward incompatible ways.               
 [https://pypi.python.org/pypi/naz](https://pypi.python.org/pypi/naz)
