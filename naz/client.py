@@ -837,3 +837,37 @@ class Client:
                 )
             )
         pass
+
+    async def unbind(self, correlation_id=None):
+        """
+        HEADER::
+        # unbind has the following pdu header:
+        command_length, int, 4octet
+        command_id, int, 4octet. `unbind`
+        command_status, int, 4octet. Not used. Set to NULL
+        sequence_number, int, 4octet.
+
+        `unbind` has no body.
+
+        clients/users should call this method when winding down.
+        """
+        # body
+        body = b""
+
+        # header
+        command_length = 16 + len(body)  # 16 is for headers
+        command_id = self.command_ids["unbind"]
+        command_status = 0x00000000  # not used for `unbind`
+        sequence_number = self.sequence_generator.next_sequence()
+        if sequence_number > self.MAX_SEQUENCE_NUMBER:
+            # prevent third party sequence_generators from ruining our party
+            raise ValueError(
+                "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
+                    sequence_number, self.MAX_SEQUENCE_NUMBER
+                )
+            )
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        # dont queue unbind in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        await self.send_data("unbind", full_pdu)
