@@ -12,7 +12,7 @@ It's name is derived from Kenyan hip hop artiste, Nazizi.
 > SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC). - [Wikipedia](https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer)
 
 naz currently only supports SMPP version 3.4.       
-naz has no third-party dependencies. naz requires python version 3.6+
+naz has no third-party dependencies and it requires python version 3.6+
 
 
 naz is in active development and it's API may change in backward incompatible ways.               
