@@ -36,9 +36,6 @@ import codecs
 import sys
 
 
-# todo: port the testcases found at:
-# https://github.com/praekelt/vumi/blob/master/vumi/codecs/tests/test_vumi_codecs.py
-
 # An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
 # however, I'm guessing that vumi has been in use longer and we should thus go with it.
 
