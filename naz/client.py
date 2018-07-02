@@ -356,7 +356,7 @@ class Client:
         self.logger.debug("tranceiver_bound")
         return full_pdu
 
-    async def enquire_link(self, correlation_id=None):
+    async def enquire_link(self, correlation_id=None, TESTING=False):
         """
         HEADER::
         # enquire_link has the following pdu header:
@@ -390,6 +390,8 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data("enquire_link", full_pdu)
+            if TESTING:
+                return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
 
     async def enquire_link_resp(self, sequence_number, correlation_id=None):
