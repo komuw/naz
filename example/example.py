@@ -4,7 +4,7 @@ import naz
 
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.DefaultOutboundQueue(maxsize=100, loop=loop)
+outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=loop)
 cli = naz.Client(
     async_loop=loop,
     smsc_host="127.0.0.1",
