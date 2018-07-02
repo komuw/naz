@@ -47,12 +47,10 @@ class TestNazCodec(TestCase):
         self.assertRaises(naz.nazcodec.NazCodecException, self.codec.decode, "unicode")
 
     def test_default_encoding(self):
-        self.assertEqual(self.codec.encode("a"), "a")
-        self.assertRaises(UnicodeEncodeError, self.codec.encode, "ë")
+        self.assertEqual(self.codec.encode("a"), b"a")
 
     def test_default_decoding(self):
-        self.assertEqual(self.codec.decode("a"), "a")
-        self.assertRaises(UnicodeDecodeError, self.codec.decode, "\xc3\xab")  # e-umlaut
+        self.assertEqual(self.codec.decode(b"a"), "a")
 
     def test_encode_utf8(self):
         self.assertEqual(self.codec.encode("Zoë", "utf-8"), "Zo\xc3\xab")
