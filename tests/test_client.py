@@ -39,12 +39,14 @@ class TestClient(TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
+        self.outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=self.loop)
         self.cli = naz.Client(
             async_loop=self.loop,
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
             password="password",
+            outboundqueue=self.outboundqueue,
         )
 
         self.docker_client = docker.from_env()
@@ -87,6 +89,7 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password="password",
                 log_metadata="bad-Type",
+                outboundqueue=self.outboundqueue,
             )
 
         self.assertRaises(ValueError, mock_create_client)
