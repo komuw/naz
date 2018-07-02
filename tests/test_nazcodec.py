@@ -59,10 +59,10 @@ class TestNazCodec(TestCase):
         self.assertEqual(self.codec.decode(b"Zo\xc3\xab", "utf-8"), "Zoë")
 
     def test_encode_utf16be(self):
-        self.assertEqual(self.codec.encode("Zoë", "utf-16be"), "\x00Z\x00o\x00\xeb")
+        self.assertEqual(self.codec.encode("Zoë", "utf-16be"), b"\x00Z\x00o\x00\xeb")
 
     def test_decode_utf16be(self):
-        self.assertEqual(self.codec.decode("\x00Z\x00o\x00\xeb", "utf-16be"), "Zoë")
+        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "utf-16be"), "Zoë")
 
     def test_encode_ucs2(self):
         self.assertEqual(self.codec.encode("Zoë", "ucs2"), "\x00Z\x00o\x00\xeb")
