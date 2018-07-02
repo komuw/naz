@@ -65,26 +65,27 @@ class TestNazCodec(TestCase):
         self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "utf-16be"), "Zoë")
 
     def test_encode_ucs2(self):
-        self.assertEqual(self.codec.encode("Zoë", "ucs2"), "\x00Z\x00o\x00\xeb")
+        self.assertEqual(self.codec.encode("Zoë", "ucs2"), b"\x00Z\x00o\x00\xeb")
 
     def test_decode_ucs2(self):
-        self.assertEqual(self.codec.decode("\x00Z\x00o\x00\xeb", "ucs2"), "Zoë")
+        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "ucs2"), "Zoë")
 
     def test_encode_gsm0338(self):
         self.assertEqual(
-            self.codec.encode("HÜLK", "gsm0338"), "".join([chr(code) for code in [72, 94, 76, 75]])
+            self.codec.encode("HÜLK", "gsm0338"),
+            "".join([chr(code) for code in [72, 94, 76, 75]]).encode(),
         )
 
     def test_encode_gsm0338_extended(self):
         self.assertEqual(
             self.codec.encode("foo €", "gsm0338"),
-            "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]),
+            "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(),
         )
 
     def test_decode_gsm0338_extended(self):
         self.assertEqual(
             self.codec.decode(
-                "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]), "gsm0338"
+                "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(), "gsm0338"
             ),
             "foo €",
         )
