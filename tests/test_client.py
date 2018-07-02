@@ -183,7 +183,7 @@ class TestClient(TestCase):
             )
 
     def test_speficic_handlers_unbind(self):
-        with mock.patch("naz.Client.unbind_resp", new=AsyncMock()) as mock_naz_unbind_resp:
+        with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
@@ -194,11 +194,9 @@ class TestClient(TestCase):
                     total_pdu_length=16,
                 )
             )
-
-            self.assertTrue(mock_naz_unbind_resp.mock.called)
-            self.assertEqual(
-                mock_naz_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
-            )
+            self.assertTrue(mock_naz_send_data.mock.called)
+            self.assertEqual(mock_naz_send_data.mock.call_count, 1)
+            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind_resp")
 
     def test_unbind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
