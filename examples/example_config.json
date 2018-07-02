@@ -3,9 +3,9 @@
     "smsc_port": 2775,
     "system_id": "smppclient1",
     "password": "password",
-    "outboundqueue": "example.example_klasses.ExampleQueueInstance",
+    "outboundqueue": "examples.example_klasses.ExampleQueueInstance",
     "encoding": "gsm0338",
-    "sequence_generator": "example.example_klasses.ExampleSeqGen",
+    "sequence_generator": "examples.example_klasses.ExampleSeqGen",
     "loglevel": "INFO",
     "log_metadata": {
         "environment": "production",
@@ -13,5 +13,5 @@
     },
     "codec_errors_level": "ignore",
     "enquire_link_interval": 30,
-    "rateLimiter": "example.example_klasses.ExampleRateLimiter"
+    "rateLimiter": "examples.example_klasses.ExampleRateLimiter"
 }

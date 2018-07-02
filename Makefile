@@ -29,5 +29,5 @@ test:
 	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=83
 	@printf "\n coverage report html::\n" && coverage html --fail-under=83 --title=naz_coverage
 	@printf "\n run flake8::\n" && flake8 .
-	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/ cli/
+	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run mypy::\n" && mypy --show-column-numbers -m naz.q

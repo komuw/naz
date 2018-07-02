@@ -31,7 +31,7 @@ flake8 .
 ```                      
 - run [pylint](https://pypi.python.org/pypi/pylint) on the code and fix any issues:                      
 ```shell
-pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y example/ naz/ tests/ cli/
+pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 ```    
 - run tests and make sure everything is passing:
 ```shell
