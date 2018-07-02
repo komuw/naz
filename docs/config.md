@@ -25,7 +25,7 @@ schedule_delivery_time | The short message is to be scheduled by the SMSC for de
 validity_period | The validity period of this message. | ""
 registered_delivery |  Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required. | 5
 replace_if_present_flag |  Flag indicating if submitted message should replace an existing message. | 0
-sm_default_msg_id |  Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC | 0,
+sm_default_msg_id |  Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC | 0
 
 
 **NB**: The canonical reference for these values is the SMPP version 3.4 spec document. It's is encouraged that you consult. 
