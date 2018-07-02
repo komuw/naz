@@ -3,6 +3,7 @@ import sys
 import json
 import asyncio
 import logging
+import inspect
 import argparse
 
 import naz
@@ -113,21 +114,41 @@ def main():
     logger.info("\n\n\t Naz: the SMPP client. \n\n")
 
     # Load custom classes #######################
+    # Users can either pass in:
+    # 1. python classes;
+    # 2. python class instances
+    # if the thing that the user passed in is a python class, we need to create a class instance.
+    # we'll use `inspect.isclass` to do that
+    # todo: test the h** out of this logic
+
+    outboundqueue = load_class(kwargs["outboundqueue"])  # this is a mandatory param
+    if inspect.isclass(outboundqueue):
+        # instantiate class instance
+        outboundqueue = outboundqueue()
+    kwargs["outboundqueue"] = outboundqueue
+
     sequence_generator = kwargs.get("sequence_generator")
     if sequence_generator:
-        kwargs["sequence_generator"] = load_class(sequence_generator)
-    outboundqueue = kwargs.get("outboundqueue")
-    if outboundqueue:
-        kwargs["outboundqueue"] = load_class(outboundqueue)
+        sequence_generator = load_class(sequence_generator)
+        if inspect.isclass(sequence_generator):
+            # instantiate an object
+            kwargs["sequence_generator"] = sequence_generator()
+
     codec_class = kwargs.get("codec_class")
     if codec_class:
-        kwargs["codec_class"] = load_class(codec_class)
+        codec_class = load_class(codec_class)
+        if inspect.isclass(codec_class):
+            kwargs["codec_class"] = codec_class()
     rateLimiter = kwargs.get("rateLimiter")
     if rateLimiter:
-        kwargs["rateLimiter"] = load_class(rateLimiter)
+        rateLimiter = load_class(rateLimiter)
+        if inspect.isclass(rateLimiter):
+            kwargs["rateLimiter"] = rateLimiter()
     hook = kwargs.get("hook")
     if hook:
-        kwargs["hook"] = load_class(hook)
+        hook = load_class(hook)
+        if inspect.isclass(hook):
+            kwargs["hook"] = hook()
     # Load custom classes #######################
 
     # call naz api ###########
@@ -135,26 +156,31 @@ def main():
     cli = naz.Client(async_loop=loop, **kwargs)
     # queue messages to send
     for i in range(0, 20):
-        loop.run_until_complete(
-            cli.submit_sm(
-                msg="Hello World-{0}.".format(str(i)),
-                correlation_id="myid12345",
-                source_addr="254722111111",
-                destination_addr="254722999999",
-            )
-        )
+        item_to_enqueue = {
+            "event": "submit_sm",
+            "short_message": "Hello World-{0}".format(str(i)),
+            "correlation_id": "myid12345",
+            "source_addr": "254722111111",
+            "destination_addr": "254722999999",
+        }
+        loop.run_until_complete(kwargs["outboundqueue"].enqueue(item_to_enqueue))
 
     # connect to the SMSC host
     reader, writer = loop.run_until_complete(cli.connect())
     # bind to SMSC as a tranceiver
     loop.run_until_complete(cli.tranceiver_bind())
 
-    # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-    loop.run_until_complete(gathering)
-
-    loop.run_forever()
-    loop.close()
+    try:
+        # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+        gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+        loop.run_until_complete(gathering)
+        loop.run_forever()
+    except Exception as e:
+        logger.exception("exception occured. error={0}".format(str(e)))
+        pass
+    finally:
+        loop.run_until_complete(cli.unbind())
+        loop.close()
     # call naz api ###########
 
 

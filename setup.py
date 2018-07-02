@@ -78,7 +78,7 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        "dev": ["coverage", "pypandoc", "twine", "wheel"],
+        "dev": ["coverage", "pypandoc", "twine", "wheel", "redis==2.10.6"],
         "test": [
             "flake8==3.5.0",
             "mock",
@@ -86,6 +86,7 @@ setup(
             "pycodestyle==2.3.1",
             "black",
             "docker==3.4.0",
+            "mypy==0.610",
         ],
     },
     # If there are data files included in your packages that need to be

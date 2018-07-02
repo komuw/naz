@@ -3,6 +3,7 @@
     "smsc_port": 2775,
     "system_id": "smppclient1",
     "password": "password",
+    "outboundqueue": "example.example_klasses.ExampleQueueInstance",
     "encoding": "gsm0338",
     "sequence_generator": "example.example_klasses.ExampleSeqGen",
     "loglevel": "INFO",

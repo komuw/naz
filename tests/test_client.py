@@ -39,12 +39,14 @@ class TestClient(TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
+        self.outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=self.loop)
         self.cli = naz.Client(
             async_loop=self.loop,
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
             password="password",
+            outboundqueue=self.outboundqueue,
         )
 
         self.docker_client = docker.from_env()
@@ -87,6 +89,7 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password="password",
                 log_metadata="bad-Type",
+                outboundqueue=self.outboundqueue,
             )
 
         self.assertRaises(ValueError, mock_create_client)
@@ -114,7 +117,7 @@ class TestClient(TestCase):
             correlation_id = "12345"
             self._run(
                 self.cli.submit_sm(
-                    msg="hello smpp",
+                    short_message="hello smpp",
                     correlation_id=correlation_id,
                     source_addr="9090",
                     destination_addr="254722000111",
@@ -129,12 +132,15 @@ class TestClient(TestCase):
     def test_submit_sm_sending(self):
         with mock.patch("naz.q.DefaultOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             correlation_id = "12345"
-            msg = "hello smpp"
+            short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
-                "pdu": msg,
+                "short_message": short_message,
                 "event": "submit_sm",
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
             }
+
             reader, writer = self._run(self.cli.connect())
             self._run(self.cli.send_forever(TESTING=True))
 
@@ -177,7 +183,7 @@ class TestClient(TestCase):
             )
 
     def test_speficic_handlers_unbind(self):
-        with mock.patch("naz.Client.unbind_resp", new=AsyncMock()) as mock_naz_unbind_resp:
+        with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
@@ -188,8 +194,35 @@ class TestClient(TestCase):
                     total_pdu_length=16,
                 )
             )
+            self.assertTrue(mock_naz_send_data.mock.called)
+            self.assertEqual(mock_naz_send_data.mock.call_count, 1)
+            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind_resp")
 
-            self.assertTrue(mock_naz_unbind_resp.mock.called)
-            self.assertEqual(
-                mock_naz_unbind_resp.mock.call_args[1]["sequence_number"], sequence_number
+    def test_speficic_handlers_deliver_sm(self):
+        with mock.patch("naz.q.DefaultOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="deliver_sm",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
             )
+            self.assertTrue(mock_naz_enqueue.mock.called)
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "deliver_sm_resp")
+
+    def test_unbind(self):
+        with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self._run(self.cli.unbind())
+            self.assertTrue(mock_naz_send_data.mock.called)
+            self.assertEqual(mock_naz_send_data.mock.call_count, 1)
+            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind")
+
+    def test_enquire_link(self):
+        with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self._run(self.cli.enquire_link(TESTING=True))
+            self.assertTrue(mock_naz_send_data.mock.called)
+            self.assertEqual(mock_naz_send_data.mock.call_count, 1)
+            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "enquire_link")
