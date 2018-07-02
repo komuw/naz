@@ -41,9 +41,13 @@ reader, writer = loop.run_until_complete(cli.connect())
 # bind to SMSC as a tranceiver
 loop.run_until_complete(cli.tranceiver_bind())
 
-# read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-loop.run_until_complete(gathering)
-
-loop.run_forever()
-loop.close()
+try:
+    # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+    gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    loop.run_until_complete(gathering)
+    loop.run_forever()
+except Exception:
+    pass
+finally:
+    loop.run_until_complete(cli.unbind())
+    loop.close()
