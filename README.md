@@ -1,11 +1,9 @@
 ## naz          
 
-<p align="left">
-<a href="https://www.codacy.com/app/komuw/naz"><img alt="code quality" src="https://api.codacy.com/project/badge/Grade/616e5c6664dd4c1abb26f34f0bf566ae"></a>
-<a href="https://travis-ci.com/komuw/naz"><img alt="build status" src="https://travis-ci.com/komuw/naz.svg?branch=master"></a>
-<a href="https://codecov.io/gh/komuw/naz"><img alt="test coverage" src="https://codecov.io/gh/komuw/naz/branch/master/graph/badge.svg"></a>
-<a href="https://github.com/komuw/naz"><img alt="code style" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-</p>
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/616e5c6664dd4c1abb26f34f0bf566ae)](https://www.codacy.com/app/komuw/naz)
+[![Build Status](https://travis-ci.com/komuw/naz.svg?branch=master)](https://travis-ci.com/komuw/naz)
+[![codecov](https://codecov.io/gh/komuw/naz/branch/master/graph/badge.svg)](https://codecov.io/gh/komuw/naz)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/komuw/naz)
 
 naz is an SMPP client.           
 It's name is derived from Kenyan hip hop artiste, Nazizi.                             
