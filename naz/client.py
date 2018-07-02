@@ -824,7 +824,7 @@ class Client:
             # short_message, C-Octet String, 0-254 octet
 
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
-            self.deliver_sm_resp(sequence_number=sequence_number)
+            await self.deliver_sm_resp(sequence_number=sequence_number)
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body

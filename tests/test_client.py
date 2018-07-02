@@ -198,6 +198,21 @@ class TestClient(TestCase):
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
             self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind_resp")
 
+    def test_speficic_handlers_deliver_sm(self):
+        with mock.patch("naz.q.DefaultOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="deliver_sm",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_naz_enqueue.mock.called)
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "deliver_sm_resp")
+
     def test_unbind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             self._run(self.cli.unbind())
