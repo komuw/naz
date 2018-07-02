@@ -107,4 +107,3 @@ class TestNazCodec(TestCase):
 
     def test_decode_gsm0338_replace(self):
         self.assertEqual(self.codec.decode("Zoë".encode("utf-8"), "gsm0338", "replace"), "Zo??")
-
