@@ -112,7 +112,7 @@ submit_sm_enqueued. event=submit_sm. correlation_id=myid12345. source_addr=25472
 network_connecting. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 network_connected. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 ```              
-For more information about the `naz` config file, consult the [documentation here](docs/config.md)                
+For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)                
 To see help:
 
 `naz-cli --help`   
@@ -144,7 +144,7 @@ optional arguments:
 
 
 ## Development setup
-- see [documentation on contributing](.github/CONTRIBUTING.md)
+- see [documentation on contributing](https://github.com/komuw/naz/blob/master/.github/CONTRIBUTING.md)
 - **NB:** I make no commitment of accepting your pull requests.                 
 
 
