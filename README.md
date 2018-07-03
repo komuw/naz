@@ -159,8 +159,9 @@ cli = naz.Client(
 ```
 
 #### 2. monitoring and observability
+it's a loaded term, I know.
 ##### 2.1 logging
-it's a loaded term, I know. In `naz` you have the ability to annotate all the log events that `naz` will generate with anything you want.        
+In `naz` you have the ability to annotate all the log events that `naz` will generate with anything you want.        
 So, for example if you wanted to annotate all log-events with a release version and your app's running environment.
 ```python
 import naz
