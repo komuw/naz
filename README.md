@@ -227,10 +227,12 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 ```python
 import naz
 
-my_throttle_handeler = naz.throttle.SimpleThrottleHandler(sampling_period=180, sample_size=45, deny_request_at=1.2)
+throttler = naz.throttle.SimpleThrottleHandler(sampling_period=180,
+                                               sample_size=45,
+                                               deny_request_at=1.2)
 cli = naz.Client(
     ...
-    throttle_handler=my_throttle_handeler,
+    throttle_handler=throttler,
 )
 ```
 
