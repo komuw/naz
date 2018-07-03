@@ -7,6 +7,9 @@ class BaseHook:
     Interface that must be implemented to satisfy naz's hooks.
     User implementations should subclassing this class and
     implement the request and response methods with the type signatures shown.
+
+    A hook is class with hook methods that are called before a request is sent to SMSC and
+    after a response is received from SMSC.
     """
 
     async def request(self, event: str, correlation_id: typing.Optional[str] = None) -> None:
@@ -18,10 +21,7 @@ class BaseHook:
 
 class SimpleHook(BaseHook):
     """
-    class with hook methods that are called before a request is sent to SMSC and
-    after a response is received from SMSC.
-
-    User's can provide their own hook classes
+    class implementing naz's Hook interface.
     """
 
     def __init__(self, logger) -> None:
