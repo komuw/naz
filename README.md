@@ -174,6 +174,17 @@ by default, `naz` annotates all log events with `smsc_host` and `system_id`
 
 #### 3. Rate limiting
 Sometimes you want to control the rate at which the client sends requests to an SMSC/server. `naz` lets you do this, by allowing you to specify a custom rate limiter.
+By default, `naz` uses a simple token bucket rate limiting algorith [implemented here](https://github.com/komuw/naz/blob/master/naz/ratelimiter.py).         
+You can customize `naz`'s ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the `BaseRateLimiter` interface [found here](https://github.com/komuw/naz/blob/master/naz/ratelimiter.py) )            
+To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
+```python
+import naz
+rateLimiter = naz.ratelimiter.SimpleRateLimiter(SEND_RATE=35)
+cli = naz.Client(
+    ...
+    rateLimiter=rateLimiter,
+)
+```
 
 #### XX. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)

@@ -289,9 +289,7 @@ class Client:
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
-            self.rateLimiter = ratelimiter.SimpleRateLimiter(
-                SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1, logger=self.logger
-            )
+            self.rateLimiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
 
         self.hook = hook
         if not self.hook:
