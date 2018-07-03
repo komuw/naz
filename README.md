@@ -82,7 +82,7 @@ create a json config file, eg;
   "smsc_port": 2775,
   "system_id": "smppclient1",
   "password": "password",
-  "outboundqueue": "myfile.ExampleQueue",
+  "outboundqueue": "myfile.ExampleQueue"
 }
 ```
 and a python file, `myfile.py` (in the current working directory) with the contents:
@@ -106,10 +106,12 @@ run:
 ```shell
 	 Naz: the SMPP client.
 
-submit_sm_enqueue. correlation_id=myid12345. source_addr=254722111111. destination_addr=254722999999. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-submit_sm_enqueued. event=submit_sm. correlation_id=myid12345. source_addr=254722111111. destination_addr=254722999999. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 network_connecting. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 network_connected. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+tranceiver_binding. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+data_sending. event=bind_transceiver. msg=@@@3@@@.  log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+tranceiver_bound. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 ```              
 For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)                
 To see help:
