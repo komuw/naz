@@ -293,7 +293,8 @@ for i in range(0, 4):
     }
     loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
 ```                   
-                    
+                         
+                         
 Here is another example, but where we now use redis for our queue;
 ```python
 import json
