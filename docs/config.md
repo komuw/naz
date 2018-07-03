@@ -47,7 +47,7 @@ log_metadata | metadata that will be included in all log statements | {"smsc_hos
 codec_class | python class to be used to encode/decode messages | naz.nazcodec.NazCodec
 codec_errors_level | same meaning as the `errors` argument to pythons' `encode` method as [defined here](https://docs.python.org/3/library/codecs.html#codecs.encode) | strict
 enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 90
-rateLimiter | python class implementing rate limitation | naz.ratelimiter.RateLimiter
+rateLimiter | python class implementing rate limitation | naz.ratelimiter.SimpleRateLimiter
 hook | python class implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.DefaultHook
 throttle_handler | python class implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
 

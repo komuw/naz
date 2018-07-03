@@ -24,10 +24,10 @@ class ExampleSeqGen(object):
         return self.sequence_number
 
 
-class ExampleRateLimiter:
+class ExampleRateLimiter(naz.ratelimiter.SimpleRateLimiter):
     """
     Usage:
-        rateLimiter = RateLimiter(SEND_RATE=10, MAX_TOKENS=25)
+        rateLimiter = ExampleRateLimiter(SEND_RATE=10, MAX_TOKENS=25)
         await rateLimiter.wait_for_token()
         send_messsages()
     """

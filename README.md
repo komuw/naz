@@ -136,9 +136,46 @@ optional arguments:
 
 
 ## Features
-- 
-- 
-- Well written(if I have to say so myself):
+#### 1. async everywhere
+SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.               
+It thus makes sense to write yur SMPP client in an async manner. We leverage python3's async/await to do so. And if you do not like python's inbuilt 
+event loop, you can bring your own. eg; to use [uvloop](https://github.com/MagicStack/uvloop);
+```python
+import naz
+import asyncio
+import uvloop
+
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+loop = asyncio.get_event_loop()
+outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=loop)
+cli = naz.Client(
+    async_loop=loop,
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=outboundqueue,
+)
+```
+
+#### 2. monitoring and observability
+it's a loaded term, I know. In `naz` you have the ability to annotate all the log events that `naz` will generate with anything you want.        
+So, for example if you wanted to annotate all log-events with a release version and your app's running environment.
+```python
+import naz
+
+cli = naz.Client(
+    ...
+    log_metadata={ "environment": "production", "release": "canary"},
+)
+```
+and then these will show up in all log events.             
+by default, `naz` annotates all log events with `smsc_host` and `system_id`
+
+#### 3. Rate limiting
+Sometimes you want to control the rate at which the client sends requests to an SMSC/server. `naz` lets you do this, by allowing you to specify a custom rate limiter.
+
+#### XX. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
   - [Passing continous integration](https://travis-ci.com/komuw/naz/builds)
   - [High grade statically analyzed code](https://www.codacy.com/app/komuw/naz/dashboard)
@@ -147,7 +184,6 @@ optional arguments:
 ## Development setup
 - see [documentation on contributing](https://github.com/komuw/naz/blob/master/.github/CONTRIBUTING.md)
 - **NB:** I make no commitment of accepting your pull requests.                 
-
 
 
 ## TODO
