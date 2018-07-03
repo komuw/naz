@@ -392,7 +392,7 @@ class Client:
             )
 
             full_pdu = header + body
-            # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+            # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data("enquire_link", full_pdu)
             if TESTING:
                 return full_pdu
@@ -454,7 +454,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        # dont queue unbind_resp in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind_resp", full_pdu)
 
     async def deliver_sm_resp(self, sequence_number, correlation_id=None):
@@ -893,5 +893,5 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        # dont queue unbind in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind", full_pdu)
