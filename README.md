@@ -200,7 +200,7 @@ cli = naz.Client(
 
 #### 3. Rate limiting
 Sometimes you want to control the rate at which the client sends requests to an SMSC/server. `naz` lets you do this, by allowing you to specify a custom rate limiter.
-By default, `naz` uses a simple token bucket rate limiting algorith [implemented here](https://github.com/komuw/naz/blob/master/naz/ratelimiter.py).         
+By default, `naz` uses a simple token bucket rate limiting algorithm [implemented here](https://github.com/komuw/naz/blob/master/naz/ratelimiter.py).         
 You can customize `naz`'s ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the `BaseRateLimiter` interface [found here](https://github.com/komuw/naz/blob/master/naz/ratelimiter.py) )            
 To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
 ```python
@@ -211,6 +211,27 @@ cli = naz.Client(
     rateLimiter=myLimiter,
 )
 ```
+
+#### 4. Throttle handling
+Sometimes, when a client sends requests to an SMSC/server, the SMSC may reply with an `ESME_RTHROTTLED` status.           
+This can happen, say if the client has surpassed the rate at which it is supposed to send requests at, or the SMSC is under load or for whatever reason ¯\_(ツ)_/¯           
+The way `naz` handles throtlling is via Throttle handlers.                
+A throttle handler is a class that implements the `BaseThrottleHandler` interface as [defined here](https://github.com/komuw/naz/blob/docz/naz/throttle.py)            
+`naz` calls that class's `throttled` method everytime it gets a throttled(`ESME_RTHROTTLED`) response from the SMSC and it also calls that class's `not_throttled` method 
+everytime it gets a response from the SMSC and the response is NOT a throttled response.            
+`naz` will also call that class's `allow_request` method just before sending a request to SMSC. the `allow_request` method should return `True` if requests should be allowed to SMSC 
+else it should return `False` if requests should not be sent.                 
+By default `naz` uses [`naz.throttle.SimpleThrottleHandler`](https://github.com/komuw/naz/blob/docz/naz/throttle.py) to handle throttling.            
+The way `SimpleThrottleHandler` works is, it calculates the percentage of responses that are throttle responses and then denies outgoing requests(towards SMSC) if percentage of responses that are throttles goes above a certain metric.         
+As an example if you want to deny outgoing requests if the percentage of throttles is above 1.2% over a period of 180 seconds and the total number of responses from SMSC is greater than 45, then;
+```python
+import naz
+
+my_throttle_handeler = naz.throttle.SimpleThrottleHandler(sampling_period=180, sample_size=45, deny_request_at=1.2)
+cli = naz.Client(
+    ...
+    throttle_handler=my_throttle_handeler,
+)
 
 #### XX. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
