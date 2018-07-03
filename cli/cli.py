@@ -177,8 +177,8 @@ def main():
 
     try:
         # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-        gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-        loop.run_until_complete(gathering)
+        tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+        loop.run_until_complete(tasks)
         loop.run_forever()
     except Exception as e:
         logger.exception("exception occured. error={0}".format(str(e)))

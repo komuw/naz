@@ -61,8 +61,8 @@ loop.run_until_complete(cli.tranceiver_bind())
 
 try:
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-    loop.run_until_complete(gathering)
+    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:
     print("exception occured. error={0}".format(str(e)))
@@ -216,12 +216,12 @@ cli = naz.Client(
 Sometimes, when a client sends requests to an SMSC/server, the SMSC may reply with an `ESME_RTHROTTLED` status.           
 This can happen, say if the client has surpassed the rate at which it is supposed to send requests at, or the SMSC is under load or for whatever reason ¯\_(ツ)_/¯           
 The way `naz` handles throtlling is via Throttle handlers.                
-A throttle handler is a class that implements the `BaseThrottleHandler` interface as [defined here](https://github.com/komuw/naz/blob/docz/naz/throttle.py)            
+A throttle handler is a class that implements the `BaseThrottleHandler` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/throttle.py)            
 `naz` calls that class's `throttled` method everytime it gets a throttled(`ESME_RTHROTTLED`) response from the SMSC and it also calls that class's `not_throttled` method 
 everytime it gets a response from the SMSC and the response is NOT a throttled response.            
 `naz` will also call that class's `allow_request` method just before sending a request to SMSC. the `allow_request` method should return `True` if requests should be allowed to SMSC 
 else it should return `False` if requests should not be sent.                 
-By default `naz` uses [`naz.throttle.SimpleThrottleHandler`](https://github.com/komuw/naz/blob/docz/naz/throttle.py) to handle throttling.            
+By default `naz` uses [`naz.throttle.SimpleThrottleHandler`](https://github.com/komuw/naz/blob/master/naz/throttle.py) to handle throttling.            
 The way `SimpleThrottleHandler` works is, it calculates the percentage of responses that are throttle responses and then denies outgoing requests(towards SMSC) if percentage of responses that are throttles goes above a certain metric.         
 As an example if you want to deny outgoing requests if the percentage of throttles is above 1.2% over a period of 180 seconds and the total number of responses from SMSC is greater than 45, then;
 ```python
@@ -235,6 +235,65 @@ cli = naz.Client(
     throttle_handler=throttler,
 )
 ```
+
+#### 5. Queuing
+**How does your application and `naz` talk with each other?**         
+It's via a queuing interface. Your application queues messages to a queue, `naz` consumes from that queue and then `naz` sends those messages to SMSC/server.       
+You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseOutboundQueue` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
+Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the queue.         
+Your application should enqueue a dictionary object with any parameters but the following are mandatory:              
+```bash
+{
+    "event": "submit_sm",
+    "short_message": string,
+    "correlation_id": string,
+    "source_addr": string,
+    "destination_addr": string
+}
+```
+`naz` ships with a simple queue implementation called [`naz.q.SimpleOutboundQueue`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
+An example of using that;
+```python
+import asyncio
+import naz
+
+loop = asyncio.get_event_loop()
+my_queue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop) # can hold upto 1000 items
+cli = naz.Client(
+    ...
+    async_loop=loop,
+    outboundqueue=my_queue,
+)
+# connect to the SMSC host
+loop.run_until_complete(cli.connect())
+# bind to SMSC as a tranceiver
+loop.run_until_complete(cli.tranceiver_bind())
+
+try:
+    # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    loop.run_until_complete(tasks)
+    loop.run_forever()
+except Exception as e:
+    print("exception occured. error={0}".format(str(e)))
+finally:
+    loop.run_until_complete(cli.unbind())
+    loop.close()
+```
+then in your application, queue items to the queue;
+```python
+# queue messages to send
+for i in range(0, 4):
+    item_to_enqueue = {
+        "event": "submit_sm",
+        "short_message": "Hello World-{0}".format(str(i)),
+        "correlation_id": "myid12345",
+        "source_addr": "254722111111",
+        "destination_addr": "254722999999",
+    }
+    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+```
+
 
 #### XX. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
