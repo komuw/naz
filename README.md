@@ -214,7 +214,7 @@ cli = naz.Client(
 #### XX. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
   - [Passing continous integration](https://travis-ci.com/komuw/naz/builds)
-  - [High grade statically analyzed code](https://www.codacy.com/app/komuw/naz/dashboard)
+  - [statically analyzed code](https://www.codacy.com/app/komuw/naz/dashboard)
 
 
 ## Development setup
