@@ -138,7 +138,7 @@ optional arguments:
 ## Features
 #### 1. async everywhere
 SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.               
-It thus makes sense to write yur SMPP client in an async manner. We leverage python3's async/await to do so. And if you do not like python's inbuilt 
+It thus makes sense to write your SMPP client in an async manner. We leverage python3's async/await to do so. And if you do not like python's inbuilt 
 event loop, you can bring your own. eg; to use [uvloop](https://github.com/MagicStack/uvloop);
 ```python
 import naz
