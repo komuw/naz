@@ -1,7 +1,4 @@
 import time
-import asyncio
-
-import typing
 
 
 class BaseThrottleHandler:
@@ -39,10 +36,10 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         :param sampling_period:                  (optional) [float]
             the duration in seconds over which we will calculate the percentage of throttled responses.
         :param sample_size:                  (optional) [int]
-            the minimum number of responses we should have got from SMSC over :sampling_period duration to enable us make a decision.  
+            the minimum number of responses we should have got from SMSC over :sampling_period duration to enable us make a decision.
         :param deny_request_at:                  (optional) [float]
             the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.
-        
+
         usage:
             throttle_handeler = SimpleThrottleHandler(sampling_period=180, sample_size=45, deny_request_at=1.2)
                 this will calculate the percentage of throttles we are getting from SMSC.

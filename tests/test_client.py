@@ -2,16 +2,15 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import os
+import sys
 import mock
 import asyncio
+import logging
 from unittest import TestCase
 
 import naz
 import docker
 
-
-import sys
-import logging
 
 logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
