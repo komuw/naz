@@ -22,8 +22,17 @@ class TestThrottle(TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
+
+        self.logger = logging.getLogger()
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("%(message)s")
+        handler.setFormatter(formatter)
+        if not self.logger.handlers:
+            self.logger.addHandler(handler)
+        self.logger.setLevel("DEBUG")
+
         self.throttle_handler = naz.throttle.SimpleThrottleHandler(
-            sampling_period=10, sample_size=12, deny_request_at=1
+            logger=self.logger, sampling_period=10, sample_size=12, deny_request_at=1
         )
 
     def tearDown(self):

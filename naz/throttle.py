@@ -1,4 +1,5 @@
 import time
+import logging
 
 
 class BaseThrottleHandler:
@@ -30,7 +31,11 @@ class BaseThrottleHandler:
 
 class SimpleThrottleHandler(BaseThrottleHandler):
     def __init__(
-        self, sampling_period: float = 180, sample_size: float = 50, deny_request_at: float = 1
+        self,
+        logger: logging.Logger,
+        sampling_period: float = 180,
+        sample_size: float = 50,
+        deny_request_at: float = 1,
     ) -> None:
         """
         :param sampling_period:                  (optional) [float]
@@ -50,6 +55,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         self.throttle_responses: int = 0
         self.updated_at: float = time.monotonic()
 
+        self.logger = logger
         self.sampling_period: float = sampling_period
         self.sample_size: float = sample_size
         self.deny_request_at: float = deny_request_at
@@ -60,11 +66,14 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         if total_smsc_responses < self.sample_size:
             # we do not have enough data to make decision, so asssume happy case
             return 0.0
-        return (self.throttle_responses / (total_smsc_responses)) * 100
+        return round((self.throttle_responses / (total_smsc_responses)) * 100, 2)
 
     async def allow_request(self) -> bool:
         # calculat percentage of throttles before resetting NON_throttle_responses and throttle_responses
         current_percent_throttles: float = self.percent_throttles
+        _throttle_responses: int = self.throttle_responses
+        _NON_throttle_responses: int = self.NON_throttle_responses
+
         now: float = time.monotonic()
         time_since_update: float = now - self.updated_at
         if time_since_update > self.sampling_period:
@@ -74,7 +83,37 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             self.throttle_responses = 0
             self.updated_at = now
         if current_percent_throttles > self.deny_request_at:
+            self.logger.info(
+                """deny_request. percent_throttles={0}.
+                throttle_responses={1}.
+                NON_throttle_responses={2}.
+                sampling_period={3}.
+                sample_size={4}.
+                deny_request_at={5}%""".format(
+                    current_percent_throttles,
+                    _throttle_responses,
+                    _NON_throttle_responses,
+                    self.sampling_period,
+                    self.sample_size,
+                    self.deny_request_at,
+                )
+            )
             return False
+        self.logger.info(
+            """allow_request. percent_throttles={0}.
+            throttle_responses={1}.
+            NON_throttle_responses={2}.
+            sampling_period={3}.
+            sample_size={4}.
+            deny_request_at={5}%""".format(
+                current_percent_throttles,
+                _throttle_responses,
+                _NON_throttle_responses,
+                self.sampling_period,
+                self.sample_size,
+                self.deny_request_at,
+            )
+        )
         return True
 
     async def not_throttled(self) -> None:
