@@ -121,10 +121,3 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     async def throttled(self) -> None:
         self.throttle_responses += 1
-
-
-import naz
-
-
-cli = naz.Client(throttle_handler=my_throttle_handeler)
-
