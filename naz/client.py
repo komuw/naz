@@ -293,7 +293,7 @@ class Client:
 
         self.hook = hook
         if not self.hook:
-            self.hook = hooks.DefaultHook(logger=self.logger)
+            self.hook = hooks.SimpleHook(logger=self.logger)
 
         self.throttle_handler = throttle_handler
         if not self.throttle_handler:
