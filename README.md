@@ -159,6 +159,7 @@ cli = naz.Client(
 ```
 
 #### 2. monitoring and observability
+##### 2.1 logging
 it's a loaded term, I know. In `naz` you have the ability to annotate all the log events that `naz` will generate with anything you want.        
 So, for example if you wanted to annotate all log-events with a release version and your app's running environment.
 ```python
@@ -171,6 +172,30 @@ cli = naz.Client(
 ```
 and then these will show up in all log events.             
 by default, `naz` annotates all log events with `smsc_host` and `system_id`
+
+##### 2.2 hooks
+a hook is a class with two methods `request` and `response`, ie it implements `naz`'s BaseHook interface as [defined here](https://github.com/komuw/naz/blob/master/naz/hooks.py).           
+`naz` will call the `request` method just before sending request to SMSC and also call the `response` method just after getting response from SMSC.       
+the default hook that `naz` uses is `naz.hooks.SimpleHook` which does nothing but logs.             
+If you wanted, for example to keep metrics of all requests and responses to SMSC in your [prometheus](https://prometheus.io/) setup;
+```python
+import naz
+from prometheus_client import Counter
+
+class MyPrometheusHook(naz.hooks.BaseHook):
+    async def request(self, event, correlation_id=None) :
+        c = Counter('my_requests', 'Description of counter')
+        c.inc() # Increment by 1
+    async def response(self, event, correlation_id=None):
+        c = Counter('my_responses', 'Description of counter')
+        c.inc() # Increment by 1
+
+myHook = MyPrometheusHook()
+cli = naz.Client(
+    ...
+    hook=myHook,
+)
+```
 
 #### 3. Rate limiting
 Sometimes you want to control the rate at which the client sends requests to an SMSC/server. `naz` lets you do this, by allowing you to specify a custom rate limiter.

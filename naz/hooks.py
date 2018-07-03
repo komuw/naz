@@ -35,7 +35,7 @@ class SimpleHook(BaseHook):
             "request_hook_called. event={0}. correlation_id={1}".format(event, correlation_id)
         )
 
-    async def response(self, event, correlation_id: typing.Optional[str] = None) -> None:
+    async def response(self, event: str, correlation_id: typing.Optional[str] = None) -> None:
         """
         hook method that is called just after a response is gotten from SMSC.
         """
