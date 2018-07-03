@@ -267,3 +267,43 @@ class TestClient(TestCase):
             self._run(cli.send_forever(TESTING=True))
 
             self.assertFalse(mock_naz_dequeue.mock.called)
+
+    def test_okay_smsc_response(self):
+        with mock.patch(
+            "naz.throttle.SimpleThrottleHandler.not_throttled", new=AsyncMock()
+        ) as mock_not_throttled, mock.patch(
+            "naz.throttle.SimpleThrottleHandler.throttled", new=AsyncMock()
+        ) as mock_throttled:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="deliver_sm",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_not_throttled.mock.called)
+            self.assertEqual(mock_not_throttled.mock.call_count, 1)
+            self.assertFalse(mock_throttled.mock.called)
+
+    def test_throttling_smsc_response(self):
+        with mock.patch(
+            "naz.throttle.SimpleThrottleHandler.not_throttled", new=AsyncMock()
+        ) as mock_not_throttled, mock.patch(
+            "naz.throttle.SimpleThrottleHandler.throttled", new=AsyncMock()
+        ) as mock_throttled:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="deliver_sm",
+                    command_status=0x00000058,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_throttled.mock.called)
+            self.assertEqual(mock_throttled.mock.call_count, 1)
+            self.assertFalse(mock_not_throttled.mock.called)
