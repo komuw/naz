@@ -667,12 +667,16 @@ class Client:
 
                 await self.send_data(event, full_pdu, correlation_id)
                 self.logger.debug("sent_forever.")
+                if TESTING:
+                    # offer escape hatch for tests to come out of endless loop
+                    return item_to_dequeue
             else:
                 # todo: sleep in an exponetial manner upto a maximum then wrap around.
                 await asyncio.sleep(8)
+                if TESTING:
+                    # offer escape hatch for tests to come out of endless loop
+                    return "throttle_handler_denied_request"
                 continue
-            if TESTING:
-                return item_to_dequeue
 
     async def receive_data(self):
         """

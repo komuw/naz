@@ -225,3 +225,45 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
             self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "enquire_link")
+
+    def test_no_sending_if_throttler(self):
+        with mock.patch("naz.q.DefaultOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            logger = logging.getLogger()
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            if not logger.handlers:
+                logger.addHandler(handler)
+            logger.setLevel("DEBUG")
+
+            sample_size = 8
+            throttle_handler = naz.throttle.SimpleThrottleHandler(
+                logger=logger, sampling_period=5, sample_size=sample_size, deny_request_at=0.4
+            )
+            cli = naz.Client(
+                async_loop=self.loop,
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password="password",
+                outboundqueue=self.outboundqueue,
+                throttle_handler=throttle_handler,
+            )
+
+            correlation_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = {
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "event": "submit_sm",
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+            }
+            reader, writer = self._run(cli.connect())
+            # mock SMSC throttling naz
+            for i in range(0, sample_size * 2):
+                self._run(cli.throttle_handler.throttled())
+
+            self._run(cli.send_forever(TESTING=True))
+
+            self.assertFalse(mock_naz_dequeue.mock.called)
