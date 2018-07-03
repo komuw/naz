@@ -107,7 +107,7 @@ class Client:
 
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
-            self.sequence_generator = sequence.DefaultSequenceGenerator()
+            self.sequence_generator = sequence.SimpleSequenceGenerator()
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
