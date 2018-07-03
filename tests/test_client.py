@@ -2,16 +2,15 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import os
+import sys
 import mock
 import asyncio
+import logging
 from unittest import TestCase
 
 import naz
 import docker
 
-
-import sys
-import logging
 
 logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
@@ -226,3 +225,85 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
             self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "enquire_link")
+
+    def test_no_sending_if_throttler(self):
+        with mock.patch("naz.q.DefaultOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            logger = logging.getLogger()
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            if not logger.handlers:
+                logger.addHandler(handler)
+            logger.setLevel("DEBUG")
+
+            sample_size = 8
+            throttle_handler = naz.throttle.SimpleThrottleHandler(
+                logger=logger, sampling_period=5, sample_size=sample_size, deny_request_at=0.4
+            )
+            cli = naz.Client(
+                async_loop=self.loop,
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password="password",
+                outboundqueue=self.outboundqueue,
+                throttle_handler=throttle_handler,
+            )
+
+            correlation_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = {
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "event": "submit_sm",
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+            }
+            reader, writer = self._run(cli.connect())
+            # mock SMSC throttling naz
+            for i in range(0, sample_size * 2):
+                self._run(cli.throttle_handler.throttled())
+
+            self._run(cli.send_forever(TESTING=True))
+
+            self.assertFalse(mock_naz_dequeue.mock.called)
+
+    def test_okay_smsc_response(self):
+        with mock.patch(
+            "naz.throttle.SimpleThrottleHandler.not_throttled", new=AsyncMock()
+        ) as mock_not_throttled, mock.patch(
+            "naz.throttle.SimpleThrottleHandler.throttled", new=AsyncMock()
+        ) as mock_throttled:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="deliver_sm",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_not_throttled.mock.called)
+            self.assertEqual(mock_not_throttled.mock.call_count, 1)
+            self.assertFalse(mock_throttled.mock.called)
+
+    def test_throttling_smsc_response(self):
+        with mock.patch(
+            "naz.throttle.SimpleThrottleHandler.not_throttled", new=AsyncMock()
+        ) as mock_not_throttled, mock.patch(
+            "naz.throttle.SimpleThrottleHandler.throttled", new=AsyncMock()
+        ) as mock_throttled:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    command_id_name="deliver_sm",
+                    command_status=0x00000058,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_throttled.mock.called)
+            self.assertEqual(mock_throttled.mock.call_count, 1)
+            self.assertFalse(mock_not_throttled.mock.called)

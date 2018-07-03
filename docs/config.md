@@ -49,6 +49,7 @@ codec_errors_level | same meaning as the `errors` argument to pythons' `encode` 
 enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 90
 rateLimiter | python class implementing rate limitation | naz.ratelimiter.RateLimiter
 hook | python class implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.DefaultHook
+throttle_handler | python class implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   

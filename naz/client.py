@@ -6,6 +6,7 @@ import collections
 from . import hooks
 from . import nazcodec
 from . import sequence
+from . import throttle
 from . import ratelimiter
 
 
@@ -44,11 +45,6 @@ class Client:
         address_range="",
         encoding="gsm0338",
         interface_version=34,
-        sequence_generator=None,
-        loglevel="DEBUG",
-        log_metadata=None,
-        codec_class=None,
-        codec_errors_level="strict",
         service_type="CMT",  # section 5.2.11
         source_addr_ton=0x00000001,  # section 5.2.5
         source_addr_npi=0x00000001,
@@ -70,8 +66,14 @@ class Client:
         replace_if_present_flag=0x00000000,
         sm_default_msg_id=0x00000000,
         enquire_link_interval=90,
+        loglevel="DEBUG",
+        log_metadata=None,
+        codec_class=None,
+        codec_errors_level="strict",
         rateLimiter=None,
         hook=None,
+        sequence_generator=None,
+        throttle_handler=None,
     ):
         """
         todo: add docs
@@ -294,6 +296,10 @@ class Client:
         self.hook = hook
         if not self.hook:
             self.hook = hooks.DefaultHook(logger=self.logger)
+
+        self.throttle_handler = throttle_handler
+        if not self.throttle_handler:
+            self.throttle_handler = throttle.SimpleThrottleHandler(logger=self.logger)
 
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
@@ -638,27 +644,39 @@ class Client:
         # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
-            # rate limit ourselves
-            await self.rateLimiter.wait_for_token()
 
-            item_to_dequeue = await self.outboundqueue.dequeue()
-            correlation_id = item_to_dequeue["correlation_id"]
-            event = item_to_dequeue["event"]
-            if event == "submit_sm":
-                short_message = item_to_dequeue["short_message"]
+            # check with throttle handler
+            send_request = await self.throttle_handler.allow_request()
+            if send_request:
+                # rate limit ourselves
+                await self.rateLimiter.wait_for_token()
+
+                item_to_dequeue = await self.outboundqueue.dequeue()
                 correlation_id = item_to_dequeue["correlation_id"]
-                source_addr = item_to_dequeue["source_addr"]
-                destination_addr = item_to_dequeue["destination_addr"]
-                full_pdu = await self.build_submit_sm_pdu(
-                    short_message, correlation_id, source_addr, destination_addr
-                )
-            else:
-                full_pdu = item_to_dequeue["pdu"]
+                event = item_to_dequeue["event"]
+                if event == "submit_sm":
+                    short_message = item_to_dequeue["short_message"]
+                    correlation_id = item_to_dequeue["correlation_id"]
+                    source_addr = item_to_dequeue["source_addr"]
+                    destination_addr = item_to_dequeue["destination_addr"]
+                    full_pdu = await self.build_submit_sm_pdu(
+                        short_message, correlation_id, source_addr, destination_addr
+                    )
+                else:
+                    full_pdu = item_to_dequeue["pdu"]
 
-            await self.send_data(event, full_pdu, correlation_id)
-            self.logger.debug("sent_forever.")
-            if TESTING:
-                return item_to_dequeue
+                await self.send_data(event, full_pdu, correlation_id)
+                self.logger.debug("sent_forever.")
+                if TESTING:
+                    # offer escape hatch for tests to come out of endless loop
+                    return item_to_dequeue
+            else:
+                # todo: sleep in an exponetial manner upto a maximum then wrap around.
+                await asyncio.sleep(8)
+                if TESTING:
+                    # offer escape hatch for tests to come out of endless loop
+                    return "throttle_handler_denied_request"
+                continue
 
     async def receive_data(self):
         """
@@ -764,6 +782,12 @@ class Client:
                     command_status_value.description,
                 )
             )
+
+        # call throttling handler
+        if command_status == self.command_statuses["ESME_ROK"].code:
+            await self.throttle_handler.not_throttled()
+        elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
+            await self.throttle_handler.throttled()
 
         if command_id_name in [
             "bind_transceiver",

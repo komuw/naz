@@ -149,6 +149,11 @@ def main():
         hook = load_class(hook)
         if inspect.isclass(hook):
             kwargs["hook"] = hook()
+    throttle_handler = kwargs.get("throttle_handler")
+    if throttle_handler:
+        throttle_handler = load_class(throttle_handler)
+        if inspect.isclass(throttle_handler):
+            kwargs["throttle_handler"] = throttle_handler()
     # Load custom classes #######################
 
     # call naz api ###########
