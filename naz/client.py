@@ -6,6 +6,7 @@ import collections
 from . import hooks
 from . import nazcodec
 from . import sequence
+from . import throttle
 from . import ratelimiter
 
 
