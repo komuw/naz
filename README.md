@@ -232,6 +232,7 @@ cli = naz.Client(
     ...
     throttle_handler=my_throttle_handeler,
 )
+```
 
 #### XX. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
