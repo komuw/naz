@@ -15,7 +15,23 @@ naz has no third-party dependencies and it requires python version 3.6+
 
 
 naz is in active development and it's API may change in backward incompatible ways.               
-[https://pypi.python.org/pypi/naz](https://pypi.python.org/pypi/naz)
+[https://pypi.python.org/pypi/naz](https://pypi.python.org/pypi/naz)                 
+
+**Contents:**          
+[Installation](#Installation)         
+[Usage](#Usage)                  
+  + [As a library](#1.-As-a-library)            
+  + [As a library](#2.-As-a-cli-app)            
+
+[Features](#Features)               
+  + [async everywhere](#1.-async-everywhere)            
+  + [monitoring-and-observability](#2.-monitoring-and-observability)            
+    + [logging](#2.1-logging)            
+    + [hooks](#2.2-hooks)
+  + [Rate limiting](#3.-Rate-limiting)            
+  + [Throttle handling](#4.-Throttle-handling)            
+  + [Queuing](#5.-Queuing)            
+
 
 ## Installation
 
