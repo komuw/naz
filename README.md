@@ -21,7 +21,7 @@ naz is in active development and it's API may change in backward incompatible wa
 [Installation](#Installation)         
 [Usage](#Usage)                  
   + [As a library](#1.-As-a-library)            
-  + [As a library](#2.-As-a-cli-app)            
+  + [As cli app](#2.-As-a-cli-app)            
 
 [Features](#Features)               
   + [async everywhere](#1.-async-everywhere)            
