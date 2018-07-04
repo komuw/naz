@@ -22,3 +22,4 @@ script:
   # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
   # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
   - mypy --show-column-numbers -m naz.q -m naz.throttle -m naz.ratelimiter -m naz.hooks -m naz.sequence
+  - naz-cli --version && naz-cli --help

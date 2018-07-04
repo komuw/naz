@@ -134,19 +134,15 @@ To see help:
 
 `naz-cli --help`   
 ```shell         
-usage: naz [-h] [--version] [--loglevel {DEBUG,INFO,WARNING,ERROR,CRITICAL}]
-           --config CONFIG
-
-naz is an SMPP client. example usage: naz-cli --config /path/to/my_config.json
+naz is an SMPP client.     
+example usage: naz-cli --config /path/to/my_config.json
 
 optional arguments:
   -h, --help            show this help message and exit
   --version             The currently installed naz version.
   --loglevel {DEBUG,INFO,WARNING,ERROR,CRITICAL}
-                        The log level to output log messages at. eg:
-                        --loglevel DEBUG
-  --config CONFIG       The config file to use. eg: --config
-                        /path/to/my_config.json
+                        The log level to output log messages at. eg: --loglevel DEBUG
+  --config CONFIG       The config file to use. eg: --config /path/to/my_config.json
 ```
 
 
