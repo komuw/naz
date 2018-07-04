@@ -18,19 +18,19 @@ naz is in active development and it's API may change in backward incompatible wa
 [https://pypi.python.org/pypi/naz](https://pypi.python.org/pypi/naz)                 
 
 **Contents:**          
-[Installation](#Installation)         
-[Usage](#Usage)                  
-  + [As a library](#1.-As-a-library)            
-  + [As cli app](#2.-As-a-cli-app)            
+[Installation](#installation)         
+[Usage](#usage)                  
+  + [As a library](#1.-as-a-library)            
+  + [As cli app](#2.-as-a-cli-app)            
 
-[Features](#Features)               
+[Features](#features)               
   + [async everywhere](#1.-async-everywhere)            
   + [monitoring-and-observability](#2.-monitoring-and-observability)            
     + [logging](#2.1-logging)            
     + [hooks](#2.2-hooks)
-  + [Rate limiting](#3.-Rate-limiting)            
-  + [Throttle handling](#4.-Throttle-handling)            
-  + [Queuing](#5.-Queuing)            
+  + [Rate limiting](#3.-rate-limiting)            
+  + [Throttle handling](#4.-throttle-handling)            
+  + [Queuing](#5.-queuing)            
 
 
 ## Installation
