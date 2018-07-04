@@ -20,17 +20,17 @@ naz is in active development and it's API may change in backward incompatible wa
 **Contents:**          
 [Installation](#installation)         
 [Usage](#usage)                  
-  + [As a library](#1.-as-a-library)            
-  + [As cli app](#2.-as-a-cli-app)            
+  + [As a library](#1-as-a-library)            
+  + [As cli app](#2-as-a-cli-app)            
 
 [Features](#features)               
-  + [async everywhere](#1.-async-everywhere)            
-  + [monitoring-and-observability](#2.-monitoring-and-observability)            
-    + [logging](#2.1-logging)            
-    + [hooks](#2.2-hooks)
-  + [Rate limiting](#3.-rate-limiting)            
-  + [Throttle handling](#4.-throttle-handling)            
-  + [Queuing](#5.-queuing)            
+  + [async everywhere](#1-async-everywhere)            
+  + [monitoring-and-observability](#2-monitoring-and-observability)            
+    + [logging](#21-logging)            
+    + [hooks](#22-hooks)
+  + [Rate limiting](#3-rate-limiting)            
+  + [Throttle handling](#4-throttle-handling)            
+  + [Queuing](#5-queuing)            
 
 
 ## Installation
