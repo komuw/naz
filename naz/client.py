@@ -107,7 +107,7 @@ class Client:
 
         self.sequence_generator = sequence_generator
         if not self.sequence_generator:
-            self.sequence_generator = sequence.DefaultSequenceGenerator()
+            self.sequence_generator = sequence.SimpleSequenceGenerator()
 
         self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
@@ -289,13 +289,11 @@ class Client:
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
-            self.rateLimiter = ratelimiter.RateLimiter(
-                SEND_RATE=1000, MAX_TOKENS=250, DELAY_FOR_TOKENS=1, logger=self.logger
-            )
+            self.rateLimiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
 
         self.hook = hook
         if not self.hook:
-            self.hook = hooks.DefaultHook(logger=self.logger)
+            self.hook = hooks.SimpleHook(logger=self.logger)
 
         self.throttle_handler = throttle_handler
         if not self.throttle_handler:
@@ -394,7 +392,7 @@ class Client:
             )
 
             full_pdu = header + body
-            # dont queue enquire_link in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+            # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data("enquire_link", full_pdu)
             if TESTING:
                 return full_pdu
@@ -456,7 +454,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        # dont queue unbind_resp in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind_resp", full_pdu)
 
     async def deliver_sm_resp(self, sequence_number, correlation_id=None):
@@ -895,5 +893,5 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        # dont queue unbind in DefaultOutboundQueue since we dont want it to be behind 10k msgs etc
+        # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind", full_pdu)

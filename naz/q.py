@@ -17,7 +17,7 @@ class BaseOutboundQueue:
         raise NotImplementedError("dequeue method must be implemented.")
 
 
-class DefaultOutboundQueue(BaseOutboundQueue):
+class SimpleOutboundQueue(BaseOutboundQueue):
     """
     this allows users to provide their own queue managers eg redis etc.
     """

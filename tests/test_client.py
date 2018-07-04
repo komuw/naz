@@ -38,7 +38,7 @@ class TestClient(TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
-        self.outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=self.loop)
+        self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=self.loop)
         self.cli = naz.Client(
             async_loop=self.loop,
             smsc_host="127.0.0.1",
@@ -110,7 +110,7 @@ class TestClient(TestCase):
         # todo: test bind_response
 
     def test_submit_sm_enqueue(self):
-        with mock.patch("naz.q.DefaultOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+        with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             reader, writer = self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
             correlation_id = "12345"
@@ -129,7 +129,7 @@ class TestClient(TestCase):
             self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "submit_sm")
 
     def test_submit_sm_sending(self):
-        with mock.patch("naz.q.DefaultOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             correlation_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -198,7 +198,7 @@ class TestClient(TestCase):
             self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind_resp")
 
     def test_speficic_handlers_deliver_sm(self):
-        with mock.patch("naz.q.DefaultOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+        with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
@@ -227,7 +227,7 @@ class TestClient(TestCase):
             self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "enquire_link")
 
     def test_no_sending_if_throttler(self):
-        with mock.patch("naz.q.DefaultOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             logger = logging.getLogger()
             handler = logging.StreamHandler()
             formatter = logging.Formatter("%(message)s")

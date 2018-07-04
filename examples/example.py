@@ -4,7 +4,7 @@ import naz
 
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.DefaultOutboundQueue(maxsize=1000, loop=loop)
+outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
 cli = naz.Client(
     async_loop=loop,
     smsc_host="127.0.0.1",
@@ -43,8 +43,8 @@ loop.run_until_complete(cli.tranceiver_bind())
 
 try:
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    gathering = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-    loop.run_until_complete(gathering)
+    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:
     print("exception occured. error={0}".format(str(e)))

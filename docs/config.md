@@ -40,15 +40,15 @@ You are also encouraged to consult any documentation of the SMSC partner that yo
 *parameter* | *meaning*     | *default value*
 ---       | ---         | ---     
 encoding | encoding used to encode messages been sent to SMSC | gsm0338
-sequence_generator | python class used to generate sequence_numbers| naz.sequence.DefaultSequenceGenerator
+sequence_generator | python class used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
 outboundqueue | python class implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
 loglevel | the level at which to log | DEBUG
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
 codec_class | python class to be used to encode/decode messages | naz.nazcodec.NazCodec
 codec_errors_level | same meaning as the `errors` argument to pythons' `encode` method as [defined here](https://docs.python.org/3/library/codecs.html#codecs.encode) | strict
 enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 90
-rateLimiter | python class implementing rate limitation | naz.ratelimiter.RateLimiter
-hook | python class implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.DefaultHook
+rateLimiter | python class implementing rate limitation | naz.ratelimiter.SimpleRateLimiter
+hook | python class implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
 throttle_handler | python class implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
 
 `SMSC`: Short Message Service Centre, ie the server               
