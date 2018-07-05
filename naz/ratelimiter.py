@@ -7,7 +7,7 @@ class BaseRateLimiter:
     """
     Interface that must be implemented to satisfy naz's rate limiter.
     User implementations should subclassing this class and
-    implement the wait_for_token and add_new_tokens methods with the type signatures shown.
+    implement the wait_for_token method with the type signatures shown.
     """
 
     async def wait_for_token(self) -> None:
