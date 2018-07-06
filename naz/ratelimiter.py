@@ -6,7 +6,7 @@ import logging
 class BaseRateLimiter:
     """
     Interface that must be implemented to satisfy naz's rate limiter.
-    User implementations should subclassing this class and
+    User implementations should inherit this class and
     implement the wait_for_token method with the type signatures shown.
     """
 
@@ -33,11 +33,17 @@ class SimpleRateLimiter(BaseRateLimiter):
         MAX_TOKENS: float = 1000,
         DELAY_FOR_TOKENS: float = 1,
     ) -> None:
-        self.SEND_RATE: float = SEND_RATE  # rate in seconds
-        self.MAX_TOKENS: float = MAX_TOKENS  # start tokens
-        self.DELAY_FOR_TOKENS: float = (
-            DELAY_FOR_TOKENS
-        )  # how long(seconds) to wait before checking for token availability after they had finished
+        """
+        :param SEND_RATE:                  (optional) [float]
+            the maximum rate, in messages/second, at which naz can send messages to SMSC.
+        :param MAX_TOKENS:                  (optional) [int]
+            the total number of initial mesages naz can send before rate limiting kicks in.
+        :param DELAY_FOR_TOKENS:                  (optional) [float]
+            the duration in seconds which to wait for before checking for token availability after they had finished.
+        """
+        self.SEND_RATE: float = SEND_RATE
+        self.MAX_TOKENS: float = MAX_TOKENS
+        self.DELAY_FOR_TOKENS: float = (DELAY_FOR_TOKENS)
         self.tokens: float = self.MAX_TOKENS
         self.updated_at: float = time.monotonic()
 

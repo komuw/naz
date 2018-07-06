@@ -5,7 +5,7 @@ import logging
 class BaseHook:
     """
     Interface that must be implemented to satisfy naz's hooks.
-    User implementations should subclassing this class and
+    User implementations should inherit this class and
     implement the request and response methods with the type signatures shown.
 
     A hook is class with hook methods that are called before a request is sent to SMSC and
@@ -13,9 +13,15 @@ class BaseHook:
     """
 
     async def request(self, event: str, correlation_id: typing.Optional[str] = None) -> None:
+        """
+        called before a request is sent to SMSC
+        """
         raise NotImplementedError("request method must be implemented.")
 
     async def response(self, event: str, correlation_id: typing.Optional[str] = None) -> None:
+        """
+        called after a response is received from SMSC.
+        """
         raise NotImplementedError("response method must be implemented.")
 
 
