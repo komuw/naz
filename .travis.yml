@@ -16,7 +16,7 @@ script:
   - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
   - coverage erase
   - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
-  - coverage report --show-missing --fail-under=84
+  - coverage report --show-missing --fail-under=86
   - flake8 .
   - pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
   # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
