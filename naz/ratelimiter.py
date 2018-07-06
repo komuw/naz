@@ -50,23 +50,29 @@ class SimpleRateLimiter(BaseRateLimiter):
         self.updated_at: float = time.monotonic()
 
         self.logger = logger
+        self.MESSAGES_DELIVERED: int = 0
+        self.EFFECTIVE_SEND_RATE: float = 0
 
     async def wait_for_token(self) -> None:
         while self.tokens < 1:
             self.logger.info(
-                "rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}".format(
-                    self.SEND_RATE, self.DELAY_FOR_TOKENS
+                "rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}. EFFECTIVE_SEND_RATE={2}.".format(
+                    self.SEND_RATE, self.DELAY_FOR_TOKENS, self.EFFECTIVE_SEND_RATE
                 )
             )
             self.add_new_tokens()
             # todo: sleep in an exponetial manner upto a maximum then wrap around.
             await asyncio.sleep(self.DELAY_FOR_TOKENS)
+
+        self.MESSAGES_DELIVERED += 1
         self.tokens -= 1
 
     def add_new_tokens(self) -> None:
         now = time.monotonic()
         time_since_update = now - self.updated_at
+        self.EFFECTIVE_SEND_RATE = self.MESSAGES_DELIVERED / time_since_update
         new_tokens = time_since_update * self.SEND_RATE
         if new_tokens > 1:
             self.tokens = min(self.tokens + new_tokens, self.MAX_TOKENS)
             self.updated_at = now
+            self.MESSAGES_DELIVERED = 0
