@@ -1,6 +1,7 @@
 Thank you for contributing to naz.                    
-Every contribution to naz is important to us.                       
-You may not know it, but you have just contributed to making the world a more safer and secure place.                         
+Every contribution to naz is important.                       
+
+                     
 
 Contributor offers to license certain software (a “Contribution” or multiple
 “Contributions”) to naz, and naz agrees to accept said Contributions,

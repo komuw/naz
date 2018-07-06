@@ -6,7 +6,7 @@ import typing
 class BaseOutboundQueue:
     """
     Interface that must be implemented to satisfy naz's outbound queue.
-    User implementations should subclassing this class and
+    User implementations should inherit this class and
     implement the enqueue and dequeue methods with the type signatures shown.
     """
 
