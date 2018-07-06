@@ -37,9 +37,11 @@ class SimpleRateLimiter(BaseRateLimiter):
         :param SEND_RATE:                  (optional) [float]
             the maximum rate, in messages/second, at which naz can send messages to SMSC.
         :param MAX_TOKENS:                  (optional) [int]
-            the total number of initial mesages naz can send before rate limiting kicks in.
+            the total number of mesages naz can send before rate limiting kicks in.
         :param DELAY_FOR_TOKENS:                  (optional) [float]
             the duration in seconds which to wait for before checking for token availability after they had finished.
+
+        SEND_RATE and MAX_TOKENS should generally be of equal value.
         """
         self.SEND_RATE: float = SEND_RATE
         self.MAX_TOKENS: float = MAX_TOKENS
