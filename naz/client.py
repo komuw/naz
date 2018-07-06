@@ -659,7 +659,7 @@ class Client:
                     # offer escape hatch for tests to come out of endless loop
                     return item_to_dequeue
             else:
-                await asyncio.sleep(self.throttle_handler.throttle_delay())
+                await asyncio.sleep(await self.throttle_handler.throttle_delay())
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
                     return "throttle_handler_denied_request"
