@@ -28,6 +28,13 @@ class BaseThrottleHandler:
         """
         raise NotImplementedError("allow_request method must be implemented.")
 
+    async def throttle_delay(self) -> float:
+        """
+        if the last allow_request method call returned False(thus denying sending a request), naz will call the throttle_delay method
+        to determine how long in seconds to wait before calling allow_request again.
+        """
+        raise NotImplementedError("throttle_delay method must be implemented.")
+
 
 class SimpleThrottleHandler(BaseThrottleHandler):
     def __init__(
@@ -36,6 +43,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         sampling_period: float = 180,
         sample_size: float = 50,
         deny_request_at: float = 1,
+        throttle_wait: float = 3,
     ) -> None:
         """
         :param sampling_period:                  (optional) [float]
@@ -44,6 +52,8 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             the minimum number of responses we should have got from SMSC over :sampling_period duration to enable us make a decision.
         :param deny_request_at:                  (optional) [float]
             the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.
+        :param throttle_wait:                  (optional) [float]
+            the time in seconds to wait before calling allow_request after the last allow_request that returned False.
 
         usage:
             throttle_handeler = SimpleThrottleHandler(sampling_period=180, sample_size=45, deny_request_at=1.2)
@@ -59,6 +69,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         self.sampling_period: float = sampling_period
         self.sample_size: float = sample_size
         self.deny_request_at: float = deny_request_at
+        self.throttle_wait: float = throttle_wait
 
     @property
     def percent_throttles(self) -> float:
@@ -121,3 +132,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     async def throttled(self) -> None:
         self.throttle_responses += 1
+
+    async def throttle_delay(self) -> float:
+        # todo: sleep in an exponetial manner upto a maximum then wrap around.
+        return self.throttle_wait

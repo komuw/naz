@@ -12,19 +12,10 @@ from . import ratelimiter
 
 # todo:
 # 1. add configurable retries
-# 2. add configurable rate limits. our rate limits should be tight
-# 3. metrics, what is happening
-# 4. propagate correlation_id, and pdu event to all/most log events
-# 5. allow user's hooks. we should correlate user's supplied correlation_id and sequence_number
-#    users should be able to supply a class/interface/func?? that gets called for various events,
-#    eg; everytime SMSC sends us a `delivery_sm` or `submit_sm_resp` etc
-# 6. add tests
-# 7. find an open source SMSC server or server software(besides, komuw/smpp_server:v0.2) to test on.
-#    even better if we can find a hosted SMSC provider with a free tier to test against.
-# 8. run end-to-end integration tests in ci.
-# 9. Maybe responses to SMSC should have their own queue. An smsc provider may complain that client is
-#    taking too long to reply to them, and the cause may be that replies are queued behind normal submit_sm msgs.
-# 10. relate everything to a correlation_id
+# 2. metrics, what is happening
+# 3. propagate correlation_id, and pdu event to all/most log events
+# 4. run end-to-end integration tests in ci.
+# 5. relate everything to a correlation_id
 
 
 class Client:
@@ -639,7 +630,6 @@ class Client:
         )
 
     async def send_forever(self, TESTING=False):
-        # todo: check sending rate and sleep if you are near limits
         while True:
             self.logger.debug("send_forever")
 
@@ -669,8 +659,7 @@ class Client:
                     # offer escape hatch for tests to come out of endless loop
                     return item_to_dequeue
             else:
-                # todo: sleep in an exponetial manner upto a maximum then wrap around.
-                await asyncio.sleep(8)
+                await asyncio.sleep(self.throttle_handler.throttle_delay())
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
                     return "throttle_handler_denied_request"
@@ -811,8 +800,6 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-            pdu_body = unparsed_pdu_body
-            print("pdu_body:::", pdu_body)
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
         elif command_id_name == "deliver_sm":
