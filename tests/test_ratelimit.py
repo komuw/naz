@@ -1,5 +1,6 @@
 import sys
 import mock
+import time
 import asyncio
 import logging
 from unittest import TestCase
@@ -70,3 +71,20 @@ class TestRateLimit(TestCase):
                 self._run(self.rateLimiter.wait_for_token())
             self.assertTrue(mock_sleep.mock.called)
             self.assertEqual(mock_sleep.mock.call_args[0][0], self.DELAY_FOR_TOKENS)
+
+    def test_send_rate(self):
+        SEND_RATE = 3
+        rLimiter = naz.ratelimiter.SimpleRateLimiter(
+            logger=self.logger, SEND_RATE=SEND_RATE, MAX_TOKENS=3, DELAY_FOR_TOKENS=1
+        )
+        msgs_delivered = []
+        now = time.monotonic()
+        for i in range(0, SEND_RATE * 4):
+            z = self._run(rLimiter.wait_for_token())
+            msgs_delivered.append(z)
+
+        then = time.monotonic()
+        time_taken_to_deliver = then - now  # seconds
+        total_msgs_delivered = len(msgs_delivered)
+        effective_message_rate = total_msgs_delivered / time_taken_to_deliver
+        self.assertAlmostEqual(effective_message_rate, SEND_RATE, 0)
