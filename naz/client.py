@@ -683,7 +683,15 @@ class Client:
             await self.hook.request(event=event, correlation_id=correlation_id)
         except Exception as e:
             self.logger.error(
-                "hook_error. hook_type=request. event={0}. error={1}".format(event, str(e))
+                "{}".format(
+                    {
+                        "event": "send_data",
+                        "stage": "end",
+                        "smpp_command": event,
+                        "state": "request hook error",
+                        "error": str(e),
+                    }
+                )
             )
 
         self.writer.write(msg)
