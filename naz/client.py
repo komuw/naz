@@ -811,7 +811,15 @@ class Client:
 
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
-            self.logger.debug("{}".format({"event": "parse_response_pdu", "stage": "end", "state": "command_id:{0} is unknown.".format(command_id)}))
+            self.logger.debug(
+                "{}".format(
+                    {
+                        "event": "parse_response_pdu",
+                        "stage": "end",
+                        "state": "command_id:{0} is unknown.".format(command_id),
+                    }
+                )
+            )
             raise ValueError("command_id:{0} is unknown.".format(command_id))
 
         # call user's hook for responses
@@ -821,8 +829,14 @@ class Client:
             await self.hook.response(event=command_id_name)
         except Exception as e:
             self.logger.error(
-                "hook_error. hook_type=response. event={0}. error={1}".format(
-                    command_id_name, str(e)
+                "{}".format(
+                    {
+                        "event": "parse_response_pdu",
+                        "stage": "end",
+                        "command_id_name": command_id_name,
+                        "state": "response hook error",
+                        "error": str(e),
+                    }
                 )
             )
 
@@ -836,7 +850,16 @@ class Client:
             unparsed_pdu_body=pdu_body,
             total_pdu_length=total_pdu_length,
         )
-        self.logger.debug("response_pdu_parsed")
+        self.logger.debug(
+            "{}".format(
+                {
+                    "event": "parse_response_pdu",
+                    "stage": "end",
+                    "command_id_name": command_id_name,
+                    "command_status": command_status,
+                }
+            )
+        )
 
     async def speficic_handlers(
         self, command_id_name, command_status, sequence_number, unparsed_pdu_body, total_pdu_length
@@ -850,24 +873,29 @@ class Client:
             command_status
         )
 
-        self.logger.info(
-            "pdu_response_handling. command_id={0}. sequence_number={1}. command_status={2}. command_description={3}. total_pdu_length={4}.".format(
-                command_id_name,
-                sequence_number,
-                command_status,
-                command_status_value.description,
-                total_pdu_length,
-            )
-        )
-
         if command_status != self.command_statuses["ESME_ROK"].code:
             # we got an error from SMSC
             self.logger.error(
-                "smsc_response_error. command_id={0}. sequence_number={1}. error_code={2}. error_description={3}".format(
-                    command_id_name,
-                    sequence_number,
-                    command_status_value.code,
-                    command_status_value.description,
+                "{}".format(
+                    {
+                        "event": "speficic_handlers",
+                        "stage": "start",
+                        "command_id_name": command_id_name,
+                        "command_status": command_status_value.code,
+                        "state": command_status_value.description,
+                    }
+                )
+            )
+        else:
+            self.logger.debug(
+                "{}".format(
+                    {
+                        "event": "speficic_handlers",
+                        "stage": "start",
+                        "command_id_name": command_id_name,
+                        "command_status": command_status_value.code,
+                        "state": command_status_value.description,
+                    }
                 )
             )
 
@@ -941,14 +969,17 @@ class Client:
             await self.enquire_link_resp(sequence_number=sequence_number)
         else:
             self.logger.error(
-                "unknown_command. command_id={0}. sequence_number={1}. error_code={2}. error_description={3}".format(
-                    command_id_name,
-                    sequence_number,
-                    command_status_value.code,
-                    command_status_value.description,
+                "{}".format(
+                    {
+                        "event": "speficic_handlers",
+                        "stage": "end",
+                        "command_id_name": command_id_name,
+                        "command_status": command_status_value.code,
+                        "state": command_status_value.description,
+                        "error": "unknown command",
+                    }
                 )
             )
-        pass
 
     async def unbind(self, correlation_id=None):
         """
@@ -963,6 +994,9 @@ class Client:
 
         clients/users should call this method when winding down.
         """
+        self.logger.debug(
+            "{}".format({"event": "unbind", "stage": "start", "correlation_id": correlation_id})
+        )
         # body
         body = b""
 
@@ -983,3 +1017,6 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind", full_pdu)
+        self.logger.debug(
+            "{}".format({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
+        )
