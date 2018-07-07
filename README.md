@@ -123,12 +123,14 @@ run:
 ```shell
 	 Naz: the SMPP client.
 
-. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-network_connecting. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-network_connected. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-tranceiver_binding. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-data_sending. event=bind_transceiver. msg=@@@3@@@.  log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-tranceiver_bound. log_metadata={'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'connect', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'connect', 'stage': 'end'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'tranceiver_bind', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'send_data', 'stage': 'start', 'smpp_command': 'bind_transceiver', 'correlation_id': None} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'SimpleHook.request', 'stage': 'start', 'correlation_id': None} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'send_data', 'stage': 'end', 'smpp_command': 'bind_transceiver', 'correlation_id': None} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'tranceiver_bind', 'stage': 'end'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'send_forever', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 ```              
 For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)                
 To see help:

@@ -104,7 +104,7 @@ def main():
     extra_log_data = {"log_metadata": log_metadata}
     logger = logging.getLogger()
     handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(message)s. log_metadata=%(log_metadata)s")
+    formatter = logging.Formatter("%(message)s %(log_metadata)s")
     handler.setFormatter(formatter)
     if not logger.handlers:
         logger.addHandler(handler)
