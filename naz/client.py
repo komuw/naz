@@ -682,7 +682,7 @@ class Client:
         try:
             await self.hook.request(event=event, correlation_id=correlation_id)
         except Exception as e:
-            self.logger.error(
+            self.logger.exception(
                 "{}".format(
                     {
                         "event": "send_data",
@@ -819,7 +819,7 @@ class Client:
 
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
-            self.logger.error(
+            self.logger.exception(
                 "{}".format(
                     {
                         "event": "parse_response_pdu",
@@ -836,7 +836,7 @@ class Client:
             # everything to a correlation_id
             await self.hook.response(event=command_id_name)
         except Exception as e:
-            self.logger.error(
+            self.logger.exception(
                 "{}".format(
                     {
                         "event": "parse_response_pdu",
@@ -883,7 +883,7 @@ class Client:
 
         if command_status != self.command_statuses["ESME_ROK"].code:
             # we got an error from SMSC
-            self.logger.error(
+            self.logger.exception(
                 "{}".format(
                     {
                         "event": "speficic_handlers",
@@ -976,7 +976,7 @@ class Client:
             # it has no body
             await self.enquire_link_resp(sequence_number=sequence_number)
         else:
-            self.logger.error(
+            self.logger.exception(
                 "{}".format(
                     {
                         "event": "speficic_handlers",

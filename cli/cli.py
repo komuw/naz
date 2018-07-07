@@ -111,7 +111,7 @@ def main():
     logger.setLevel(loglevel)
     logger = logging.LoggerAdapter(logger, extra_log_data)
 
-    logger.info("\n\n\t Naz: the SMPP client. \n\n")
+    logger.exception("\n\n\t {} \n\n".format("Naz: the SMPP client."))
 
     # Load custom classes #######################
     # Users can either pass in:
@@ -181,13 +181,8 @@ def main():
         loop.run_until_complete(tasks)
         loop.run_forever()
     except Exception as e:
-        logger.exception("exception occured. error={0}".format(str(e)))
-        pass
+        logger.exception("{}".format({"event": "cli", "stage": "end", "error": str(e)}))
     finally:
         loop.run_until_complete(cli.unbind())
         loop.close()
     # call naz api ###########
-
-
-# todo: remove this after testing
-main()
