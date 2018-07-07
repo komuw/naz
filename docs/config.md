@@ -1,5 +1,9 @@
-`naz-cli` accepts a json config file. The parameters that can be put in that file, what they mean and their default values(if any) are documented here.                   
-The parameters are divided into two categories, (i) parameters that emanate from the SMPP specification and (ii) parameters that are specific to `naz`.          
+`naz-cli` accepts a json config file. The parameters that can be put in that file, what they mean and their default values(if any) are documented here.                     
+Note that these are also the parameters that `naz.Client` takes.               
+        
+The parameters are divided into two categories,                    
+(i) parameters that emanate from the SMPP specification and             
+(ii) parameters that are specific to `naz`.          
 
 #### (i) smpp spec parameters        
 *parameter* | *meaning*     | *default value*
@@ -57,7 +61,7 @@ throttle_handler | python class implementing functionality of what todo when naz
 **NB**: the only *mandatory* parameters are the ones marked N/A ie `smsc_host`, `smsc_port`, `system_id`, `password` and `outboundqueue`             
 
 #### Example
-An example config file is shown below.         
+1. An example config file is shown below.         
 
 `/tmp/my_config.json` 
 ```bash        
@@ -78,4 +82,34 @@ An example config file is shown below.
   "enquire_link_interval": 30,
   "rateLimiter": "dotted.path.to.CustomRateLimiter"
 }
+```
+
+2. An example `naz.Client` declaration              
+```python
+import asyncio
+import naz
+
+loop = asyncio.get_event_loop()
+
+class ExampleQueue(naz.q.BaseOutboundQueue):
+    def __init__(self):
+        loop = asyncio.get_event_loop()
+        self.queue = asyncio.Queue(maxsize=1000, loop=loop)
+    async def enqueue(self, item):
+        self.queue.put_nowait(item)
+    async def dequeue(self):
+        return await self.queue.get()
+
+
+outboundqueue = ExampleQueue()
+cli = naz.Client(
+    async_loop=loop,
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=outboundqueue,
+    log_metadata={"environment": "production",  "release": "canary"},
+    loglevel="WARNING",
+)
 ```

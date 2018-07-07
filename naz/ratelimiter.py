@@ -7,11 +7,11 @@ class BaseRateLimiter:
     """
     Interface that must be implemented to satisfy naz's rate limiter.
     User implementations should inherit this class and
-    implement the wait_for_token method with the type signatures shown.
+    implement the limit method with the type signatures shown.
     """
 
-    async def wait_for_token(self) -> None:
-        raise NotImplementedError("wait_for_token method must be implemented.")
+    async def limit(self) -> None:
+        raise NotImplementedError("limit method must be implemented.")
 
 
 class SimpleRateLimiter(BaseRateLimiter):
@@ -22,7 +22,7 @@ class SimpleRateLimiter(BaseRateLimiter):
 
     Usage:
         rateLimiter = SimpleRateLimiter(logger=myLogger, SEND_RATE=10, MAX_TOKENS=25)
-        await rateLimiter.wait_for_token()
+        await rateLimiter.limit()
         send_messsages()
     """
 
@@ -53,7 +53,7 @@ class SimpleRateLimiter(BaseRateLimiter):
         self.MESSAGES_DELIVERED: int = 0
         self.EFFECTIVE_SEND_RATE: float = 0
 
-    async def wait_for_token(self) -> None:
+    async def limit(self) -> None:
         while self.tokens < 1:
             self.logger.info(
                 "rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}. EFFECTIVE_SEND_RATE={2}.".format(

@@ -28,7 +28,7 @@ class ExampleRateLimiter(naz.ratelimiter.SimpleRateLimiter):
     """
     Usage:
         rateLimiter = ExampleRateLimiter(SEND_RATE=10, MAX_TOKENS=25)
-        await rateLimiter.wait_for_token()
+        await rateLimiter.limit()
         send_messsages()
     """
 
@@ -41,7 +41,7 @@ class ExampleRateLimiter(naz.ratelimiter.SimpleRateLimiter):
         self.tokens = self.MAX_TOKENS
         self.updated_at = time.monotonic()
 
-    async def wait_for_token(self):
+    async def limit(self):
         while self.tokens < 1:
             print(
                 "EXAMPLE_rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}".format(

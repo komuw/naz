@@ -637,7 +637,7 @@ class Client:
             send_request = await self.throttle_handler.allow_request()
             if send_request:
                 # rate limit ourselves
-                await self.rateLimiter.wait_for_token()
+                await self.rateLimiter.limit()
 
                 item_to_dequeue = await self.outboundqueue.dequeue()
                 correlation_id = item_to_dequeue["correlation_id"]
