@@ -819,7 +819,7 @@ class Client:
 
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
-            self.logger.debug(
+            self.logger.error(
                 "{}".format(
                     {
                         "event": "parse_response_pdu",
