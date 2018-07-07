@@ -80,6 +80,9 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         return round((self.throttle_responses / (total_smsc_responses)) * 100, 2)
 
     async def allow_request(self) -> bool:
+        self.logger.info(
+            "{}".format({"event": "SimpleThrottleHandler.allow_request", "stage": "start"})
+        )
         # calculat percentage of throttles before resetting NON_throttle_responses and throttle_responses
         current_percent_throttles: float = self.percent_throttles
         _throttle_responses: int = self.throttle_responses
@@ -95,34 +98,34 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             self.updated_at = now
         if current_percent_throttles > self.deny_request_at:
             self.logger.info(
-                """deny_request. percent_throttles={0}.
-                throttle_responses={1}.
-                NON_throttle_responses={2}.
-                sampling_period={3}.
-                sample_size={4}.
-                deny_request_at={5}%""".format(
-                    current_percent_throttles,
-                    _throttle_responses,
-                    _NON_throttle_responses,
-                    self.sampling_period,
-                    self.sample_size,
-                    self.deny_request_at,
+                "{}".format(
+                    {
+                        "event": "SimpleThrottleHandler.allow_request",
+                        "stage": "end",
+                        "percent_throttles": current_percent_throttles,
+                        "throttle_responses": _throttle_responses,
+                        "NON_throttle_responses": _NON_throttle_responses,
+                        "sampling_period": self.sampling_period,
+                        "sample_size": self.sample_size,
+                        "deny_request_at": self.deny_request_at,
+                        "state": "deny_request",
+                    }
                 )
             )
             return False
         self.logger.info(
-            """allow_request. percent_throttles={0}.
-            throttle_responses={1}.
-            NON_throttle_responses={2}.
-            sampling_period={3}.
-            sample_size={4}.
-            deny_request_at={5}%""".format(
-                current_percent_throttles,
-                _throttle_responses,
-                _NON_throttle_responses,
-                self.sampling_period,
-                self.sample_size,
-                self.deny_request_at,
+            "{}".format(
+                {
+                    "event": "SimpleThrottleHandler.allow_request",
+                    "stage": "end",
+                    "percent_throttles": current_percent_throttles,
+                    "throttle_responses": _throttle_responses,
+                    "NON_throttle_responses": _NON_throttle_responses,
+                    "sampling_period": self.sampling_period,
+                    "sample_size": self.sample_size,
+                    "deny_request_at": self.deny_request_at,
+                    "state": "allow_request",
+                }
             )
         )
         return True
