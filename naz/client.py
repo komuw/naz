@@ -303,17 +303,17 @@ class Client:
         return None, None
 
     async def connect(self):
-        self.logger.debug("{}".format({"event": "connect", "stage": "start"}))
+        self.logger.info("{}".format({"event": "connect", "stage": "start"}))
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader = reader
         self.writer = writer
-        self.logger.debug("{}".format({"event": "connect", "stage": "end"}))
+        self.logger.info("{}".format({"event": "connect", "stage": "end"}))
         return reader, writer
 
     async def tranceiver_bind(self):
-        self.logger.debug("{}".format({"event": "tranceiver_bind", "stage": "start"}))
+        self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "start"}))
         # body
         body = b""
         body = (
@@ -348,7 +348,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data("bind_transceiver", full_pdu)
-        self.logger.debug("{}".format({"event": "tranceiver_bind", "stage": "end"}))
+        self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "end"}))
         return full_pdu
 
     async def enquire_link(self, correlation_id=None, TESTING=False):
@@ -363,7 +363,7 @@ class Client:
         `enquire_link` has no body.
         """
         while True:
-            self.logger.debug("{}".format({"event": "enquire_link", "stage": "start"}))
+            self.logger.info("{}".format({"event": "enquire_link", "stage": "start"}))
             # body
             body = b""
 
@@ -386,7 +386,7 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data("enquire_link", full_pdu)
-            self.logger.debug("{}".format({"event": "enquire_link", "stage": "end"}))
+            self.logger.info("{}".format({"event": "enquire_link", "stage": "end"}))
             if TESTING:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
@@ -403,7 +403,7 @@ class Client:
         `enquire_link_resp` has no body.
         """
         # body
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {"event": "enquire_link_resp", "stage": "start", "correlation_id": correlation_id}
             )
@@ -424,7 +424,7 @@ class Client:
             "event": "enquire_link_resp",
         }
         await self.outboundqueue.enqueue(item_to_enqueue)
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
             )
@@ -441,7 +441,7 @@ class Client:
 
         `unbind_resp` has no body.
         """
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {"event": "unbind_resp", "stage": "start", "correlation_id": correlation_id}
             )
@@ -460,7 +460,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind_resp", full_pdu)
-        self.logger.debug(
+        self.logger.info(
             "{}".format({"event": "unbind_resp", "stage": "end", "correlation_id": correlation_id})
         )
 
@@ -476,7 +476,7 @@ class Client:
         BODY::
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {"event": "deliver_sm_resp", "stage": "start", "correlation_id": correlation_id}
             )
@@ -500,7 +500,7 @@ class Client:
             "event": "deliver_sm_resp",
         }
         await self.outboundqueue.enqueue(item_to_enqueue)
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
             )
@@ -541,7 +541,7 @@ class Client:
                u cant use both `short_message` and `message_payload`
             2. Octet String - A series of octets, not necessarily NULL terminated.
         """
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "submit_sm",
@@ -561,7 +561,7 @@ class Client:
             "destination_addr": destination_addr,
         }
         await self.outboundqueue.enqueue(item_to_enqueue)
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "submit_sm",
@@ -577,7 +577,7 @@ class Client:
     async def build_submit_sm_pdu(
         self, short_message, correlation_id, source_addr, destination_addr
     ):
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "build_submit_sm_pdu",
@@ -637,7 +637,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
 
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "build_submit_sm_pdu",
@@ -663,7 +663,7 @@ class Client:
             log_msg = self.codec_class.decode(msg, self.encoding)
         except Exception:
             pass
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "send_data",
@@ -696,7 +696,7 @@ class Client:
 
         self.writer.write(msg)
         await self.writer.drain()
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "send_data",
@@ -710,7 +710,7 @@ class Client:
 
     async def send_forever(self, TESTING=False):
         while True:
-            self.logger.debug("{}".format({"event": "send_forever", "stage": "start"}))
+            self.logger.info("{}".format({"event": "send_forever", "stage": "start"}))
 
             # check with throttle handler
             send_request = await self.throttle_handler.allow_request()
@@ -733,7 +733,7 @@ class Client:
                     full_pdu = item_to_dequeue["pdu"]
 
                 await self.send_data(event, full_pdu, correlation_id)
-                self.logger.debug(
+                self.logger.info(
                     "{}".format(
                         {
                             "event": "send_forever",
@@ -748,7 +748,7 @@ class Client:
                     # offer escape hatch for tests to come out of endless loop
                     return item_to_dequeue
             else:
-                self.logger.debug(
+                self.logger.info(
                     "{}".format(
                         {"event": "send_forever", "stage": "end", "send_request": send_request}
                     )
@@ -763,11 +763,11 @@ class Client:
         """
         """
         while True:
-            self.logger.debug("{}".format({"event": "receive_data", "stage": "start"}))
+            self.logger.info("{}".format({"event": "receive_data", "stage": "start"}))
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
-                self.logger.debug(
+                self.logger.info(
                     "{}".format(
                         {"event": "receive_data", "stage": "start", "state": "no data received"}
                     )
@@ -784,7 +784,7 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 if chunk == b"":
-                    self.logger.debug(
+                    self.logger.info(
                         "{}".format(
                             {
                                 "event": "receive_data",
@@ -798,12 +798,12 @@ class Client:
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
-            self.logger.debug("{}".format({"event": "receive_data", "stage": "end"}))
+            self.logger.info("{}".format({"event": "receive_data", "stage": "end"}))
 
     async def parse_response_pdu(self, pdu):
         """
         """
-        self.logger.debug("{}".format({"event": "parse_response_pdu", "stage": "start"}))
+        self.logger.info("{}".format({"event": "parse_response_pdu", "stage": "start"}))
 
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
@@ -858,7 +858,7 @@ class Client:
             unparsed_pdu_body=pdu_body,
             total_pdu_length=total_pdu_length,
         )
-        self.logger.debug(
+        self.logger.info(
             "{}".format(
                 {
                     "event": "parse_response_pdu",
@@ -895,7 +895,7 @@ class Client:
                 )
             )
         else:
-            self.logger.debug(
+            self.logger.info(
                 "{}".format(
                     {
                         "event": "speficic_handlers",
@@ -1002,7 +1002,7 @@ class Client:
 
         clients/users should call this method when winding down.
         """
-        self.logger.debug(
+        self.logger.info(
             "{}".format({"event": "unbind", "stage": "start", "correlation_id": correlation_id})
         )
         # body
@@ -1025,6 +1025,6 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data("unbind", full_pdu)
-        self.logger.debug(
+        self.logger.info(
             "{}".format({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
         )

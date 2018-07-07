@@ -54,12 +54,12 @@ class SimpleRateLimiter(BaseRateLimiter):
         self.EFFECTIVE_SEND_RATE: float = 0
 
     async def limit(self) -> None:
-        self.logger.debug("{}".format({"event": "SimpleRateLimiter.limit", "stage": "start"}))
+        self.logger.info("{}".format({"event": "SimpleRateLimiter.limit", "stage": "start"}))
         while self.tokens < 1:
             self.add_new_tokens()
             # todo: sleep in an exponetial manner upto a maximum then wrap around.
             await asyncio.sleep(self.DELAY_FOR_TOKENS)
-            self.logger.debug(
+            self.logger.info(
                 "{}".format(
                     {
                         "event": "SimpleRateLimiter.limit",
