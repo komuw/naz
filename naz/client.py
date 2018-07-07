@@ -268,6 +268,7 @@ class Client:
         self.reader = None
         self.writer = None
 
+        # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         extra_log_data = {"log_metadata": self.log_metadata}
         self.logger = logging.getLogger()
         handler = logging.StreamHandler()
