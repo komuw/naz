@@ -220,7 +220,7 @@ You can customize `naz`'s ratelimiter or even write your own ratelimiter (if you
 To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
 ```python
 import naz
-myLimiter = naz.ratelimiter.SimpleRateLimiter(SEND_RATE=35)
+myLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=35)
 cli = naz.Client(
     ...
     rateLimiter=myLimiter,

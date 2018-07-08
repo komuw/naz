@@ -272,7 +272,7 @@ class Client:
         extra_log_data = {"log_metadata": self.log_metadata}
         self.logger = logging.getLogger()
         handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s %(log_metadata)s")
+        formatter = logging.Formatter("%(message)s" + "%(log_metadata)s")
         handler.setFormatter(formatter)
         if not self.logger.handlers:
             self.logger.addHandler(handler)

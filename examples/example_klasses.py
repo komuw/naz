@@ -27,37 +27,37 @@ class ExampleSeqGen(object):
 class ExampleRateLimiter(naz.ratelimiter.SimpleRateLimiter):
     """
     Usage:
-        rateLimiter = ExampleRateLimiter(SEND_RATE=10, MAX_TOKENS=25)
+        rateLimiter = ExampleRateLimiter(send_rate=10, max_tokens=25)
         await rateLimiter.limit()
         send_messsages()
     """
 
-    def __init__(self, SEND_RATE=1, MAX_TOKENS=2, DELAY_FOR_TOKENS=10):
-        self.SEND_RATE = SEND_RATE  # rate in seconds
-        self.MAX_TOKENS = MAX_TOKENS  # start tokens
-        self.DELAY_FOR_TOKENS = (
-            DELAY_FOR_TOKENS
+    def __init__(self, send_rate=1, max_tokens=2, delay_for_tokens=10):
+        self.send_rate = send_rate  # rate in seconds
+        self.max_tokens = max_tokens  # start tokens
+        self.delay_for_tokens = (
+            delay_for_tokens
         )  # how long(seconds) to wait before checking for token availability after they had finished
-        self.tokens = self.MAX_TOKENS
+        self.tokens = self.max_tokens
         self.updated_at = time.monotonic()
 
     async def limit(self):
         while self.tokens < 1:
             print(
-                "EXAMPLE_rate_limiting. SEND_RATE={0}. DELAY_FOR_TOKENS={1}".format(
-                    self.SEND_RATE, self.DELAY_FOR_TOKENS
+                "EXAMPLE_rate_limiting. send_rate={0}. delay_for_tokens={1}".format(
+                    self.send_rate, self.delay_for_tokens
                 )
             )
             self.add_new_tokens()
-            await asyncio.sleep(self.DELAY_FOR_TOKENS)
+            await asyncio.sleep(self.delay_for_tokens)
         self.tokens -= 1
 
     def add_new_tokens(self):
         now = time.monotonic()
         time_since_update = now - self.updated_at
-        new_tokens = time_since_update * self.SEND_RATE
+        new_tokens = time_since_update * self.send_rate
         if new_tokens > 1:
-            self.tokens = min(self.tokens + new_tokens, self.MAX_TOKENS)
+            self.tokens = min(self.tokens + new_tokens, self.max_tokens)
             self.updated_at = now
 
 

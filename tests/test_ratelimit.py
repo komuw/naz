@@ -43,14 +43,14 @@ class TestRateLimit(TestCase):
             self.logger.addHandler(handler)
         self.logger.setLevel("DEBUG")
 
-        self.SEND_RATE = 1
-        self.MAX_TOKENS = 1
-        self.DELAY_FOR_TOKENS = 1
+        self.send_rate = 1
+        self.max_tokens = 1
+        self.delay_for_tokens = 1
         self.rateLimiter = naz.ratelimiter.SimpleRateLimiter(
             logger=self.logger,
-            SEND_RATE=self.SEND_RATE,
-            MAX_TOKENS=self.MAX_TOKENS,
-            DELAY_FOR_TOKENS=self.DELAY_FOR_TOKENS,
+            send_rate=self.send_rate,
+            max_tokens=self.max_tokens,
+            delay_for_tokens=self.delay_for_tokens,
         )
 
     def tearDown(self):
@@ -61,25 +61,25 @@ class TestRateLimit(TestCase):
 
     def test_no_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
-            for i in range(0, self.MAX_TOKENS):
+            for i in range(0, self.max_tokens):
                 self._run(self.rateLimiter.limit())
             self.assertFalse(mock_sleep.mock.called)
 
     def test_token_exhaustion_causes_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
-            for i in range(0, self.MAX_TOKENS * 2):
+            for i in range(0, self.max_tokens * 2):
                 self._run(self.rateLimiter.limit())
             self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.DELAY_FOR_TOKENS)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.delay_for_tokens)
 
     def test_send_rate(self):
-        SEND_RATE = 3
+        send_rate = 3
         rLimiter = naz.ratelimiter.SimpleRateLimiter(
-            logger=self.logger, SEND_RATE=SEND_RATE, MAX_TOKENS=3, DELAY_FOR_TOKENS=1
+            logger=self.logger, send_rate=send_rate, max_tokens=3, delay_for_tokens=1
         )
         msgs_delivered = []
         now = time.monotonic()
-        for i in range(0, SEND_RATE * 4):
+        for i in range(0, send_rate * 4):
             z = self._run(rLimiter.limit())
             msgs_delivered.append(z)
 
@@ -87,4 +87,4 @@ class TestRateLimit(TestCase):
         time_taken_to_deliver = then - now  # seconds
         total_msgs_delivered = len(msgs_delivered)
         effective_message_rate = total_msgs_delivered / time_taken_to_deliver
-        self.assertAlmostEqual(effective_message_rate, SEND_RATE, 0)
+        self.assertAlmostEqual(effective_message_rate, send_rate, 0)
