@@ -50,8 +50,8 @@ class SimpleRateLimiter(BaseRateLimiter):
         self.updated_at: float = time.monotonic()
 
         self.logger = logger
-        self.MESSAGES_DELIVERED: int = 0
-        self.EFFECTIVE_send_rate: float = 0
+        self.messages_delivered: int = 0
+        self.effective_send_rate: float = 0
 
     async def limit(self) -> None:
         self.logger.info("{}".format({"event": "SimpleRateLimiter.limit", "stage": "start"}))
@@ -67,20 +67,20 @@ class SimpleRateLimiter(BaseRateLimiter):
                         "state": "limiting rate",
                         "send_rate": self.send_rate,
                         "delay": self.delay_for_tokens,
-                        "effective_send_rate": self.EFFECTIVE_send_rate,
+                        "effective_send_rate": self.effective_send_rate,
                     }
                 )
             )
 
-        self.MESSAGES_DELIVERED += 1
+        self.messages_delivered += 1
         self.tokens -= 1
 
     def add_new_tokens(self) -> None:
         now = time.monotonic()
         time_since_update = now - self.updated_at
-        self.EFFECTIVE_send_rate = self.MESSAGES_DELIVERED / time_since_update
+        self.effective_send_rate = self.messages_delivered / time_since_update
         new_tokens = time_since_update * self.send_rate
         if new_tokens > 1:
             self.tokens = min(self.tokens + new_tokens, self.max_tokens)
             self.updated_at = now
-            self.MESSAGES_DELIVERED = 0
+            self.messages_delivered = 0
