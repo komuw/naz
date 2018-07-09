@@ -199,10 +199,10 @@ import naz
 from prometheus_client import Counter
 
 class MyPrometheusHook(naz.hooks.BaseHook):
-    async def request(self, event, correlation_id=None) :
+    async def request(self, event, correlation_id):
         c = Counter('my_requests', 'Description of counter')
         c.inc() # Increment by 1
-    async def response(self, event, correlation_id=None):
+    async def response(self, event, correlation_id):
         c = Counter('my_responses', 'Description of counter')
         c.inc() # Increment by 1
 
@@ -212,6 +212,30 @@ cli = naz.Client(
     hook=myHook,
 )
 ```
+another example is if you want to update a database record whenever you get a delivery notification event;
+```python
+import sqlite3
+import naz
+
+class SetMessageStateHook(naz.hooks.BaseHook):
+    async def request(self, event, correlation_id):
+        pass
+    async def response(self, event, correlation_id):
+        if event == "deliver_sm":
+            conn = sqlite3.connect('mySmsDB.db')
+            c = conn.cursor()
+            t = (correlation_id,)
+            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t) # watch out for SQL injections!!
+            conn.commit()
+            conn.close()
+
+stateHook = SetMessageStateHook()
+cli = naz.Client(
+    ...
+    hook=stateHook,
+)
+```
+
 
 #### 3. Rate limiting
 Sometimes you want to control the rate at which the client sends requests to an SMSC/server. `naz` lets you do this, by allowing you to specify a custom rate limiter.

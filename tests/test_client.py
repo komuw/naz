@@ -170,6 +170,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     command_id_name="enquire_link",
+                    correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     unparsed_pdu_body=b"Doesnt matter",
@@ -187,6 +188,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     command_id_name="unbind",
+                    correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     unparsed_pdu_body=b"Doesnt matter",
@@ -203,6 +205,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     command_id_name="deliver_sm",
+                    correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     unparsed_pdu_body=b"Doesnt matter",
@@ -278,6 +281,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     command_id_name="deliver_sm",
+                    correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     unparsed_pdu_body=b"Doesnt matter",
@@ -298,6 +302,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     command_id_name="deliver_sm",
+                    correlation_id="correlation_id",
                     command_status=0x00000058,
                     sequence_number=sequence_number,
                     unparsed_pdu_body=b"Doesnt matter",
@@ -307,3 +312,14 @@ class TestClient(TestCase):
             self.assertTrue(mock_throttled.mock.called)
             self.assertEqual(mock_throttled.mock.call_count, 1)
             self.assertFalse(mock_not_throttled.mock.called)
+
+    def test_response_hook_called(self):
+        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            self._run(
+                self.cli.parse_response_pdu(
+                    pdu=b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["event"], "submit_sm_resp")
+            self.assertEqual(mock_hook_response.mock.call_args[1]["correlation_id"], None)

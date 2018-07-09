@@ -13,9 +13,7 @@ from . import ratelimiter
 # todo:
 # 1. add configurable retries
 # 2. metrics, what is happening
-# 3. propagate correlation_id, and pdu event to all/most log events
-# 4. run end-to-end integration tests in ci.
-# 5. relate everything to a correlation_id
+# 3. run end-to-end integration tests in ci.
 
 
 class Client:
@@ -291,6 +289,10 @@ class Client:
         if not self.throttle_handler:
             self.throttle_handler = throttle.SimpleThrottleHandler(logger=self.logger)
 
+        # dictionary of sequence_number and their corresponding correlation_id
+        # this will be used to track different pdu's and user generated correlation_id
+        self.seq_correl = {}
+
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
             if val == command_id_code:
@@ -364,7 +366,11 @@ class Client:
         `enquire_link` has no body.
         """
         while True:
-            self.logger.info("{}".format({"event": "enquire_link", "stage": "start"}))
+            self.logger.info(
+                "{}".format(
+                    {"event": "enquire_link", "stage": "start", "correlation_id": correlation_id}
+                )
+            )
             # body
             body = b""
 
@@ -387,7 +393,11 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data("enquire_link", full_pdu)
-            self.logger.info("{}".format({"event": "enquire_link", "stage": "end"}))
+            self.logger.info(
+                "{}".format(
+                    {"event": "enquire_link", "stage": "end", "correlation_id": correlation_id}
+                )
+            )
             if TESTING:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
@@ -635,6 +645,8 @@ class Client:
                     sequence_number, self.MAX_SEQUENCE_NUMBER
                 )
             )
+        # associate sequence_number and user supplied correlation_id
+        self.seq_correl[sequence_number] = correlation_id
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
 
@@ -689,6 +701,7 @@ class Client:
                         "event": "send_data",
                         "stage": "end",
                         "smpp_command": event,
+                        "correlation_id": correlation_id,
                         "state": "request hook error",
                         "error": str(e),
                     }
@@ -785,7 +798,7 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 if chunk == b"":
-                    self.logger.info(
+                    self.logger.exception(
                         "{}".format(
                             {
                                 "event": "receive_data",
@@ -817,6 +830,8 @@ class Client:
         command_id = struct.unpack(">I", command_id_header_data)[0]
         command_status = struct.unpack(">I", command_status_header_data)[0]
         sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
+        # get associated user supplied correlation_id if any, free mem while at it.
+        correlation_id = self.seq_correl.pop(sequence_number, None)
 
         command_id_name = self.search_by_command_id_code(command_id)
         if not command_id_name:
@@ -825,6 +840,7 @@ class Client:
                     {
                         "event": "parse_response_pdu",
                         "stage": "end",
+                        "correlation_id": correlation_id,
                         "state": "command_id:{0} is unknown.".format(command_id),
                     }
                 )
@@ -835,7 +851,7 @@ class Client:
         try:
             # todo: send correlation_id to response hook, when we are eventually able to relate
             # everything to a correlation_id
-            await self.hook.response(event=command_id_name)
+            await self.hook.response(event=command_id_name, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
                 "{}".format(
@@ -843,6 +859,7 @@ class Client:
                         "event": "parse_response_pdu",
                         "stage": "end",
                         "command_id_name": command_id_name,
+                        "correlation_id": correlation_id,
                         "state": "response hook error",
                         "error": str(e),
                     }
@@ -856,6 +873,7 @@ class Client:
             command_id_name=command_id_name,
             command_status=command_status,
             sequence_number=sequence_number,
+            correlation_id=correlation_id,
             unparsed_pdu_body=pdu_body,
             total_pdu_length=total_pdu_length,
         )
@@ -865,13 +883,20 @@ class Client:
                     "event": "parse_response_pdu",
                     "stage": "end",
                     "command_id_name": command_id_name,
+                    "correlation_id": correlation_id,
                     "command_status": command_status,
                 }
             )
         )
 
     async def speficic_handlers(
-        self, command_id_name, command_status, sequence_number, unparsed_pdu_body, total_pdu_length
+        self,
+        command_id_name,
+        command_status,
+        sequence_number,
+        correlation_id,
+        unparsed_pdu_body,
+        total_pdu_length,
     ):
         """
         this handles parsing speficic
@@ -890,6 +915,7 @@ class Client:
                         "event": "speficic_handlers",
                         "stage": "start",
                         "command_id_name": command_id_name,
+                        "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
                     }
@@ -902,6 +928,7 @@ class Client:
                         "event": "speficic_handlers",
                         "stage": "start",
                         "command_id_name": command_id_name,
+                        "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
                     }
@@ -932,7 +959,7 @@ class Client:
         elif command_id_name == "unbind":
             # we need to handle this since we need to send unbind_resp
             # it has no body
-            await self.unbind_resp(sequence_number=sequence_number)
+            await self.unbind_resp(sequence_number=sequence_number, correlation_id=correlation_id)
         elif command_id_name == "submit_sm_resp":
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
@@ -970,12 +997,16 @@ class Client:
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
 
-            # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
-            await self.deliver_sm_resp(sequence_number=sequence_number)
+            # NB: user's hook has already been called.
+            await self.deliver_sm_resp(
+                sequence_number=sequence_number, correlation_id=correlation_id
+            )
         elif command_id_name == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
-            await self.enquire_link_resp(sequence_number=sequence_number)
+            await self.enquire_link_resp(
+                sequence_number=sequence_number, correlation_id=correlation_id
+            )
         else:
             self.logger.exception(
                 "{}".format(
@@ -983,6 +1014,7 @@ class Client:
                         "event": "speficic_handlers",
                         "stage": "end",
                         "command_id_name": command_id_name,
+                        "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
                         "error": "unknown command",
