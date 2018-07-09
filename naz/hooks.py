@@ -14,13 +14,35 @@ class BaseHook:
 
     async def request(self, event: str, correlation_id: typing.Optional[str] = None) -> None:
         """
-        called before a request is sent to SMSC
+        called before a request is sent to SMSC.
+
+        :param event:                  (mandatory) [str]
+            any one of the SMSC event/command_id;
+                bind_transceiver, bind_transceiver_resp,
+                unbind, unbind_resp,
+                submit_sm, submit_sm_resp,
+                deliver_sm, deliver_sm_resp,
+                enquire_link, enquire_link_resp, generic_nack
+        :param correlation_id:                  (mandatory) [str]
+            an ID that a user's application had previously supplied to user
+            to track/correlate different messages.
         """
         raise NotImplementedError("request method must be implemented.")
 
     async def response(self, event: str, correlation_id: typing.Optional[str] = None) -> None:
         """
         called after a response is received from SMSC.
+
+        :param event:                  (mandatory) [str]
+            any one of the SMSC event/command_id;
+                bind_transceiver, bind_transceiver_resp,
+                unbind, unbind_resp,
+                submit_sm, submit_sm_resp,
+                deliver_sm, deliver_sm_resp,
+                enquire_link, enquire_link_resp, generic_nack
+        :param correlation_id:                  (mandatory) [str]
+            an ID that a user's application had previously supplied to user
+            to track/correlate different messages.
         """
         raise NotImplementedError("response method must be implemented.")
 
