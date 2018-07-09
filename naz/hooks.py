@@ -61,7 +61,12 @@ class SimpleHook(BaseHook):
         """
         self.logger.info(
             "{}".format(
-                {"event": "SimpleHook.request", "stage": "start", "correlation_id": correlation_id}
+                {
+                    "event": "SimpleHook.request",
+                    "stage": "start",
+                    "smpp_command": event,
+                    "correlation_id": correlation_id,
+                }
             )
         )
 
@@ -71,6 +76,11 @@ class SimpleHook(BaseHook):
         """
         self.logger.info(
             "{}".format(
-                {"event": "SimpleHook.response", "stage": "start", "correlation_id": correlation_id}
+                {
+                    "event": "SimpleHook.response",
+                    "stage": "start",
+                    "smpp_command": event,
+                    "correlation_id": correlation_id,
+                }
             )
         )
