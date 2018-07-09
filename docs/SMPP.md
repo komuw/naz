@@ -26,12 +26,12 @@ SMSC should bind to the ESME by issuing an `outbind` request. The ESME responds 
 
 #### 2.3 PDUS
 Section 2.3 of smpp ver3.4 spec has a table of all PDU names(`submit_sm`, `bind_transceiver` etc ) the smpp session state that applies to them and who(ESME or SMSC) can issue them.                 
-**NB:** For first draft we will only support the following PDUs:
-`bind_transceiver` -> `bind_transceiver_resp`
-`unbind` -> `unbind_resp`
-`submit_sm` -> `submit_sm_resp`
-`deliver_sm` -> `deliver_sm_resp`
-`enquire_link` -> `enquire_link_resp`  
+**NB:** For first draft we will only support the following PDUs:         
+`bind_transceiver` -> `bind_transceiver_resp`            
+`unbind` -> `unbind_resp`           
+`submit_sm` -> `submit_sm_resp`           
+`deliver_sm` -> `deliver_sm_resp`            
+`enquire_link` -> `enquire_link_resp`           
 `generic_nack` -> has no response. it is for error handling.
 
 #### 2.4 Network Layer Connections
@@ -41,18 +41,18 @@ At the SMPP level, the ESME and SMSC should treat the network connection as a re
 
 
 #### 2.5 SMPP messages sent from ESME to SMSC, and their responses
-`submit_sm` -> `submit_sm_resp`
-`data_sm` -> `data_sm_resp`
-In addition to submission of messages to the SMSC, an ESME may perform the following SMPP operations **using** the **message identifier returned** by the **SMSC in the message acknowledgement**:
-`query_sm ` -> `query_sm_resp`: Query the SMSC for the status of a previously submitted message
-`cancel_sm` -> `cancel_sm_resp`: Cancel delivery of a previously submitted message
-`replace_sm` -> `replace_sm_resp`: Replace a previously submitted message                   
+`submit_sm` -> `submit_sm_resp`          
+`data_sm` -> `data_sm_resp`          
+In addition to submission of messages to the SMSC, an ESME may perform the following SMPP operations **using** the **message identifier returned** by the **SMSC in the message acknowledgement**:          
+`query_sm ` -> `query_sm_resp`: Query the SMSC for the status of a previously submitted message        
+`cancel_sm` -> `cancel_sm_resp`: Cancel delivery of a previously submitted message            
+`replace_sm` -> `replace_sm_resp`: Replace a previously submitted message                         
 **NB:** For first draft we will only support `submit_sm` PDU
 
-#### 2.6 SMPP messages sent from SMSC to ESME , and their responses
-`deliver_sm` -> `deliver_sm_resp` 
-`data_sm` -> `data_sm_resp`
-`alert_notification` -> has no response                      
+#### 2.6 SMPP messages sent from SMSC to ESME , and their responses          
+`deliver_sm` -> `deliver_sm_resp`       
+`data_sm` -> `data_sm_resp`          
+`alert_notification` -> has no response                          
 **NB:** For first draft we will only support `deliver_sm` PDU
 
 SMPP responses should be returned in the same order in which the original requests were received. 
@@ -63,7 +63,7 @@ However, as a guideline it is recommended that no more than **10 SMPP messages a
 
 
 #### 2.8 SMPP Error Handling
-In the event that the original SMPP request PDU is found to contain an error, the receiving entity must return a response with an appropriate error code inserted in the `command_status` field of the response PDU header. (See section 3.2 of spec document.)
+In the event that the original SMPP request PDU is found to contain an error, the receiving entity must return a response with an appropriate error code inserted in the `command_status` field of the response PDU header. (See section 3.2 of spec document.)       
 If the receiving entity finds an error in the PDU header, it should return a `generic_nak` PDU to the originator. (See section 4.3 of spec document.)
 
 #### 2.9 SMPP Timers
@@ -73,9 +73,9 @@ It is recommended that each SMPP session be managed using configurable timers on
 
 
 #### 2.10 Message Modes
-The typical delivery mechanisms that may be offered by an SMSC are: `Store and Forward`, `Datagram`, `Transaction mode`
-Store and Forward - SMSC stores sms in db before forwading to customer. SMPP supports this mode via `submit_sm` operation.
-The ESME must request an SMSC Delivery Receipt in the `submit_sm` operation using the `esm_class` parameter of `submit_sm` op.                   
+The typical delivery mechanisms that may be offered by an SMSC are: `Store and Forward`, `Datagram`, `Transaction mode`            
+Store and Forward - SMSC stores sms in db before forwading to customer. SMPP supports this mode via `submit_sm` operation.          
+The ESME must request an SMSC Delivery Receipt in the `submit_sm` operation using the `esm_class` parameter of `submit_sm` op.                       
 **NB:** For first draft we will only support `Store and Forward` msg mode. we will use `esm_class` param of submit_sm op.
 
 Look at section 2.11 of spec document to learn more about Message Types.
@@ -136,7 +136,7 @@ command-length | command-id | command-status |sequence-number | PDU-Body
 
 
 **NB:** Some SMPP PDUs may only have a Header part only, for example, the `enquire_link`     
-**NB:** 1octet == 8bits == 1byte. so 4 octets == 32bytes. so for `submit_sm_resp` is `0x80000004`
+**NB:** 1octet == 8bits == 1byte. so 4 octets == 4bytes. so for `submit_sm_resp` is `0x80000004`
 ```python
 import struct
 body = b'smppclient1\x00password\x00\x00\x00\x00\x004\x00\x00\x00'
