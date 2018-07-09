@@ -86,7 +86,8 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
-For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)    
+For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)            
+More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)   
 
 
 #### 2. As a cli app
