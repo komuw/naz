@@ -86,8 +86,11 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
-For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)            
-More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)   
+**NB:**      
+(a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)            
+(b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)         
+(c) if you need a SMSC server/gateway to test with, you can use the [docker-compose file in this repo](https://github.com/komuw/naz/blob/master/docker-compose.yml) to bring up an SMSC simulator.        
+That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your outboundqueue.
 
 
 #### 2. As a cli app
