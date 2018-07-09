@@ -1,5 +1,5 @@
 `naz-cli` accepts a json config file. The parameters that can be put in that file, what they mean and their default values(if any) are documented here.                     
-Note that these are also the parameters that `naz.Client` takes.               
+Note that these are also the parameters that [`naz.Client`](https://github.com/komuw/naz/blob/master/naz/client.py) takes.               
         
 The parameters are divided into two categories,                    
 (i) parameters that emanate from the SMPP specification and             
