@@ -270,12 +270,12 @@ class Client:
         extra_log_data = {"log_metadata": self.log_metadata}
         self.logger = logging.getLogger()
         handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s %(log_metadata)s")
+        formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
         if not self.logger.handlers:
             self.logger.addHandler(handler)
         self.logger.setLevel(self.loglevel)
-        self.logger = logging.LoggerAdapter(self.logger, extra_log_data)
+        self.logger = NazLoggingAdapter(self.logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
@@ -1061,3 +1061,13 @@ class Client:
         self.logger.info(
             "{}".format({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
         )
+
+
+class NazLoggingAdapter(logging.LoggerAdapter):
+    """
+    This example adapter expects the passed in dict-like object to have a
+    'log_metadata' key, whose value in brackets is apended to the log message.
+    """
+
+    def process(self, msg, kwargs):
+        return "{0} {1}".format(msg, self.extra.get("log_metadata")), kwargs
