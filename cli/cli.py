@@ -104,12 +104,12 @@ def main():
     extra_log_data = {"log_metadata": log_metadata}
     logger = logging.getLogger()
     handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(message)s %(log_metadata)s")
+    formatter = logging.Formatter("%(message)s")
     handler.setFormatter(formatter)
     if not logger.handlers:
         logger.addHandler(handler)
     logger.setLevel(loglevel)
-    logger = logging.LoggerAdapter(logger, extra_log_data)
+    logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
 
     logger.exception("\n\n\t {} \n\n".format("Naz: the SMPP client."))
 
