@@ -252,21 +252,20 @@ create an instance implementation of `BaseThrottleHandler` and plug it in.
 ```python
 import naz
 
-throttler = naz.throttle.SimpleThrottleHandler(sampling_period=180,
-                                               sample_size=45,
-                                               deny_request_at=1.2)
+th = naz.throttle.SimpleThrottleHandler(sampling_period=180,
+                                        sample_size=45,
+                                        deny_request_at=1.2)
 cli = naz.Client(
     ...
-    throttle_handler=throttler,
+    throttle_handler=th,
 )
 ```
 
 ---
 #### 5.5 Queuing               
 An instance of a class that implements `naz.q.BaseOutboundQueue`. It has two methods `enqueue` & `dequeue`.         
-`enqueue` takes a dictionary while `dequeue`  returns a dictionary.   
 what you put inside those two methods is upto you.         
-Your application queues messages to a queue, naz consumes from that queue and then naz sends those messages to SMSC/server.           
+Your app queues messages, naz consumes from that queue and then sends those messages to SMSC/server.           
 `naz` ships with a `SimpleOutboundQueue` that queues inMem.
 
 ---
@@ -309,6 +308,8 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
+@[3-10]
+@[12-21]
 
 ---
 #### 5.5 Queuing; example (your app)
@@ -317,15 +318,16 @@ import asyncio, naz, redis
 
 outboundqueue = RedisExampleQueue()
 for i in range(0, 5):
-    item_to_enqueue = {
+    item = {
         "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
         "destination_addr": "254722999999",
     }
-    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+    loop.run_until_complete(outboundqueue.enqueue(item))
 ```
+@[3-12]
 
 ---
 #### 5.6 cli app
