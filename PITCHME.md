@@ -141,7 +141,34 @@ cli = naz.Client(
 ```
 
 ---
-#### 5.1.2 observability: hooks        
+#### 5.1.2 observability: hooks          
+An instance of a class that implements `naz.hooks.BaseHook`.  It has two methods `request` and `response`.         
+create an instance implementation of `BaseHook`, plug it in, and u can do whatever u want inside `request`/`response` methods.  
+
+---
+#### 5.1.2 observability: example 
+```python
+import sqlite3
+import naz
+class SetMessageStateHook(naz.hooks.BaseHook):
+    async def request(self, smpp_event, correlation_id):
+        pass
+    async def response(self, smpp_event, correlation_id):
+        if smpp_event == "deliver_sm":
+            conn = sqlite3.connect('mySmsDB.db')
+            c = conn.cursor()
+            t = (correlation_id,)
+            # watch out for SQL injections!!
+            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t)
+            conn.commit()
+            conn.close()
+
+stateHook = SetMessageStateHook()
+cli = naz.Client(
+    ...
+    hook=stateHook,
+)
+```
 
 #### 5.2 Rate limiting             
 #### 5.4 Throttle handling              
