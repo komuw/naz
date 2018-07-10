@@ -46,7 +46,7 @@ cli = naz.Client(
 for i in range(0, 5):
     print("submit_sm round:", i)
     item_to_enqueue = {
-        "event": "submit_sm",
+        "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
