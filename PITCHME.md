@@ -155,7 +155,7 @@ An instance of a class that implements `naz.hooks.BaseHook`.  It has two methods
 create an instance implementation of `BaseHook`, plug it in, and u can do whatever u want inside `request`/`response` methods.  
 
 ---
-#### 5.1.2 observability: example 
+#### 5.1.2 observability: hooks example 
 ```python
 import sqlite3
 import naz
@@ -181,6 +181,7 @@ cli = naz.Client(
     hook=stateHook,
 )
 ```
+@[6-17]
 
 ---
 #### 5.2 Rate limiting  
