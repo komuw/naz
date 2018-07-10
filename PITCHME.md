@@ -85,8 +85,7 @@ Naz makes no imposition of what the Queue is.
 BYO queue...             
 
 ---
-#### 4.2 usage                    
-`pip install naz`        
+#### 4.2 usage                          
 ```python
 import naz, asyncio
 
@@ -115,6 +114,8 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
+@[3, 5-7, 9]
+
 ---
 #### 4.2.1 sequence of requests
 ![Image of sequence](docs/sequence.png)
