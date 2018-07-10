@@ -41,9 +41,11 @@ command_length = 16 + len(body)  # 16 is for headers
 command_id = 21 # enquire_link PDU
 command_status = 0
 sequence_number = 1
-header = struct.pack(
-    ">IIII", command_length, command_id, command_status, sequence_number
-)
+header = struct.pack(">IIII",
+                     command_length,
+                     command_id,
+                     command_status,
+                     sequence_number)
 
 # send PDU
 full_pdu = header + body
