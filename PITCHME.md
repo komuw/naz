@@ -215,7 +215,7 @@ import naz
 class AwesomeLimiter(naz.ratelimiter.BaseRateLimiter):
     async def limit(self):
         sleeper = 13.13
-        print("\n\t hey we are rate limiting. sleep={}".format(sleeper))
+        print("\n\t rate limiting. sleep={}".format(sleeper))
         await asyncio.sleep(sleeper)
 
 lim = AwesomeLimiter()
@@ -231,7 +231,7 @@ cli = naz.Client(
 {'deny_request_at': 1, 'state': 'allow_request'}      
 {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}          
 
-	 hey we are rate limiting. sleep=13.13
+	rate limiting. sleep=13.13
 {'event': 'receive_data', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 ```
 
