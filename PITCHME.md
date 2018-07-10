@@ -325,10 +325,27 @@ for i in range(0, 5):
 
 ---
 #### 5.6 cli app
+this is installed when you install `naz`.       
+```
+naz-cli --help
+```          
+`naz-cli` consumes the `naz` api. 
+It accepts a json config file.
+
+---
+#### 5.6 cli app; example
+demo
+
 
 ---
 #### 6. then what?         
+- looking for feedback, critique, feature requests, bug reports.                 
+- test on one staging mno env.            
 
 
-vumi smpp config:     
-https://github.com/praekelt/vumi/blob/master/vumi/transports/smpp/config.py
+---
+#### 7. resources         
+- https://github.com/komuw/naz                
+- https://github.com/komuw/naz/blob/master/docs/SMPP_v3_4_specification.pdf          
+- https://github.com/praekelt/vumi
+
