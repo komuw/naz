@@ -7,26 +7,18 @@ jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_th
 # topics                   
 1. SMPP spec intro               
 2. SMPP & python intro        
-3. current lay of the land          
-    3.1 problems with current solutions           
-4. naz intro                     
-    4.1 architecture              
-    4.2 usage                    
-5. naz features         
-    5.1 async           
-    5.2 observability            
-    5.3 Rate limiting             
-    5.4 Throttle handling              
-    5.5 Queuing            
-6. then what?  
+3. current lay of the land                  
+4. naz intro                                       
+5. naz features                    
+6. then what?         
 
 ---
 ## 1. SMPP spec intro                 
-The SMPP protocol is an open protocl designed for transfer of short message data between a Message Center(SMSC/USSD server etc) & a SMS application system.                
-SMPP is based on the exchange of request and response protocol data units(PDUs) between the client/ESME and the server/SMSC over an underlying TCP/IP network connection.                
+The SMPP protocol is designed for transfer of short messages between a Message Center(SMSC/USSD server etc) & an SMS app system.                
+It's ased on exchange of request/response protocol data units(PDUs) between the client and the server over a TCP/IP network.                
 
 ---
-#### 1.1 sequence of requests¶
+#### 1.1 sequence of requests
 ![Image of sequence](docs/sequence.png)
                              
 ---
@@ -36,8 +28,7 @@ SMPP is based on the exchange of request and response protocol data units(PDUs) 
 ---
 ## 2. SMPP & python intro         
 ```python
-import socket
-import struct
+import socket, struct
 
 # 1. network connect
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -70,10 +61,10 @@ sock.send(full_pdu)
     - complexity of code base    
     - coupling with other things(rabbitMQ, redis, Twisted)      
     - non-granular configurability         
-      - (PR #352 what happens when SMSC throttles, you can only set `throttle_delay: X seconds` )
+      - (PR #352 you can only set `throttle_delay: X seconds` )
     - maintenance debt:
-      - (PR #342 disable vumi sentry integration; vumi has not updated raven dependancies)
-      - upgrade to python3 but transport is yet to(because vumi is py2)
+      - (PR #342 disable vumi sentry integration; vumi outdated raven dependancies)
+      - cant migrate transport to py3(because vumi is py2)
     - lack of visibility      
       - (PR #335 and PR #327 enrich queue to vumi logging). 
       - PR #336, PR #339
