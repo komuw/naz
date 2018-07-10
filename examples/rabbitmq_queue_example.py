@@ -28,9 +28,12 @@ class RabbitmqExampleQueue(naz.q.BaseOutboundQueue):
 
     async def dequeue(self):
         self.channel.queue_declare(queue=self.queue_name)
-        _, _, body = self.channel.basic_get(self.queue_name)
-        item = json.loads(body.decode())
-        return item
+        while True:
+            _, _, body = self.channel.basic_get(self.queue_name)
+            if body:
+                item = json.loads(body.decode())
+                return item
+            await asyncio.sleep(5)
 
 
 loop = asyncio.get_event_loop()
@@ -42,6 +45,7 @@ cli = naz.Client(
     system_id="smppclient1",
     password="password",
     outboundqueue=outboundqueue,
+    enquire_link_interval=17,
 )
 
 item_to_enqueue = {
