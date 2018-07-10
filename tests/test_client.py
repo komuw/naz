@@ -126,7 +126,7 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_naz_enqueue.mock.call_args[0][1]["correlation_id"], correlation_id
             )
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "submit_sm")
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["smpp_event"], "submit_sm")
 
     def test_submit_sm_sending(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
@@ -135,7 +135,7 @@ class TestClient(TestCase):
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "event": "submit_sm",
+                "smpp_event": "submit_sm",
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
@@ -213,7 +213,7 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "deliver_sm_resp")
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["smpp_event"], "deliver_sm_resp")
 
     def test_unbind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
@@ -258,7 +258,7 @@ class TestClient(TestCase):
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "event": "submit_sm",
+                "smpp_event": "submit_sm",
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
@@ -321,5 +321,5 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_hook_response.mock.called)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["event"], "submit_sm_resp")
+            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_event"], "submit_sm_resp")
             self.assertEqual(mock_hook_response.mock.call_args[1]["correlation_id"], None)
