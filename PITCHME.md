@@ -4,7 +4,7 @@ jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_th
 
 ---
 
-# topics                   
+#### topics                   
 1. SMPP spec intro               
 2. SMPP & python intro        
 3. current lay of the land                  
@@ -13,7 +13,7 @@ jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_th
 6. then what?         
 
 ---
-## 1. SMPP spec intro                 
+#### 1. SMPP spec intro                 
 The SMPP protocol is designed for transfer of short messages between a Message Center(SMSC/USSD server etc) & an SMS app system.                
 It's ased on exchange of request/response protocol data units(PDUs) between the client and the server over a TCP/IP network.                
 
@@ -26,7 +26,7 @@ It's ased on exchange of request/response protocol data units(PDUs) between the 
 ![Image of pdu format](docs/pdu_format.png)
 
 ---
-## 2. SMPP & python intro         
+#### 2. SMPP & python intro         
 ```python
 import socket, struct
 
@@ -51,7 +51,7 @@ sock.send(full_pdu)
 ```          
 
 ---
-## 3. current lay of the land               
+#### 3. current lay of the land               
 - github.com/podshumok/python-smpplib               
 - github.com/praekelt/vumi                    
 - ... couple more          
@@ -71,7 +71,7 @@ sock.send(full_pdu)
 
 
 ---
-## 4. naz intro                     
+#### 4. naz intro                     
 
 
 
@@ -79,7 +79,7 @@ sock.send(full_pdu)
 #### 4.2 usage                    
 
 ---
-## 5. naz features        
+#### 5. naz features        
 #### 5.1 async          
 #### 5.2 observability         
 5.2.1 logging               
@@ -89,7 +89,7 @@ sock.send(full_pdu)
 5.5 Queuing          
 
 ---
-6. then what?         
+#### 6. then what?         
 
 
 vumi smpp config:     
