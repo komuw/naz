@@ -10,13 +10,13 @@ class ExampleSeqGen(object):
     """
     """
 
-    MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
+    max_sequence_number = 0x7FFFFFFF
 
     def __init__(self):
         self.sequence_number = 1
 
     def next_sequence(self):
-        if self.sequence_number == self.MAX_SEQUENCE_NUMBER:
+        if self.sequence_number == self.max_sequence_number:
             # wrap around
             self.sequence_number = 1
         else:
@@ -24,7 +24,7 @@ class ExampleSeqGen(object):
         return self.sequence_number
 
 
-class ExampleRateLimiter(naz.ratelimiter.SimpleRateLimiter):
+class ExampleRateLimiter(naz.ratelimiter.BaseRateLimiter):
     """
     Usage:
         rateLimiter = ExampleRateLimiter(send_rate=10, max_tokens=25)

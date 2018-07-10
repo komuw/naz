@@ -28,9 +28,12 @@ class RabbitmqExampleQueue(naz.q.BaseOutboundQueue):
 
     async def dequeue(self):
         self.channel.queue_declare(queue=self.queue_name)
-        _, _, body = self.channel.basic_get(self.queue_name)
-        item = json.loads(body.decode())
-        return item
+        while True:
+            _, _, body = self.channel.basic_get(self.queue_name)
+            if body:
+                item = json.loads(body.decode())
+                return item
+            await asyncio.sleep(5)
 
 
 loop = asyncio.get_event_loop()
@@ -42,10 +45,11 @@ cli = naz.Client(
     system_id="smppclient1",
     password="password",
     outboundqueue=outboundqueue,
+    enquire_link_interval=17,
 )
 
 item_to_enqueue = {
-    "event": "submit_sm",
+    "smpp_event": "submit_sm",
     "short_message": "Hello World",
     "correlation_id": "myid12345",
     "source_addr": "254722111111",
@@ -64,7 +68,7 @@ try:
     loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:
-    print("error occured. error={0}".format(str(e)))
+    print("\n\t error occured. error={0}".format(str(e)))
 finally:
     loop.run_until_complete(cli.unbind())
     loop.close()

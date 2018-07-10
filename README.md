@@ -62,7 +62,7 @@ cli = naz.Client(
 for i in range(0, 4):
     print("submit_sm round:", i)
     item_to_enqueue = {
-        "event": "submit_sm",
+        "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
@@ -136,7 +136,11 @@ run:
 {'event': 'tranceiver_bind', 'stage': 'end'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 {'event': 'send_forever', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
 ```              
-For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)                
+             
+**NB:**      
+(a) For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)             
+(b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples). As an example, start the SMSC simulator(`docker-compose up`) then in another terminal run, `naz-cli --config examples/example_config.json`
+
 To see help:
 
 `naz-cli --help`   
@@ -203,10 +207,10 @@ import naz
 from prometheus_client import Counter
 
 class MyPrometheusHook(naz.hooks.BaseHook):
-    async def request(self, event, correlation_id):
+    async def request(self, smpp_event, correlation_id):
         c = Counter('my_requests', 'Description of counter')
         c.inc() # Increment by 1
-    async def response(self, event, correlation_id):
+    async def response(self, smpp_event, correlation_id):
         c = Counter('my_responses', 'Description of counter')
         c.inc() # Increment by 1
 
@@ -222,14 +226,15 @@ import sqlite3
 import naz
 
 class SetMessageStateHook(naz.hooks.BaseHook):
-    async def request(self, event, correlation_id):
+    async def request(self, smpp_event, correlation_id):
         pass
-    async def response(self, event, correlation_id):
-        if event == "deliver_sm":
+    async def response(self, smpp_event, correlation_id):
+        if smpp_event == "deliver_sm":
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()
             t = (correlation_id,)
-            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t) # watch out for SQL injections!!
+            # watch out for SQL injections!!
+            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t)
             conn.commit()
             conn.close()
 
@@ -287,7 +292,7 @@ Your application should call that class's `enqueue` method to -you guessed it- e
 Your application should enqueue a dictionary object with any parameters but the following are mandatory:              
 ```bash
 {
-    "event": "submit_sm",
+    "smpp_event": "submit_sm",
     "short_message": string,
     "correlation_id": string,
     "source_addr": string,
@@ -328,7 +333,7 @@ then in your application, queue items to the queue;
 # queue messages to send
 for i in range(0, 4):
     item_to_enqueue = {
-        "event": "submit_sm",
+        "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
@@ -396,7 +401,7 @@ then queue on your application side;
 for i in range(0, 5):
     print("submit_sm round:", i)
     item_to_enqueue = {
-        "event": "submit_sm",
+        "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",

@@ -98,7 +98,7 @@ class Client:
         if not self.sequence_generator:
             self.sequence_generator = sequence.SimpleSequenceGenerator()
 
-        self.MAX_SEQUENCE_NUMBER = 0x7FFFFFFF
+        self.max_sequence_number = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
         self.log_metadata = log_metadata
         if not self.log_metadata:
@@ -340,17 +340,17 @@ class Client:
         # the status for success see section 5.1.3
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = self.sequence_generator.next_sequence()
-        if sequence_number > self.MAX_SEQUENCE_NUMBER:
+        if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
                 "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
-                    sequence_number, self.MAX_SEQUENCE_NUMBER
+                    sequence_number, self.max_sequence_number
                 )
             )
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        await self.send_data("bind_transceiver", full_pdu)
+        await self.send_data(smpp_event="bind_transceiver", msg=full_pdu)
         self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "end"}))
         return full_pdu
 
@@ -379,11 +379,11 @@ class Client:
             command_id = self.command_ids["enquire_link"]
             command_status = 0x00000000  # not used for `enquire_link`
             sequence_number = self.sequence_generator.next_sequence()
-            if sequence_number > self.MAX_SEQUENCE_NUMBER:
+            if sequence_number > self.max_sequence_number:
                 # prevent third party sequence_generators from ruining our party
                 raise ValueError(
                     "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
-                        sequence_number, self.MAX_SEQUENCE_NUMBER
+                        sequence_number, self.max_sequence_number
                     )
                 )
             header = struct.pack(
@@ -392,7 +392,7 @@ class Client:
 
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-            await self.send_data("enquire_link", full_pdu)
+            await self.send_data(smpp_event="enquire_link", msg=full_pdu)
             self.logger.info(
                 "{}".format(
                     {"event": "enquire_link", "stage": "end", "correlation_id": correlation_id}
@@ -432,7 +432,7 @@ class Client:
         item_to_enqueue = {
             "correlation_id": correlation_id,
             "pdu": full_pdu,
-            "event": "enquire_link_resp",
+            "smpp_event": "enquire_link_resp",
         }
         await self.outboundqueue.enqueue(item_to_enqueue)
         self.logger.info(
@@ -470,7 +470,7 @@ class Client:
 
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data("unbind_resp", full_pdu)
+        await self.send_data(smpp_event="unbind_resp", msg=full_pdu)
         self.logger.info(
             "{}".format({"event": "unbind_resp", "stage": "end", "correlation_id": correlation_id})
         )
@@ -508,7 +508,7 @@ class Client:
         item_to_enqueue = {
             "correlation_id": correlation_id,
             "pdu": full_pdu,
-            "event": "deliver_sm_resp",
+            "smpp_event": "deliver_sm_resp",
         }
         await self.outboundqueue.enqueue(item_to_enqueue)
         self.logger.info(
@@ -565,7 +565,7 @@ class Client:
             )
         )
         item_to_enqueue = {
-            "event": "submit_sm",
+            "smpp_event": "submit_sm",
             "short_message": short_message,
             "correlation_id": correlation_id,
             "source_addr": source_addr,
@@ -638,11 +638,11 @@ class Client:
         # the status for success see section 5.1.3
         command_status = 0x00000000  # not used for `submit_sm`
         sequence_number = self.sequence_generator.next_sequence()
-        if sequence_number > self.MAX_SEQUENCE_NUMBER:
+        if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
                 "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
-                    sequence_number, self.MAX_SEQUENCE_NUMBER
+                    sequence_number, self.max_sequence_number
                 )
             )
         # associate sequence_number and user supplied correlation_id
@@ -664,7 +664,7 @@ class Client:
         )
         return full_pdu
 
-    async def send_data(self, event, msg, correlation_id=None):
+    async def send_data(self, smpp_event, msg, correlation_id=None):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -681,7 +681,7 @@ class Client:
                 {
                     "event": "send_data",
                     "stage": "start",
-                    "smpp_command": event,
+                    "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
                     "msg": log_msg,
                 }
@@ -693,14 +693,14 @@ class Client:
 
         # call user's hook for requests
         try:
-            await self.hook.request(event=event, correlation_id=correlation_id)
+            await self.hook.request(smpp_event=smpp_event, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
                 "{}".format(
                     {
                         "event": "send_data",
                         "stage": "end",
-                        "smpp_command": event,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "state": "request hook error",
                         "error": str(e),
@@ -715,7 +715,7 @@ class Client:
                 {
                     "event": "send_data",
                     "stage": "end",
-                    "smpp_command": event,
+                    "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
                     "msg": log_msg,
                 }
@@ -734,8 +734,8 @@ class Client:
 
                 item_to_dequeue = await self.outboundqueue.dequeue()
                 correlation_id = item_to_dequeue["correlation_id"]
-                event = item_to_dequeue["event"]
-                if event == "submit_sm":
+                smpp_event = item_to_dequeue["smpp_event"]
+                if smpp_event == "submit_sm":
                     short_message = item_to_dequeue["short_message"]
                     correlation_id = item_to_dequeue["correlation_id"]
                     source_addr = item_to_dequeue["source_addr"]
@@ -746,14 +746,16 @@ class Client:
                 else:
                     full_pdu = item_to_dequeue["pdu"]
 
-                await self.send_data(event, full_pdu, correlation_id)
+                await self.send_data(
+                    smpp_event=smpp_event, msg=full_pdu, correlation_id=correlation_id
+                )
                 self.logger.info(
                     "{}".format(
                         {
                             "event": "send_forever",
                             "stage": "end",
                             "correlation_id": correlation_id,
-                            "smpp_command": event,
+                            "smpp_event": smpp_event,
                             "send_request": send_request,
                         }
                     )
@@ -833,8 +835,8 @@ class Client:
         # get associated user supplied correlation_id if any, free mem while at it.
         correlation_id = self.seq_correl.pop(sequence_number, None)
 
-        command_id_name = self.search_by_command_id_code(command_id)
-        if not command_id_name:
+        smpp_event = self.search_by_command_id_code(command_id)
+        if not smpp_event:
             self.logger.exception(
                 "{}".format(
                     {
@@ -851,14 +853,14 @@ class Client:
         try:
             # todo: send correlation_id to response hook, when we are eventually able to relate
             # everything to a correlation_id
-            await self.hook.response(event=command_id_name, correlation_id=correlation_id)
+            await self.hook.response(smpp_event=smpp_event, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
                 "{}".format(
                     {
                         "event": "parse_response_pdu",
                         "stage": "end",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "state": "response hook error",
                         "error": str(e),
@@ -870,7 +872,7 @@ class Client:
         if total_pdu_length > 16:
             pdu_body = pdu[16:]
         await self.speficic_handlers(
-            command_id_name=command_id_name,
+            smpp_event=smpp_event,
             command_status=command_status,
             sequence_number=sequence_number,
             correlation_id=correlation_id,
@@ -882,7 +884,7 @@ class Client:
                 {
                     "event": "parse_response_pdu",
                     "stage": "end",
-                    "command_id_name": command_id_name,
+                    "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
                     "command_status": command_status,
                 }
@@ -891,7 +893,7 @@ class Client:
 
     async def speficic_handlers(
         self,
-        command_id_name,
+        smpp_event,
         command_status,
         sequence_number,
         correlation_id,
@@ -914,7 +916,7 @@ class Client:
                     {
                         "event": "speficic_handlers",
                         "stage": "start",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
@@ -927,7 +929,7 @@ class Client:
                     {
                         "event": "speficic_handlers",
                         "stage": "start",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
@@ -941,7 +943,7 @@ class Client:
         elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
             await self.throttle_handler.throttled()
 
-        if command_id_name in [
+        if smpp_event in [
             "bind_transceiver",
             "bind_transceiver_resp",
             # the body of `bind_transceiver_resp` only has `system_id` which is a
@@ -956,18 +958,18 @@ class Client:
         ]:
             # we never have to handle this
             pass
-        elif command_id_name == "unbind":
+        elif smpp_event == "unbind":
             # we need to handle this since we need to send unbind_resp
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number, correlation_id=correlation_id)
-        elif command_id_name == "submit_sm_resp":
+        elif smpp_event == "submit_sm_resp":
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
-        elif command_id_name == "deliver_sm":
+        elif smpp_event == "deliver_sm":
             # HEADER::
             # command_length, int, 4octet
             # command_id, int, 4octet. `deliver_sm`
@@ -1001,7 +1003,7 @@ class Client:
             await self.deliver_sm_resp(
                 sequence_number=sequence_number, correlation_id=correlation_id
             )
-        elif command_id_name == "enquire_link":
+        elif smpp_event == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             await self.enquire_link_resp(
@@ -1013,7 +1015,7 @@ class Client:
                     {
                         "event": "speficic_handlers",
                         "stage": "end",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
@@ -1046,18 +1048,18 @@ class Client:
         command_id = self.command_ids["unbind"]
         command_status = 0x00000000  # not used for `unbind`
         sequence_number = self.sequence_generator.next_sequence()
-        if sequence_number > self.MAX_SEQUENCE_NUMBER:
+        if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
                 "the sequence_number: {0} is greater than the max: {1} allowed by SMPP spec.".format(
-                    sequence_number, self.MAX_SEQUENCE_NUMBER
+                    sequence_number, self.max_sequence_number
                 )
             )
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data("unbind", full_pdu)
+        await self.send_data(smpp_event="unbind", msg=full_pdu)
         self.logger.info(
             "{}".format({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
         )

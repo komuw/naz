@@ -3,12 +3,12 @@
 
 import os
 import sys
-import mock
 import asyncio
 import logging
 from unittest import TestCase
 
 import naz
+import mock
 import docker
 
 
@@ -106,7 +106,7 @@ class TestClient(TestCase):
             self._run(self.cli.tranceiver_bind())
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "bind_transceiver")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "bind_transceiver")
         # todo: test bind_response
 
     def test_submit_sm_enqueue(self):
@@ -126,7 +126,7 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_naz_enqueue.mock.call_args[0][1]["correlation_id"], correlation_id
             )
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "submit_sm")
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["smpp_event"], "submit_sm")
 
     def test_submit_sm_sending(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
@@ -135,7 +135,7 @@ class TestClient(TestCase):
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "event": "submit_sm",
+                "smpp_event": "submit_sm",
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
@@ -158,8 +158,7 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_speficic_handlers.mock.called)
             self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_speficic_handlers.mock.call_args[1]["command_id_name"],
-                "bind_transceiver_resp",
+                mock_naz_speficic_handlers.mock.call_args[1]["smpp_event"], "bind_transceiver_resp"
             )
 
     def test_speficic_handlers(self):
@@ -169,7 +168,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="enquire_link",
+                    smpp_event="enquire_link",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -187,7 +186,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="unbind",
+                    smpp_event="unbind",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -197,14 +196,14 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind_resp")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "unbind_resp")
 
     def test_speficic_handlers_deliver_sm(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="deliver_sm",
+                    smpp_event="deliver_sm",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -213,21 +212,21 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["event"], "deliver_sm_resp")
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["smpp_event"], "deliver_sm_resp")
 
     def test_unbind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             self._run(self.cli.unbind())
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "unbind")
 
     def test_enquire_link(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "enquire_link")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "enquire_link")
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
@@ -258,7 +257,7 @@ class TestClient(TestCase):
             mock_naz_dequeue.mock.return_value = {
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "event": "submit_sm",
+                "smpp_event": "submit_sm",
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
@@ -280,7 +279,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="deliver_sm",
+                    smpp_event="deliver_sm",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -301,7 +300,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="deliver_sm",
+                    smpp_event="deliver_sm",
                     correlation_id="correlation_id",
                     command_status=0x00000058,
                     sequence_number=sequence_number,
@@ -321,5 +320,5 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_hook_response.mock.called)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["event"], "submit_sm_resp")
+            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_event"], "submit_sm_resp")
             self.assertEqual(mock_hook_response.mock.call_args[1]["correlation_id"], None)

@@ -24,16 +24,16 @@ class SimpleSequenceGenerator(BaseSequenceGenerator):
     implement's naz BaseSequenceGenerator interface
     """
 
-    MIN_SEQUENCE_NUMBER: int = 0x00000001
-    MAX_SEQUENCE_NUMBER: int = 0x7FFFFFFF
+    min_sequence_number: int = 0x00000001
+    max_sequence_number: int = 0x7FFFFFFF
 
     def __init__(self) -> None:
-        self.sequence_number: int = self.MIN_SEQUENCE_NUMBER
+        self.sequence_number: int = self.min_sequence_number
 
     def next_sequence(self) -> int:
-        if self.sequence_number == self.MAX_SEQUENCE_NUMBER:
+        if self.sequence_number == self.max_sequence_number:
             # wrap around
-            self.sequence_number = self.MIN_SEQUENCE_NUMBER
+            self.sequence_number = self.min_sequence_number
         else:
             self.sequence_number += 1
         return self.sequence_number
