@@ -12,6 +12,7 @@ cli = naz.Client(
     system_id="smppclient1",
     password="password",
     outboundqueue=outboundqueue,
+    log_metadata={"env": "prod", "release": "canary", "work": "jira-2345"},
 )
 
 # queue messages to send

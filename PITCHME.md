@@ -120,14 +120,33 @@ finally:
 ![Image of sequence](docs/sequence.png)
 
 ---
-#### 5. naz features        
-#### 5.1 async          
-#### 5.2 observability         
-5.2.1 logging               
-5.2.2 hooks         
-5.3 Rate limiting             
-5.4 Throttle handling              
-5.5 Queuing          
+#### 5. naz features  
+
+---                
+#### 5.1.1 observability: logging                 
+```python
+import naz
+cli = naz.Client(
+    ...
+    log_metadata={ "env": "prod", "release": "canary", "work": "jira-2345"},
+)
+```
+
+--- 
+#### 5.1.1 observability: logs
+```bash
+{'event': 'connect', 'stage': 'start'} {'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'connect', 'stage': 'end'} {'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'tranceiver_bind', 'stage': 'start'} {'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+```
+
+---
+#### 5.1.2 observability: hooks        
+
+#### 5.2 Rate limiting             
+#### 5.4 Throttle handling              
+#### 5.5 Queuing             
+#### 5.6 cli app
 
 ---
 #### 6. then what?         
