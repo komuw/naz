@@ -263,6 +263,69 @@ cli = naz.Client(
 
 ---
 #### 5.5 Queuing               
+An instance of a class that implements `naz.q.BaseOutboundQueue`. It has two methods `enqueue` & `dequeue`.         
+`enqueue` takes a dictionary while `dequeue`  returns a dictionary.   
+what you put inside those two methods is upto you.         
+Your application queues messages to a queue, naz consumes from that queue and then naz sends those messages to SMSC/server.           
+`naz` ships with a `SimpleOutboundQueue` that queues inMem.
+
+---
+#### 5.5 Queuing; example
+```python
+import asyncio, naz, redis
+
+class RedisExampleQueue(naz.q.BaseOutboundQueue):
+    def __init__(self):
+        self.redis_instance = redis.StrictRedis(host="localhost", port=6379, db=0)
+        self.queue_name = "myqueue"
+    async def enqueue(self, item):
+        self.redis_instance.lpush(self.queue_name, json.dumps(item))
+    async def dequeue(self):
+        x = self.redis_instance.brpop(self.queue_name)
+        dequed_item = json.loads(x[1].decode())
+        return dequed_item
+
+loop = asyncio.get_event_loop()
+outboundqueue = RedisExampleQueue()
+cli = naz.Client(
+    async_loop=loop,
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=outboundqueue,
+)
+# 1. network connect and bind
+reader, writer = loop.run_until_complete(cli.connect())
+loop.run_until_complete(cli.tranceiver_bind())
+try:
+    # 2. consume from queue, read responses from SMSC, send status checks
+    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    loop.run_until_complete(tasks)
+except Exception as e:
+    print("exception occured. error={0}".format(str(e)))
+finally:
+    # 3. unbind
+    loop.run_until_complete(cli.unbind())
+    loop.close()
+```
+
+---
+#### 5.5 Queuing; example (your app)
+```python
+import asyncio, naz, redis
+
+outboundqueue = RedisExampleQueue()
+for i in range(0, 5):
+    item_to_enqueue = {
+        "smpp_event": "submit_sm",
+        "short_message": "Hello World-{0}".format(str(i)),
+        "correlation_id": "myid12345",
+        "source_addr": "254722111111",
+        "destination_addr": "254722999999",
+    }
+    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+```
 
 ---
 #### 5.6 cli app
