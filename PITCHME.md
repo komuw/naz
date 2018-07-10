@@ -15,7 +15,7 @@ jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_th
 ---
 #### 1. SMPP spec intro                 
 The SMPP protocol is designed for transfer of short messages between a Message Center(SMSC/USSD server etc) & an SMS app system.                
-It's ased on exchange of request/response protocol data units(PDUs) between the client and the server over a TCP/IP network.                
+It's based on exchange of request/response protocol data units(PDUs) between the client and the server over a TCP/IP network.                
 
 ---
 #### 1.1 sequence of requests
