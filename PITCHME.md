@@ -214,7 +214,52 @@ cli = naz.Client(
 ```
 
 ---
-#### 5.4 Throttle handling                
+#### 5.2 Rate limiting: example2                
+```python
+import naz
+
+class AwesomeLimiter(naz.ratelimiter.BaseRateLimiter):
+    async def limit(self):
+        sleeper = 13.13
+        print("\n\t hey we are rate limiting. sleep={}".format(sleeper))
+        await asyncio.sleep(sleeper)
+
+lim = AwesomeLimiter()
+cli = naz.Client(
+    ...
+    rateLimiter=lim,
+)
+```
+
+---
+#### 5.2 Rate limiting 2 - logs
+```
+{'deny_request_at': 1, 'state': 'allow_request'}      
+{'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}          
+
+	 hey we are rate limiting. sleep=13.13
+{'event': 'receive_data', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+```
+
+---
+#### 5.4 Throttle handling     
+An instance of a class that implements `naz.throttle.BaseThrottleHandler`.  It has methods `throttled`, `not_throttled`, `allow_request` & `throttle_delay`.         
+create an instance implementation of `BaseThrottleHandler` and plug it in.         
+`naz` ships with a default, `SimpleThrottleHandler`              
+
+---
+#### 5.4 Throttle handling; example
+```python
+import naz
+
+throttler = naz.throttle.SimpleThrottleHandler(sampling_period=180,
+                                               sample_size=45,
+                                               deny_request_at=1.2)
+cli = naz.Client(
+    ...
+    throttle_handler=throttler,
+)
+```
 
 ---
 #### 5.5 Queuing               
