@@ -29,12 +29,10 @@ It's based on exchange of request/response protocol data units(PDUs) between the
 #### 2. SMPP & python intro         
 ```python
 import socket, struct
-
 # 1. network connect
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.settimeout(5)
 sock.connect(('127.0.0.1', 2775))
-
 # 2. create PDU
 body = b""
 command_length = 16 + len(body)  # 16 is for headers
@@ -46,11 +44,14 @@ header = struct.pack(">IIII",
                      command_id,
                      command_status,
                      sequence_number)
-
 # send PDU
 full_pdu = header + body
 sock.send(full_pdu)
 ```          
+@[1-5]
+@[6-16]
+@[17-19]
+
 
 ---
 #### 3. current lay of the land               
@@ -88,7 +89,6 @@ BYO queue...
 #### 4.2 usage                          
 ```python
 import naz, asyncio
-
 loop = asyncio.get_event_loop()
 outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
 cli = naz.Client(
@@ -99,7 +99,6 @@ cli = naz.Client(
     password="password",
     outboundqueue=outboundqueue,
 )
-
 # 1. network connect and bind
 reader, writer = loop.run_until_complete(cli.connect())
 loop.run_until_complete(cli.tranceiver_bind())
@@ -114,7 +113,7 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
-@[3, 5-7, 9]
+
 
 ---
 #### 4.2.1 sequence of requests
