@@ -106,7 +106,7 @@ class TestClient(TestCase):
             self._run(self.cli.tranceiver_bind())
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "bind_transceiver")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "bind_transceiver")
         # todo: test bind_response
 
     def test_submit_sm_enqueue(self):
@@ -197,7 +197,7 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind_resp")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "unbind_resp")
 
     def test_speficic_handlers_deliver_sm(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
@@ -220,14 +220,14 @@ class TestClient(TestCase):
             self._run(self.cli.unbind())
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "unbind")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "unbind")
 
     def test_enquire_link(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[0][1], "enquire_link")
+            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_event"], "enquire_link")
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
