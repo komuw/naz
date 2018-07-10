@@ -64,7 +64,7 @@ try:
     loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:
-    print("error occured. error={0}".format(str(e)))
+    print("\n\t error occured. error={0}".format(str(e)))
 finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
