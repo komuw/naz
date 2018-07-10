@@ -113,7 +113,10 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
-
+@[1-11]
+@[12-14]
+@[15-19]
+@[20-25]
 
 ---
 #### 4.2.1 sequence of requests
