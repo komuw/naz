@@ -162,7 +162,6 @@ class SetMessageStateHook(naz.hooks.BaseHook):
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()
             t = (correlation_id,)
-            # watch out for SQL injections!!
             c.execute("UPDATE \
                        SmsTable \
                        SET State='delivered' \
@@ -176,7 +175,7 @@ cli = naz.Client(
     hook=stateHook,
 )
 ```
-@[6-17]
+@[6-16]
 
 ---
 #### 5.2 Rate limiting  
