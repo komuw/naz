@@ -35,3 +35,5 @@ test:
 
 asciinema rec --idle-time-limit 2 first.cast
 asciinema play -i 2 docs/first.cast
+asciinema play -i 2 -s 2 docs/first.cast
+
