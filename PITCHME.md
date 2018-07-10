@@ -74,11 +74,48 @@ sock.send(full_pdu)
 
 ---
 #### 4. naz intro                     
+naz is an async SMPP client.       
+It's easily configurable, BYO(throttlers, rateLimiters etc)
 
+#### 4.1 architecture                
+| Your App |  ---> | Queue | ---> | Naz |                   
+what is the Queue?? rabbitmq, redis ...??       
+Naz makes no imposition of what the Queue is.      
+BYO queue...
 
-
-#### 4.1 architecture              
 #### 4.2 usage                    
+`pip install naz`        
+```python
+import naz, asyncio
+
+loop = asyncio.get_event_loop()
+outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+cli = naz.Client(
+    async_loop=loop,
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=outboundqueue,
+)
+
+# 1. network connect and bind
+reader, writer = loop.run_until_complete(cli.connect())
+loop.run_until_complete(cli.tranceiver_bind())
+try:
+    # 2. consume from queue, read responses from SMSC, send status checks
+    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    loop.run_until_complete(tasks)
+except Exception as e:
+    print("exception occured. error={0}".format(str(e)))
+finally:
+    # 3. unbind
+    loop.run_until_complete(cli.unbind())
+    loop.close()
+```
+---
+#### 4.2.1 sequence of requests
+![Image of sequence](docs/sequence.png)
 
 ---
 #### 5. naz features        
