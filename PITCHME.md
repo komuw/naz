@@ -80,7 +80,7 @@ It's easily configurable, BYO(throttlers, rateLimiters etc)
 ---
 #### 4.1 architecture                
 | Your App |  ---> | Queue | ---> | Naz |                   
-what is the Queue?? rabbitmq, redis ...??       
+what is the Queue?? inMem, rabbitmq, redis ...??       
 Naz makes no imposition of what the Queue is.      
 BYO queue...             
 
