@@ -2,6 +2,7 @@ pip install -U jupyter jupyterlab
 jupyter lab -y 
 jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_theme=serif --SlidesExporter.reveal_scroll=True --SlidesExporter.reveal_transition=none    
 
+---
 
 # topics                   
 1. SMPP spec intro               
@@ -19,18 +20,20 @@ jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_th
     5.5 Queuing            
 6. then what?  
 
+---
 ## 1. SMPP spec intro                 
 The SMPP protocol is an open protocl designed for transfer of short message data between a Message Center(SMSC/USSD server etc) & a SMS application system.                
 SMPP is based on the exchange of request and response protocol data units(PDUs) between the client/ESME and the server/SMSC over an underlying TCP/IP network connection.                
 
+---
 #### 1.1 sequence of requests¶
-![Image of sequence](sequence.png)
+![Image of sequence](docs/sequence.png)
                              
-
+---
 #### 1.2 PDU format
-![Image of pdu format](pdu_format.png)
+![Image of pdu format](docs/pdu_format.png)
 
-
+---
 ## 2. SMPP & python intro         
 ```python
 import socket
@@ -56,11 +59,13 @@ full_pdu = header + body
 sock.send(full_pdu)
 ```          
 
+---
 ## 3. current lay of the land               
 - github.com/podshumok/python-smpplib               
 - github.com/praekelt/vumi                    
 - ... couple more          
 
+---
 #### 3.1 problems with current solutions           
     - complexity of code base    
     - coupling with other things(rabbitMQ, redis, Twisted)      
@@ -74,6 +79,7 @@ sock.send(full_pdu)
       - PR #336, PR #339
 
 
+---
 ## 4. naz intro                     
 
 
@@ -81,6 +87,7 @@ sock.send(full_pdu)
 #### 4.1 architecture              
 #### 4.2 usage                    
 
+---
 ## 5. naz features        
 #### 5.1 async          
 #### 5.2 observability         
@@ -90,6 +97,7 @@ sock.send(full_pdu)
 5.4 Throttle handling              
 5.5 Queuing          
 
+---
 6. then what?         
 
 
