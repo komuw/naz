@@ -835,8 +835,8 @@ class Client:
         # get associated user supplied correlation_id if any, free mem while at it.
         correlation_id = self.seq_correl.pop(sequence_number, None)
 
-        command_id_name = self.search_by_command_id_code(command_id)
-        if not command_id_name:
+        smpp_event = self.search_by_command_id_code(command_id)
+        if not smpp_event:
             self.logger.exception(
                 "{}".format(
                     {
@@ -853,14 +853,14 @@ class Client:
         try:
             # todo: send correlation_id to response hook, when we are eventually able to relate
             # everything to a correlation_id
-            await self.hook.response(smpp_event=command_id_name, correlation_id=correlation_id)
+            await self.hook.response(smpp_event=smpp_event, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
                 "{}".format(
                     {
                         "event": "parse_response_pdu",
                         "stage": "end",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "state": "response hook error",
                         "error": str(e),
@@ -872,7 +872,7 @@ class Client:
         if total_pdu_length > 16:
             pdu_body = pdu[16:]
         await self.speficic_handlers(
-            command_id_name=command_id_name,
+            smpp_event=smpp_event,
             command_status=command_status,
             sequence_number=sequence_number,
             correlation_id=correlation_id,
@@ -884,7 +884,7 @@ class Client:
                 {
                     "event": "parse_response_pdu",
                     "stage": "end",
-                    "command_id_name": command_id_name,
+                    "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
                     "command_status": command_status,
                 }
@@ -893,7 +893,7 @@ class Client:
 
     async def speficic_handlers(
         self,
-        command_id_name,
+        smpp_event,
         command_status,
         sequence_number,
         correlation_id,
@@ -916,7 +916,7 @@ class Client:
                     {
                         "event": "speficic_handlers",
                         "stage": "start",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
@@ -929,7 +929,7 @@ class Client:
                     {
                         "event": "speficic_handlers",
                         "stage": "start",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,
@@ -943,7 +943,7 @@ class Client:
         elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
             await self.throttle_handler.throttled()
 
-        if command_id_name in [
+        if smpp_event in [
             "bind_transceiver",
             "bind_transceiver_resp",
             # the body of `bind_transceiver_resp` only has `system_id` which is a
@@ -958,18 +958,18 @@ class Client:
         ]:
             # we never have to handle this
             pass
-        elif command_id_name == "unbind":
+        elif smpp_event == "unbind":
             # we need to handle this since we need to send unbind_resp
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number, correlation_id=correlation_id)
-        elif command_id_name == "submit_sm_resp":
+        elif smpp_event == "submit_sm_resp":
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
-        elif command_id_name == "deliver_sm":
+        elif smpp_event == "deliver_sm":
             # HEADER::
             # command_length, int, 4octet
             # command_id, int, 4octet. `deliver_sm`
@@ -1003,7 +1003,7 @@ class Client:
             await self.deliver_sm_resp(
                 sequence_number=sequence_number, correlation_id=correlation_id
             )
-        elif command_id_name == "enquire_link":
+        elif smpp_event == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             await self.enquire_link_resp(
@@ -1015,7 +1015,7 @@ class Client:
                     {
                         "event": "speficic_handlers",
                         "stage": "end",
-                        "command_id_name": command_id_name,
+                        "smpp_event": smpp_event,
                         "correlation_id": correlation_id,
                         "command_status": command_status_value.code,
                         "state": command_status_value.description,

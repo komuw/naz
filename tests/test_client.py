@@ -158,8 +158,7 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_speficic_handlers.mock.called)
             self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_speficic_handlers.mock.call_args[1]["command_id_name"],
-                "bind_transceiver_resp",
+                mock_naz_speficic_handlers.mock.call_args[1]["smpp_event"], "bind_transceiver_resp"
             )
 
     def test_speficic_handlers(self):
@@ -169,7 +168,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="enquire_link",
+                    smpp_event="enquire_link",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -187,7 +186,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="unbind",
+                    smpp_event="unbind",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -204,7 +203,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="deliver_sm",
+                    smpp_event="deliver_sm",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -280,7 +279,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="deliver_sm",
+                    smpp_event="deliver_sm",
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -301,7 +300,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    command_id_name="deliver_sm",
+                    smpp_event="deliver_sm",
                     correlation_id="correlation_id",
                     command_status=0x00000058,
                     sequence_number=sequence_number,
