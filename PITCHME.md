@@ -129,7 +129,9 @@ running theme: configurability, BYO ... nini nini
 import naz
 cli = naz.Client(
     ...
-    log_metadata={ "env": "prod", "release": "canary", "work": "jira-2345"},
+    log_metadata={
+        "env": "prod", "release": "canary", "work": "jira-2345"
+        }
 )
 ```
 
