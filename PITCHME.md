@@ -1,9 +1,4 @@
-pip install -U jupyter jupyterlab      
-jupyter lab -y 
-jupyter nbconvert pres.ipynb --to slides --post serve --SlidesExporter.reveal_theme=serif --SlidesExporter.reveal_scroll=True --SlidesExporter.reveal_transition=none    
-
 ---
-
 #### topics                   
 1. SMPP spec intro               
 2. SMPP & python intro        
