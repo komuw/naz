@@ -1,12 +1,11 @@
 import sys
-import mock
 import time
 import asyncio
 import logging
 from unittest import TestCase
 
 import naz
-
+import mock
 
 logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 

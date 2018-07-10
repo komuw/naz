@@ -3,12 +3,12 @@
 
 import os
 import sys
-import mock
 import asyncio
 import logging
 from unittest import TestCase
 
 import naz
+import mock
 import docker
 
 

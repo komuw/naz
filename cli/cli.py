@@ -186,3 +186,7 @@ def main():
         loop.run_until_complete(cli.unbind())
         loop.close()
     # call naz api ###########
+
+
+if __name__ == "__main__":
+    main()
