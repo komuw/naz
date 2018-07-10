@@ -2,9 +2,16 @@ import asyncio
 
 import naz
 
+import logging
+
+logger = logging.getLogger()
+
 
 loop = asyncio.get_event_loop()
 outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+limiter = naz.ratelimiter.SimpleRateLimiter(
+    logger=logger, send_rate=1, max_tokens=1, delay_for_tokens=6
+)
 cli = naz.Client(
     async_loop=loop,
     smsc_host="127.0.0.1",
@@ -12,11 +19,11 @@ cli = naz.Client(
     system_id="smppclient1",
     password="password",
     outboundqueue=outboundqueue,
-    log_metadata={"env": "prod", "release": "canary", "work": "jira-2345"},
+    rateLimiter=limiter,
 )
 
 # queue messages to send
-for i in range(0, 4):
+for i in range(0, 12):
     print("submit_sm round:", i)
     item_to_enqueue = {
         "smpp_event": "submit_sm",

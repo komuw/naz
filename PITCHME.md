@@ -141,9 +141,12 @@ cli = naz.Client(
 --- 
 #### 5.1.1 observability: logs
 ```bash
-{'event': 'connect', 'stage': 'start'} {'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'connect', 'stage': 'end'} {'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'tranceiver_bind', 'stage': 'start'} {'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'connect', 'stage': 'start'}         
+{'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}                
+{'event': 'connect', 'stage': 'end'}              
+{'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}               
+{'event': 'tranceiver_bind', 'stage': 'start'}                   
+{'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}                      
 ```
 
 ---
@@ -165,7 +168,10 @@ class SetMessageStateHook(naz.hooks.BaseHook):
             c = conn.cursor()
             t = (correlation_id,)
             # watch out for SQL injections!!
-            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t)
+            c.execute("UPDATE \
+                       SmsTable \
+                       SET State='delivered' \
+                       WHERE CorrelatinID=?", t)
             conn.commit()
             conn.close()
 
@@ -176,9 +182,43 @@ cli = naz.Client(
 )
 ```
 
-#### 5.2 Rate limiting             
-#### 5.4 Throttle handling              
-#### 5.5 Queuing             
+---
+#### 5.2 Rate limiting  
+An instance of a class that implements `naz.ratelimiter.BaseRateLimiter`.  It has one method `limit`.         
+create an instance implementation of `BaseRateLimiter`, plug it in, and u can implement any rate limiting algo inside `limit` method.         
+`naz` ships with a simple token-bucket Ratelimiter, `SimpleRateLimiter`   
+
+
+---
+#### 5.2 Rate limiting: example                
+```python
+import naz
+limiter = naz.ratelimiter.SimpleRateLimiter(
+    send_rate=1, max_tokens=1, delay_for_tokens=6
+)
+cli = naz.Client(
+    ...
+    rateLimiter=limiter,
+)
+```
+
+---
+#### 5.2 Rate limiting - logs
+```bash
+{'event': 'receive_data', 'stage': 'start'}                 
+{'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'SimpleRateLimiter.limit', 'stage': 'end',            
+'state': 'limiting rate',             
+'send_rate': 1, 'delay': 6, 'effective_send_rate': 0.166}
+```
+
+---
+#### 5.4 Throttle handling                
+
+---
+#### 5.5 Queuing               
+
+---
 #### 5.6 cli app
 
 ---
