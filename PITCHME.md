@@ -121,7 +121,7 @@ finally:
 
 ---
 #### 5. naz features  
-configurability, BYO ... nini nini
+running theme: configurability, BYO ... nini nini
 
 ---                
 #### 5.1.1 observability: logging                 
