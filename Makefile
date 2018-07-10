@@ -31,3 +31,7 @@ test:
 	@printf "\n run flake8::\n" && flake8 .
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run mypy::\n" && mypy --show-column-numbers -m naz.q -m naz.throttle -m naz.ratelimiter -m naz.hooks -m naz.sequence
+
+
+asciinema rec --idle-time-limit 2 first.cast
+asciinema play -i 2 docs/first.cast
