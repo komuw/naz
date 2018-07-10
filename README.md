@@ -233,7 +233,8 @@ class SetMessageStateHook(naz.hooks.BaseHook):
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()
             t = (correlation_id,)
-            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t) # watch out for SQL injections!!
+            # watch out for SQL injections!!
+            c.execute("UPDATE SmsTable SET State='delivered' WHERE CorrelatinID=?", t)
             conn.commit()
             conn.close()
 
