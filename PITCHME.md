@@ -308,8 +308,8 @@ finally:
     loop.run_until_complete(cli.unbind())
     loop.close()
 ```
-@[3-10]
-@[12-21]
+@[3-12]
+@[14-23]
 
 ---
 #### 5.5 Queuing; example (your app)
