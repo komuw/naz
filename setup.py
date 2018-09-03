@@ -85,6 +85,7 @@ setup(
             "pylint==1.8.2",
             "pycodestyle==2.3.1",
             "black",
+            "bandit",
             "docker==3.4.0",
             "mypy==0.610",
         ],
