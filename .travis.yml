@@ -2,6 +2,10 @@ language: python
 python:
   - "3.6"
 
+env:
+  global:
+    - PYTHONASYNCIODEBUG='2'
+
 before_install:
 - pwd
 - sudo apt -y update; sudo apt-get -y install pandoc curl
@@ -12,7 +16,6 @@ install:
 
 # run static analyzers, tests etc
 script:
-  - export PYTHONASYNCIODEBUG='2'
   - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
   - flake8 .
   - pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
