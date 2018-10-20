@@ -6,7 +6,7 @@ import typing
 import naz
 
 
-class ExampleSeqGen(object):
+class MySeqGen(object):
     """
     """
 
@@ -24,10 +24,10 @@ class ExampleSeqGen(object):
         return self.sequence_number
 
 
-class ExampleRateLimiter(naz.ratelimiter.BaseRateLimiter):
+class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
     """
     Usage:
-        rateLimiter = ExampleRateLimiter(send_rate=10, max_tokens=25)
+        rateLimiter = MyRateLimiter(send_rate=10, max_tokens=25)
         await rateLimiter.limit()
         send_messsages()
     """
@@ -76,4 +76,6 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
         return await self.queue.get()
 
 
+ExampleSeqGen = MySeqGen()
+ExampleRateLimiter = MyRateLimiter()
 ExampleQueueInstance = ExampleQueue(maxsize=433)
