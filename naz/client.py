@@ -434,7 +434,20 @@ class Client:
             "pdu": full_pdu,
             "smpp_event": "enquire_link_resp",
         }
-        await self.outboundqueue.enqueue(item_to_enqueue)
+        try:
+            await self.outboundqueue.enqueue(item_to_enqueue)
+        except Exception as e:
+            self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "enquire_link_resp",
+                            "stage": "end",
+                            "error": str(e),
+                            "correlation_id": correlation_id,
+                        }
+                    )
+                )
+            continue
         self.logger.info(
             "{}".format(
                 {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
@@ -510,7 +523,19 @@ class Client:
             "pdu": full_pdu,
             "smpp_event": "deliver_sm_resp",
         }
-        await self.outboundqueue.enqueue(item_to_enqueue)
+        try:
+            await self.outboundqueue.enqueue(item_to_enqueue)
+        except Exception as e:
+            self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "deliver_sm_resp",
+                            "stage": "end",
+                            "error": str(e),
+                            "correlation_id": correlation_id,
+                        }
+                    )
+                )
         self.logger.info(
             "{}".format(
                 {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
@@ -571,7 +596,19 @@ class Client:
             "source_addr": source_addr,
             "destination_addr": destination_addr,
         }
-        await self.outboundqueue.enqueue(item_to_enqueue)
+        try:
+            await self.outboundqueue.enqueue(item_to_enqueue)
+        except Exception as e:
+            self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "submit_sm",
+                            "stage": "end",
+                            "error": str(e),
+                            "correlation_id": correlation_id,
+                        }
+                    )
+                )
         self.logger.info(
             "{}".format(
                 {
@@ -732,19 +769,45 @@ class Client:
                 # rate limit ourselves
                 await self.rateLimiter.limit()
 
-                item_to_dequeue = await self.outboundqueue.dequeue()
-                correlation_id = item_to_dequeue["correlation_id"]
-                smpp_event = item_to_dequeue["smpp_event"]
-                if smpp_event == "submit_sm":
-                    short_message = item_to_dequeue["short_message"]
+                try:
+                    item_to_dequeue = await self.outboundqueue.dequeue()
+                except Exception as e:
+                    self.logger.exception(
+                            "{}".format(
+                                {
+                                    "event": "send_forever",
+                                    "stage": "end",
+                                    "state": "send_forever error",
+                                    "error": str(e),
+                                }
+                            )
+                        )
+                    continue
+                try:
                     correlation_id = item_to_dequeue["correlation_id"]
-                    source_addr = item_to_dequeue["source_addr"]
-                    destination_addr = item_to_dequeue["destination_addr"]
-                    full_pdu = await self.build_submit_sm_pdu(
-                        short_message, correlation_id, source_addr, destination_addr
-                    )
-                else:
-                    full_pdu = item_to_dequeue["pdu"]
+                    smpp_event = item_to_dequeue["smpp_event"]
+                    if smpp_event == "submit_sm":
+                        short_message = item_to_dequeue["short_message"]
+                        correlation_id = item_to_dequeue["correlation_id"]
+                        source_addr = item_to_dequeue["source_addr"]
+                        destination_addr = item_to_dequeue["destination_addr"]
+                        full_pdu = await self.build_submit_sm_pdu(
+                            short_message, correlation_id, source_addr, destination_addr
+                        )
+                    else:
+                        full_pdu = item_to_dequeue["pdu"]
+                except KeyError as e:
+                    self.logger.exception(
+                            "{}".format(
+                                {
+                                    "event": "send_forever",
+                                    "stage": "end",
+                                    "state": "send_forever error",
+                                    "error": str(e),
+                                }
+                            )
+                        )
+                    continue
 
                 await self.send_data(
                     smpp_event=smpp_event, msg=full_pdu, correlation_id=correlation_id
