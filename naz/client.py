@@ -339,7 +339,19 @@ class Client:
         command_id = self.command_ids["bind_transceiver"]
         # the status for success see section 5.1.3
         command_status = self.command_statuses["ESME_ROK"].code
-        sequence_number = self.sequence_generator.next_sequence()
+        try:
+            sequence_number = self.sequence_generator.next_sequence()
+        except Exception as e:
+            self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "tranceiver_bind",
+                            "stage": "end",
+                            "error": str(e),
+                        }
+                    )
+                )
+
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
@@ -378,7 +390,19 @@ class Client:
             command_length = 16 + len(body)  # 16 is for headers
             command_id = self.command_ids["enquire_link"]
             command_status = 0x00000000  # not used for `enquire_link`
-            sequence_number = self.sequence_generator.next_sequence()
+            try:
+                sequence_number = self.sequence_generator.next_sequence()
+            except Exception as e:
+                self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "enquire_link",
+                                "stage": "end",
+                                "error": str(e),
+                                "correlation_id": correlation_id
+                            }
+                        )
+                    )
             if sequence_number > self.max_sequence_number:
                 # prevent third party sequence_generators from ruining our party
                 raise ValueError(
@@ -447,7 +471,6 @@ class Client:
                         }
                     )
                 )
-            continue
         self.logger.info(
             "{}".format(
                 {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
@@ -674,7 +697,19 @@ class Client:
         command_id = self.command_ids["submit_sm"]
         # the status for success see section 5.1.3
         command_status = 0x00000000  # not used for `submit_sm`
-        sequence_number = self.sequence_generator.next_sequence()
+        try:
+            sequence_number = self.sequence_generator.next_sequence()
+        except Exception as e:
+                self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "build_submit_sm_pdu",
+                                "stage": "end",
+                                "error": str(e),
+                                "correlation_id": correlation_id
+                            }
+                        )
+                    )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
@@ -1124,7 +1159,19 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids["unbind"]
         command_status = 0x00000000  # not used for `unbind`
-        sequence_number = self.sequence_generator.next_sequence()
+        try:
+            sequence_number = self.sequence_generator.next_sequence()
+        except Exception as e:
+            self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "unbind",
+                            "stage": "end",
+                            "error": str(e),
+                            "correlation_id": correlation_id
+                        }
+                    )
+                )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
