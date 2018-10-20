@@ -111,7 +111,7 @@ def main():
     logger.setLevel(loglevel)
     logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
 
-    logger.exception("\n\n\t {} \n\n".format("Naz: the SMPP client."))
+    logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
 
     # Load custom classes #######################
     # Users can ONLY pass in:
