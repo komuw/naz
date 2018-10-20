@@ -766,8 +766,21 @@ class Client:
             # check with throttle handler
             send_request = await self.throttle_handler.allow_request()
             if send_request:
-                # rate limit ourselves
-                await self.rateLimiter.limit()
+                try:
+                    # rate limit ourselves
+                    await self.rateLimiter.limit()
+                except Exception as e:
+                    self.logger.exception(
+                            "{}".format(
+                                {
+                                    "event": "send_forever",
+                                    "stage": "end",
+                                    "state": "send_forever error",
+                                    "error": str(e),
+                                }
+                            )
+                        )
+                    continue
 
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
@@ -827,6 +840,7 @@ class Client:
                     # offer escape hatch for tests to come out of endless loop
                     return item_to_dequeue
             else:
+                # throttle_handler didn't allow us to send request.
                 self.logger.info(
                     "{}".format(
                         {"event": "send_forever", "stage": "end", "send_request": send_request}
