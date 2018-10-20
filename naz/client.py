@@ -343,14 +343,8 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
             self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "tranceiver_bind",
-                            "stage": "end",
-                            "error": str(e),
-                        }
-                    )
-                )
+                "{}".format({"event": "tranceiver_bind", "stage": "end", "error": str(e)})
+            )
 
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -394,15 +388,15 @@ class Client:
                 sequence_number = self.sequence_generator.next_sequence()
             except Exception as e:
                 self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "enquire_link",
-                                "stage": "end",
-                                "error": str(e),
-                                "correlation_id": correlation_id
-                            }
-                        )
+                    "{}".format(
+                        {
+                            "event": "enquire_link",
+                            "stage": "end",
+                            "error": str(e),
+                            "correlation_id": correlation_id,
+                        }
                     )
+                )
             if sequence_number > self.max_sequence_number:
                 # prevent third party sequence_generators from ruining our party
                 raise ValueError(
@@ -462,15 +456,15 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "enquire_link_resp",
-                            "stage": "end",
-                            "error": str(e),
-                            "correlation_id": correlation_id,
-                        }
-                    )
+                "{}".format(
+                    {
+                        "event": "enquire_link_resp",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
                 )
+            )
         self.logger.info(
             "{}".format(
                 {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
@@ -550,15 +544,15 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "deliver_sm_resp",
-                            "stage": "end",
-                            "error": str(e),
-                            "correlation_id": correlation_id,
-                        }
-                    )
+                "{}".format(
+                    {
+                        "event": "deliver_sm_resp",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
                 )
+            )
         self.logger.info(
             "{}".format(
                 {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
@@ -623,15 +617,15 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "submit_sm",
-                            "stage": "end",
-                            "error": str(e),
-                            "correlation_id": correlation_id,
-                        }
-                    )
+                "{}".format(
+                    {
+                        "event": "submit_sm",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
                 )
+            )
         self.logger.info(
             "{}".format(
                 {
@@ -700,16 +694,16 @@ class Client:
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
-                self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "build_submit_sm_pdu",
-                                "stage": "end",
-                                "error": str(e),
-                                "correlation_id": correlation_id
-                            }
-                        )
-                    )
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "build_submit_sm_pdu",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
+                )
+            )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
@@ -798,38 +792,53 @@ class Client:
         while True:
             self.logger.info("{}".format({"event": "send_forever", "stage": "start"}))
 
-            # check with throttle handler
-            send_request = await self.throttle_handler.allow_request()
+            # TODO: there are so many try-except classes in this func.
+            # do something about that.
+            try:
+                # check with throttle handler
+                send_request = await self.throttle_handler.allow_request()
+            except Exception as e:
+                self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "send_forever",
+                            "stage": "end",
+                            "state": "send_forever error",
+                            "error": str(e),
+                        }
+                    )
+                )
+                continue
             if send_request:
                 try:
                     # rate limit ourselves
                     await self.rateLimiter.limit()
                 except Exception as e:
                     self.logger.exception(
-                            "{}".format(
-                                {
-                                    "event": "send_forever",
-                                    "stage": "end",
-                                    "state": "send_forever error",
-                                    "error": str(e),
-                                }
-                            )
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
                         )
+                    )
                     continue
 
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
                     self.logger.exception(
-                            "{}".format(
-                                {
-                                    "event": "send_forever",
-                                    "stage": "end",
-                                    "state": "send_forever error",
-                                    "error": str(e),
-                                }
-                            )
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
                         )
+                    )
                     continue
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
@@ -846,15 +855,15 @@ class Client:
                         full_pdu = item_to_dequeue["pdu"]
                 except KeyError as e:
                     self.logger.exception(
-                            "{}".format(
-                                {
-                                    "event": "send_forever",
-                                    "stage": "end",
-                                    "state": "send_forever error",
-                                    "error": str(e),
-                                }
-                            )
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
                         )
+                    )
                     continue
 
                 await self.send_data(
@@ -881,7 +890,20 @@ class Client:
                         {"event": "send_forever", "stage": "end", "send_request": send_request}
                     )
                 )
-                await asyncio.sleep(await self.throttle_handler.throttle_delay())
+                try:
+                    await asyncio.sleep(await self.throttle_handler.throttle_delay())
+                except Exception as e:
+                    self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
+                        )
+                    )
+                    continue
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
                     return "throttle_handler_denied_request"
@@ -1049,11 +1071,25 @@ class Client:
                 )
             )
 
-        # call throttling handler
-        if command_status == self.command_statuses["ESME_ROK"].code:
-            await self.throttle_handler.not_throttled()
-        elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
-            await self.throttle_handler.throttled()
+        try:
+            # call throttling handler
+            if command_status == self.command_statuses["ESME_ROK"].code:
+                await self.throttle_handler.not_throttled()
+            elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
+                await self.throttle_handler.throttled()
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "speficic_handlers",
+                        "stage": "end",
+                        "error": str(e),
+                        "smpp_event": smpp_event,
+                        "correlation_id": correlation_id,
+                        "state": command_status_value.description,
+                    }
+                )
+            )
 
         if smpp_event in [
             "bind_transceiver",
@@ -1163,15 +1199,15 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
             self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "unbind",
-                            "stage": "end",
-                            "error": str(e),
-                            "correlation_id": correlation_id
-                        }
-                    )
+                "{}".format(
+                    {
+                        "event": "unbind",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
                 )
+            )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
