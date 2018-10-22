@@ -365,3 +365,21 @@ class TestClient(TestCase):
             self.cli.writer = writer
             received_pdu = self._run(self.cli.receive_data(TESTING=True))
             self.assertEqual(received_pdu, submit_sm_resp_pdu)
+
+    def test_enquire_link_resp(self):
+        with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+            sequence_number = 7
+            self._run(
+                self.cli.speficic_handlers(
+                    smpp_event="enquire_link",
+                    correlation_id="correlation_id",
+                    command_status=0,
+                    sequence_number=sequence_number,
+                    unparsed_pdu_body=b"Doesnt matter",
+                    total_pdu_length=16,
+                )
+            )
+            self.assertTrue(mock_naz_enqueue.mock.called)
+            self.assertEqual(
+                mock_naz_enqueue.mock.call_args[0][1]["smpp_event"], "enquire_link_resp"
+            )
