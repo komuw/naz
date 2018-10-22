@@ -28,6 +28,31 @@ def AsyncMock(*args, **kwargs):
     return mock_coro
 
 
+class MockStreamReader:
+    """
+    This is a mock of python's StreamReader;
+    https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamReader
+
+    We mock the reader having a succesful submit_sm_resp PDU.
+    For the first read we return the first 4bytes,
+    the second read, we return the remaining bytes.
+    """
+
+    def __init__(self, pdu):
+        self.pdu = pdu
+
+    async def read(self, n_index=-1):
+        if n_index == 0:
+            return b""
+        blocks = []
+        blocks.append(self.pdu)
+        data = b"".join(blocks)
+        if n_index == 4:
+            return data[:n_index]
+        else:
+            return data[4:]
+
+
 class TestClient(TestCase):
     """
     run tests as:
@@ -322,3 +347,21 @@ class TestClient(TestCase):
             self.assertTrue(mock_hook_response.mock.called)
             self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_event"], "submit_sm_resp")
             self.assertEqual(mock_hook_response.mock.call_args[1]["correlation_id"], None)
+
+    def test_receving_data(self):
+        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
+            submit_sm_resp_pdu = (
+                b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
+            )
+
+            # TODO: also create a MockStreamWriter
+            mock_naz_connect.mock.return_value = (
+                MockStreamReader(pdu=submit_sm_resp_pdu),
+                "MockStreamWriter",
+            )
+
+            reader, writer = self._run(self.cli.connect())
+            self.cli.reader = reader
+            self.cli.writer = writer
+            received_pdu = self._run(self.cli.receive_data(TESTING=True))
+            self.assertEqual(received_pdu, submit_sm_resp_pdu)

@@ -909,7 +909,7 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
-    async def receive_data(self):
+    async def receive_data(self, TESTING=False):
         """
         """
         while True:
@@ -949,6 +949,9 @@ class Client:
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
             self.logger.info("{}".format({"event": "receive_data", "stage": "end"}))
+            if TESTING:
+                # offer escape hatch for tests to come out of endless loop
+                return full_pdu_data
 
     async def parse_response_pdu(self, pdu):
         """
