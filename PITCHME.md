@@ -1,16 +1,24 @@
 ---
 #### topics                   
-1. SMPP spec intro               
+1. SMPP spec               
 2. SMPP & python intro        
 3. current lay of the land                  
 4. naz intro                                       
 5. naz features                    
-6. then what?         
+6. then what?  
 
 ---
-#### 1. SMPP spec intro                 
-The SMPP protocol is designed for transfer of short messages between a Message Center(SMSC/USSD server etc) & an SMS app system.                
-It's based on exchange of request/response protocol data units(PDUs) between the client and the server over a TCP/IP network.                
+#### 1. intro                 
+Komu Wairagu   
+Software developer at [https://jumo.world/](https://jumo.world/)      
+
+About Me: https://www.komu.engineer/about  
+
+---
+#### 1. SMPP spec                 
+It's a protocol designed for transfer of Short messages between an SMS server and a mobile phone.               
+Based on exchange of request/response protocol data units(PDUs) between client & server over TCP/IP network.   
+Typically used for SMS and USSD by Telcos.         
 
 ---
 #### 1.1 sequence of requests
