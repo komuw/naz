@@ -24,11 +24,13 @@ Typically used for SMS and USSD by Telcos.
 ---
 #### 1.1 sequence of requests
 ![Image of sequence](docs/sequence.png)                  
-                             
+                        
+.
 ---
 #### 1.2 PDU format
 ![Image of pdu format](docs/pdu_format.png)            
            
+.
 
 ---
 #### 2. SMPP & python intro         
