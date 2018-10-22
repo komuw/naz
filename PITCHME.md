@@ -356,5 +356,8 @@ demo
 #### 7. resources         
 - https://github.com/komuw/naz                
 - https://github.com/komuw/naz/blob/master/docs/SMPP_v3_4_specification.pdf          
-- https://github.com/praekelt/vumi
+- https://github.com/praekelt/vumi          
+      
+- https://www.komu.engineer/about      
+
 
