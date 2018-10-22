@@ -18,6 +18,7 @@
 #### 1. SMPP spec                 
 It's a protocol designed for transfer of Short messages between an SMS server and a mobile phone.               
 Based on exchange of request/response protocol data units(PDUs) between client & server over TCP/IP network.   
+    
 Typically used for SMS and USSD by Telcos.         
 
 ---
