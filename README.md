@@ -5,7 +5,7 @@
 [![codecov](https://codecov.io/gh/komuw/naz/branch/master/graph/badge.svg)](https://codecov.io/gh/komuw/naz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/komuw/naz)
 
-naz is an SMPP client.           
+naz is an async SMPP client.           
 It's name is derived from Kenyan hip hop artiste, Nazizi.                             
 
 > SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC). - [Wikipedia](https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer)
@@ -253,8 +253,11 @@ By default, `naz` uses a simple token bucket rate limiting algorithm [implemente
 You can customize `naz`'s ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the `BaseRateLimiter` interface [found here](https://github.com/komuw/naz/blob/master/naz/ratelimiter.py) )            
 To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
 ```python
+import logging
 import naz
-myLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=35)
+logger = logging.getLogger()
+
+myLimiter = naz.ratelimiter.SimpleRateLimiter(logger=logger, send_rate=35)
 cli = naz.Client(
     ...
     rateLimiter=myLimiter,
@@ -425,4 +428,3 @@ for i in range(0, 5):
 
 ## TODO
 - 
-

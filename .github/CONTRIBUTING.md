@@ -33,6 +33,10 @@ flake8 .
 ```shell
 pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 ```    
+- run bandit
+```shell
+bandit -r --exclude .venv -ll .
+```
 - run tests and make sure everything is passing:
 ```shell
 make test
