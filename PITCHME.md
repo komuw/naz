@@ -14,11 +14,12 @@ It's based on exchange of request/response protocol data units(PDUs) between the
 
 ---
 #### 1.1 sequence of requests
-![Image of sequence](docs/sequence.png)
+![Image of sequence](docs/sequence.png)                  
                              
 ---
 #### 1.2 PDU format
-![Image of pdu format](docs/pdu_format.png)
+![Image of pdu format](docs/pdu_format.png)            
+           
 
 ---
 #### 2. SMPP & python intro         
