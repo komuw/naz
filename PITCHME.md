@@ -9,10 +9,10 @@
 
 ---
 #### 1. intro                 
-Komu Wairagu   
-Software developer at [https://jumo.world/](https://jumo.world/)      
+**Name:** Komu Wairagu   
+**Occupation:** Software developer at [https://jumo.world/](https://jumo.world/)      
 
-About Me: https://www.komu.engineer/about  
+**About Me:** https://www.komu.engineer/about  
 
 ---
 #### 1. SMPP spec                 
