@@ -27,6 +27,11 @@ Typically used for SMS and USSD by Telcos(Mobile Network Operators).
 If you want to do integrate with various Telcos; you'll have to SMPP.      
 
 ---
+#### 1.2.1 codeee
+![codeee](docs/carbon.png)                  
+  
+
+---
 #### 1.3 sequence of requests
 ![Image of sequence](docs/sequence.png)                  
                         
