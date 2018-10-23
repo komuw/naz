@@ -41,6 +41,16 @@ If you want to do integrate with various Telcos; you'll have to SMPP.
 #### 2. SMPP & python         
 How do you connect to SMPP server(SMSC) from Python?
 
+
+---
+#### py and smpp
+![2times.png](docs/2times.png)            
+   
+
+---
+![2times.png](docs/2times.png)  
+
+
 ---
 #### A. Create network connection 
 ```python
