@@ -84,8 +84,16 @@ what is the Queue?? inMem, rabbitmq, redis ...??
 Naz makes no imposition of what the Queue is.      
 BYO queue...             
 
+
 ---
-#### 4.2 usage                          
+#### 4.2 usage
+![naz exampleusage](docs/naz-example-usage.png)    
+
+---
+![naz exampleusage](docs/naz-example-usage.png)    
+
+---
+#### 4.2.1 usage                          
 ```python
 import naz, asyncio
 loop = asyncio.get_event_loop()
