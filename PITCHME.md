@@ -23,7 +23,7 @@ Based on exchange of request/response protocol data units(PDUs) between client &
 
 ---
 #### 1.2 Why care about SMPP? 
-Typically used for SMS and USSD by Telcos(Mobile Network Operator).         
+Typically used for SMS and USSD by Telcos(Mobile Network Operators).         
 If you want to do integrate with various Telcos; you'll have to SMPP.      
 
 ---
