@@ -19,15 +19,19 @@
 It's a protocol designed for transfer of Short messages between an SMS server and a mobile phone.               
 Based on exchange of request/response protocol data units(PDUs) between client & server over TCP/IP network.   
     
-Typically used for SMS and USSD by Telcos.         
 
 ---
-#### 1.2 sequence of requests
+#### 1.2 Why care about SMPP? 
+Typically used for SMS and USSD by Telcos(Mobile Network Operator).         
+If you want to do integrate with various Telcos; you'll have to SMPP.      
+
+---
+#### 1.3 sequence of requests
 ![Image of sequence](docs/sequence.png)                  
                         
 .
 ---
-#### 1.3 PDU format
+#### 1.4 PDU format
 ![Image of pdu format](docs/pdu_format.png)            
            
 .
