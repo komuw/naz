@@ -5,7 +5,7 @@
 3. current lay of the land                  
 4. naz intro                                       
 5. naz features                    
-6. then what?  
+6. Q&A  
 
 ---
 #### 1. intro                 
