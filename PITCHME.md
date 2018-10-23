@@ -98,38 +98,11 @@ running theme: configurability, observability, BYO ... nini nini
 #### 5.1.1 observability: logging  
 ![naz-observability-logging](docs/pyconKE2018/naz-observability-logging.png)                  
 
-
-
 ---
 #### 5.1.1 observability: logs 
 ![naz-observability-logs](docs/pyconKE2018/naz-observability-logs.png)                  
 
 
-
-
-
----                
-#### 5.1.1.2 observability: logging                 
-```python
-import naz
-cli = naz.Client(
-    ...
-    log_metadata={
-        "env": "prod", "release": "canary", "work": "jira-2345"
-        }
-)
-```
-
---- 
-#### 5.1.1 observability: logs
-```bash
-{'event': 'connect', 'stage': 'start'}         
-{'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}                
-{'event': 'connect', 'stage': 'end'}              
-{'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}               
-{'event': 'tranceiver_bind', 'stage': 'start'}                   
-{'env': 'prod', 'release': 'canary', 'work': 'jira-2345', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}                      
-```
 
 ---
 #### 5.1.2 observability: hooks          
@@ -138,31 +111,13 @@ create an instance implementation of `BaseHook`, plug it in, and u can do whatev
 
 ---
 #### 5.1.2 observability: hooks example 
-```python
-import sqlite3
-import naz
-class SetMessageStateHook(naz.hooks.BaseHook):
-    async def request(self, smpp_event, correlation_id):
-        pass
-    async def response(self, smpp_event, correlation_id):
-        if smpp_event == "deliver_sm":
-            conn = sqlite3.connect('mySmsDB.db')
-            c = conn.cursor()
-            t = (correlation_id,)
-            c.execute("UPDATE \
-                       SmsTable \
-                       SET State='delivered' \
-                       WHERE CorrelatinID=?", t)
-            conn.commit()
-            conn.close()
+![naz-observability-hooks](docs/pyconKE2018/naz-observability-hooks.png)
 
-stateHook = SetMessageStateHook()
-cli = naz.Client(
-    ...
-    hook=stateHook,
-)
-```
-@[6-16]
+
+---
+#### 5.1.2 observability: hooks example 2
+![naz-observability-hooks-prometheus](docs/pyconKE2018/naz-observability-hooks-prometheus.png)
+
 
 ---
 #### 5.2 Rate limiting  
@@ -173,54 +128,19 @@ create an instance implementation of `BaseRateLimiter`, plug it in, and u can im
 
 ---
 #### 5.2 Rate limiting: example                
-```python
-import naz
-limiter = naz.ratelimiter.SimpleRateLimiter(
-    send_rate=1, max_tokens=1, delay_for_tokens=6
-)
-cli = naz.Client(
-    ...
-    rateLimiter=limiter,
-)
-```
+![naz-ratelimiting-simple](docs/pyconKE2018/naz-ratelimiting-simple.png)
+
 
 ---
 #### 5.2 Rate limiting - logs
-```bash
-{'event': 'receive_data', 'stage': 'start'}                 
-{'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'SimpleRateLimiter.limit', 'stage': 'end',            
-'state': 'limiting rate',             
-'send_rate': 1, 'delay': 6, 'effective_send_rate': 0.166}
-```
+![naz-ratelimiting-simple-logs](docs/pyconKE2018/naz-ratelimiting-simple-logs.png)
+
 
 ---
 #### 5.2 Rate limiting: example2                
-```python
-import naz
+![naz-ratelimiting-awesome](docs/pyconKE2018/naz-ratelimiting-awesome.png)
 
-class AwesomeLimiter(naz.ratelimiter.BaseRateLimiter):
-    async def limit(self):
-        sleeper = 13.13
-        print("\n\t rate limiting. sleep={}".format(sleeper))
-        await asyncio.sleep(sleeper)
 
-lim = AwesomeLimiter()
-cli = naz.Client(
-    ...
-    rateLimiter=lim,
-)
-```
-
----
-#### 5.2 Rate limiting 2 - logs
-```
-{'deny_request_at': 1, 'state': 'allow_request'}      
-{'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}          
-
-	rate limiting. sleep=13.13
-{'event': 'receive_data', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-```
 
 ---
 #### 5.4 Throttle handling     
