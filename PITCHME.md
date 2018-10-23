@@ -48,11 +48,6 @@ How do you connect to SMPP server(SMSC) from Python?
    
 
 ---
-#### 2.2 python and request/response sequence
-![Image of sequence](docs/request-response-sequence.png)                  
-
-
----
 #### 3. current lay of the land               
 - github.com/podshumok/python-smpplib               
 - github.com/praekelt/vumi                    
@@ -127,7 +122,9 @@ finally:
 
 ---
 #### 4.2.1 sequence of requests
-![Image of sequence](docs/sequence.png)
+![Image of sequence](docs/request-response-sequence.png)                  
+
+
 
 ---
 #### 5. naz features  
