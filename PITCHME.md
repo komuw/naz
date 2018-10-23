@@ -26,35 +26,19 @@ Based on exchange of request/response protocol data units(PDUs) between client &
 Typically used for SMS and USSD by Telcos(Mobile Network Operators).         
 If you want to do integrate with various Telcos; you'll have to SMPP.      
 
----
-#### 1.2.1 codeee
-![codeee](docs/2times.png)                  
-  
-
----
-#### 1.2.2 codee2
-![codeee](docs/1times.png)    
-
-
----
-![codeee](docs/2times.png)                  
-  
-
----
-![codeee](docs/1times.png)    
-
-
 
 ---
 #### 1.3 sequence of requests
-![Image of sequence](docs/sequence.png)                  
-                        
-.
+![Image of sequence](docs/request-response-sequence.png)                  
+
+
+---
+![Image of sequence two](docs/request-response-sequence.png)                   
+
 ---
 #### 1.4 PDU format
 ![Image of pdu format](docs/pdu_format.png)            
            
-.
 
 ---
 #### 2. SMPP & python         
