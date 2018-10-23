@@ -1,6 +1,6 @@
 ---
 #### topics                   
-1. SMPP spec               
+1. SMPP               
 2. SMPP & python intro        
 3. current lay of the land                  
 4. naz intro                                       
@@ -15,7 +15,8 @@
 **About Me:** https://www.komu.engineer/about  
 
 ---
-#### 1.1 SMPP spec                 
+#### 1.1 SMPP
+Short Message Peer-to-Peer.                     
 It's a protocol designed for transfer of Short messages between an SMS server and a mobile phone.               
 Based on exchange of request/response protocol data units(PDUs) between client & server over TCP/IP network.   
     
