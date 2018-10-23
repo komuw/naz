@@ -30,12 +30,12 @@ If you want to do integrate with various Telcos; you'll have to SMPP.
 
 ---
 #### 1.3 sequence of requests
-![Image of sequence](docs/request-response-sequence.png)                  
+![Image of sequence](docs/pyconKE2018/request-response-sequence.png)                  
 
 
 ---
 #### 1.4 PDU format
-![Image of pdu format](docs/pdu-format.png)            
+![Image of pdu format](docs/pyconKE2018/pdu-format.png)            
            
 
 ---
@@ -44,7 +44,7 @@ How do you connect to SMPP server(SMSC) from Python?
 
 
 ---
-![SMPP & python](docs/python-smpp-intro.png)            
+![SMPP & python](docs/pyconKE2018/python-smpp-intro.png)            
    
 
 ---
@@ -81,54 +81,17 @@ BYO queue...
 
 
 ---
-#### 4.2 usage
-![naz exampleusage](docs/naz-example-usage.png)    
+![naz exampleusage](docs/pyconKE2018/naz-example-usage.png)    
 
----
-![naz exampleusage](docs/naz-example-usage.png)    
-
----
-#### 4.2.1 usage                          
-```python
-import naz, asyncio
-loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
-cli = naz.Client(
-    async_loop=loop,
-    smsc_host="127.0.0.1",
-    smsc_port=2775,
-    system_id="smppclient1",
-    password="password",
-    outboundqueue=outboundqueue,
-)
-# 1. network connect and bind
-reader, writer = loop.run_until_complete(cli.connect())
-loop.run_until_complete(cli.tranceiver_bind())
-try:
-    # 2. consume from queue, read responses from SMSC, send status checks
-    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-    loop.run_until_complete(tasks)
-except Exception as e:
-    print("exception occured. error={0}".format(str(e)))
-finally:
-    # 3. unbind
-    loop.run_until_complete(cli.unbind())
-    loop.close()
-```
-@[1-11]
-@[12-14]
-@[15-19]
-@[20-25]
 
 ---
 #### 4.2.1 sequence of requests
-![Image of sequence](docs/request-response-sequence.png)                  
-
+![Image of sequence](docs/pyconKE2018/request-response-sequence.png)                  
 
 
 ---
 #### 5. naz features  
-running theme: configurability, BYO ... nini nini
+running theme: configurability, observability, BYO ... nini nini
 
 ---                
 #### 5.1.1 observability: logging                 
