@@ -143,91 +143,31 @@ create an instance implementation of `BaseRateLimiter`, plug it in, and u can im
 
 ---
 #### 5.4 Throttle handling     
-An instance of a class that implements `naz.throttle.BaseThrottleHandler`.  It has methods `throttled`, `not_throttled`, `allow_request` & `throttle_delay`.         
-create an instance implementation of `BaseThrottleHandler` and plug it in.         
+An instance of a class that implements `naz.throttle.BaseThrottleHandler`.    
+`naz` calls it to handle throttling events from Telco.            
 `naz` ships with a default, `SimpleThrottleHandler`              
 
 ---
 #### 5.4 Throttle handling; example
-```python
-import naz
+![naz-throttle-handling](docs/pyconKE2018/naz-throttle-handling.png)
 
-th = naz.throttle.SimpleThrottleHandler(sampling_period=180,
-                                        sample_size=45,
-                                        deny_request_at=1.2)
-cli = naz.Client(
-    ...
-    throttle_handler=th,
-)
-```
 
 ---
 #### 5.5 Queuing               
 An instance of a class that implements `naz.q.BaseOutboundQueue`. It has two methods `enqueue` & `dequeue`.         
 what you put inside those two methods is upto you.         
 Your app queues messages, naz consumes from that queue and then sends those messages to SMSC/server.           
-`naz` ships with a `SimpleOutboundQueue` that queues inMem.
+`naz` ships with a `SimpleOutboundQueue` that queues in Memory.
 
 ---
 #### 5.5 Queuing; example
-```python
-import asyncio, naz, redis
+![naz-redis-queue](docs/pyconKE2018/naz-redis-queue.png)
 
-class RedisExampleQueue(naz.q.BaseOutboundQueue):
-    def __init__(self):
-        self.redis_instance = redis.StrictRedis(host="localhost", port=6379, db=0)
-        self.queue_name = "myqueue"
-    async def enqueue(self, item):
-        self.redis_instance.lpush(self.queue_name, json.dumps(item))
-    async def dequeue(self):
-        x = self.redis_instance.brpop(self.queue_name)
-        dequed_item = json.loads(x[1].decode())
-        return dequed_item
 
-loop = asyncio.get_event_loop()
-outboundqueue = RedisExampleQueue()
-cli = naz.Client(
-    async_loop=loop,
-    smsc_host="127.0.0.1",
-    smsc_port=2775,
-    system_id="smppclient1",
-    password="password",
-    outboundqueue=outboundqueue,
-)
-# 1. network connect and bind
-reader, writer = loop.run_until_complete(cli.connect())
-loop.run_until_complete(cli.tranceiver_bind())
-try:
-    # 2. consume from queue, read responses from SMSC, send status checks
-    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
-    loop.run_until_complete(tasks)
-except Exception as e:
-    print("exception occured. error={0}".format(str(e)))
-finally:
-    # 3. unbind
-    loop.run_until_complete(cli.unbind())
-    loop.close()
-```
-@[3-12]
-@[14-23]
 
 ---
 #### 5.5 Queuing; example (your app)
-```python
-import asyncio, naz, redis
-
-outboundqueue = RedisExampleQueue()
-for i in range(0, 5):
-    item = {
-        "smpp_event": "submit_sm",
-        "short_message": "Hello World-{0}".format(str(i)),
-        "correlation_id": "myid12345",
-        "source_addr": "254722111111",
-        "destination_addr": "254722999999",
-    }
-    loop.run_until_complete(outboundqueue.enqueue(item))
-```
-@[3-12]
+![naz-redis-queue-app](docs/pyconKE2018/naz-redis-queue-app.png)
 
 ---
 #### 5.6 cli app
@@ -244,13 +184,7 @@ demo
 
 
 ---
-#### 6. then what?         
-- looking for feedback, critique, feature requests, bug reports.                 
-- test on one staging mno env.            
-
-
----
-#### 7. resources         
+#### 6. resources         
 - https://github.com/komuw/naz                
 - https://github.com/komuw/naz/blob/master/docs/SMPP_v3_4_specification.pdf   
 - https://gitpitch.com/komuw/naz/presentation       
@@ -259,3 +193,6 @@ demo
 - https://www.komu.engineer/about      
 
 
+---
+#### 6. Thanks
+Q & A
