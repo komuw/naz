@@ -57,4 +57,6 @@ asciinema play -i 2 -s 2 docs/first.cast
 ![codeee](docs/1times.png)    
 
 
+Use https://carbon.now.sh for code png's
+
 
