@@ -33,11 +33,8 @@ If you want to do integrate with various Telcos; you'll have to SMPP.
 
 
 ---
-![Image of sequence two](docs/request-response-sequence.png)                   
-
----
 #### 1.4 PDU format
-![Image of pdu format](docs/pdu_format.png)            
+![Image of pdu format](docs/pdu-format.png)            
            
 
 ---
