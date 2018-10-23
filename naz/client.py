@@ -339,7 +339,13 @@ class Client:
         command_id = self.command_ids["bind_transceiver"]
         # the status for success see section 5.1.3
         command_status = self.command_statuses["ESME_ROK"].code
-        sequence_number = self.sequence_generator.next_sequence()
+        try:
+            sequence_number = self.sequence_generator.next_sequence()
+        except Exception as e:
+            self.logger.exception(
+                "{}".format({"event": "tranceiver_bind", "stage": "end", "error": str(e)})
+            )
+
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
@@ -378,7 +384,19 @@ class Client:
             command_length = 16 + len(body)  # 16 is for headers
             command_id = self.command_ids["enquire_link"]
             command_status = 0x00000000  # not used for `enquire_link`
-            sequence_number = self.sequence_generator.next_sequence()
+            try:
+                sequence_number = self.sequence_generator.next_sequence()
+            except Exception as e:
+                self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "enquire_link",
+                            "stage": "end",
+                            "error": str(e),
+                            "correlation_id": correlation_id,
+                        }
+                    )
+                )
             if sequence_number > self.max_sequence_number:
                 # prevent third party sequence_generators from ruining our party
                 raise ValueError(
@@ -434,7 +452,19 @@ class Client:
             "pdu": full_pdu,
             "smpp_event": "enquire_link_resp",
         }
-        await self.outboundqueue.enqueue(item_to_enqueue)
+        try:
+            await self.outboundqueue.enqueue(item_to_enqueue)
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "enquire_link_resp",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
+                )
+            )
         self.logger.info(
             "{}".format(
                 {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
@@ -510,7 +540,19 @@ class Client:
             "pdu": full_pdu,
             "smpp_event": "deliver_sm_resp",
         }
-        await self.outboundqueue.enqueue(item_to_enqueue)
+        try:
+            await self.outboundqueue.enqueue(item_to_enqueue)
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "deliver_sm_resp",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
+                )
+            )
         self.logger.info(
             "{}".format(
                 {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
@@ -571,7 +613,19 @@ class Client:
             "source_addr": source_addr,
             "destination_addr": destination_addr,
         }
-        await self.outboundqueue.enqueue(item_to_enqueue)
+        try:
+            await self.outboundqueue.enqueue(item_to_enqueue)
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "submit_sm",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
+                )
+            )
         self.logger.info(
             "{}".format(
                 {
@@ -637,7 +691,19 @@ class Client:
         command_id = self.command_ids["submit_sm"]
         # the status for success see section 5.1.3
         command_status = 0x00000000  # not used for `submit_sm`
-        sequence_number = self.sequence_generator.next_sequence()
+        try:
+            sequence_number = self.sequence_generator.next_sequence()
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "build_submit_sm_pdu",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
+                )
+            )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(
@@ -726,25 +792,79 @@ class Client:
         while True:
             self.logger.info("{}".format({"event": "send_forever", "stage": "start"}))
 
-            # check with throttle handler
-            send_request = await self.throttle_handler.allow_request()
-            if send_request:
-                # rate limit ourselves
-                await self.rateLimiter.limit()
-
-                item_to_dequeue = await self.outboundqueue.dequeue()
-                correlation_id = item_to_dequeue["correlation_id"]
-                smpp_event = item_to_dequeue["smpp_event"]
-                if smpp_event == "submit_sm":
-                    short_message = item_to_dequeue["short_message"]
-                    correlation_id = item_to_dequeue["correlation_id"]
-                    source_addr = item_to_dequeue["source_addr"]
-                    destination_addr = item_to_dequeue["destination_addr"]
-                    full_pdu = await self.build_submit_sm_pdu(
-                        short_message, correlation_id, source_addr, destination_addr
+            # TODO: there are so many try-except classes in this func.
+            # do something about that.
+            try:
+                # check with throttle handler
+                send_request = await self.throttle_handler.allow_request()
+            except Exception as e:
+                self.logger.exception(
+                    "{}".format(
+                        {
+                            "event": "send_forever",
+                            "stage": "end",
+                            "state": "send_forever error",
+                            "error": str(e),
+                        }
                     )
-                else:
-                    full_pdu = item_to_dequeue["pdu"]
+                )
+                continue
+            if send_request:
+                try:
+                    # rate limit ourselves
+                    await self.rateLimiter.limit()
+                except Exception as e:
+                    self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
+                        )
+                    )
+                    continue
+
+                try:
+                    item_to_dequeue = await self.outboundqueue.dequeue()
+                except Exception as e:
+                    self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
+                        )
+                    )
+                    continue
+                try:
+                    correlation_id = item_to_dequeue["correlation_id"]
+                    smpp_event = item_to_dequeue["smpp_event"]
+                    if smpp_event == "submit_sm":
+                        short_message = item_to_dequeue["short_message"]
+                        correlation_id = item_to_dequeue["correlation_id"]
+                        source_addr = item_to_dequeue["source_addr"]
+                        destination_addr = item_to_dequeue["destination_addr"]
+                        full_pdu = await self.build_submit_sm_pdu(
+                            short_message, correlation_id, source_addr, destination_addr
+                        )
+                    else:
+                        full_pdu = item_to_dequeue["pdu"]
+                except KeyError as e:
+                    self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
+                        )
+                    )
+                    continue
 
                 await self.send_data(
                     smpp_event=smpp_event, msg=full_pdu, correlation_id=correlation_id
@@ -764,18 +884,32 @@ class Client:
                     # offer escape hatch for tests to come out of endless loop
                     return item_to_dequeue
             else:
+                # throttle_handler didn't allow us to send request.
                 self.logger.info(
                     "{}".format(
                         {"event": "send_forever", "stage": "end", "send_request": send_request}
                     )
                 )
-                await asyncio.sleep(await self.throttle_handler.throttle_delay())
+                try:
+                    await asyncio.sleep(await self.throttle_handler.throttle_delay())
+                except Exception as e:
+                    self.logger.exception(
+                        "{}".format(
+                            {
+                                "event": "send_forever",
+                                "stage": "end",
+                                "state": "send_forever error",
+                                "error": str(e),
+                            }
+                        )
+                    )
+                    continue
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
                     return "throttle_handler_denied_request"
                 continue
 
-    async def receive_data(self):
+    async def receive_data(self, TESTING=False):
         """
         """
         while True:
@@ -815,6 +949,9 @@ class Client:
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
             self.logger.info("{}".format({"event": "receive_data", "stage": "end"}))
+            if TESTING:
+                # offer escape hatch for tests to come out of endless loop
+                return full_pdu_data
 
     async def parse_response_pdu(self, pdu):
         """
@@ -937,11 +1074,25 @@ class Client:
                 )
             )
 
-        # call throttling handler
-        if command_status == self.command_statuses["ESME_ROK"].code:
-            await self.throttle_handler.not_throttled()
-        elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
-            await self.throttle_handler.throttled()
+        try:
+            # call throttling handler
+            if command_status == self.command_statuses["ESME_ROK"].code:
+                await self.throttle_handler.not_throttled()
+            elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
+                await self.throttle_handler.throttled()
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "speficic_handlers",
+                        "stage": "end",
+                        "error": str(e),
+                        "smpp_event": smpp_event,
+                        "correlation_id": correlation_id,
+                        "state": command_status_value.description,
+                    }
+                )
+            )
 
         if smpp_event in [
             "bind_transceiver",
@@ -1047,7 +1198,19 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids["unbind"]
         command_status = 0x00000000  # not used for `unbind`
-        sequence_number = self.sequence_generator.next_sequence()
+        try:
+            sequence_number = self.sequence_generator.next_sequence()
+        except Exception as e:
+            self.logger.exception(
+                "{}".format(
+                    {
+                        "event": "unbind",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
+                )
+            )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
             raise ValueError(

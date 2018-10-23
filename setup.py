@@ -79,16 +79,7 @@ setup(
     # $ pip install -e .[dev,test]
     extras_require={
         "dev": ["coverage", "pypandoc", "twine", "wheel", "redis==2.10.6", "pika==0.12.0"],
-        "test": [
-            "flake8==3.5.0",
-            "mock",
-            "pylint==1.8.2",
-            "pycodestyle==2.3.1",
-            "black",
-            "bandit",
-            "docker==3.4.0",
-            "mypy==0.610",
-        ],
+        "test": ["flake8", "mock", "pylint", "black", "bandit", "docker==3.4.0", "mypy"],
     },
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these

@@ -111,49 +111,63 @@ def main():
     logger.setLevel(loglevel)
     logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
 
-    logger.exception("\n\n\t {} \n\n".format("Naz: the SMPP client."))
+    logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
 
     # Load custom classes #######################
-    # Users can either pass in:
-    # 1. python classes;
-    # 2. python class instances
-    # if the thing that the user passed in is a python class, we need to create a class instance.
+    # Users can ONLY pass in:
+    # 1. python class instances
+    # if the thing that the user passed in is a python class, we need to exit with an error
     # we'll use `inspect.isclass` to do that
     # todo: test the h** out of this logic
 
     outboundqueue = load_class(kwargs["outboundqueue"])  # this is a mandatory param
-    if inspect.isclass(outboundqueue):
-        # instantiate class instance
-        outboundqueue = outboundqueue()
     kwargs["outboundqueue"] = outboundqueue
+    if inspect.isclass(outboundqueue):
+        # DO NOT instantiate class instance, fail with appropriate error instead.
+        logger.exception("\n\n\t {} \n\n".format("outboundqueue should be a class instance."))
+        sys.exit(77)
 
     sequence_generator = kwargs.get("sequence_generator")
     if sequence_generator:
         sequence_generator = load_class(sequence_generator)
+        # kwargs should contain the actual loaded class instances
+        kwargs["sequence_generator"] = sequence_generator
         if inspect.isclass(sequence_generator):
-            # instantiate an object
-            kwargs["sequence_generator"] = sequence_generator()
+            logger.exception(
+                "\n\n\t {} \n\n".format("sequence_generator should be a class instance.")
+            )
+            sys.exit(77)
 
     codec_class = kwargs.get("codec_class")
     if codec_class:
         codec_class = load_class(codec_class)
+        kwargs["codec_class"] = codec_class
         if inspect.isclass(codec_class):
-            kwargs["codec_class"] = codec_class()
+            logger.exception("\n\n\t {} \n\n".format("codec_class should be a class instance."))
+            sys.exit(77)
     rateLimiter = kwargs.get("rateLimiter")
     if rateLimiter:
         rateLimiter = load_class(rateLimiter)
+        kwargs["rateLimiter"] = rateLimiter
         if inspect.isclass(rateLimiter):
-            kwargs["rateLimiter"] = rateLimiter()
+            logger.exception("\n\n\t {} \n\n".format("rateLimiter should be a class instance."))
+            sys.exit(77)
     hook = kwargs.get("hook")
     if hook:
         hook = load_class(hook)
+        kwargs["hook"] = hook
         if inspect.isclass(hook):
-            kwargs["hook"] = hook()
+            logger.exception("\n\n\t {} \n\n".format("hook should be a class instance."))
+            sys.exit(77)
     throttle_handler = kwargs.get("throttle_handler")
     if throttle_handler:
         throttle_handler = load_class(throttle_handler)
+        kwargs["throttle_handler"] = throttle_handler
         if inspect.isclass(throttle_handler):
-            kwargs["throttle_handler"] = throttle_handler()
+            logger.exception(
+                "\n\n\t {} \n\n".format("throttle_handler should be a class instance.")
+            )
+            sys.exit(77)
     # Load custom classes #######################
 
     # call naz api ###########
