@@ -110,8 +110,7 @@ An instance of a class that implements `naz.hooks.BaseHook`.  It has two methods
 create an instance implementation of `BaseHook`, plug it in, and u can do whatever u want inside `request`/`response` methods.  
 
 ---
-#### 5.1.2 observability: hooks example 
-![naz-observability-hooks](docs/pyconKE2018/naz-observability-hooks.png)
+![naz-observability-hooks-example1](docs/pyconKE2018/naz-observability-hooks.png)
 
 
 ---
