@@ -15,32 +15,40 @@
 **About Me:** https://www.komu.engineer/about  
 
 ---
-#### 1. SMPP spec                 
+#### 1.1 SMPP spec                 
 It's a protocol designed for transfer of Short messages between an SMS server and a mobile phone.               
 Based on exchange of request/response protocol data units(PDUs) between client & server over TCP/IP network.   
     
 Typically used for SMS and USSD by Telcos.         
 
 ---
-#### 1.1 sequence of requests
+#### 1.2 sequence of requests
 ![Image of sequence](docs/sequence.png)                  
                         
 .
 ---
-#### 1.2 PDU format
+#### 1.3 PDU format
 ![Image of pdu format](docs/pdu_format.png)            
            
 .
 
 ---
-#### 2. SMPP & python intro         
+#### 2. SMPP & python         
+How do you connect to SMPP server(SMSC) from Python?
+
+---
+#### A. Create network connection 
 ```python
-import socket, struct
-# 1. network connect
+import socket
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.settimeout(5)
 sock.connect(('127.0.0.1', 2775))
-# 2. create PDU
+```
+
+---
+#### B. Create PDU
+```python
+import struct
 body = b""
 command_length = 16 + len(body)  # 16 is for headers
 command_id = 21 # enquire_link PDU
@@ -51,13 +59,14 @@ header = struct.pack(">IIII",
                      command_id,
                      command_status,
                      sequence_number)
-# send PDU
 full_pdu = header + body
+```
+
+---
+#### C. Send PDU over network
+```python
 sock.send(full_pdu)
 ```          
-@[1-5]
-@[6-16]
-@[17-19]
 
 
 ---
@@ -71,13 +80,13 @@ sock.send(full_pdu)
     - complexity of code base    
     - coupling with other things(rabbitMQ, redis, Twisted)      
     - non-granular configurability         
-      - (PR #352 you can only set `throttle_delay: X seconds` )
+      - (you can only set `throttle_delay: X seconds` )
     - maintenance debt:
-      - (PR #342 disable vumi sentry integration; vumi outdated raven dependancies)
+      - (we had to disable vumi sentry integration;   
+         vumi outdated raven dependancies)
       - cant migrate transport to py3(because vumi is py2)
-    - lack of visibility      
-      - (PR #335 and PR #327 enrich queue to vumi logging). 
-      - PR #336, PR #339
+    - lack of visibility(what is happenning?)      
+      - (you have to enrich vumi logs). 
 
 
 ---
