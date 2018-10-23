@@ -28,8 +28,22 @@ If you want to do integrate with various Telcos; you'll have to SMPP.
 
 ---
 #### 1.2.1 codeee
-![codeee](docs/carbon.png)                  
+![codeee](docs/2times.png)                  
   
+
+---
+#### 1.2.2 codee2
+![codeee](docs/1times.png)    
+
+
+---
+![codeee](docs/2times.png)                  
+  
+
+---
+![codeee](docs/1times.png)    
+
+
 
 ---
 #### 1.3 sequence of requests
