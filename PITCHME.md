@@ -43,45 +43,12 @@ How do you connect to SMPP server(SMSC) from Python?
 
 
 ---
-#### py and smpp
-![2times.png](docs/2times.png)            
+![SMPP & python](docs/python-smpp-intro.png)            
    
 
 ---
-![2times.png](docs/2times.png)  
-
-
----
-#### A. Create network connection 
-```python
-import socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.settimeout(5)
-sock.connect(('127.0.0.1', 2775))
-```
-
----
-#### B. Create PDU
-```python
-import struct
-body = b""
-command_length = 16 + len(body)  # 16 is for headers
-command_id = 21 # enquire_link PDU
-command_status = 0
-sequence_number = 1
-header = struct.pack(">IIII",
-                     command_length,
-                     command_id,
-                     command_status,
-                     sequence_number)
-full_pdu = header + body
-```
-
----
-#### C. Send PDU over network
-```python
-sock.send(full_pdu)
-```          
+#### 2.2 python and request/response sequence
+![Image of sequence](docs/request-response-sequence.png)                  
 
 
 ---
