@@ -93,8 +93,23 @@ BYO queue...
 #### 5. naz features  
 running theme: configurability, observability, BYO ... nini nini
 
+
+---
+#### 5.1.1 observability: logging  
+![naz-observability-logging](docs/pyconKE2018/naz-observability-logging.png)                  
+
+
+
+---
+#### 5.1.1 observability: logs 
+![naz-observability-logs](docs/pyconKE2018/naz-observability-logs.png)                  
+
+
+
+
+
 ---                
-#### 5.1.1 observability: logging                 
+#### 5.1.1.2 observability: logging                 
 ```python
 import naz
 cli = naz.Client(
