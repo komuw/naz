@@ -84,7 +84,7 @@ sock.send(full_pdu)
     - maintenance debt:
       - (we had to disable vumi sentry integration;   
          vumi outdated raven dependancies)
-      - cant migrate transport to py3(because vumi is py2)
+      - cant migrate your app to Python3(because vumi is py2)
     - lack of visibility(what is happenning?)      
       - (you have to enrich vumi logs). 
 
