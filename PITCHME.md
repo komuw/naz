@@ -12,7 +12,8 @@
 **Name:** Komu Wairagu   
 **Occupation:** Software developer at [https://jumo.world/](https://jumo.world/)      
 
-**About Me:** https://www.komu.engineer/about  
+**About Me:** https://www.komu.engineer/about    
+**Presentation:** https://gitpitch.com/komuw/naz/presentation
 
 ---
 #### 1.1 SMPP
@@ -349,7 +350,8 @@ demo
 ---
 #### 7. resources         
 - https://github.com/komuw/naz                
-- https://github.com/komuw/naz/blob/master/docs/SMPP_v3_4_specification.pdf          
+- https://github.com/komuw/naz/blob/master/docs/SMPP_v3_4_specification.pdf   
+- https://gitpitch.com/komuw/naz/presentation       
 - https://github.com/praekelt/vumi          
       
 - https://www.komu.engineer/about      
