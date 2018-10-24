@@ -1,7 +1,7 @@
-
 ---               
-Introduction to naz, an async SMPP client    
-**Presentation:** https://gitpitch.com/komuw/naz/presentation
+Introduction to naz, an async SMPP client      
+
+**Slides:** https://gitpitch.com/komuw/naz/presentation
 
 ---
 #### 0. topics                   
@@ -19,9 +19,6 @@ Introduction to naz, an async SMPP client
 **Occupation:** Software developer at [https://jumo.world/](https://jumo.world/)      
 
 **About Me:** https://www.komu.engineer/about    
-
-**Presentation:** https://gitpitch.com/komuw/naz/presentation
-
 
 ---
 #### 1.1 SMPP
