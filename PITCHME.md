@@ -73,6 +73,8 @@ How do you connect to SMPP server(SMSC) from Python?
 naz is an async SMPP client.       
 It's easily configurable, BYO(throttlers, rateLimiters etc)        
 
+`pip install naz`       
+
 ---
 #### 4.1 architecture                
 | Your App |  ---> | Queue | ---> | Naz |                   
