@@ -13,6 +13,7 @@
 **Occupation:** Software developer at [https://jumo.world/](https://jumo.world/)      
 
 **About Me:** https://www.komu.engineer/about    
+
 **Presentation:** https://gitpitch.com/komuw/naz/presentation
 
 ---
