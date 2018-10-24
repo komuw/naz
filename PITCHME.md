@@ -1,7 +1,7 @@
 ---               
 ## Introduction to naz, an async SMPP client      
 
-**Slides:** https://gitpitch.com/komuw/naz/presentation
+https://gitpitch.com/komuw/naz/presentation
 
 ---
 #### 0. topics                   
