@@ -180,12 +180,22 @@ Your app queues messages, naz consumes from that queue and then sends those mess
 
 ---
 #### 5.6 cli app
-this is installed when you install `naz`.       
-```
+this is installed when you install `naz`.    
+```sh
 naz-cli --help
 ```          
-`naz-cli` consumes the `naz` api. 
-It accepts a json config file.
+```bash
+usage: naz [-h] [--version] --config CONFIG
+
+naz is an SMPP client.  
+example usage: naz-cli --config /path/to/my_config.json
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             The currently installed naz version.
+  --config CONFIG       The config file to use. eg: --config
+                        /path/to/my_config.json
+```          
 
 ---
 #### 5.6 cli app; example
