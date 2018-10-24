@@ -4,7 +4,7 @@
 https://gitpitch.com/komuw/naz/presentation
 
 ---
-#### 0. topics                   
+#### topics                   
 1. SMPP               
 2. SMPP & python intro        
 3. current lay of the land                  
