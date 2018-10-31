@@ -102,7 +102,7 @@ def main():
     )
 
     extra_log_data = {"log_metadata": log_metadata}
-    logger = logging.getLogger()
+    logger = logging.getLogger("naz.cli")
     handler = logging.StreamHandler()
     formatter = logging.Formatter("%(message)s")
     handler.setFormatter(formatter)
