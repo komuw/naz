@@ -255,7 +255,7 @@ class TestClient(TestCase):
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            logger = logging.getLogger()
+            logger = logging.getLogger("naz.test")
             handler = logging.StreamHandler()
             formatter = logging.Formatter("%(message)s")
             handler.setFormatter(formatter)

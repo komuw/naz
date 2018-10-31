@@ -29,8 +29,8 @@ class SimpleRateLimiter(BaseRateLimiter):
     def __init__(
         self,
         logger: logging.Logger,
-        send_rate: float = 1000,
-        max_tokens: float = 1000,
+        send_rate: float = 100000,
+        max_tokens: float = 100000,
         delay_for_tokens: float = 1,
     ) -> None:
         """

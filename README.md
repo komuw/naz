@@ -255,7 +255,7 @@ To customize the default ratelimiter, for example to send at a rate of 35 reques
 ```python
 import logging
 import naz
-logger = logging.getLogger()
+logger = logging.getLogger("naz.rateLimiter")
 
 myLimiter = naz.ratelimiter.SimpleRateLimiter(logger=logger, send_rate=35)
 cli = naz.Client(

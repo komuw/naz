@@ -23,7 +23,7 @@ class TestThrottle(TestCase):
     def setUp(self):
         self.loop = asyncio.get_event_loop()
 
-        self.logger = logging.getLogger()
+        self.logger = logging.getLogger("naz.test")
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
