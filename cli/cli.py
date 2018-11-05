@@ -10,6 +10,7 @@ import naz
 
 os.environ["PYTHONASYNCIODEBUG"] = "1"
 
+
 def load_class(dotted_path):
     """
     taken from: https://github.com/coleifer/huey/blob/4138d454cc6fd4d252c9350dbd88d74dd3c67dcb/huey/utils.py#L44
