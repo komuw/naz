@@ -4,7 +4,7 @@ python:
 
 env:
   global:
-    - PYTHONASYNCIODEBUG='2'
+    - PYTHONASYNCIODEBUG='1'
 
 before_install:
 - pwd
