@@ -8,6 +8,8 @@ import argparse
 
 import naz
 
+os.environ["PYTHONASYNCIODEBUG"] = "1"
+
 
 def load_class(dotted_path):
     """
