@@ -852,7 +852,7 @@ class Client:
                     continue
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
-                    message_protocol_version = item_to_dequeue["version"]
+                    item_to_dequeue["version"]  # version is a required field
                     smpp_event = item_to_dequeue["smpp_event"]
                     if smpp_event == "submit_sm":
                         short_message = item_to_dequeue["short_message"]
