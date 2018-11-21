@@ -49,6 +49,7 @@ cli = naz.Client(
 )
 
 item_to_enqueue = {
+    "version": "1",
     "smpp_event": "submit_sm",
     "short_message": "Hello World",
     "correlation_id": "myid12345",

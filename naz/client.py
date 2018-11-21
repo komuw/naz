@@ -293,6 +293,13 @@ class Client:
         # this will be used to track different pdu's and user generated correlation_id
         self.seq_correl = {}
 
+        # the messages that are published to a queue by either naz
+        # or user application should be versioned.
+        # This version will enable naz to be able to evolve in future;
+        # eg a future version of naz could add/remove the number of required items in a message.
+        # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
+        self.naz_message_protocol_version = "1"
+
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
             if val == command_id_code:
@@ -448,6 +455,7 @@ class Client:
 
         full_pdu = header + body
         item_to_enqueue = {
+            "version": self.naz_message_protocol_version,
             "correlation_id": correlation_id,
             "pdu": full_pdu,
             "smpp_event": "enquire_link_resp",
@@ -536,6 +544,7 @@ class Client:
 
         full_pdu = header + body
         item_to_enqueue = {
+            "version": self.naz_message_protocol_version,
             "correlation_id": correlation_id,
             "pdu": full_pdu,
             "smpp_event": "deliver_sm_resp",
@@ -607,6 +616,7 @@ class Client:
             )
         )
         item_to_enqueue = {
+            "version": self.naz_message_protocol_version,
             "smpp_event": "submit_sm",
             "short_message": short_message,
             "correlation_id": correlation_id,
@@ -842,6 +852,7 @@ class Client:
                     continue
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
+                    item_to_dequeue["version"]  # version is a required field
                     smpp_event = item_to_dequeue["smpp_event"]
                     if smpp_event == "submit_sm":
                         short_message = item_to_dequeue["short_message"]
@@ -854,6 +865,9 @@ class Client:
                     else:
                         full_pdu = item_to_dequeue["pdu"]
                 except KeyError as e:
+                    e = ValueError(
+                        "enqueued message/object is missing required field:{}".format(str(e))
+                    )
                     self.logger.exception(
                         "{}".format(
                             {

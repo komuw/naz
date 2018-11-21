@@ -158,6 +158,7 @@ class TestClient(TestCase):
             correlation_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
+                "version": "1",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
                 "smpp_event": "submit_sm",
@@ -280,6 +281,7 @@ class TestClient(TestCase):
             correlation_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
+                "version": "1",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
                 "smpp_event": "submit_sm",
