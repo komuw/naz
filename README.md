@@ -62,6 +62,7 @@ cli = naz.Client(
 for i in range(0, 4):
     print("submit_sm round:", i)
     item_to_enqueue = {
+        "version": "1",
         "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
@@ -293,16 +294,19 @@ cli = naz.Client(
 It's via a queuing interface. Your application queues messages to a queue, `naz` consumes from that queue and then `naz` sends those messages to SMSC/server.       
 You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseOutboundQueue` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
 Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the queue.         
-Your application should enqueue a dictionary object with any parameters but the following are mandatory:              
+Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:              
 ```bash
 {
+    "version": "1",
     "smpp_event": "submit_sm",
     "short_message": string,
     "correlation_id": string,
     "source_addr": string,
     "destination_addr": string
 }
-```
+```  
+For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)      
+
 `naz` ships with a simple queue implementation called [`naz.q.SimpleOutboundQueue`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
 An example of using that;
 ```python
@@ -337,6 +341,7 @@ then in your application, queue items to the queue;
 # queue messages to send
 for i in range(0, 4):
     item_to_enqueue = {
+        "version": "1",
         "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
@@ -405,6 +410,7 @@ then queue on your application side;
 for i in range(0, 5):
     print("submit_sm round:", i)
     item_to_enqueue = {
+        "version": "1",
         "smpp_event": "submit_sm",
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",

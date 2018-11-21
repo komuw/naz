@@ -1,3 +1,4 @@
+## 1. naz Config file (naz client) parameters
 `naz-cli` accepts a json config file. The parameters that can be put in that file, what they mean and their default values(if any) are documented here.                     
 Note that these are also the parameters that [`naz.Client`](https://github.com/komuw/naz/blob/master/naz/client.py) takes.               
         
@@ -113,3 +114,21 @@ cli = naz.Client(
     loglevel="WARNING",
 )
 ```
+
+
+## 2. naz enqueued message protocol. 
+Your application enqueues an item in the form of a json object to a queue of it's choice and then `naz` dequeues that message, converts it into a python object and uses the parameters in there to send the message to right place.     
+Your application should enqueue a dictionary object with any parameters but the following are mandatory:              
+```bash
+{
+    "version": "1",
+    "smpp_event": "submit_sm",
+    "short_message": string,
+    "correlation_id": string,
+    "source_addr": string,
+    "destination_addr": string
+}
+```     
+Notice that the enqueued item has a `version` field. This indicates the current version of the naz message protocol.    
+A future version of `naz` may ship with a different message protocol that may require different mandatory fields to be in the 
+enqueued json object.    
