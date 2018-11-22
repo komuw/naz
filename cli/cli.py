@@ -187,7 +187,7 @@ def main():
         loop.run_until_complete(tasks)
         loop.run_forever()
     except Exception as e:
-        logger.exception("{}".format({"event": "cli", "stage": "end", "error": str(e)}))
+        logger.exception({"event": "cli", "stage": "end", "error": str(e)})
     finally:
         loop.run_until_complete(cli.unbind())
         loop.close()

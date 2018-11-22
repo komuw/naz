@@ -313,17 +313,17 @@ class Client:
         return None, None
 
     async def connect(self):
-        self.logger.info("{}".format({"event": "connect", "stage": "start"}))
+        self.logger.info({"event": "connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader = reader
         self.writer = writer
-        self.logger.info("{}".format({"event": "connect", "stage": "end"}))
+        self.logger.info({"event": "connect", "stage": "end"})
         return reader, writer
 
     async def tranceiver_bind(self):
-        self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "start"}))
+        self.logger.info({"event": "tranceiver_bind", "stage": "start"})
         # body
         body = b""
         body = (
@@ -362,7 +362,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(smpp_event="bind_transceiver", msg=full_pdu)
-        self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "end"}))
+        self.logger.info({"event": "tranceiver_bind", "stage": "end"})
         return full_pdu
 
     async def enquire_link(self, correlation_id=None, TESTING=False):
@@ -759,7 +759,7 @@ class Client:
 
     async def send_forever(self, TESTING=False):
         while True:
-            self.logger.info("{}".format({"event": "send_forever", "stage": "start"}))
+            self.logger.info({"event": "send_forever", "stage": "start"})
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -872,7 +872,7 @@ class Client:
         """
         """
         while True:
-            self.logger.info("{}".format({"event": "receive_data", "stage": "start"}))
+            self.logger.info({"event": "receive_data", "stage": "start"})
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
@@ -903,7 +903,7 @@ class Client:
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
-            self.logger.info("{}".format({"event": "receive_data", "stage": "end"}))
+            self.logger.info({"event": "receive_data", "stage": "end"})
             if TESTING:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
@@ -911,7 +911,7 @@ class Client:
     async def parse_response_pdu(self, pdu):
         """
         """
-        self.logger.info("{}".format({"event": "parse_response_pdu", "stage": "start"}))
+        self.logger.info({"event": "parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
