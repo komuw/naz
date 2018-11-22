@@ -1170,6 +1170,9 @@ class NazLoggingAdapter(logging.LoggerAdapter):
     """
 
     def process(self, msg, kwargs):
-        log_metadata = self.extra.get("log_metadata")
-        merged_log_event = {**msg, **log_metadata}
-        return "{0}".format(merged_log_event), kwargs
+        if isinstance(msg, str):
+            return msg, kwargs
+        else:
+            log_metadata = self.extra.get("log_metadata")
+            merged_log_event = {**msg, **log_metadata}
+            return "{0}".format(merged_log_event), kwargs
