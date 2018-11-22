@@ -60,16 +60,14 @@ class SimpleRateLimiter(BaseRateLimiter):
             # todo: sleep in an exponetial manner upto a maximum then wrap around.
             await asyncio.sleep(self.delay_for_tokens)
             self.logger.info(
-                "{}".format(
-                    {
-                        "event": "SimpleRateLimiter.limit",
-                        "stage": "end",
-                        "state": "limiting rate",
-                        "send_rate": self.send_rate,
-                        "delay": self.delay_for_tokens,
-                        "effective_send_rate": self.effective_send_rate,
-                    }
-                )
+                {
+                    "event": "SimpleRateLimiter.limit",
+                    "stage": "end",
+                    "state": "limiting rate",
+                    "send_rate": self.send_rate,
+                    "delay": self.delay_for_tokens,
+                    "effective_send_rate": self.effective_send_rate,
+                }
             )
 
         self.messages_delivered += 1
