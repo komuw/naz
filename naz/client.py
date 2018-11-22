@@ -313,17 +313,17 @@ class Client:
         return None, None
 
     async def connect(self):
-        self.logger.info("{}".format({"event": "connect", "stage": "start"}))
+        self.logger.info({"event": "connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader = reader
         self.writer = writer
-        self.logger.info("{}".format({"event": "connect", "stage": "end"}))
+        self.logger.info({"event": "connect", "stage": "end"})
         return reader, writer
 
     async def tranceiver_bind(self):
-        self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "start"}))
+        self.logger.info({"event": "tranceiver_bind", "stage": "start"})
         # body
         body = b""
         body = (
@@ -349,9 +349,7 @@ class Client:
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
-            self.logger.exception(
-                "{}".format({"event": "tranceiver_bind", "stage": "end", "error": str(e)})
-            )
+            self.logger.exception({"event": "tranceiver_bind", "stage": "end", "error": str(e)})
 
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -364,7 +362,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(smpp_event="bind_transceiver", msg=full_pdu)
-        self.logger.info("{}".format({"event": "tranceiver_bind", "stage": "end"}))
+        self.logger.info({"event": "tranceiver_bind", "stage": "end"})
         return full_pdu
 
     async def enquire_link(self, correlation_id=None, TESTING=False):
@@ -380,9 +378,7 @@ class Client:
         """
         while True:
             self.logger.info(
-                "{}".format(
-                    {"event": "enquire_link", "stage": "start", "correlation_id": correlation_id}
-                )
+                {"event": "enquire_link", "stage": "start", "correlation_id": correlation_id}
             )
             # body
             body = b""
@@ -395,14 +391,12 @@ class Client:
                 sequence_number = self.sequence_generator.next_sequence()
             except Exception as e:
                 self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "enquire_link",
-                            "stage": "end",
-                            "error": str(e),
-                            "correlation_id": correlation_id,
-                        }
-                    )
+                    {
+                        "event": "enquire_link",
+                        "stage": "end",
+                        "error": str(e),
+                        "correlation_id": correlation_id,
+                    }
                 )
             if sequence_number > self.max_sequence_number:
                 # prevent third party sequence_generators from ruining our party
@@ -419,9 +413,7 @@ class Client:
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(smpp_event="enquire_link", msg=full_pdu)
             self.logger.info(
-                "{}".format(
-                    {"event": "enquire_link", "stage": "end", "correlation_id": correlation_id}
-                )
+                {"event": "enquire_link", "stage": "end", "correlation_id": correlation_id}
             )
             if TESTING:
                 return full_pdu
@@ -440,9 +432,7 @@ class Client:
         """
         # body
         self.logger.info(
-            "{}".format(
-                {"event": "enquire_link_resp", "stage": "start", "correlation_id": correlation_id}
-            )
+            {"event": "enquire_link_resp", "stage": "start", "correlation_id": correlation_id}
         )
         body = b""
 
@@ -464,19 +454,15 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "enquire_link_resp",
-                        "stage": "end",
-                        "error": str(e),
-                        "correlation_id": correlation_id,
-                    }
-                )
+                {
+                    "event": "enquire_link_resp",
+                    "stage": "end",
+                    "error": str(e),
+                    "correlation_id": correlation_id,
+                }
             )
         self.logger.info(
-            "{}".format(
-                {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
-            )
+            {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
         )
 
     async def unbind_resp(self, sequence_number, correlation_id=None):
@@ -491,9 +477,7 @@ class Client:
         `unbind_resp` has no body.
         """
         self.logger.info(
-            "{}".format(
-                {"event": "unbind_resp", "stage": "start", "correlation_id": correlation_id}
-            )
+            {"event": "unbind_resp", "stage": "start", "correlation_id": correlation_id}
         )
 
         # body
@@ -509,9 +493,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_event="unbind_resp", msg=full_pdu)
-        self.logger.info(
-            "{}".format({"event": "unbind_resp", "stage": "end", "correlation_id": correlation_id})
-        )
+        self.logger.info({"event": "unbind_resp", "stage": "end", "correlation_id": correlation_id})
 
     async def deliver_sm_resp(self, sequence_number, correlation_id=None):
         """
@@ -526,9 +508,7 @@ class Client:
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
         self.logger.info(
-            "{}".format(
-                {"event": "deliver_sm_resp", "stage": "start", "correlation_id": correlation_id}
-            )
+            {"event": "deliver_sm_resp", "stage": "start", "correlation_id": correlation_id}
         )
         # body
         body = b""
@@ -553,19 +533,16 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "deliver_sm_resp",
-                        "stage": "end",
-                        "error": str(e),
-                        "correlation_id": correlation_id,
-                    }
-                )
+                {
+                    "event": "deliver_sm_resp",
+                    "stage": "end",
+                    "error": str(e),
+                    "correlation_id": correlation_id,
+                }
             )
+
         self.logger.info(
-            "{}".format(
-                {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
-            )
+            {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
         )
 
     # this method just enqueues a submit_sm msg to queue
@@ -604,16 +581,14 @@ class Client:
             2. Octet String - A series of octets, not necessarily NULL terminated.
         """
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "submit_sm",
-                    "stage": "start",
-                    "correlation_id": correlation_id,
-                    "short_message": short_message,
-                    "source_addr": source_addr,
-                    "destination_addr": destination_addr,
-                }
-            )
+            {
+                "event": "submit_sm",
+                "stage": "start",
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "source_addr": source_addr,
+                "destination_addr": destination_addr,
+            }
         )
         item_to_enqueue = {
             "version": self.naz_message_protocol_version,
@@ -627,42 +602,36 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "submit_sm",
-                        "stage": "end",
-                        "error": str(e),
-                        "correlation_id": correlation_id,
-                    }
-                )
-            )
-        self.logger.info(
-            "{}".format(
                 {
                     "event": "submit_sm",
                     "stage": "end",
+                    "error": str(e),
                     "correlation_id": correlation_id,
-                    "short_message": short_message,
-                    "source_addr": source_addr,
-                    "destination_addr": destination_addr,
                 }
             )
+        self.logger.info(
+            {
+                "event": "submit_sm",
+                "stage": "end",
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "source_addr": source_addr,
+                "destination_addr": destination_addr,
+            }
         )
 
     async def build_submit_sm_pdu(
         self, short_message, correlation_id, source_addr, destination_addr
     ):
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "build_submit_sm_pdu",
-                    "stage": "start",
-                    "correlation_id": correlation_id,
-                    "short_message": short_message,
-                    "source_addr": source_addr,
-                    "destination_addr": destination_addr,
-                }
-            )
+            {
+                "event": "build_submit_sm_pdu",
+                "stage": "start",
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "source_addr": source_addr,
+                "destination_addr": destination_addr,
+            }
         )
         encoded_short_message = self.codec_class.encode(short_message, self.encoding)
         sm_length = len(encoded_short_message)
@@ -705,14 +674,12 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "build_submit_sm_pdu",
-                        "stage": "end",
-                        "error": str(e),
-                        "correlation_id": correlation_id,
-                    }
-                )
+                {
+                    "event": "build_submit_sm_pdu",
+                    "stage": "end",
+                    "error": str(e),
+                    "correlation_id": correlation_id,
+                }
             )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -727,16 +694,14 @@ class Client:
         full_pdu = header + body
 
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "build_submit_sm_pdu",
-                    "stage": "end",
-                    "correlation_id": correlation_id,
-                    "short_message": short_message,
-                    "source_addr": source_addr,
-                    "destination_addr": destination_addr,
-                }
-            )
+            {
+                "event": "build_submit_sm_pdu",
+                "stage": "end",
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "source_addr": source_addr,
+                "destination_addr": destination_addr,
+            }
         )
         return full_pdu
 
@@ -753,15 +718,13 @@ class Client:
         except Exception:
             pass
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "send_data",
-                    "stage": "start",
-                    "smpp_event": smpp_event,
-                    "correlation_id": correlation_id,
-                    "msg": log_msg,
-                }
-            )
+            {
+                "event": "send_data",
+                "stage": "start",
+                "smpp_event": smpp_event,
+                "correlation_id": correlation_id,
+                "msg": log_msg,
+            }
         )
 
         if isinstance(msg, str):
@@ -772,35 +735,31 @@ class Client:
             await self.hook.request(smpp_event=smpp_event, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "send_data",
-                        "stage": "end",
-                        "smpp_event": smpp_event,
-                        "correlation_id": correlation_id,
-                        "state": "request hook error",
-                        "error": str(e),
-                    }
-                )
-            )
-
-        self.writer.write(msg)
-        await self.writer.drain()
-        self.logger.info(
-            "{}".format(
                 {
                     "event": "send_data",
                     "stage": "end",
                     "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
-                    "msg": log_msg,
+                    "state": "request hook error",
+                    "error": str(e),
                 }
             )
+
+        self.writer.write(msg)
+        await self.writer.drain()
+        self.logger.info(
+            {
+                "event": "send_data",
+                "stage": "end",
+                "smpp_event": smpp_event,
+                "correlation_id": correlation_id,
+                "msg": log_msg,
+            }
         )
 
     async def send_forever(self, TESTING=False):
         while True:
-            self.logger.info("{}".format({"event": "send_forever", "stage": "start"}))
+            self.logger.info({"event": "send_forever", "stage": "start"})
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -809,14 +768,12 @@ class Client:
                 send_request = await self.throttle_handler.allow_request()
             except Exception as e:
                 self.logger.exception(
-                    "{}".format(
-                        {
-                            "event": "send_forever",
-                            "stage": "end",
-                            "state": "send_forever error",
-                            "error": str(e),
-                        }
-                    )
+                    {
+                        "event": "send_forever",
+                        "stage": "end",
+                        "state": "send_forever error",
+                        "error": str(e),
+                    }
                 )
                 continue
             if send_request:
@@ -825,14 +782,12 @@ class Client:
                     await self.rateLimiter.limit()
                 except Exception as e:
                     self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "send_forever",
-                                "stage": "end",
-                                "state": "send_forever error",
-                                "error": str(e),
-                            }
-                        )
+                        {
+                            "event": "send_forever",
+                            "stage": "end",
+                            "state": "send_forever error",
+                            "error": str(e),
+                        }
                     )
                     continue
 
@@ -840,14 +795,12 @@ class Client:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
                     self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "send_forever",
-                                "stage": "end",
-                                "state": "send_forever error",
-                                "error": str(e),
-                            }
-                        )
+                        {
+                            "event": "send_forever",
+                            "stage": "end",
+                            "state": "send_forever error",
+                            "error": str(e),
+                        }
                     )
                     continue
                 try:
@@ -869,14 +822,12 @@ class Client:
                         "enqueued message/object is missing required field:{}".format(str(e))
                     )
                     self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "send_forever",
-                                "stage": "end",
-                                "state": "send_forever error",
-                                "error": str(e),
-                            }
-                        )
+                        {
+                            "event": "send_forever",
+                            "stage": "end",
+                            "state": "send_forever error",
+                            "error": str(e),
+                        }
                     )
                     continue
 
@@ -884,15 +835,13 @@ class Client:
                     smpp_event=smpp_event, msg=full_pdu, correlation_id=correlation_id
                 )
                 self.logger.info(
-                    "{}".format(
-                        {
-                            "event": "send_forever",
-                            "stage": "end",
-                            "correlation_id": correlation_id,
-                            "smpp_event": smpp_event,
-                            "send_request": send_request,
-                        }
-                    )
+                    {
+                        "event": "send_forever",
+                        "stage": "end",
+                        "correlation_id": correlation_id,
+                        "smpp_event": smpp_event,
+                        "send_request": send_request,
+                    }
                 )
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
@@ -900,22 +849,18 @@ class Client:
             else:
                 # throttle_handler didn't allow us to send request.
                 self.logger.info(
-                    "{}".format(
-                        {"event": "send_forever", "stage": "end", "send_request": send_request}
-                    )
+                    {"event": "send_forever", "stage": "end", "send_request": send_request}
                 )
                 try:
                     await asyncio.sleep(await self.throttle_handler.throttle_delay())
                 except Exception as e:
                     self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "send_forever",
-                                "stage": "end",
-                                "state": "send_forever error",
-                                "error": str(e),
-                            }
-                        )
+                        {
+                            "event": "send_forever",
+                            "stage": "end",
+                            "state": "send_forever error",
+                            "error": str(e),
+                        }
                     )
                     continue
                 if TESTING:
@@ -927,14 +872,12 @@ class Client:
         """
         """
         while True:
-            self.logger.info("{}".format({"event": "receive_data", "stage": "start"}))
+            self.logger.info({"event": "receive_data", "stage": "start"})
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
                 self.logger.info(
-                    "{}".format(
-                        {"event": "receive_data", "stage": "start", "state": "no data received"}
-                    )
+                    {"event": "receive_data", "stage": "start", "state": "no data received"}
                 )
                 # todo: sleep in an exponetial manner upto a maximum then wrap around.
                 await asyncio.sleep(8)
@@ -949,20 +892,18 @@ class Client:
                 chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 if chunk == b"":
                     self.logger.exception(
-                        "{}".format(
-                            {
-                                "event": "receive_data",
-                                "stage": "end",
-                                "state": "socket connection broken",
-                            }
-                        )
+                        {
+                            "event": "receive_data",
+                            "stage": "end",
+                            "state": "socket connection broken",
+                        }
                     )
                     raise RuntimeError("socket connection broken")
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
-            self.logger.info("{}".format({"event": "receive_data", "stage": "end"}))
+            self.logger.info({"event": "receive_data", "stage": "end"})
             if TESTING:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
@@ -970,7 +911,7 @@ class Client:
     async def parse_response_pdu(self, pdu):
         """
         """
-        self.logger.info("{}".format({"event": "parse_response_pdu", "stage": "start"}))
+        self.logger.info({"event": "parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
@@ -989,14 +930,12 @@ class Client:
         smpp_event = self.search_by_command_id_code(command_id)
         if not smpp_event:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "parse_response_pdu",
-                        "stage": "end",
-                        "correlation_id": correlation_id,
-                        "state": "command_id:{0} is unknown.".format(command_id),
-                    }
-                )
+                {
+                    "event": "parse_response_pdu",
+                    "stage": "end",
+                    "correlation_id": correlation_id,
+                    "state": "command_id:{0} is unknown.".format(command_id),
+                }
             )
             raise ValueError("command_id:{0} is unknown.".format(command_id))
 
@@ -1007,16 +946,14 @@ class Client:
             await self.hook.response(smpp_event=smpp_event, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "parse_response_pdu",
-                        "stage": "end",
-                        "smpp_event": smpp_event,
-                        "correlation_id": correlation_id,
-                        "state": "response hook error",
-                        "error": str(e),
-                    }
-                )
+                {
+                    "event": "parse_response_pdu",
+                    "stage": "end",
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "state": "response hook error",
+                    "error": str(e),
+                }
             )
 
         pdu_body = b""
@@ -1031,15 +968,13 @@ class Client:
             total_pdu_length=total_pdu_length,
         )
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "parse_response_pdu",
-                    "stage": "end",
-                    "smpp_event": smpp_event,
-                    "correlation_id": correlation_id,
-                    "command_status": command_status,
-                }
-            )
+            {
+                "event": "parse_response_pdu",
+                "stage": "end",
+                "smpp_event": smpp_event,
+                "correlation_id": correlation_id,
+                "command_status": command_status,
+            }
         )
 
     async def speficic_handlers(
@@ -1063,29 +998,25 @@ class Client:
         if command_status != self.command_statuses["ESME_ROK"].code:
             # we got an error from SMSC
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "speficic_handlers",
-                        "stage": "start",
-                        "smpp_event": smpp_event,
-                        "correlation_id": correlation_id,
-                        "command_status": command_status_value.code,
-                        "state": command_status_value.description,
-                    }
-                )
+                {
+                    "event": "speficic_handlers",
+                    "stage": "start",
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "command_status": command_status_value.code,
+                    "state": command_status_value.description,
+                }
             )
         else:
             self.logger.info(
-                "{}".format(
-                    {
-                        "event": "speficic_handlers",
-                        "stage": "start",
-                        "smpp_event": smpp_event,
-                        "correlation_id": correlation_id,
-                        "command_status": command_status_value.code,
-                        "state": command_status_value.description,
-                    }
-                )
+                {
+                    "event": "speficic_handlers",
+                    "stage": "start",
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "command_status": command_status_value.code,
+                    "state": command_status_value.description,
+                }
             )
 
         try:
@@ -1096,16 +1027,14 @@ class Client:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "speficic_handlers",
-                        "stage": "end",
-                        "error": str(e),
-                        "smpp_event": smpp_event,
-                        "correlation_id": correlation_id,
-                        "state": command_status_value.description,
-                    }
-                )
+                {
+                    "event": "speficic_handlers",
+                    "stage": "end",
+                    "error": str(e),
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "state": command_status_value.description,
+                }
             )
 
         if smpp_event in [
@@ -1176,17 +1105,15 @@ class Client:
             )
         else:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "speficic_handlers",
-                        "stage": "end",
-                        "smpp_event": smpp_event,
-                        "correlation_id": correlation_id,
-                        "command_status": command_status_value.code,
-                        "state": command_status_value.description,
-                        "error": "unknown command",
-                    }
-                )
+                {
+                    "event": "speficic_handlers",
+                    "stage": "end",
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "command_status": command_status_value.code,
+                    "state": command_status_value.description,
+                    "error": "unknown command",
+                }
             )
 
     async def unbind(self, correlation_id=None):
@@ -1202,9 +1129,7 @@ class Client:
 
         clients/users should call this method when winding down.
         """
-        self.logger.info(
-            "{}".format({"event": "unbind", "stage": "start", "correlation_id": correlation_id})
-        )
+        self.logger.info({"event": "unbind", "stage": "start", "correlation_id": correlation_id})
         # body
         body = b""
 
@@ -1216,14 +1141,12 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
             self.logger.exception(
-                "{}".format(
-                    {
-                        "event": "unbind",
-                        "stage": "end",
-                        "error": str(e),
-                        "correlation_id": correlation_id,
-                    }
-                )
+                {
+                    "event": "unbind",
+                    "stage": "end",
+                    "error": str(e),
+                    "correlation_id": correlation_id,
+                }
             )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -1237,9 +1160,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_event="unbind", msg=full_pdu)
-        self.logger.info(
-            "{}".format({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
-        )
+        self.logger.info({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
 
 
 class NazLoggingAdapter(logging.LoggerAdapter):
@@ -1249,4 +1170,9 @@ class NazLoggingAdapter(logging.LoggerAdapter):
     """
 
     def process(self, msg, kwargs):
-        return "{0} {1}".format(msg, self.extra.get("log_metadata")), kwargs
+        if isinstance(msg, str):
+            return msg, kwargs
+        else:
+            log_metadata = self.extra.get("log_metadata")
+            merged_log_event = {**msg, **log_metadata}
+            return "{0}".format(merged_log_event), kwargs

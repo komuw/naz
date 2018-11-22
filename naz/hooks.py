@@ -60,14 +60,12 @@ class SimpleHook(BaseHook):
         hook method that is called just before a request is sent to SMSC.
         """
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "SimpleHook.request",
-                    "stage": "start",
-                    "smpp_event": smpp_event,
-                    "correlation_id": correlation_id,
-                }
-            )
+            {
+                "event": "SimpleHook.request",
+                "stage": "start",
+                "smpp_event": smpp_event,
+                "correlation_id": correlation_id,
+            }
         )
 
     async def response(self, smpp_event: str, correlation_id: typing.Optional[str] = None) -> None:
@@ -75,12 +73,10 @@ class SimpleHook(BaseHook):
         hook method that is called just after a response is gotten from SMSC.
         """
         self.logger.info(
-            "{}".format(
-                {
-                    "event": "SimpleHook.response",
-                    "stage": "start",
-                    "smpp_event": smpp_event,
-                    "correlation_id": correlation_id,
-                }
-            )
+            {
+                "event": "SimpleHook.response",
+                "stage": "start",
+                "smpp_event": smpp_event,
+                "correlation_id": correlation_id,
+            }
         )

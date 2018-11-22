@@ -87,9 +87,19 @@ def main():
         help="The config file to use. \
         eg: --config /path/to/my_config.json",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=False,
+        default=False,
+        help="""Whether we want to do a dry-run of the naz cli.
+        This is typically only used by developers who are developing naz.
+        eg: --dry-run""",
+    )
 
     args = parser.parse_args()
 
+    dry_run = args.dry_run
     config = args.config
     config_contents = config.read()
     kwargs = json.loads(config_contents)
@@ -114,6 +124,12 @@ def main():
     logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
 
     logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
+    if dry_run:
+        logger.warn(
+            "\n\n\t {} \n\n".format(
+                "Naz: Caution; You have activated dry-run, naz may not behave correctly."
+            )
+        )
 
     # Load custom classes #######################
     # Users can ONLY pass in:
@@ -175,6 +191,8 @@ def main():
     # call naz api ###########
     loop = asyncio.get_event_loop()
     cli = naz.Client(async_loop=loop, **kwargs)
+    if dry_run:
+        return
 
     # connect to the SMSC host
     reader, writer = loop.run_until_complete(cli.connect())
@@ -183,11 +201,15 @@ def main():
 
     try:
         # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-        tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+        tasks = asyncio.gather(
+            cli.send_forever(TESTING=dry_run),
+            cli.receive_data(TESTING=dry_run),
+            cli.enquire_link(TESTING=dry_run),
+        )
         loop.run_until_complete(tasks)
         loop.run_forever()
     except Exception as e:
-        logger.exception("{}".format({"event": "cli", "stage": "end", "error": str(e)}))
+        logger.exception({"event": "cli", "stage": "end", "error": str(e)})
     finally:
         loop.run_until_complete(cli.unbind())
         loop.close()
