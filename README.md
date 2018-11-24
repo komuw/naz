@@ -32,6 +32,7 @@ naz is in active development and it's API may change in backward incompatible wa
   + [Throttle handling](#4-throttle-handling)            
   + [Queuing](#5-queuing)            
 
+https://gitpitch.com/komuw/naz/presentation
 
 ## Installation
 

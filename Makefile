@@ -32,3 +32,31 @@ test:
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers -m naz.q -m naz.throttle -m naz.ratelimiter -m naz.hooks -m naz.sequence
+
+
+asciinema rec --idle-time-limit 2 first.cast
+asciinema play -i 2 docs/first.cast
+asciinema play -i 2 -s 2 docs/first.cast
+
+
+---
+#### 1.2.1 codeee
+![codeee](docs/2times.png)                  
+  
+
+---
+#### 1.2.2 codee2
+![codeee](docs/1times.png)    
+
+
+---
+![codeee](docs/2times.png) {this is what we will do}                  
+  
+
+---
+![codeee](docs/1times.png)    
+
+
+Use https://carbon.now.sh for code png's
+
+

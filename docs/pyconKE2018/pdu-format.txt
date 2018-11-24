@@ -1,0 +1,8 @@
+
+< ----------------------------- HEADER -------------------------> <---- BODY --->
+| command_length | command_id | command_status | sequence_number  |     BODY     |
+
+1. command_length, 4bytes, Integer
+2. command_id, 4bytes, Integer. eg `submit_sm` is Integer 4
+3. command_status, 4bytes, Integer. eg success is Integer 0
+4. sequence_number, 4bytes, Integer

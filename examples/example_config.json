@@ -5,13 +5,13 @@
     "password": "password",
     "outboundqueue": "examples.example_klasses.ExampleQueueInstance",
     "encoding": "gsm0338",
-    "sequence_generator": "examples.example_klasses.ExampleSeqGen",
     "loglevel": "INFO",
     "log_metadata": {
         "environment": "production",
-        "release": "canary"
+        "release": "canary",
+        "age": 67
     },
     "codec_errors_level": "ignore",
-    "enquire_link_interval": 30,
-    "rateLimiter": "examples.example_klasses.ExampleRateLimiter"
+    "enquire_link_interval": 70,
+    "rateLimiter": "examples.example_klasses.MyRateLimiter"
 }
