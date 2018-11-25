@@ -23,7 +23,7 @@ uploadprod:
 # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
 test:
 	@export PYTHONASYNCIODEBUG='2'
-	@printf "\n removing pyc files::\n" && find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | echo
+	@printf "\n removing pyc files::\n" && find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 	@printf "\n coverage erase::\n" && coverage erase
 	@printf "\n coverage run::\n" && coverage run --omit="*tests*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s .
 	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=84
