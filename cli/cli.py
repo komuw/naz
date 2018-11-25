@@ -188,7 +188,7 @@ def main():
             sys.exit(77)
     # Load custom classes #######################
 
-    # call naz api ###########
+    # call naz api ##############################
     loop = asyncio.get_event_loop()
     cli = naz.Client(async_loop=loop, **kwargs)
     if dry_run:
@@ -209,11 +209,11 @@ def main():
         loop.run_until_complete(tasks)
         loop.run_forever()
     except Exception as e:
-        logger.exception({"event": "cli", "stage": "end", "error": str(e)})
+        logger.exception({"event": "naz.cli", "stage": "end", "error": str(e)})
     finally:
         loop.run_until_complete(cli.unbind())
         loop.close()
-    # call naz api ###########
+    # call naz api #################################
 
 
 if __name__ == "__main__":
