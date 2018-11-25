@@ -313,17 +313,17 @@ class Client:
         return None, None
 
     async def connect(self):
-        self.logger.info({"event": "connect", "stage": "start"})
+        self.logger.info({"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader = reader
         self.writer = writer
-        self.logger.info({"event": "connect", "stage": "end"})
+        self.logger.info({"event": "naz.Client.connect", "stage": "end"})
         return reader, writer
 
     async def tranceiver_bind(self):
-        self.logger.info({"event": "tranceiver_bind", "stage": "start"})
+        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "start"})
         # body
         body = b""
         body = (
@@ -349,7 +349,7 @@ class Client:
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
-            self.logger.exception({"event": "tranceiver_bind", "stage": "end", "error": str(e)})
+            self.logger.exception({"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)})
 
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -362,7 +362,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(smpp_event="bind_transceiver", msg=full_pdu)
-        self.logger.info({"event": "tranceiver_bind", "stage": "end"})
+        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end"})
         return full_pdu
 
     async def enquire_link(self, correlation_id=None, TESTING=False):
@@ -378,7 +378,7 @@ class Client:
         """
         while True:
             self.logger.info(
-                {"event": "enquire_link", "stage": "start", "correlation_id": correlation_id}
+                {"event": "naz.Client.enquire_link", "stage": "start", "correlation_id": correlation_id}
             )
             # body
             body = b""
@@ -392,7 +392,7 @@ class Client:
             except Exception as e:
                 self.logger.exception(
                     {
-                        "event": "enquire_link",
+                        "event": "naz.Client.enquire_link",
                         "stage": "end",
                         "error": str(e),
                         "correlation_id": correlation_id,
@@ -413,7 +413,7 @@ class Client:
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(smpp_event="enquire_link", msg=full_pdu)
             self.logger.info(
-                {"event": "enquire_link", "stage": "end", "correlation_id": correlation_id}
+                {"event": "naz.Client.enquire_link", "stage": "end", "correlation_id": correlation_id}
             )
             if TESTING:
                 return full_pdu
@@ -432,7 +432,7 @@ class Client:
         """
         # body
         self.logger.info(
-            {"event": "enquire_link_resp", "stage": "start", "correlation_id": correlation_id}
+            {"event": "naz.Client.enquire_link_resp", "stage": "start", "correlation_id": correlation_id}
         )
         body = b""
 
@@ -455,14 +455,14 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "enquire_link_resp",
+                    "event": "naz.Client.enquire_link_resp",
                     "stage": "end",
                     "error": str(e),
                     "correlation_id": correlation_id,
                 }
             )
         self.logger.info(
-            {"event": "enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
+            {"event": "naz.Client.enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
         )
 
     async def unbind_resp(self, sequence_number, correlation_id=None):
@@ -477,7 +477,7 @@ class Client:
         `unbind_resp` has no body.
         """
         self.logger.info(
-            {"event": "unbind_resp", "stage": "start", "correlation_id": correlation_id}
+            {"event": "naz.Client.unbind_resp", "stage": "start", "correlation_id": correlation_id}
         )
 
         # body
@@ -493,7 +493,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_event="unbind_resp", msg=full_pdu)
-        self.logger.info({"event": "unbind_resp", "stage": "end", "correlation_id": correlation_id})
+        self.logger.info({"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id})
 
     async def deliver_sm_resp(self, sequence_number, correlation_id=None):
         """
@@ -508,7 +508,7 @@ class Client:
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
         self.logger.info(
-            {"event": "deliver_sm_resp", "stage": "start", "correlation_id": correlation_id}
+            {"event": "naz.Client.deliver_sm_resp", "stage": "start", "correlation_id": correlation_id}
         )
         # body
         body = b""
@@ -534,7 +534,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "deliver_sm_resp",
+                    "event": "naz.Client.deliver_sm_resp",
                     "stage": "end",
                     "error": str(e),
                     "correlation_id": correlation_id,
@@ -542,7 +542,7 @@ class Client:
             )
 
         self.logger.info(
-            {"event": "deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
+            {"event": "naz.Client.deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
         )
 
     # this method just enqueues a submit_sm msg to queue
@@ -582,7 +582,7 @@ class Client:
         """
         self.logger.info(
             {
-                "event": "submit_sm",
+                "event": "naz.Client.submit_sm",
                 "stage": "start",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
@@ -603,7 +603,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "submit_sm",
+                    "event": "naz.Client.submit_sm",
                     "stage": "end",
                     "error": str(e),
                     "correlation_id": correlation_id,
@@ -611,7 +611,7 @@ class Client:
             )
         self.logger.info(
             {
-                "event": "submit_sm",
+                "event": "naz.Client.submit_sm",
                 "stage": "end",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
@@ -625,7 +625,7 @@ class Client:
     ):
         self.logger.info(
             {
-                "event": "build_submit_sm_pdu",
+                "event": "naz.Client.build_submit_sm_pdu",
                 "stage": "start",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
@@ -675,7 +675,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "build_submit_sm_pdu",
+                    "event": "naz.Client.build_submit_sm_pdu",
                     "stage": "end",
                     "error": str(e),
                     "correlation_id": correlation_id,
@@ -695,7 +695,7 @@ class Client:
 
         self.logger.info(
             {
-                "event": "build_submit_sm_pdu",
+                "event": "naz.Client.build_submit_sm_pdu",
                 "stage": "end",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
@@ -719,7 +719,7 @@ class Client:
             pass
         self.logger.info(
             {
-                "event": "send_data",
+                "event": "naz.Client.send_data",
                 "stage": "start",
                 "smpp_event": smpp_event,
                 "correlation_id": correlation_id,
@@ -736,7 +736,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "send_data",
+                    "event": "naz.Client.send_data",
                     "stage": "end",
                     "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
@@ -749,7 +749,7 @@ class Client:
         await self.writer.drain()
         self.logger.info(
             {
-                "event": "send_data",
+                "event": "naz.Client.send_data",
                 "stage": "end",
                 "smpp_event": smpp_event,
                 "correlation_id": correlation_id,
@@ -759,7 +759,7 @@ class Client:
 
     async def send_forever(self, TESTING=False):
         while True:
-            self.logger.info({"event": "send_forever", "stage": "start"})
+            self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -769,7 +769,7 @@ class Client:
             except Exception as e:
                 self.logger.exception(
                     {
-                        "event": "send_forever",
+                        "event": "naz.Client.send_forever",
                         "stage": "end",
                         "state": "send_forever error",
                         "error": str(e),
@@ -783,7 +783,7 @@ class Client:
                 except Exception as e:
                     self.logger.exception(
                         {
-                            "event": "send_forever",
+                            "event": "naz.Client.send_forever",
                             "stage": "end",
                             "state": "send_forever error",
                             "error": str(e),
@@ -796,7 +796,7 @@ class Client:
                 except Exception as e:
                     self.logger.exception(
                         {
-                            "event": "send_forever",
+                            "event": "naz.Client.send_forever",
                             "stage": "end",
                             "state": "send_forever error",
                             "error": str(e),
@@ -823,7 +823,7 @@ class Client:
                     )
                     self.logger.exception(
                         {
-                            "event": "send_forever",
+                            "event": "naz.Client.send_forever",
                             "stage": "end",
                             "state": "send_forever error",
                             "error": str(e),
@@ -836,7 +836,7 @@ class Client:
                 )
                 self.logger.info(
                     {
-                        "event": "send_forever",
+                        "event": "naz.Client.send_forever",
                         "stage": "end",
                         "correlation_id": correlation_id,
                         "smpp_event": smpp_event,
@@ -849,14 +849,14 @@ class Client:
             else:
                 # throttle_handler didn't allow us to send request.
                 self.logger.info(
-                    {"event": "send_forever", "stage": "end", "send_request": send_request}
+                    {"event": "naz.Client.send_forever", "stage": "end", "send_request": send_request}
                 )
                 try:
                     await asyncio.sleep(await self.throttle_handler.throttle_delay())
                 except Exception as e:
                     self.logger.exception(
                         {
-                            "event": "send_forever",
+                            "event": "naz.Client.send_forever",
                             "stage": "end",
                             "state": "send_forever error",
                             "error": str(e),
@@ -872,12 +872,12 @@ class Client:
         """
         """
         while True:
-            self.logger.info({"event": "receive_data", "stage": "start"})
+            self.logger.info({"event": "naz.Client.receive_data", "stage": "start"})
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
                 self.logger.info(
-                    {"event": "receive_data", "stage": "start", "state": "no data received"}
+                    {"event": "naz.Client.receive_data", "stage": "start", "state": "no data received"}
                 )
                 # todo: sleep in an exponetial manner upto a maximum then wrap around.
                 await asyncio.sleep(8)
@@ -893,7 +893,7 @@ class Client:
                 if chunk == b"":
                     self.logger.exception(
                         {
-                            "event": "receive_data",
+                            "event": "naz.Client.receive_data",
                             "stage": "end",
                             "state": "socket connection broken",
                         }
@@ -903,7 +903,7 @@ class Client:
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
-            self.logger.info({"event": "receive_data", "stage": "end"})
+            self.logger.info({"event": "naz.Client.receive_data", "stage": "end"})
             if TESTING:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
@@ -911,7 +911,7 @@ class Client:
     async def parse_response_pdu(self, pdu):
         """
         """
-        self.logger.info({"event": "parse_response_pdu", "stage": "start"})
+        self.logger.info({"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
         command_length_header_data = header_data[:4]
@@ -931,7 +931,7 @@ class Client:
         if not smpp_event:
             self.logger.exception(
                 {
-                    "event": "parse_response_pdu",
+                    "event": "naz.Client.parse_response_pdu",
                     "stage": "end",
                     "correlation_id": correlation_id,
                     "state": "command_id:{0} is unknown.".format(command_id),
@@ -947,7 +947,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "parse_response_pdu",
+                    "event": "naz.Client.parse_response_pdu",
                     "stage": "end",
                     "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
@@ -969,7 +969,7 @@ class Client:
         )
         self.logger.info(
             {
-                "event": "parse_response_pdu",
+                "event": "naz.Client.parse_response_pdu",
                 "stage": "end",
                 "smpp_event": smpp_event,
                 "correlation_id": correlation_id,
@@ -999,7 +999,7 @@ class Client:
             # we got an error from SMSC
             self.logger.exception(
                 {
-                    "event": "speficic_handlers",
+                    "event": "naz.Client.speficic_handlers",
                     "stage": "start",
                     "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
@@ -1010,7 +1010,7 @@ class Client:
         else:
             self.logger.info(
                 {
-                    "event": "speficic_handlers",
+                    "event": "naz.Client.speficic_handlers",
                     "stage": "start",
                     "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
@@ -1028,7 +1028,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "speficic_handlers",
+                    "event": "naz.Client.speficic_handlers",
                     "stage": "end",
                     "error": str(e),
                     "smpp_event": smpp_event,
@@ -1106,7 +1106,7 @@ class Client:
         else:
             self.logger.exception(
                 {
-                    "event": "speficic_handlers",
+                    "event": "naz.Client.speficic_handlers",
                     "stage": "end",
                     "smpp_event": smpp_event,
                     "correlation_id": correlation_id,
@@ -1129,7 +1129,7 @@ class Client:
 
         clients/users should call this method when winding down.
         """
-        self.logger.info({"event": "unbind", "stage": "start", "correlation_id": correlation_id})
+        self.logger.info({"event": "naz.Client.unbind", "stage": "start", "correlation_id": correlation_id})
         # body
         body = b""
 
@@ -1142,7 +1142,7 @@ class Client:
         except Exception as e:
             self.logger.exception(
                 {
-                    "event": "unbind",
+                    "event": "naz.Client.unbind",
                     "stage": "end",
                     "error": str(e),
                     "correlation_id": correlation_id,
@@ -1160,7 +1160,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_event="unbind", msg=full_pdu)
-        self.logger.info({"event": "unbind", "stage": "end", "correlation_id": correlation_id})
+        self.logger.info({"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id})
 
 
 class NazLoggingAdapter(logging.LoggerAdapter):

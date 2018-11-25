@@ -61,7 +61,7 @@ class SimpleHook(BaseHook):
         """
         self.logger.info(
             {
-                "event": "SimpleHook.request",
+                "event": "naz.SimpleHook.request",
                 "stage": "start",
                 "smpp_event": smpp_event,
                 "correlation_id": correlation_id,
@@ -74,7 +74,7 @@ class SimpleHook(BaseHook):
         """
         self.logger.info(
             {
-                "event": "SimpleHook.response",
+                "event": "naz.SimpleHook.response",
                 "stage": "start",
                 "smpp_event": smpp_event,
                 "correlation_id": correlation_id,

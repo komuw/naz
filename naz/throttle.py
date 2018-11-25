@@ -80,7 +80,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         return round((self.throttle_responses / (total_smsc_responses)) * 100, 2)
 
     async def allow_request(self) -> bool:
-        self.logger.info({"event": "SimpleThrottleHandler.allow_request", "stage": "start"})
+        self.logger.info({"event": "naz.SimpleThrottleHandler.allow_request", "stage": "start"})
         # calculat percentage of throttles before resetting NON_throttle_responses and throttle_responses
         current_percent_throttles: float = self.percent_throttles
         _throttle_responses: int = self.throttle_responses
@@ -97,7 +97,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         if current_percent_throttles > self.deny_request_at:
             self.logger.info(
                 {
-                    "event": "SimpleThrottleHandler.allow_request",
+                    "event": "naz.SimpleThrottleHandler.allow_request",
                     "stage": "end",
                     "percent_throttles": current_percent_throttles,
                     "throttle_responses": _throttle_responses,
@@ -111,7 +111,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             return False
         self.logger.info(
             {
-                "event": "SimpleThrottleHandler.allow_request",
+                "event": "naz.SimpleThrottleHandler.allow_request",
                 "stage": "end",
                 "percent_throttles": current_percent_throttles,
                 "throttle_responses": _throttle_responses,
