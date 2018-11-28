@@ -349,7 +349,9 @@ class Client:
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
-            self.logger.exception({"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)})
+            self.logger.exception(
+                {"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)}
+            )
 
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -378,7 +380,11 @@ class Client:
         """
         while True:
             self.logger.info(
-                {"event": "naz.Client.enquire_link", "stage": "start", "correlation_id": correlation_id}
+                {
+                    "event": "naz.Client.enquire_link",
+                    "stage": "start",
+                    "correlation_id": correlation_id,
+                }
             )
             # body
             body = b""
@@ -413,7 +419,11 @@ class Client:
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(smpp_event="enquire_link", msg=full_pdu)
             self.logger.info(
-                {"event": "naz.Client.enquire_link", "stage": "end", "correlation_id": correlation_id}
+                {
+                    "event": "naz.Client.enquire_link",
+                    "stage": "end",
+                    "correlation_id": correlation_id,
+                }
             )
             if TESTING:
                 return full_pdu
@@ -432,7 +442,11 @@ class Client:
         """
         # body
         self.logger.info(
-            {"event": "naz.Client.enquire_link_resp", "stage": "start", "correlation_id": correlation_id}
+            {
+                "event": "naz.Client.enquire_link_resp",
+                "stage": "start",
+                "correlation_id": correlation_id,
+            }
         )
         body = b""
 
@@ -462,7 +476,11 @@ class Client:
                 }
             )
         self.logger.info(
-            {"event": "naz.Client.enquire_link_resp", "stage": "end", "correlation_id": correlation_id}
+            {
+                "event": "naz.Client.enquire_link_resp",
+                "stage": "end",
+                "correlation_id": correlation_id,
+            }
         )
 
     async def unbind_resp(self, sequence_number, correlation_id=None):
@@ -493,7 +511,9 @@ class Client:
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_event="unbind_resp", msg=full_pdu)
-        self.logger.info({"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id})
+        self.logger.info(
+            {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
+        )
 
     async def deliver_sm_resp(self, sequence_number, correlation_id=None):
         """
@@ -508,7 +528,11 @@ class Client:
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
         self.logger.info(
-            {"event": "naz.Client.deliver_sm_resp", "stage": "start", "correlation_id": correlation_id}
+            {
+                "event": "naz.Client.deliver_sm_resp",
+                "stage": "start",
+                "correlation_id": correlation_id,
+            }
         )
         # body
         body = b""
@@ -542,7 +566,11 @@ class Client:
             )
 
         self.logger.info(
-            {"event": "naz.Client.deliver_sm_resp", "stage": "end", "correlation_id": correlation_id}
+            {
+                "event": "naz.Client.deliver_sm_resp",
+                "stage": "end",
+                "correlation_id": correlation_id,
+            }
         )
 
     # this method just enqueues a submit_sm msg to queue
@@ -849,7 +877,11 @@ class Client:
             else:
                 # throttle_handler didn't allow us to send request.
                 self.logger.info(
-                    {"event": "naz.Client.send_forever", "stage": "end", "send_request": send_request}
+                    {
+                        "event": "naz.Client.send_forever",
+                        "stage": "end",
+                        "send_request": send_request,
+                    }
                 )
                 try:
                     await asyncio.sleep(await self.throttle_handler.throttle_delay())
@@ -877,7 +909,11 @@ class Client:
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
                 self.logger.info(
-                    {"event": "naz.Client.receive_data", "stage": "start", "state": "no data received"}
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "start",
+                        "state": "no data received",
+                    }
                 )
                 # todo: sleep in an exponetial manner upto a maximum then wrap around.
                 await asyncio.sleep(8)
@@ -1129,7 +1165,9 @@ class Client:
 
         clients/users should call this method when winding down.
         """
-        self.logger.info({"event": "naz.Client.unbind", "stage": "start", "correlation_id": correlation_id})
+        self.logger.info(
+            {"event": "naz.Client.unbind", "stage": "start", "correlation_id": correlation_id}
+        )
         # body
         body = b""
 
@@ -1160,7 +1198,9 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_event="unbind", msg=full_pdu)
-        self.logger.info({"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id})
+        self.logger.info(
+            {"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id}
+        )
 
 
 class NazLoggingAdapter(logging.LoggerAdapter):
