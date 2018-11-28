@@ -17,6 +17,7 @@ install:
 # run static analyzers, tests etc
 script:
   - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
+  - black --line-length=100 --py36 --check .
   - flake8 .
   - pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
   - bandit -r --exclude .venv -ll .
