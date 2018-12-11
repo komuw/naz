@@ -1,8 +1,10 @@
 import time
-import asyncio
+import json
 import typing
+import asyncio
 
 import naz
+import redis
 
 
 class MySeqGen(object):
@@ -75,6 +77,47 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
         return await self.queue.get()
 
 
+class ExampleRedisQueue(naz.q.BaseOutboundQueue):
+    """
+    use redis as our queue.
+
+    This implements a basic FIFO queue using redis.
+    Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
+    https://redis.io/commands/lpush
+    https://redis.io/commands/brpop
+
+    Note that in practice, you would probaly want to use a non-blocking redis
+    client eg https://github.com/aio-libs/aioredis
+    """
+
+    def __init__(self):
+        self.redis_instance = redis.StrictRedis(host="localhost", port=6379, db=0)
+        self.queue_name = "myqueue"
+
+    async def enqueue(self, item):
+        self.redis_instance.lpush(self.queue_name, json.dumps(item))
+
+    async def dequeue(self):
+        x = self.redis_instance.brpop(self.queue_name)
+        dequed_item = json.loads(x[1].decode())
+        return dequed_item
+
+
 ExampleSeqGen = MySeqGen()
 ExampleRateLimiter = MyRateLimiter()
-ExampleQueueInstance = ExampleQueue(maxsize=433)
+ExampleRedisQueueInstance = ExampleRedisQueue()
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    for i in range(0, 4):
+        print("submit_sm round:", i)
+        item_to_enqueue = {
+            "version": "1",
+            "smpp_event": "submit_sm",
+            "short_message": "Hello World-{0}".format(str(i)),
+            "correlation_id": "myid12345",
+            "source_addr": "254722111111",
+            "destination_addr": "254722999999",
+        }
+        loop.run_until_complete(ExampleRedisQueueInstance.enqueue(item_to_enqueue))
