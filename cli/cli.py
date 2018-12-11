@@ -134,7 +134,7 @@ def main():
             {"smsc_host": kwargs.get("smsc_host"), "system_id": kwargs.get("system_id")}
         )
         extra_log_data = {"log_metadata": log_metadata}
-        logger = naz.cli.Client.NazLoggingAdapter(logger, extra_log_data)
+        logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
 
         logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:
@@ -206,7 +206,7 @@ def main():
             return
 
         # call naz api
-        cli = naz.cli.Client(async_loop=loop, **kwargs)
+        cli = naz.Client(async_loop=loop, **kwargs)
         # connect to the SMSC host
         reader, writer = loop.run_until_complete(cli.connect())
         # bind to SMSC as a tranceiver
