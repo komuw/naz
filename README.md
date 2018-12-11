@@ -85,7 +85,7 @@ except Exception as e:
     print("exception occured. error={0}".format(str(e)))
 finally:
     loop.run_until_complete(cli.unbind())
-    loop.close()
+    loop.stop()
 ```
 **NB:**      
 (a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)            
@@ -334,7 +334,7 @@ except Exception as e:
     print("exception occured. error={0}".format(str(e)))
 finally:
     loop.run_until_complete(cli.unbind())
-    loop.close()
+    loop.stop()
 ```
 then in your application, queue items to the queue;
 ```python
@@ -402,7 +402,7 @@ except Exception as e:
     print("error={0}".format(str(e)))
 finally:
     loop.run_until_complete(cli.unbind())
-    loop.close()
+    loop.stop()
 ```
 then queue on your application side;
 ```python

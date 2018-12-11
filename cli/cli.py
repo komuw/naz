@@ -226,7 +226,7 @@ def main():
         sys.exit(77)
     finally:
         logger.info({"event": "naz.cli", "stage": "end"})
-        loop.close()
+        loop.stop()
     # call naz api #################################
 
 
