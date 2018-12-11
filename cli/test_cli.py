@@ -1,6 +1,9 @@
+import io
 import os
 import sys
+import json
 import logging
+import argparse
 from unittest import TestCase
 
 import mock
@@ -15,9 +18,22 @@ class MockArgumentParser:
         pass
 
     def parse_args(self, args=None, namespace=None):
-        import argparse
+        naz_config = {
+            "smsc_host": "127.0.0.1",
+            "smsc_port": 2775,
+            "system_id": "smppclient1",
+            "password": "password",
+            "outboundqueue": "examples.example_klasses.ExampleRedisQueueInstance",
+            "encoding": "gsm0338",
+            "sequence_generator": "examples.example_klasses.ExampleSeqGen",
+            "loglevel": "INFO",
+            "log_metadata": {"environment": "production", "release": "canary"},
+            "codec_errors_level": "ignore",
+            "enquire_link_interval": 30,
+            "rateLimiter": "examples.example_klasses.ExampleRateLimiter",
+        }
 
-        naz_config_file = open("examples/example_config.json", "r", encoding="utf-8")
+        naz_config_file = io.StringIO(json.dumps(naz_config))
         return argparse.Namespace(config=naz_config_file, dry_run=True, loglevel="DEBUG")
 
 
