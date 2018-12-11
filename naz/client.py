@@ -927,14 +927,16 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 if chunk == b"":
+                    err = RuntimeError("socket connection broken")
                     self.logger.exception(
                         {
                             "event": "naz.Client.receive_data",
                             "stage": "end",
                             "state": "socket connection broken",
+                            "error": str(err),
                         }
                     )
-                    raise RuntimeError("socket connection broken")
+                    raise err
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
