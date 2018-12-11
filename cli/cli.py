@@ -148,7 +148,8 @@ def main():
         kwargs["outboundqueue"] = outboundqueue
         if inspect.isclass(outboundqueue):
             # DO NOT instantiate class instance, fail with appropriate error instead.
-            logger.exception("\n\n\t {} \n\n".format("outboundqueue should be a class instance."))
+            msg = "outboundqueue should be a class instance."
+            logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
             sys.exit(77)
 
         sequence_generator = kwargs.get("sequence_generator")
@@ -157,9 +158,8 @@ def main():
             # kwargs should contain the actual loaded class instances
             kwargs["sequence_generator"] = sequence_generator
             if inspect.isclass(sequence_generator):
-                logger.exception(
-                    "\n\n\t {} \n\n".format("sequence_generator should be a class instance.")
-                )
+                msg = "sequence_generator should be a class instance."
+                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
                 sys.exit(77)
 
         codec_class = kwargs.get("codec_class")
@@ -167,30 +167,32 @@ def main():
             codec_class = load_class(codec_class)
             kwargs["codec_class"] = codec_class
             if inspect.isclass(codec_class):
-                logger.exception("\n\n\t {} \n\n".format("codec_class should be a class instance."))
+                msg = "codec_class should be a class instance."
+                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
                 sys.exit(77)
         rateLimiter = kwargs.get("rateLimiter")
         if rateLimiter:
             rateLimiter = load_class(rateLimiter)
             kwargs["rateLimiter"] = rateLimiter
             if inspect.isclass(rateLimiter):
-                logger.exception("\n\n\t {} \n\n".format("rateLimiter should be a class instance."))
+                msg = "rateLimiter should be a class instance."
+                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
                 sys.exit(77)
         hook = kwargs.get("hook")
         if hook:
             hook = load_class(hook)
             kwargs["hook"] = hook
             if inspect.isclass(hook):
-                logger.exception("\n\n\t {} \n\n".format("hook should be a class instance."))
+                msg = "hook should be a class instance."
+                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
                 sys.exit(77)
         throttle_handler = kwargs.get("throttle_handler")
         if throttle_handler:
             throttle_handler = load_class(throttle_handler)
             kwargs["throttle_handler"] = throttle_handler
             if inspect.isclass(throttle_handler):
-                logger.exception(
-                    "\n\n\t {} \n\n".format("throttle_handler should be a class instance.")
-                )
+                msg = "throttle_handler should be a class instance."
+                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
                 sys.exit(77)
         # Load custom classes #######################
 
@@ -214,6 +216,7 @@ def main():
         loop.run_until_complete(cli.unbind())
     except Exception as e:
         logger.exception({"event": "naz.cli", "stage": "end", "error": str(e)})
+        sys.exit(77)
     finally:
         logger.info({"event": "naz.cli", "stage": "end"})
         loop.close()
