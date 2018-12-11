@@ -205,13 +205,14 @@ def main():
 
         # call naz api ##############################
         cli = naz.Client(async_loop=loop, **kwargs)
-        if dry_run:
-            return
 
         # connect to the SMSC host
         reader, writer = loop.run_until_complete(cli.connect())
         # bind to SMSC as a tranceiver
         loop.run_until_complete(cli.tranceiver_bind())
+
+        if dry_run:
+            return
 
         # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
         tasks = asyncio.gather(
