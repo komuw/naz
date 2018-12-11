@@ -102,7 +102,8 @@ class TestClient(TestCase):
         helper function that runs any coroutine in an event loop and passes its return value back to the caller.
         https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
         """
-        return self.loop.run_until_complete(coro)
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(coro)
 
     def test_bad_instantiation(self):
         def mock_create_client():

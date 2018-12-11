@@ -69,4 +69,4 @@ except Exception as e:
     print("\n\t error occured. error={0}".format(str(e)))
 finally:
     loop.run_until_complete(cli.unbind())
-    loop.close()
+    loop.stop()

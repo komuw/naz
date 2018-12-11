@@ -32,7 +32,6 @@ class TestRateLimit(TestCase):
     """
 
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
 
         self.logger = logging.getLogger("naz.test")
         handler = logging.StreamHandler()
@@ -56,7 +55,8 @@ class TestRateLimit(TestCase):
         pass
 
     def _run(self, coro):
-        return self.loop.run_until_complete(coro)
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(coro)
 
     def test_no_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
