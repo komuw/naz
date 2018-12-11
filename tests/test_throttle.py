@@ -36,7 +36,7 @@ class TestThrottle(TestCase):
         )
 
     def tearDown(self):
-        pass
+        self.loop.close()
 
     def _run(self, coro):
         return self.loop.run_until_complete(coro)

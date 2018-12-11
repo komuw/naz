@@ -91,6 +91,7 @@ class TestClient(TestCase):
         )
 
     def tearDown(self):
+        self.loop.close()
         if os.environ.get("CI_ENVIRONMENT"):
             print("\n\nrunning in CI env.\n")
             self.smpp_simulator.remove(force=True)
