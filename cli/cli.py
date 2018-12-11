@@ -54,6 +54,52 @@ def load_class(dotted_path):
         raise
 
 
+def make_parser_args(args):
+    """
+    this is abstracted into its own method so that it is easier to test it.
+    """
+    parser = argparse.ArgumentParser(
+        prog="naz",
+        description="""naz is an SMPP client.
+                example usage:
+                naz-cli \
+                --config /path/to/my_config.json
+                """,
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s {version}".format(version=naz.__version__.about["__version__"]),
+        help="The currently installed naz version.",
+    )
+    parser.add_argument(
+        "--loglevel",
+        type=str,
+        required=False,
+        default="INFO",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="The log level to output log messages at. \
+        eg: --loglevel DEBUG",
+    )
+    parser.add_argument(
+        "--config",
+        required=True,
+        type=argparse.FileType(mode="r"),
+        help="The config file to use. \
+        eg: --config /path/to/my_config.json",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        required=False,
+        default=False,
+        help="""Whether we want to do a dry-run of the naz cli.
+        This is typically only used by developers who are developing naz.
+        eg: --dry-run""",
+    )
+    return parser.parse_args()
+
+
 def main():
     """
     """
@@ -68,47 +114,7 @@ def main():
 
     loop = asyncio.get_event_loop()
     try:
-        parser = argparse.ArgumentParser(
-            prog="naz",
-            description="""naz is an SMPP client.
-                example usage:
-                naz-cli \
-                --config /path/to/my_config.json
-                """,
-        )
-        parser.add_argument(
-            "--version",
-            action="version",
-            version="%(prog)s {version}".format(version=naz.__version__.about["__version__"]),
-            help="The currently installed naz version.",
-        )
-        parser.add_argument(
-            "--loglevel",
-            type=str,
-            required=False,
-            default="INFO",
-            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-            help="The log level to output log messages at. \
-            eg: --loglevel DEBUG",
-        )
-        parser.add_argument(
-            "--config",
-            required=True,
-            type=argparse.FileType(mode="r"),
-            help="The config file to use. \
-            eg: --config /path/to/my_config.json",
-        )
-        parser.add_argument(
-            "--dry-run",
-            action="store_true",
-            required=False,
-            default=False,
-            help="""Whether we want to do a dry-run of the naz cli.
-            This is typically only used by developers who are developing naz.
-            eg: --dry-run""",
-        )
-
-        args = parser.parse_args()
+        args = make_parser_args(sys.argv[1:])
 
         dry_run = args.dry_run
         config = args.config
