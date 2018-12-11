@@ -60,7 +60,7 @@ class TestCli(TestCase):
         with self.assertRaises(SystemExit):
             self.parser.parse_args(["naz-cli", "-someBad", "-arguments"])
 
-    def test_something(self):
+    def test_cli_main(self):
         with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
             mock_ArgumentParser.return_value = MockArgumentParser()
             cli.main()
