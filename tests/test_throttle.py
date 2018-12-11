@@ -21,8 +21,6 @@ class TestThrottle(TestCase):
     """
 
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
-
         self.logger = logging.getLogger("naz.test")
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
@@ -36,10 +34,11 @@ class TestThrottle(TestCase):
         )
 
     def tearDown(self):
-        self.loop.close()
+        pass
 
     def _run(self, coro):
-        return self.loop.run_until_complete(coro)
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(coro)
 
     def test_small_sample_size_allows_requests(self):
         for i in range(0, (self.throttle_handler.sample_size - 2)):
