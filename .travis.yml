@@ -28,4 +28,4 @@ script:
   - naz-cli --config examples/example_config.json --dry-run
   - coverage erase
   - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
-  - coverage report --show-missing --fail-under=86
+  - coverage report --show-missing --fail-under=84
