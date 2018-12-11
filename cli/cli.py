@@ -54,7 +54,7 @@ def load_class(dotted_path):
         raise
 
 
-def make_parser_args(args):
+def make_parser():
     """
     this is abstracted into its own method so that it is easier to test it.
     """
@@ -97,7 +97,7 @@ def make_parser_args(args):
         This is typically only used by developers who are developing naz.
         eg: --dry-run""",
     )
-    return parser.parse_args()
+    return parser
 
 
 def main():
@@ -114,7 +114,8 @@ def main():
 
     loop = asyncio.get_event_loop()
     try:
-        args = make_parser_args(sys.argv[1:])
+        parser = make_parser()
+        args = parser.parse_args()
 
         dry_run = args.dry_run
         config = args.config
