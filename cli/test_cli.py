@@ -92,3 +92,11 @@ class TestCli(TestCase):
             with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
                 mock_ArgumentParser.return_value = MockArgumentParser(naz_config=bad_config)
                 cli.main()
+
+    def test_load_class_error(self):
+        with self.assertRaises(SystemExit):
+            bad_config = copy.deepcopy(self.naz_config)
+            bad_config.update({"outboundqueue": "BareClass"})
+            with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
+                mock_ArgumentParser.return_value = MockArgumentParser(naz_config=bad_config)
+                cli.main()
