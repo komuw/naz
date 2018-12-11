@@ -110,7 +110,7 @@ def main():
     if not logger.handlers:
         logger.addHandler(handler)
     logger.setLevel("DEBUG")
-    logger.info({"event": "naz.cli", "stage": "start"})
+    logger.info({"event": "naz.cli.main", "stage": "start"})
 
     loop = asyncio.get_event_loop()
     try:
@@ -134,7 +134,7 @@ def main():
             {"smsc_host": kwargs.get("smsc_host"), "system_id": kwargs.get("system_id")}
         )
         extra_log_data = {"log_metadata": log_metadata}
-        logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
+        logger = naz.cli.mainent.NazLoggingAdapter(logger, extra_log_data)
 
         logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:
@@ -156,7 +156,7 @@ def main():
         if inspect.isclass(outboundqueue):
             # DO NOT instantiate class instance, fail with appropriate error instead.
             msg = "outboundqueue should be a class instance."
-            logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
+            logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
             sys.exit(77)
 
         sequence_generator = kwargs.get("sequence_generator")
@@ -166,7 +166,7 @@ def main():
             kwargs["sequence_generator"] = sequence_generator
             if inspect.isclass(sequence_generator):
                 msg = "sequence_generator should be a class instance."
-                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
+                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
 
         codec_class = kwargs.get("codec_class")
@@ -175,7 +175,7 @@ def main():
             kwargs["codec_class"] = codec_class
             if inspect.isclass(codec_class):
                 msg = "codec_class should be a class instance."
-                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
+                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
         rateLimiter = kwargs.get("rateLimiter")
         if rateLimiter:
@@ -183,7 +183,7 @@ def main():
             kwargs["rateLimiter"] = rateLimiter
             if inspect.isclass(rateLimiter):
                 msg = "rateLimiter should be a class instance."
-                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
+                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
         hook = kwargs.get("hook")
         if hook:
@@ -191,7 +191,7 @@ def main():
             kwargs["hook"] = hook
             if inspect.isclass(hook):
                 msg = "hook should be a class instance."
-                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
+                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
         throttle_handler = kwargs.get("throttle_handler")
         if throttle_handler:
@@ -199,14 +199,14 @@ def main():
             kwargs["throttle_handler"] = throttle_handler
             if inspect.isclass(throttle_handler):
                 msg = "throttle_handler should be a class instance."
-                logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
+                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
 
         if dry_run:
             return
 
         # call naz api
-        cli = naz.Client(async_loop=loop, **kwargs)
+        cli = naz.cli.mainent(async_loop=loop, **kwargs)
         # connect to the SMSC host
         reader, writer = loop.run_until_complete(cli.connect())
         # bind to SMSC as a tranceiver
@@ -221,10 +221,10 @@ def main():
         loop.run_until_complete(tasks)
         loop.run_until_complete(cli.unbind())
     except Exception as e:
-        logger.exception({"event": "naz.cli", "stage": "end", "error": str(e)})
+        logger.exception({"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
     finally:
-        logger.info({"event": "naz.cli", "stage": "end"})
+        logger.info({"event": "naz.cli.main", "stage": "end"})
 
 
 if __name__ == "__main__":
