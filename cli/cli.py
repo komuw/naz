@@ -120,9 +120,9 @@ def main():
         dry_run = args.dry_run
         config = args.config
         config_contents = config.read()
+        # todo: validate that config_contents hold all the required params
         kwargs = json.loads(config_contents)
 
-        # todo: validate that config_contents hold all the required params
         loglevel = (
             kwargs.get("loglevel").upper() if kwargs.get("loglevel") else args.loglevel.upper()
         )
