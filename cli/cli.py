@@ -144,7 +144,7 @@ def main():
                 )
             )
 
-        # Load custom classes #######################
+        # Load custom classes
         # Users can ONLY pass in:
         # 1. python class instances
         # if the thing that the user passed in is a python class, we need to exit with an error
@@ -201,18 +201,16 @@ def main():
                 msg = "throttle_handler should be a class instance."
                 logger.exception({"event": "naz.cli", "stage": "end", "error": msg})
                 sys.exit(77)
-        # Load custom classes #######################
 
-        # call naz api ##############################
+        if dry_run:
+            return
+
+        # call naz api
         cli = naz.Client(async_loop=loop, **kwargs)
-
         # connect to the SMSC host
         reader, writer = loop.run_until_complete(cli.connect())
         # bind to SMSC as a tranceiver
         loop.run_until_complete(cli.tranceiver_bind())
-
-        if dry_run:
-            return
 
         # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
         tasks = asyncio.gather(
@@ -227,7 +225,6 @@ def main():
         sys.exit(77)
     finally:
         logger.info({"event": "naz.cli", "stage": "end"})
-    # call naz api #################################
 
 
 if __name__ == "__main__":
