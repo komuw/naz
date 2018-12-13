@@ -1,4 +1,6 @@
 import struct
+import random
+import string
 import asyncio
 import logging
 import collections
@@ -28,6 +30,7 @@ class Client:
         system_id,
         password,
         outboundqueue,
+        client_id=None,
         system_type="",
         addr_ton=0,
         addr_npi=0,
@@ -87,6 +90,9 @@ class Client:
         self.system_id = system_id
         self.password = password
         self.outboundqueue = outboundqueue
+        self.client_id = client_id
+        if not self.client_id:
+            self.client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
         self.system_type = system_type
         self.interface_version = interface_version
         self.addr_ton = addr_ton
@@ -103,7 +109,9 @@ class Client:
         self.log_metadata = log_metadata
         if not self.log_metadata:
             self.log_metadata = {}
-        self.log_metadata.update({"smsc_host": self.smsc_host, "system_id": system_id})
+        self.log_metadata.update(
+            {"smsc_host": self.smsc_host, "system_id": system_id, "client_id": self.client_id}
+        )
 
         self.codec_errors_level = codec_errors_level
         self.codec_class = codec_class
