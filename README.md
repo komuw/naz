@@ -128,14 +128,14 @@ run:
 ```shell
 	 Naz: the SMPP client.
 
-{'event': 'connect', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'connect', 'stage': 'end'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'tranceiver_bind', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'send_data', 'stage': 'start', 'smpp_command': 'bind_transceiver', 'correlation_id': None} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'SimpleHook.request', 'stage': 'start', 'correlation_id': None} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'send_data', 'stage': 'end', 'smpp_command': 'bind_transceiver', 'correlation_id': None} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'tranceiver_bind', 'stage': 'end'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
-{'event': 'send_forever', 'stage': 'start'} {'smsc_host': '127.0.0.1', 'system_id': 'smppclient1'}
+{'event': 'naz.Client.connect', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.connect', 'stage': 'end', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.tranceiver_bind', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.send_data', 'stage': 'start', 'smpp_event': 'bind_transceiver', 'correlation_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.SimpleHook.request', 'stage': 'start', 'smpp_event': 'bind_transceiver', 'correlation_id': None, 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.send_data', 'stage': 'end', 'smpp_event': 'bind_transceiver', 'correlation_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.tranceiver_bind', 'stage': 'end', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.send_forever', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 ```              
              
 **NB:**      
@@ -197,7 +197,7 @@ cli = naz.Client(
 )
 ```
 and then these will show up in all log events.             
-by default, `naz` annotates all log events with `smsc_host` and `system_id`
+by default, `naz` annotates all log events with `smsc_host`, `system_id` and `client_id`
 
 ##### 2.2 hooks
 a hook is a class with two methods `request` and `response`, ie it implements `naz`'s BaseHook interface as [defined here](https://github.com/komuw/naz/blob/master/naz/hooks.py).           

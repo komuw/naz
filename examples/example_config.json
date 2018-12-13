@@ -8,7 +8,7 @@
     "sequence_generator": "examples.example_klasses.ExampleSeqGen",
     "loglevel": "INFO",
     "log_metadata": {
-        "environment": "production",
+        "environment": "staging",
         "release": "canary"
     },
     "codec_errors_level": "ignore",

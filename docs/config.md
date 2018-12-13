@@ -46,7 +46,9 @@ You are also encouraged to consult any documentation of the SMSC partner that yo
 ---       | ---         | ---     
 encoding | encoding used to encode messages been sent to SMSC | gsm0338
 sequence_generator | python class used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
-outboundqueue | python class implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
+outboundqueue | python class implementing some queueing mechanism. messages to be sent to SMSC are queued using the said   
+client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
+mechanism before been sent | N/A
 loglevel | the level at which to log | DEBUG
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
 codec_class | python class to be used to encode/decode messages | naz.nazcodec.NazCodec

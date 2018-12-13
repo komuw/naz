@@ -1,6 +1,8 @@
 import os
 import sys
 import json
+import random
+import string
 import asyncio
 import logging
 import inspect
@@ -103,6 +105,8 @@ def make_parser():
 def main():
     """
     """
+    client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
+
     logger = logging.getLogger("naz.cli")
     handler = logging.StreamHandler()
     formatter = logging.Formatter("%(message)s")
@@ -131,7 +135,11 @@ def main():
         if not log_metadata:
             log_metadata = {}
         log_metadata.update(
-            {"smsc_host": kwargs.get("smsc_host"), "system_id": kwargs.get("system_id")}
+            {
+                "smsc_host": kwargs.get("smsc_host"),
+                "system_id": kwargs.get("system_id"),
+                "client_id": client_id,
+            }
         )
         extra_log_data = {"log_metadata": log_metadata}
         logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
