@@ -105,8 +105,6 @@ def make_parser():
 def main():
     """
     """
-    client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
-
     logger = logging.getLogger("naz.cli")
     handler = logging.StreamHandler()
     formatter = logging.Formatter("%(message)s")
@@ -134,6 +132,10 @@ def main():
         log_metadata = kwargs.get("log_metadata")
         if not log_metadata:
             log_metadata = {}
+        client_id = kwargs.get("client_id")
+        if not client_id:
+            client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
+            kwargs["client_id"] = client_id
         log_metadata.update(
             {
                 "smsc_host": kwargs.get("smsc_host"),
