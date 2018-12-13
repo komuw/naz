@@ -105,6 +105,7 @@ def make_parser():
 def main():
     """
     """
+    _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
     logger = logging.getLogger("naz.cli")
     handler = logging.StreamHandler()
     formatter = logging.Formatter("%(message)s")
@@ -112,7 +113,7 @@ def main():
     if not logger.handlers:
         logger.addHandler(handler)
     logger.setLevel("DEBUG")
-    logger.info({"event": "naz.cli.main", "stage": "start"})
+    logger.info({"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
 
     loop = asyncio.get_event_loop()
     try:
@@ -134,7 +135,7 @@ def main():
             log_metadata = {}
         client_id = kwargs.get("client_id")
         if not client_id:
-            client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
+            client_id = _client_id
             kwargs["client_id"] = client_id
         log_metadata.update(
             {
