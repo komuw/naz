@@ -90,6 +90,10 @@ class ExampleRedisQueue(naz.q.BaseOutboundQueue):
 
     Note that in practice, you would probaly want to use a non-blocking redis
     client eg https://github.com/aio-libs/aioredis
+    This example uses concurrent.futures.ThreadPoolExecutor to workaround
+    the fact that we are using a blocking/sync redis client.
+
+    Use an async client in real life/code.
     """
 
     def __init__(self):
