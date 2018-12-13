@@ -1,5 +1,7 @@
 import json
 import asyncio
+import functools
+import concurrent
 
 import naz
 import redis
@@ -16,17 +18,45 @@ class RedisExampleQueue(naz.q.BaseOutboundQueue):
 
     Note that in practice, you would probaly want to use a non-blocking redis
     client eg https://github.com/aio-libs/aioredis
+    This example uses concurrent.futures.ThreadPoolExecutor to workaround
+    the fact that we are using a blocking/sync redis client.
+
+    Use an async client in real life/code.
     """
 
     def __init__(self):
+        self.loop = asyncio.get_event_loop()
         self.redis_instance = redis.StrictRedis(host="localhost", port=6379, db=0)
         self.queue_name = "myqueue"
 
     async def enqueue(self, item):
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix="naz-redis-thread-pool"
+        ) as executor:
+            await self.loop.run_in_executor(
+                executor, functools.partial(self.blocking_enqueue, item=item)
+            )
+
+    def blocking_enqueue(self, item):
         self.redis_instance.lpush(self.queue_name, json.dumps(item))
 
     async def dequeue(self):
-        x = self.redis_instance.brpop(self.queue_name)
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix="naz-redis-thread-pool"
+        ) as executor:
+            while True:
+                item = await self.loop.run_in_executor(
+                    executor, functools.partial(self.blocking_dequeue)
+                )
+                if item:
+                    return item
+                else:
+                    await asyncio.sleep(5)
+
+    def blocking_dequeue(self):
+        x = self.redis_instance.brpop(self.queue_name, timeout=3)
+        if not x:
+            return None
         dequed_item = json.loads(x[1].decode())
         return dequed_item
 
