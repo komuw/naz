@@ -1002,15 +1002,11 @@ class Client:
                 }
             )
 
-        pdu_body = b""
-        if total_pdu_length > 16:
-            pdu_body = pdu[16:]
         await self.speficic_handlers(
             smpp_event=smpp_event,
             command_status=command_status,
             sequence_number=sequence_number,
             correlation_id=correlation_id,
-            unparsed_pdu_body=pdu_body,
             total_pdu_length=total_pdu_length,
         )
         self.logger.info(
@@ -1024,13 +1020,7 @@ class Client:
         )
 
     async def speficic_handlers(
-        self,
-        smpp_event,
-        command_status,
-        sequence_number,
-        correlation_id,
-        unparsed_pdu_body,
-        total_pdu_length,
+        self, smpp_event, command_status, sequence_number, correlation_id, total_pdu_length
     ):
         """
         this handles parsing speficic
