@@ -751,6 +751,9 @@ class Client:
         log_msg = ""
         try:
             log_msg = self.codec_class.decode(msg, self.encoding)
+            # do not log password, redact it from logs.
+            if self.password in log_msg:
+                log_msg = log_msg.replace(self.password, "{REDACTED}")
         except Exception:
             pass
         self.logger.info(
