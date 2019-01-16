@@ -968,7 +968,7 @@ class Client:
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "start",
-                        "state": "no data received from SMSC. sleeping for {0}minutes.".format(
+                        "state": "no data received from SMSC. sleeping for {0}minutes".format(
                             poll_read_interval
                         ),
                     }
