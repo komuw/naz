@@ -375,7 +375,7 @@ class Client:
         self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end"})
         return full_pdu
 
-    async def enquire_link(self, correlation_id=None, TESTING=False):
+    async def enquire_link(self, correlation_id, TESTING=False):
         """
         HEADER::
         # enquire_link has the following pdu header:
@@ -437,7 +437,7 @@ class Client:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
 
-    async def enquire_link_resp(self, sequence_number, correlation_id=None):
+    async def enquire_link_resp(self, sequence_number, correlation_id):
         """
         HEADER::
         # enquire_link_resp has the following pdu header:
@@ -491,7 +491,7 @@ class Client:
             }
         )
 
-    async def unbind_resp(self, sequence_number, correlation_id=None):
+    async def unbind_resp(self, sequence_number, correlation_id):
         """
         HEADER::
         # unbind_resp has the following pdu header:
@@ -523,7 +523,7 @@ class Client:
             {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
         )
 
-    async def deliver_sm_resp(self, sequence_number, correlation_id=None):
+    async def deliver_sm_resp(self, sequence_number, correlation_id):
         """
         HEADER::
         # deliver_sm_resp has the following pdu header:
@@ -741,7 +741,7 @@ class Client:
         )
         return full_pdu
 
-    async def send_data(self, smpp_event, msg, correlation_id=None):
+    async def send_data(self, smpp_event, msg, correlation_id):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -1155,7 +1155,7 @@ class Client:
                 }
             )
 
-    async def unbind(self, correlation_id=None):
+    async def unbind(self, correlation_id):
         """
         HEADER::
         # unbind has the following pdu header:
