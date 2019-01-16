@@ -380,3 +380,15 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_naz_enqueue.mock.call_args[0][1]["smpp_event"], "enquire_link_resp"
             )
+
+    def test_retry_after(self):
+        self.assertEqual(self.cli.retry_after(current_retries=-23) / 60, 1)
+        self.assertEqual(self.cli.retry_after(current_retries=0) / 60, 1)
+        self.assertEqual(self.cli.retry_after(current_retries=1) / 60, 2)
+        self.assertEqual(self.cli.retry_after(current_retries=2) / 60, 4)
+        self.assertEqual(self.cli.retry_after(current_retries=3) / 60, 8)
+        self.assertEqual(self.cli.retry_after(current_retries=4) / 60, 16)
+        self.assertEqual(self.cli.retry_after(current_retries=5) / 60, 32)
+
+        self.assertEqual(self.cli.retry_after(current_retries=7) / 60, 16)
+        self.assertEqual(self.cli.retry_after(current_retries=5432) / 60, 16)

@@ -827,6 +827,7 @@ class Client:
         )
 
     async def send_forever(self, TESTING=False):
+        no_msg_received_retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
 
@@ -863,15 +864,23 @@ class Client:
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
+                    no_msg_received_retry_count += 1
+                    poll_queue_interval = self.retry_after(no_msg_received_retry_count)
                     self.logger.exception(
                         {
                             "event": "naz.Client.send_forever",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "send_forever error. sleeping for {0}minutes".format(
+                                poll_queue_interval / 60
+                            ),
+                            "no_msg_received_retry_count": no_msg_received_retry_count,
                             "error": str(e),
                         }
                     )
+                    await asyncio.sleep(poll_queue_interval)
                     continue
+                # we didn't fail to dequeue a message
+                no_msg_received_retry_count = 0
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
                     item_to_dequeue["version"]  # version is a required field
@@ -941,24 +950,47 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
+    def retry_after(self, current_retries):
+        """
+        retries will happen in this sequence;
+        1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
+        """
+        # TODO:
+        # 1. give users ability to bring their own retry algorithms.
+        # 2. add jitter
+        if current_retries < 0:
+            current_retries = 0
+        if current_retries >= 6:
+            return 60 * 16  # 16 minutes
+        else:
+            return 60 * (1 * (2 ** current_retries))
+
     async def receive_data(self, TESTING=False):
         """
         """
+        no_data_received_retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.receive_data", "stage": "start"})
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
+                no_data_received_retry_count += 1
+                poll_read_interval = self.retry_after(no_data_received_retry_count)
                 self.logger.info(
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "start",
-                        "state": "no data received from SMSC",
+                        "state": "no data received from SMSC. sleeping for {0}minutes".format(
+                            poll_read_interval / 60
+                        ),
+                        "no_data_received_retry_count": no_data_received_retry_count,
                     }
                 )
-                # todo: sleep in an exponetial manner upto a maximum then wrap around.
-                await asyncio.sleep(8)
+                await asyncio.sleep(poll_read_interval)
                 continue
+            else:
+                # we didn't fail to read from SMSC
+                no_data_received_retry_count = 0
 
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
 
