@@ -389,6 +389,26 @@ class TestClient(TestCase):
         self.assertEqual(self.cli.retry_after(current_retries=3) / 60, 8)
         self.assertEqual(self.cli.retry_after(current_retries=4) / 60, 16)
         self.assertEqual(self.cli.retry_after(current_retries=5) / 60, 32)
-
         self.assertEqual(self.cli.retry_after(current_retries=7) / 60, 16)
         self.assertEqual(self.cli.retry_after(current_retries=5432) / 60, 16)
+
+    def test_session_state(self):
+        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            correlation_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "correlation_id": correlation_id,
+                "short_message": short_message,
+                "smpp_event": "submit_sm",
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+            }
+
+            reader, writer = self._run(self.cli.connect())
+            with self.assertRaises(ValueError) as raised_exception:
+                self._run(self.cli.send_forever(TESTING=True))
+            self.assertIn(
+                "smpp_event: submit_sm cannot be sent to SMSC when the client session state is: OPEN",
+                str(raised_exception.exception),
+            )
