@@ -331,7 +331,8 @@ class Client:
         return reader, writer
 
     async def tranceiver_bind(self):
-        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "start"})
+        correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "start", "correlation_id": correlation_id})
         # body
         body = b""
         body = (
@@ -371,8 +372,8 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        await self.send_data(smpp_event="bind_transceiver", msg=full_pdu)
-        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end"})
+        await self.send_data(smpp_event="bind_transceiver", msg=full_pdu, correlation_id=correlation_id)
+        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end", "correlation_id":correlation_id})
         return full_pdu
 
     async def enquire_link(self, TESTING=False):
@@ -748,7 +749,7 @@ class Client:
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
 
-        # associate sequence_number and correlation_id.
+        # associate sequence_number with correlation_id.
         # this will enable us to also associate responses and thus enhancing traceability of all workflows
         self.seq_correl[sequence_number] = correlation_id
 
