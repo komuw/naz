@@ -871,7 +871,7 @@ class Client:
                             "event": "naz.Client.send_forever",
                             "stage": "end",
                             "state": "send_forever error. sleeping for {0}minutes".format(
-                                poll_queue_interval
+                                poll_queue_interval / 60
                             ),
                             "no_msg_received_retry_count": no_msg_received_retry_count,
                             "error": str(e),
@@ -979,7 +979,7 @@ class Client:
                         "event": "naz.Client.receive_data",
                         "stage": "start",
                         "state": "no data received from SMSC. sleeping for {0}minutes".format(
-                            poll_read_interval
+                            poll_read_interval / 60
                         ),
                         "no_data_received_retry_count": no_data_received_retry_count,
                     }
