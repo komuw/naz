@@ -827,6 +827,7 @@ class Client:
         )
 
     async def send_forever(self, TESTING=False):
+        no_msg_received_retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
 
@@ -863,15 +864,23 @@ class Client:
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
+                    no_msg_received_retry_count += 1
+                    poll_queue_interval = self.retry_after(no_msg_received_retry_count)
                     self.logger.exception(
                         {
                             "event": "naz.Client.send_forever",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "send_forever error. sleeping for {0}minutes".format(
+                                poll_queue_interval
+                            ),
+                            "no_msg_received_retry_count": no_msg_received_retry_count,
                             "error": str(e),
                         }
                     )
+                    await asyncio.sleep(poll_queue_interval)
                     continue
+                # we didn't fail to dequeue a message
+                no_msg_received_retry_count = 0
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
                     item_to_dequeue["version"]  # version is a required field
@@ -977,6 +986,9 @@ class Client:
                 )
                 await asyncio.sleep(poll_read_interval)
                 continue
+            else:
+                # we didn't fail to read from SMSC
+                no_data_received_retry_count = 0
 
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
 
@@ -986,7 +998,6 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 if chunk == b"":
-                    no_data_received_retry_count = 0
                     err = RuntimeError("socket connection broken")
                     self.logger.exception(
                         {
@@ -1001,7 +1012,6 @@ class Client:
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
-            no_data_received_retry_count = 0
             self.logger.info({"event": "naz.Client.receive_data", "stage": "end"})
             if TESTING:
                 # offer escape hatch for tests to come out of endless loop
