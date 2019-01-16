@@ -332,7 +332,13 @@ class Client:
 
     async def tranceiver_bind(self):
         correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
-        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "start", "correlation_id": correlation_id})
+        self.logger.info(
+            {
+                "event": "naz.Client.tranceiver_bind",
+                "stage": "start",
+                "correlation_id": correlation_id,
+            }
+        )
         # body
         body = b""
         body = (
@@ -372,8 +378,16 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        await self.send_data(smpp_event="bind_transceiver", msg=full_pdu, correlation_id=correlation_id)
-        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end", "correlation_id":correlation_id})
+        await self.send_data(
+            smpp_event="bind_transceiver", msg=full_pdu, correlation_id=correlation_id
+        )
+        self.logger.info(
+            {
+                "event": "naz.Client.tranceiver_bind",
+                "stage": "end",
+                "correlation_id": correlation_id,
+            }
+        )
         return full_pdu
 
     async def enquire_link(self, TESTING=False):
@@ -427,7 +441,9 @@ class Client:
 
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-            await self.send_data(smpp_event="enquire_link", msg=full_pdu)
+            await self.send_data(
+                smpp_event="enquire_link", msg=full_pdu, correlation_id=correlation_id
+            )
             self.logger.info(
                 {
                     "event": "naz.Client.enquire_link",
@@ -439,7 +455,7 @@ class Client:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
 
-    async def enquire_link_resp(self, sequence_number, correlation_id):
+    async def enquire_link_resp(self, sequence_number):
         """
         HEADER::
         # enquire_link_resp has the following pdu header:
@@ -450,7 +466,7 @@ class Client:
 
         `enquire_link_resp` has no body.
         """
-        # body
+        correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {
                 "event": "naz.Client.enquire_link_resp",
@@ -458,6 +474,8 @@ class Client:
                 "correlation_id": correlation_id,
             }
         )
+
+        # body
         body = b""
 
         # header
@@ -1144,9 +1162,7 @@ class Client:
         elif smpp_event == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
-            await self.enquire_link_resp(
-                sequence_number=sequence_number, correlation_id=correlation_id
-            )
+            await self.enquire_link_resp(sequence_number=sequence_number)
         else:
             self.logger.exception(
                 {
