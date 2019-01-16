@@ -168,6 +168,8 @@ class TestClient(TestCase):
             }
 
             reader, writer = self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
             self._run(self.cli.send_forever(TESTING=True))
 
             self.assertTrue(mock_naz_dequeue.mock.called)
