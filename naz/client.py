@@ -953,7 +953,7 @@ class Client:
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "start",
-                        "state": "no data received",
+                        "state": "no data received from SMSC",
                     }
                 )
                 # todo: sleep in an exponetial manner upto a maximum then wrap around.
