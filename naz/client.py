@@ -363,6 +363,9 @@ class Client:
         command_status = self.command_statuses["ESME_ROK"].code
         try:
             sequence_number = self.sequence_generator.next_sequence()
+            # associate sequence_number with correlation_id.
+            # this will enable us to also associate responses and thus enhancing traceability of all workflows
+            self.seq_correl[sequence_number] = correlation_id
         except Exception as e:
             self.logger.exception(
                 {"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)}
@@ -419,6 +422,9 @@ class Client:
             command_status = 0x00000000  # not used for `enquire_link`
             try:
                 sequence_number = self.sequence_generator.next_sequence()
+                # associate sequence_number with correlation_id.
+                # this will enable us to also associate responses and thus enhancing traceability of all workflows
+                self.seq_correl[sequence_number] = correlation_id
             except Exception as e:
                 self.logger.exception(
                     {
@@ -730,6 +736,9 @@ class Client:
         command_status = 0x00000000  # not used for `submit_sm`
         try:
             sequence_number = self.sequence_generator.next_sequence()
+            # associate sequence_number with correlation_id.
+            # this will enable us to also associate responses and thus enhancing traceability of all workflows
+            self.seq_correl[sequence_number] = correlation_id
         except Exception as e:
             self.logger.exception(
                 {
@@ -768,10 +777,6 @@ class Client:
         """
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
-
-        # associate sequence_number with correlation_id.
-        # this will enable us to also associate responses and thus enhancing traceability of all workflows
-        self.seq_correl[sequence_number] = correlation_id
 
         log_msg = ""
         try:
@@ -1202,6 +1207,9 @@ class Client:
         command_status = 0x00000000  # not used for `unbind`
         try:
             sequence_number = self.sequence_generator.next_sequence()
+            # associate sequence_number with correlation_id.
+            # this will enable us to also associate responses and thus enhancing traceability of all workflows
+            self.seq_correl[sequence_number] = correlation_id
         except Exception as e:
             self.logger.exception(
                 {
