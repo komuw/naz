@@ -946,6 +946,7 @@ class Client:
         retries will happen in this sequence;
         1min, 2min, 4min, 8min, 16min, 32min, 32min, 32min ...
         """
+        # TODO: give users ability to bring their own retry algorithms.
         if current_retries < 0:
             current_retries = 0
         if current_retries >= 6:
@@ -973,7 +974,6 @@ class Client:
                         ),
                     }
                 )
-                # TODO: give users ability to bring their own retry algorithms.
                 await asyncio.sleep(poll_read_interval)
                 continue
 
