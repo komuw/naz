@@ -511,7 +511,7 @@ class Client:
             }
         )
 
-    async def unbind_resp(self, sequence_number, correlation_id):
+    async def unbind_resp(self, sequence_number):
         """
         HEADER::
         # unbind_resp has the following pdu header:
@@ -522,6 +522,7 @@ class Client:
 
         `unbind_resp` has no body.
         """
+        correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {"event": "naz.Client.unbind_resp", "stage": "start", "correlation_id": correlation_id}
         )
@@ -538,7 +539,7 @@ class Client:
 
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data(smpp_event="unbind_resp", msg=full_pdu)
+        await self.send_data(smpp_event="unbind_resp", msg=full_pdu, correlation_id=correlation_id)
         self.logger.info(
             {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
         )
@@ -1117,7 +1118,7 @@ class Client:
         elif smpp_event == "unbind":
             # we need to handle this since we need to send unbind_resp
             # it has no body
-            await self.unbind_resp(sequence_number=sequence_number, correlation_id=correlation_id)
+            await self.unbind_resp(sequence_number=sequence_number)
         elif smpp_event == "submit_sm_resp":
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
