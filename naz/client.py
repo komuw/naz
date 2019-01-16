@@ -308,6 +308,8 @@ class Client:
         # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
         self.naz_message_protocol_version = "1"
 
+        self.current_session_state = SmppSessionState.CLOSED
+
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
             if val == command_id_code:
@@ -328,6 +330,7 @@ class Client:
         self.reader = reader
         self.writer = writer
         self.logger.info({"event": "naz.Client.connect", "stage": "end"})
+        self.current_session_state = SmppSessionState.OPEN
         return reader, writer
 
     async def tranceiver_bind(self):
@@ -796,6 +799,47 @@ class Client:
             }
         )
 
+        # check session state to see if we can send messages.
+        # see section 2.3 of SMPP spec document v3.4
+        if self.current_session_state == SmppSessionState.CLOSED:
+            error_msg = "smpp_event: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+                smpp_event, self.current_session_state
+            )
+            self.logger.info(
+                {
+                    "event": "naz.Client.send_data",
+                    "stage": "end",
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "msg": log_msg,
+                    "current_session_state": self.current_session_state,
+                    "error": error_msg,
+                }
+            )
+            raise ValueError(error_msg)
+        elif self.current_session_state == SmppSessionState.OPEN and smpp_event not in [
+            "bind_transmitter",
+            "bind_receiver",
+            "bind_transceiver",
+        ]:
+            # only the smpp_event's listed above are allowed by SMPP spec to be sent
+            # if current_session_state == SmppSessionState.OPEN
+            error_msg = "smpp_event: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+                smpp_event, self.current_session_state
+            )
+            self.logger.info(
+                {
+                    "event": "naz.Client.send_data",
+                    "stage": "end",
+                    "smpp_event": smpp_event,
+                    "correlation_id": correlation_id,
+                    "msg": log_msg,
+                    "current_session_state": self.current_session_state,
+                    "error": error_msg,
+                }
+            )
+            raise ValueError(error_msg)
+
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding)
 
@@ -1140,9 +1184,6 @@ class Client:
 
         if smpp_event in [
             "bind_transceiver",
-            "bind_transceiver_resp",
-            # the body of `bind_transceiver_resp` only has `system_id` which is a
-            # C-Octet String of variable length upto 16 octets
             "unbind_resp",
             "submit_sm",  # We dont expect SMSC to send `submit_sm` to us.
             "deliver_sm_resp",
@@ -1153,6 +1194,11 @@ class Client:
         ]:
             # we never have to handle this
             pass
+        elif smpp_event == "bind_transceiver_resp":
+            # the body of `bind_transceiver_resp` only has `system_id` which is a
+            # C-Octet String of variable length upto 16 octets
+            if command_status == self.command_statuses["ESME_ROK"].code:
+                self.current_session_state = SmppSessionState.BOUND_TRX
         elif smpp_event == "unbind":
             # we need to handle this since we need to send unbind_resp
             # it has no body
@@ -1281,3 +1327,18 @@ class NazLoggingAdapter(logging.LoggerAdapter):
             log_metadata = self.extra.get("log_metadata")
             merged_log_event = {**msg, **log_metadata}
             return "{0}".format(merged_log_event), kwargs
+
+
+class SmppSessionState:
+    """
+    see section 2.2 of SMPP spec document v3.4
+    we are ignoring the other states since we are only concerning ourselves with an ESME in Transceiver mode.
+    """
+
+    # An ESME has established a network connection to the SMSC but has not yet issued a Bind request.
+    OPEN = "OPEN"
+    # A connected ESME has requested to bind as an ESME Transceiver (by issuing a bind_transceiver PDU)
+    # and has received a response from the SMSC authorising its Bind request.
+    BOUND_TRX = "BOUND_TRX"
+    # An ESME has unbound from the SMSC and has closed the network connection. The SMSC may also unbind from the ESME.
+    CLOSED = "CLOSED"
