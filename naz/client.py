@@ -57,7 +57,7 @@ class Client:
         registered_delivery=0b00000101,  # see section 5.2.17
         replace_if_present_flag=0x00000000,
         sm_default_msg_id=0x00000000,
-        enquire_link_interval=90,
+        enquire_link_interval=300,
         loglevel="DEBUG",
         log_metadata=None,
         codec_class=None,
