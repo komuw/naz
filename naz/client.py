@@ -941,23 +941,40 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
+    def no_data_received_retry(self, current_retries):
+        """
+        retries will happen in this sequence;
+        1min, 2min, 4min, 8min, 16min, 32min, 32min, 32min ...
+        """
+        if current_retries < 0:
+            current_retries = 0
+        if current_retries >= 6:
+            return 60 * 32  # 15 minutes
+        else:
+            return 60 * (1 * (2 ** current_retries))
+
     async def receive_data(self, TESTING=False):
         """
         """
+        no_data_received_retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.receive_data", "stage": "start"})
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
+                no_data_received_retry_count += 1
+                poll_read_interval = self.no_data_received_retry(no_data_received_retry_count)
                 self.logger.info(
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "start",
-                        "state": "no data received from SMSC",
+                        "state": "no data received from SMSC. sleeping for {0}minutes.".format(
+                            poll_read_interval
+                        ),
                     }
                 )
-                # todo: sleep in an exponetial manner upto a maximum then wrap around.
-                await asyncio.sleep(8)
+                # TODO: give users ability to bring their own retry algorithms.
+                await asyncio.sleep(poll_read_interval)
                 continue
 
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
@@ -968,6 +985,7 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 if chunk == b"":
+                    no_data_received_retry_count = 0
                     err = RuntimeError("socket connection broken")
                     self.logger.exception(
                         {
@@ -982,6 +1000,7 @@ class Client:
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
             await self.parse_response_pdu(full_pdu_data)
+            no_data_received_retry_count = 0
             self.logger.info({"event": "naz.Client.receive_data", "stage": "end"})
             if TESTING:
                 # offer escape hatch for tests to come out of endless loop
