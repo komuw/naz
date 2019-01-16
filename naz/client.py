@@ -375,7 +375,7 @@ class Client:
         self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end"})
         return full_pdu
 
-    async def enquire_link(self, correlation_id, TESTING=False):
+    async def enquire_link(self, TESTING=False):
         """
         HEADER::
         # enquire_link has the following pdu header:
@@ -387,6 +387,7 @@ class Client:
         `enquire_link` has no body.
         """
         while True:
+            correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self.logger.info(
                 {
                     "event": "naz.Client.enquire_link",
@@ -724,8 +725,6 @@ class Client:
                     sequence_number, self.max_sequence_number
                 )
             )
-        # associate sequence_number and user supplied correlation_id
-        self.seq_correl[sequence_number] = correlation_id
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
 
@@ -748,6 +747,11 @@ class Client:
         """
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
+
+        # associate sequence_number and correlation_id.
+        # this will enable us to also associate responses and thus enhancing traceability of all workflows
+        self.seq_correl[sequence_number] = correlation_id
+
         log_msg = ""
         try:
             log_msg = self.codec_class.decode(msg, self.encoding)
