@@ -972,6 +972,7 @@ class Client:
                         "state": "no data received from SMSC. sleeping for {0}minutes".format(
                             poll_read_interval
                         ),
+                        "no_data_received_retry_count": no_data_received_retry_count,
                     }
                 )
                 await asyncio.sleep(poll_read_interval)
