@@ -1176,7 +1176,7 @@ class Client:
                 }
             )
 
-    async def unbind(self, correlation_id):
+    async def unbind(self):
         """
         HEADER::
         # unbind has the following pdu header:
@@ -1189,6 +1189,7 @@ class Client:
 
         clients/users should call this method when winding down.
         """
+        correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {"event": "naz.Client.unbind", "stage": "start", "correlation_id": correlation_id}
         )
@@ -1221,7 +1222,7 @@ class Client:
 
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data(smpp_event="unbind", msg=full_pdu)
+        await self.send_data(smpp_event="unbind", msg=full_pdu, correlation_id=correlation_id)
         self.logger.info(
             {"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id}
         )
