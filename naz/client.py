@@ -941,7 +941,7 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
-    def no_data_received_retry(self, current_retries):
+    def retry_after(self, current_retries):
         """
         retries will happen in this sequence;
         1min, 2min, 4min, 8min, 16min, 32min, 32min, 32min ...
@@ -964,7 +964,7 @@ class Client:
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
                 no_data_received_retry_count += 1
-                poll_read_interval = self.no_data_received_retry(no_data_received_retry_count)
+                poll_read_interval = self.retry_after(no_data_received_retry_count)
                 self.logger.info(
                     {
                         "event": "naz.Client.receive_data",
