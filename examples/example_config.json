@@ -12,6 +12,6 @@
         "release": "canary"
     },
     "codec_errors_level": "ignore",
-    "enquire_link_interval": 30,
+    "enquire_link_interval": 420,
     "rateLimiter": "examples.example_klasses.ExampleRateLimiter"
 }
