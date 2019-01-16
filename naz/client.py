@@ -408,6 +408,10 @@ class Client:
         `enquire_link` has no body.
         """
         while True:
+            if self.current_session_state != SmppSessionState.BOUND_TRX:
+                # you can only send enquire_link request when session state is BOUND_TRX
+                await asyncio.sleep(self.enquire_link_interval)
+
             correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self.logger.info(
                 {
