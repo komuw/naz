@@ -36,7 +36,7 @@ sm_default_msg_id |  Indicates the short message to send from a list of predefin
 **NB**: The canonical reference for these values is the SMPP version 3.4 spec document. It's is encouraged that you consult. 
 Where anything differs with the SMPP spec document, you should consider the spec as the truth.        
 Any errors are my own doing, apologies in advance.          
-A copy of the SMPP spec is available at; https://github.com/komuw/naz/tree/master/docs         
+A copy of the SMPP spec is available at; https://github.com/komuw/naz/tree/master/documentation         
 You are also encouraged to consult any documentation of the SMSC partner that you want to connect with. Experience has shown that not everyone implements the SMPP spec exactly the same ¯\_(ツ)_/¯
 
 

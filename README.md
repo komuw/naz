@@ -88,7 +88,7 @@ finally:
     loop.stop()
 ```
 **NB:**      
-(a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)            
+(a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)            
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)         
 (c) if you need a SMSC server/gateway to test with, you can use the [docker-compose file in this repo](https://github.com/komuw/naz/blob/master/docker-compose.yml) to bring up an SMSC simulator.        
 That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your outboundqueue.
@@ -139,7 +139,7 @@ run:
 ```              
              
 **NB:**      
-(a) For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)             
+(a) For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)             
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples). As an example, start the SMSC simulator(`docker-compose up`) then in another terminal run, `naz-cli --config examples/example_config.json`
 
 To see help:
@@ -305,7 +305,7 @@ Your application should enqueue a dictionary/json object with any parameters but
     "destination_addr": string
 }
 ```  
-For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/docs/config.md)      
+For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
 
 `naz` ships with a simple queue implementation called [`naz.q.SimpleOutboundQueue`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
 An example of using that;
