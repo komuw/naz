@@ -955,7 +955,9 @@ class Client:
         retries will happen in this sequence;
         1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
         """
-        # TODO: give users ability to bring their own retry algorithms.
+        # TODO:
+        # 1. give users ability to bring their own retry algorithms.
+        # 2. add jitter
         if current_retries < 0:
             current_retries = 0
         if current_retries >= 6:
