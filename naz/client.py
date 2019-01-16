@@ -953,13 +953,13 @@ class Client:
     def retry_after(self, current_retries):
         """
         retries will happen in this sequence;
-        1min, 2min, 4min, 8min, 16min, 32min, 32min, 32min ...
+        1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
         """
         # TODO: give users ability to bring their own retry algorithms.
         if current_retries < 0:
             current_retries = 0
         if current_retries >= 6:
-            return 60 * 32  # 15 minutes
+            return 60 * 16  # 16 minutes
         else:
             return 60 * (1 * (2 ** current_retries))
 
