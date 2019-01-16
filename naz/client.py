@@ -544,7 +544,7 @@ class Client:
             {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
         )
 
-    async def deliver_sm_resp(self, sequence_number, correlation_id):
+    async def deliver_sm_resp(self, sequence_number):
         """
         HEADER::
         # deliver_sm_resp has the following pdu header:
@@ -556,6 +556,7 @@ class Client:
         BODY::
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
+        correlation_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {
                 "event": "naz.Client.deliver_sm_resp",
@@ -1157,9 +1158,7 @@ class Client:
             # short_message, C-Octet String, 0-254 octet
 
             # NB: user's hook has already been called.
-            await self.deliver_sm_resp(
-                sequence_number=sequence_number, correlation_id=correlation_id
-            )
+            await self.deliver_sm_resp(sequence_number=sequence_number)
         elif smpp_event == "enquire_link":
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
