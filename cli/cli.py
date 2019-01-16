@@ -219,7 +219,7 @@ def main():
         # call naz api
         cli = naz.Client(async_loop=loop, **kwargs)
         # connect to the SMSC host
-        reader, writer = loop.run_until_complete(cli.connect())
+        _, _ = loop.run_until_complete(cli.connect())
         # bind to SMSC as a tranceiver
         loop.run_until_complete(cli.tranceiver_bind())
 
@@ -231,6 +231,7 @@ def main():
         )
         loop.run_until_complete(tasks)
         loop.run_until_complete(cli.unbind())
+        cli.writer.close()
     except Exception as e:
         logger.exception({"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
