@@ -32,3 +32,9 @@ test:
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers -m naz.q -m naz.throttle -m naz.ratelimiter -m naz.hooks -m naz.sequence
+
+
+VERSION_STRING=$$(cat naz/__version__.py)
+
+cool:
+	@printf "$(VERSION_STRING)"
