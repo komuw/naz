@@ -9,7 +9,7 @@ upload:
 
 
 VERSION_STRING=$$(cat naz/__version__.py | grep "__version__" | sed -e 's/"__version__"://' | sed -e 's/,//g' | sed -e 's/"//g' | sed -e 's/ //g')
-LATEST_COMMIT_MESSAGE=$$(git log -n1 master)
+LATEST_COMMIT_MESSAGE=$$(git log $(git describe --tags --abbrev=0)..HEAD)
 uploadprod:
 	@rm -rf build
 	@rm -rf dist
