@@ -17,7 +17,7 @@ class BaseHook:
         called before a request is sent to SMSC.
 
         :param smpp_command:                  (mandatory) [str]
-            any one of the SMSC event/command_id;
+            any one of the SMSC command;
                 bind_transceiver, bind_transceiver_resp,
                 unbind, unbind_resp,
                 submit_sm, submit_sm_resp,
@@ -36,7 +36,7 @@ class BaseHook:
         called after a response is received from SMSC.
 
         :param smpp_command:                  (mandatory) [str]
-            any one of the SMSC event/command_id;
+            any one of the SMSC command;
                 bind_transceiver, bind_transceiver_resp,
                 unbind, unbind_resp,
                 submit_sm, submit_sm_resp,
