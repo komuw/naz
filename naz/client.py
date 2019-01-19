@@ -54,7 +54,7 @@ class Client:
         # xxxx01xx SME Delivery Acknowledgement requested
         # xxx0xxxx No Intermediate notification requested
         # all other values reserved
-        registered_delivery=0b00000101,  # see section 5.2.17
+        registered_delivery=0b00000001,  # see section 5.2.17
         replace_if_present_flag=0x00000000,
         sm_default_msg_id=0x00000000,
         enquire_link_interval=300,
