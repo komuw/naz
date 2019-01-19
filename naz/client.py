@@ -135,17 +135,17 @@ class Client:
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
-            "bind_transceiver": 0x00000009,
-            "bind_transceiver_resp": 0x80000009,
-            "unbind": 0x00000006,
-            "unbind_resp": 0x80000006,
-            "submit_sm": 0x00000004,
-            "submit_sm_resp": 0x80000004,
-            "deliver_sm": 0x00000005,
-            "deliver_sm_resp": 0x80000005,
-            "enquire_link": 0x00000015,
-            "enquire_link_resp": 0x80000015,
-            "generic_nack": 0x80000000,
+            SmppEvent.BIND_TRANSCEIVER: 0x00000009,
+            SmppEvent.BIND_TRANSCEIVER_RESP: 0x80000009,
+            SmppEvent.UNBIND: 0x00000006,
+            SmppEvent.UNBIND_RESP: 0x80000006,
+            SmppEvent.SUBMIT_SM: 0x00000004,
+            SmppEvent.SUBMIT_SM_RESP: 0x80000004,
+            SmppEvent.DELIVER_SM: 0x00000005,
+            SmppEvent.DELIVER_SM_RESP: 0x80000005,
+            SmppEvent.ENQUIRE_LINK: 0x00000015,
+            SmppEvent.ENQUIRE_LINK_RESP: 0x80000015,
+            SmppEvent.GENERIC_NACK: 0x80000000,
         }
 
         # see section 5.1.3 of smpp ver 3.4 spec document
@@ -322,6 +322,22 @@ class Client:
                 return key, val
         return None, None
 
+    @staticmethod
+    def retry_after(current_retries):
+        """
+        retries will happen in this sequence;
+        1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
+        """
+        # TODO:
+        # 1. give users ability to bring their own retry algorithms.
+        # 2. add jitter
+        if current_retries < 0:
+            current_retries = 0
+        if current_retries >= 6:
+            return 60 * 16  # 16 minutes
+        else:
+            return 60 * (1 * (2 ** current_retries))
+
     async def connect(self):
         self.logger.info({"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
@@ -361,7 +377,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids["bind_transceiver"]
+        command_id = self.command_ids[SmppEvent.BIND_TRANSCEIVER]
         # the status for success see section 5.1.3
         command_status = self.command_statuses["ESME_ROK"].code
         try:
@@ -385,7 +401,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(
-            smpp_event="bind_transceiver", msg=full_pdu, correlation_id=correlation_id
+            smpp_event=SmppEvent.BIND_TRANSCEIVER, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {
@@ -425,7 +441,7 @@ class Client:
 
             # header
             command_length = 16 + len(body)  # 16 is for headers
-            command_id = self.command_ids["enquire_link"]
+            command_id = self.command_ids[SmppEvent.ENQUIRE_LINK]
             command_status = 0x00000000  # not used for `enquire_link`
             try:
                 sequence_number = self.sequence_generator.next_sequence()
@@ -455,7 +471,7 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(
-                smpp_event="enquire_link", msg=full_pdu, correlation_id=correlation_id
+                smpp_event=SmppEvent.ENQUIRE_LINK, msg=full_pdu, correlation_id=correlation_id
             )
             self.logger.info(
                 {
@@ -545,14 +561,16 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids["unbind_resp"]
+        command_id = self.command_ids[SmppEvent.UNBIND_RESP]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data(smpp_event="unbind_resp", msg=full_pdu, correlation_id=correlation_id)
+        await self.send_data(
+            smpp_event=SmppEvent.UNBIND_RESP, msg=full_pdu, correlation_id=correlation_id
+        )
         self.logger.info(
             {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
         )
@@ -933,7 +951,7 @@ class Client:
                     correlation_id = item_to_dequeue["correlation_id"]
                     item_to_dequeue["version"]  # version is a required field
                     smpp_event = item_to_dequeue["smpp_event"]
-                    if smpp_event == "submit_sm":
+                    if smpp_event == SmppEvent.SUBMIT_SM:
                         short_message = item_to_dequeue["short_message"]
                         correlation_id = item_to_dequeue["correlation_id"]
                         source_addr = item_to_dequeue["source_addr"]
@@ -997,21 +1015,6 @@ class Client:
                     # offer escape hatch for tests to come out of endless loop
                     return "throttle_handler_denied_request"
                 continue
-
-    def retry_after(self, current_retries):
-        """
-        retries will happen in this sequence;
-        1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
-        """
-        # TODO:
-        # 1. give users ability to bring their own retry algorithms.
-        # 2. add jitter
-        if current_retries < 0:
-            current_retries = 0
-        if current_retries >= 6:
-            return 60 * 16  # 16 minutes
-        else:
-            return 60 * (1 * (2 ** current_retries))
 
     async def receive_data(self, TESTING=False):
         """
@@ -1198,23 +1201,23 @@ class Client:
         ]:
             # we never have to handle this
             pass
-        elif smpp_event == "bind_transceiver_resp":
+        elif smpp_event == SmppEvent.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
             if command_status == self.command_statuses["ESME_ROK"].code:
                 self.current_session_state = SmppSessionState.BOUND_TRX
-        elif smpp_event == "unbind":
+        elif smpp_event == SmppEvent.UNBIND:
             # we need to handle this since we need to send unbind_resp
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number)
-        elif smpp_event == "submit_sm_resp":
+        elif smpp_event == SmppEvent.SUBMIT_SM_RESP:
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
-        elif smpp_event == "deliver_sm":
+        elif smpp_event == SmppEvent.DELIVER_SM:
             # HEADER::
             # command_length, int, 4octet
             # command_id, int, 4octet. `deliver_sm`
@@ -1246,7 +1249,7 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
-        elif smpp_event == "enquire_link":
+        elif smpp_event == SmppEvent.ENQUIRE_LINK:
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             await self.enquire_link_resp(sequence_number=sequence_number)
@@ -1259,7 +1262,9 @@ class Client:
                     "correlation_id": correlation_id,
                     "command_status": command_status_value.code,
                     "state": command_status_value.description,
-                    "error": "unknown command",
+                    "error": "the smpp event: {0} has not been implemented in naz. please create a github issue".format(
+                        smpp_event
+                    ),
                 }
             )
 
@@ -1285,7 +1290,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids["unbind"]
+        command_id = self.command_ids[SmppEvent.UNBIND]
         command_status = 0x00000000  # not used for `unbind`
         try:
             sequence_number = self.sequence_generator.next_sequence()
@@ -1312,7 +1317,9 @@ class Client:
 
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data(smpp_event="unbind", msg=full_pdu, correlation_id=correlation_id)
+        await self.send_data(
+            smpp_event=SmppEvent.UNBIND, msg=full_pdu, correlation_id=correlation_id
+        )
         self.logger.info(
             {"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id}
         )
@@ -1346,3 +1353,21 @@ class SmppSessionState:
     BOUND_TRX = "BOUND_TRX"
     # An ESME has unbound from the SMSC and has closed the network connection. The SMSC may also unbind from the ESME.
     CLOSED = "CLOSED"
+
+
+class SmppEvent:
+    """
+    see section 4 of SMPP spec document v3.4
+    """
+
+    BIND_TRANSCEIVER = "bind_transceiver"
+    BIND_TRANSCEIVER_RESP = "bind_transceiver_resp"
+    UNBIND = "unbind"
+    UNBIND_RESP = "unbind_resp"
+    SUBMIT_SM = "submit_sm"
+    SUBMIT_SM_RESP = "submit_sm_resp"
+    DELIVER_SM = "deliver_sm"
+    DELIVER_SM_RESP = "deliver_sm_resp"
+    ENQUIRE_LINK = "enquire_link"
+    ENQUIRE_LINK_RESP = "enquire_link_resp"
+    GENERIC_NACK = "generic_nack"
