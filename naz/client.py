@@ -893,7 +893,7 @@ class Client:
         )
 
     async def send_forever(self, TESTING=False):
-        no_msg_received_retry_count = 0
+        dequeue_failure_retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
 
@@ -930,8 +930,8 @@ class Client:
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
-                    no_msg_received_retry_count += 1
-                    poll_queue_interval = self.retry_after(no_msg_received_retry_count)
+                    dequeue_failure_retry_count += 1
+                    poll_queue_interval = self.retry_after(dequeue_failure_retry_count)
                     self.logger.exception(
                         {
                             "event": "naz.Client.send_forever",
@@ -939,14 +939,14 @@ class Client:
                             "state": "send_forever error. sleeping for {0}minutes".format(
                                 poll_queue_interval / 60
                             ),
-                            "no_msg_received_retry_count": no_msg_received_retry_count,
+                            "dequeue_failure_retry_count": dequeue_failure_retry_count,
                             "error": str(e),
                         }
                     )
                     await asyncio.sleep(poll_queue_interval)
                     continue
                 # we didn't fail to dequeue a message
-                no_msg_received_retry_count = 0
+                dequeue_failure_retry_count = 0
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
                     item_to_dequeue["version"]  # version is a required field
@@ -1019,14 +1019,14 @@ class Client:
     async def receive_data(self, TESTING=False):
         """
         """
-        no_data_received_retry_count = 0
+        smsc_read_retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.receive_data", "stage": "start"})
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
-                no_data_received_retry_count += 1
-                poll_read_interval = self.retry_after(no_data_received_retry_count)
+                smsc_read_retry_count += 1
+                poll_read_interval = self.retry_after(smsc_read_retry_count)
                 self.logger.info(
                     {
                         "event": "naz.Client.receive_data",
@@ -1034,14 +1034,14 @@ class Client:
                         "state": "no data received from SMSC. sleeping for {0}minutes".format(
                             poll_read_interval / 60
                         ),
-                        "no_data_received_retry_count": no_data_received_retry_count,
+                        "smsc_read_retry_count": smsc_read_retry_count,
                     }
                 )
                 await asyncio.sleep(poll_read_interval)
                 continue
             else:
                 # we didn't fail to read from SMSC
-                no_data_received_retry_count = 0
+                smsc_read_retry_count = 0
 
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
 
