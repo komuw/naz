@@ -322,6 +322,22 @@ class Client:
                 return key, val
         return None, None
 
+    @staticmethod
+    def retry_after(self, current_retries):
+        """
+        retries will happen in this sequence;
+        1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
+        """
+        # TODO:
+        # 1. give users ability to bring their own retry algorithms.
+        # 2. add jitter
+        if current_retries < 0:
+            current_retries = 0
+        if current_retries >= 6:
+            return 60 * 16  # 16 minutes
+        else:
+            return 60 * (1 * (2 ** current_retries))
+
     async def connect(self):
         self.logger.info({"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
@@ -998,21 +1014,6 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
-    def retry_after(self, current_retries):
-        """
-        retries will happen in this sequence;
-        1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
-        """
-        # TODO:
-        # 1. give users ability to bring their own retry algorithms.
-        # 2. add jitter
-        if current_retries < 0:
-            current_retries = 0
-        if current_retries >= 6:
-            return 60 * 16  # 16 minutes
-        else:
-            return 60 * (1 * (2 ** current_retries))
-
     async def receive_data(self, TESTING=False):
         """
         """
@@ -1346,3 +1347,11 @@ class SmppSessionState:
     BOUND_TRX = "BOUND_TRX"
     # An ESME has unbound from the SMSC and has closed the network connection. The SMSC may also unbind from the ESME.
     CLOSED = "CLOSED"
+
+
+class SmppEvent:
+    """
+    see section 4 of SMPP spec document v3.4
+    """
+
+    OPEN = "OPEN"
