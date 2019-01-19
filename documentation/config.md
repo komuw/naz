@@ -123,7 +123,7 @@ Your application should enqueue a dictionary object with any parameters but the 
 ```bash
 {
     "version": "1",
-    "smpp_event": "submit_sm",
+    "smpp_command": "submit_sm",
     "short_message": string,
     "correlation_id": string,
     "source_addr": string,

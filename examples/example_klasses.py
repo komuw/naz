@@ -144,7 +144,7 @@ if __name__ == "__main__":
         print("submit_sm round:", i)
         item_to_enqueue = {
             "version": "1",
-            "smpp_event": "submit_sm",
+            "smpp_command": "submit_sm",
             "short_message": "Hello World-{0}".format(str(i)),
             "correlation_id": "myid1234-{0}".format(str(i)),
             "source_addr": "254722111111",

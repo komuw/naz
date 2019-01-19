@@ -401,7 +401,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(
-            smpp_event=SmppEvent.BIND_TRANSCEIVER, msg=full_pdu, correlation_id=correlation_id
+            smpp_command=SmppEvent.BIND_TRANSCEIVER, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {
@@ -471,7 +471,7 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(
-                smpp_event=SmppEvent.ENQUIRE_LINK, msg=full_pdu, correlation_id=correlation_id
+                smpp_command=SmppEvent.ENQUIRE_LINK, msg=full_pdu, correlation_id=correlation_id
             )
             self.logger.info(
                 {
@@ -519,7 +519,7 @@ class Client:
             "version": self.naz_message_protocol_version,
             "correlation_id": correlation_id,
             "pdu": full_pdu,
-            "smpp_event": "enquire_link_resp",
+            "smpp_command": "enquire_link_resp",
         }
         try:
             await self.outboundqueue.enqueue(item_to_enqueue)
@@ -569,7 +569,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(
-            smpp_event=SmppEvent.UNBIND_RESP, msg=full_pdu, correlation_id=correlation_id
+            smpp_command=SmppEvent.UNBIND_RESP, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
@@ -612,7 +612,7 @@ class Client:
             "version": self.naz_message_protocol_version,
             "correlation_id": correlation_id,
             "pdu": full_pdu,
-            "smpp_event": "deliver_sm_resp",
+            "smpp_command": "deliver_sm_resp",
         }
         try:
             await self.outboundqueue.enqueue(item_to_enqueue)
@@ -681,7 +681,7 @@ class Client:
         )
         item_to_enqueue = {
             "version": self.naz_message_protocol_version,
-            "smpp_event": "submit_sm",
+            "smpp_command": "submit_sm",
             "short_message": short_message,
             "correlation_id": correlation_id,
             "source_addr": source_addr,
@@ -795,7 +795,7 @@ class Client:
         )
         return full_pdu
 
-    async def send_data(self, smpp_event, msg, correlation_id):
+    async def send_data(self, smpp_command, msg, correlation_id):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -815,7 +815,7 @@ class Client:
             {
                 "event": "naz.Client.send_data",
                 "stage": "start",
-                "smpp_event": smpp_event,
+                "smpp_command": smpp_command,
                 "correlation_id": correlation_id,
                 "msg": log_msg,
             }
@@ -824,14 +824,14 @@ class Client:
         # check session state to see if we can send messages.
         # see section 2.3 of SMPP spec document v3.4
         if self.current_session_state == SmppSessionState.CLOSED:
-            error_msg = "smpp_event: {0} cannot be sent to SMSC when the client session state is: {1}".format(
-                smpp_event, self.current_session_state
+            error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+                smpp_command, self.current_session_state
             )
             self.logger.info(
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "msg": log_msg,
                     "current_session_state": self.current_session_state,
@@ -839,21 +839,21 @@ class Client:
                 }
             )
             raise ValueError(error_msg)
-        elif self.current_session_state == SmppSessionState.OPEN and smpp_event not in [
+        elif self.current_session_state == SmppSessionState.OPEN and smpp_command not in [
             "bind_transmitter",
             "bind_receiver",
             "bind_transceiver",
         ]:
-            # only the smpp_event's listed above are allowed by SMPP spec to be sent
+            # only the smpp_command's listed above are allowed by SMPP spec to be sent
             # if current_session_state == SmppSessionState.OPEN
-            error_msg = "smpp_event: {0} cannot be sent to SMSC when the client session state is: {1}".format(
-                smpp_event, self.current_session_state
+            error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+                smpp_command, self.current_session_state
             )
             self.logger.info(
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "msg": log_msg,
                     "current_session_state": self.current_session_state,
@@ -867,13 +867,13 @@ class Client:
 
         # call user's hook for requests
         try:
-            await self.hook.request(smpp_event=smpp_event, correlation_id=correlation_id)
+            await self.hook.request(smpp_command=smpp_command, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "state": "request hook error",
                     "error": str(e),
@@ -886,7 +886,7 @@ class Client:
             {
                 "event": "naz.Client.send_data",
                 "stage": "end",
-                "smpp_event": smpp_event,
+                "smpp_command": smpp_command,
                 "correlation_id": correlation_id,
                 "msg": log_msg,
             }
@@ -950,8 +950,8 @@ class Client:
                 try:
                     correlation_id = item_to_dequeue["correlation_id"]
                     item_to_dequeue["version"]  # version is a required field
-                    smpp_event = item_to_dequeue["smpp_event"]
-                    if smpp_event == SmppEvent.SUBMIT_SM:
+                    smpp_command = item_to_dequeue["smpp_command"]
+                    if smpp_command == SmppEvent.SUBMIT_SM:
                         short_message = item_to_dequeue["short_message"]
                         correlation_id = item_to_dequeue["correlation_id"]
                         source_addr = item_to_dequeue["source_addr"]
@@ -976,14 +976,14 @@ class Client:
                     continue
 
                 await self.send_data(
-                    smpp_event=smpp_event, msg=full_pdu, correlation_id=correlation_id
+                    smpp_command=smpp_command, msg=full_pdu, correlation_id=correlation_id
                 )
                 self.logger.info(
                     {
                         "event": "naz.Client.send_forever",
                         "stage": "end",
                         "correlation_id": correlation_id,
-                        "smpp_event": smpp_event,
+                        "smpp_command": smpp_command,
                         "send_request": send_request,
                     }
                 )
@@ -1089,8 +1089,8 @@ class Client:
         # get associated user supplied correlation_id if any, free mem while at it.
         correlation_id = self.seq_correl.pop(sequence_number, None)
 
-        smpp_event = self.search_by_command_id_code(command_id)
-        if not smpp_event:
+        smpp_command = self.search_by_command_id_code(command_id)
+        if not smpp_command:
             self.logger.exception(
                 {
                     "event": "naz.Client.parse_response_pdu",
@@ -1105,13 +1105,13 @@ class Client:
         try:
             # todo: send correlation_id to response hook, when we are eventually able to relate
             # everything to a correlation_id
-            await self.hook.response(smpp_event=smpp_event, correlation_id=correlation_id)
+            await self.hook.response(smpp_command=smpp_command, correlation_id=correlation_id)
         except Exception as e:
             self.logger.exception(
                 {
                     "event": "naz.Client.parse_response_pdu",
                     "stage": "end",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "state": "response hook error",
                     "error": str(e),
@@ -1119,7 +1119,7 @@ class Client:
             )
 
         await self.speficic_handlers(
-            smpp_event=smpp_event,
+            smpp_command=smpp_command,
             command_status=command_status,
             sequence_number=sequence_number,
             correlation_id=correlation_id,
@@ -1129,14 +1129,14 @@ class Client:
             {
                 "event": "naz.Client.parse_response_pdu",
                 "stage": "end",
-                "smpp_event": smpp_event,
+                "smpp_command": smpp_command,
                 "correlation_id": correlation_id,
                 "command_status": command_status,
             }
         )
 
     async def speficic_handlers(
-        self, smpp_event, command_status, sequence_number, correlation_id, total_pdu_length
+        self, smpp_command, command_status, sequence_number, correlation_id, total_pdu_length
     ):
         """
         this handles parsing speficic
@@ -1153,7 +1153,7 @@ class Client:
                 {
                     "event": "naz.Client.speficic_handlers",
                     "stage": "start",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "command_status": command_status_value.code,
                     "state": command_status_value.description,
@@ -1164,7 +1164,7 @@ class Client:
                 {
                     "event": "naz.Client.speficic_handlers",
                     "stage": "start",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "command_status": command_status_value.code,
                     "state": command_status_value.description,
@@ -1183,13 +1183,13 @@ class Client:
                     "event": "naz.Client.speficic_handlers",
                     "stage": "end",
                     "error": str(e),
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "state": command_status_value.description,
                 }
             )
 
-        if smpp_event in [
+        if smpp_command in [
             "bind_transceiver",
             "unbind_resp",
             "submit_sm",  # We dont expect SMSC to send `submit_sm` to us.
@@ -1201,23 +1201,23 @@ class Client:
         ]:
             # we never have to handle this
             pass
-        elif smpp_event == SmppEvent.BIND_TRANSCEIVER_RESP:
+        elif smpp_command == SmppEvent.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
             if command_status == self.command_statuses["ESME_ROK"].code:
                 self.current_session_state = SmppSessionState.BOUND_TRX
-        elif smpp_event == SmppEvent.UNBIND:
+        elif smpp_command == SmppEvent.UNBIND:
             # we need to handle this since we need to send unbind_resp
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number)
-        elif smpp_event == SmppEvent.SUBMIT_SM_RESP:
+        elif smpp_command == SmppEvent.SUBMIT_SM_RESP:
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
-        elif smpp_event == SmppEvent.DELIVER_SM:
+        elif smpp_command == SmppEvent.DELIVER_SM:
             # HEADER::
             # command_length, int, 4octet
             # command_id, int, 4octet. `deliver_sm`
@@ -1249,7 +1249,7 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
-        elif smpp_event == SmppEvent.ENQUIRE_LINK:
+        elif smpp_command == SmppEvent.ENQUIRE_LINK:
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             await self.enquire_link_resp(sequence_number=sequence_number)
@@ -1258,12 +1258,12 @@ class Client:
                 {
                     "event": "naz.Client.speficic_handlers",
                     "stage": "end",
-                    "smpp_event": smpp_event,
+                    "smpp_command": smpp_command,
                     "correlation_id": correlation_id,
                     "command_status": command_status_value.code,
                     "state": command_status_value.description,
-                    "error": "the smpp event: {0} has not been implemented in naz. please create a github issue".format(
-                        smpp_event
+                    "error": "the smpp_command:{0} has not been implemented in naz. please create a github issue".format(
+                        smpp_command
                     ),
                 }
             )
@@ -1318,7 +1318,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(
-            smpp_event=SmppEvent.UNBIND, msg=full_pdu, correlation_id=correlation_id
+            smpp_command=SmppEvent.UNBIND, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id}
