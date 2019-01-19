@@ -231,7 +231,7 @@ class SetMessageStateHook(naz.hooks.BaseHook):
     async def request(self, smpp_command, correlation_id):
         pass
     async def response(self, smpp_command, correlation_id):
-        if smpp_command == naz.SmppEvent.DELIVER_SM:
+        if smpp_command == naz.SmppCommand.DELIVER_SM:
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()
             t = (correlation_id,)

@@ -200,7 +200,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.speficic_handlers(
-                    smpp_command=naz.SmppEvent.ENQUIRE_LINK,
+                    smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -217,7 +217,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    smpp_command=naz.SmppEvent.UNBIND,
+                    smpp_command=naz.SmppCommand.UNBIND,
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -233,7 +233,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    smpp_command=naz.SmppEvent.DELIVER_SM,
+                    smpp_command=naz.SmppCommand.DELIVER_SM,
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -311,7 +311,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    smpp_command=naz.SmppEvent.DELIVER_SM,
+                    smpp_command=naz.SmppCommand.DELIVER_SM,
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,
@@ -331,7 +331,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    smpp_command=naz.SmppEvent.DELIVER_SM,
+                    smpp_command=naz.SmppCommand.DELIVER_SM,
                     correlation_id="correlation_id",
                     command_status=0x00000058,
                     sequence_number=sequence_number,
@@ -376,7 +376,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
-                    smpp_command=naz.SmppEvent.ENQUIRE_LINK,
+                    smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     correlation_id="correlation_id",
                     command_status=0,
                     sequence_number=sequence_number,

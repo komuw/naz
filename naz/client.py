@@ -135,17 +135,17 @@ class Client:
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
-            SmppEvent.BIND_TRANSCEIVER: 0x00000009,
-            SmppEvent.BIND_TRANSCEIVER_RESP: 0x80000009,
-            SmppEvent.UNBIND: 0x00000006,
-            SmppEvent.UNBIND_RESP: 0x80000006,
-            SmppEvent.SUBMIT_SM: 0x00000004,
-            SmppEvent.SUBMIT_SM_RESP: 0x80000004,
-            SmppEvent.DELIVER_SM: 0x00000005,
-            SmppEvent.DELIVER_SM_RESP: 0x80000005,
-            SmppEvent.ENQUIRE_LINK: 0x00000015,
-            SmppEvent.ENQUIRE_LINK_RESP: 0x80000015,
-            SmppEvent.GENERIC_NACK: 0x80000000,
+            SmppCommand.BIND_TRANSCEIVER: 0x00000009,
+            SmppCommand.BIND_TRANSCEIVER_RESP: 0x80000009,
+            SmppCommand.UNBIND: 0x00000006,
+            SmppCommand.UNBIND_RESP: 0x80000006,
+            SmppCommand.SUBMIT_SM: 0x00000004,
+            SmppCommand.SUBMIT_SM_RESP: 0x80000004,
+            SmppCommand.DELIVER_SM: 0x00000005,
+            SmppCommand.DELIVER_SM_RESP: 0x80000005,
+            SmppCommand.ENQUIRE_LINK: 0x00000015,
+            SmppCommand.ENQUIRE_LINK_RESP: 0x80000015,
+            SmppCommand.GENERIC_NACK: 0x80000000,
         }
 
         # see section 5.1.3 of smpp ver 3.4 spec document
@@ -377,7 +377,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppEvent.BIND_TRANSCEIVER]
+        command_id = self.command_ids[SmppCommand.BIND_TRANSCEIVER]
         # the status for success see section 5.1.3
         command_status = self.command_statuses["ESME_ROK"].code
         try:
@@ -401,7 +401,7 @@ class Client:
 
         full_pdu = header + body
         await self.send_data(
-            smpp_command=SmppEvent.BIND_TRANSCEIVER, msg=full_pdu, correlation_id=correlation_id
+            smpp_command=SmppCommand.BIND_TRANSCEIVER, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {
@@ -441,7 +441,7 @@ class Client:
 
             # header
             command_length = 16 + len(body)  # 16 is for headers
-            command_id = self.command_ids[SmppEvent.ENQUIRE_LINK]
+            command_id = self.command_ids[SmppCommand.ENQUIRE_LINK]
             command_status = 0x00000000  # not used for `enquire_link`
             try:
                 sequence_number = self.sequence_generator.next_sequence()
@@ -471,7 +471,7 @@ class Client:
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(
-                smpp_command=SmppEvent.ENQUIRE_LINK, msg=full_pdu, correlation_id=correlation_id
+                smpp_command=SmppCommand.ENQUIRE_LINK, msg=full_pdu, correlation_id=correlation_id
             )
             self.logger.info(
                 {
@@ -561,7 +561,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppEvent.UNBIND_RESP]
+        command_id = self.command_ids[SmppCommand.UNBIND_RESP]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
@@ -569,7 +569,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(
-            smpp_command=SmppEvent.UNBIND_RESP, msg=full_pdu, correlation_id=correlation_id
+            smpp_command=SmppCommand.UNBIND_RESP, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {"event": "naz.Client.unbind_resp", "stage": "end", "correlation_id": correlation_id}
@@ -951,7 +951,7 @@ class Client:
                     correlation_id = item_to_dequeue["correlation_id"]
                     item_to_dequeue["version"]  # version is a required field
                     smpp_command = item_to_dequeue["smpp_command"]
-                    if smpp_command == SmppEvent.SUBMIT_SM:
+                    if smpp_command == SmppCommand.SUBMIT_SM:
                         short_message = item_to_dequeue["short_message"]
                         correlation_id = item_to_dequeue["correlation_id"]
                         source_addr = item_to_dequeue["source_addr"]
@@ -1201,23 +1201,23 @@ class Client:
         ]:
             # we never have to handle this
             pass
-        elif smpp_command == SmppEvent.BIND_TRANSCEIVER_RESP:
+        elif smpp_command == SmppCommand.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
             if command_status == self.command_statuses["ESME_ROK"].code:
                 self.current_session_state = SmppSessionState.BOUND_TRX
-        elif smpp_command == SmppEvent.UNBIND:
+        elif smpp_command == SmppCommand.UNBIND:
             # we need to handle this since we need to send unbind_resp
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number)
-        elif smpp_command == SmppEvent.SUBMIT_SM_RESP:
+        elif smpp_command == SmppCommand.SUBMIT_SM_RESP:
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             # todo: call user's hook in here. we should correlate user's supplied correlation_id and sequence_number
             pass
-        elif smpp_command == SmppEvent.DELIVER_SM:
+        elif smpp_command == SmppCommand.DELIVER_SM:
             # HEADER::
             # command_length, int, 4octet
             # command_id, int, 4octet. `deliver_sm`
@@ -1249,7 +1249,7 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
-        elif smpp_command == SmppEvent.ENQUIRE_LINK:
+        elif smpp_command == SmppCommand.ENQUIRE_LINK:
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             await self.enquire_link_resp(sequence_number=sequence_number)
@@ -1290,7 +1290,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppEvent.UNBIND]
+        command_id = self.command_ids[SmppCommand.UNBIND]
         command_status = 0x00000000  # not used for `unbind`
         try:
             sequence_number = self.sequence_generator.next_sequence()
@@ -1318,7 +1318,7 @@ class Client:
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
         await self.send_data(
-            smpp_command=SmppEvent.UNBIND, msg=full_pdu, correlation_id=correlation_id
+            smpp_command=SmppCommand.UNBIND, msg=full_pdu, correlation_id=correlation_id
         )
         self.logger.info(
             {"event": "naz.Client.unbind", "stage": "end", "correlation_id": correlation_id}
@@ -1355,7 +1355,7 @@ class SmppSessionState:
     CLOSED = "CLOSED"
 
 
-class SmppEvent:
+class SmppCommand:
     """
     see section 4 of SMPP spec document v3.4
     """
