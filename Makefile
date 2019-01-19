@@ -9,7 +9,8 @@ upload:
 
 
 VERSION_STRING=$$(cat naz/__version__.py | grep "__version__" | sed -e 's/"__version__"://' | sed -e 's/,//g' | sed -e 's/"//g' | sed -e 's/ //g')
-LATEST_COMMIT_MESSAGE=$$(git log $(git describe --tags --abbrev=0)..HEAD)
+LAST_TAG=$$(git describe --tags --abbrev=0)
+COMMIT_MESSAGES_SINCE_LAST_TAG=$$(git log "$(LAST_TAG)"...master)
 uploadprod:
 	@rm -rf build
 	@rm -rf dist
@@ -18,7 +19,7 @@ uploadprod:
 	@python setup.py bdist_wheel
 	@twine upload dist/*
 	@printf "\n creating git tag: $(VERSION_STRING) \n"
-	@printf "\n with commit message $(LATEST_COMMIT_MESSAGE) \n" && git tag -a "$(VERSION_STRING)" -m "$(LATEST_COMMIT_MESSAGE)"
+	@printf "\n with commit message $(COMMIT_MESSAGES_SINCE_LAST_TAG) \n" && git tag -a "$(VERSION_STRING)" -m "$(COMMIT_MESSAGES_SINCE_LAST_TAG)"
 	@printf "\n git push the tag::\n" && git push --all -u --follow-tags
 	@pip install -U naz
 
@@ -38,4 +39,3 @@ test:
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers -m naz.q -m naz.throttle -m naz.ratelimiter -m naz.hooks -m naz.sequence
-
