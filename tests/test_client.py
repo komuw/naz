@@ -133,7 +133,8 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_send_data.mock.call_args[1]["smpp_command"], "bind_transceiver"
+                mock_naz_send_data.mock.call_args[1]["smpp_command"],
+                naz.SmppCommand.BIND_TRANSCEIVER,
             )
         # todo: test bind_response
 
@@ -154,7 +155,9 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_naz_enqueue.mock.call_args[0][1]["correlation_id"], correlation_id
             )
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], "submit_sm")
+            self.assertEqual(
+                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
+            )
 
     def test_submit_sm_sending(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
@@ -164,7 +167,7 @@ class TestClient(TestCase):
                 "version": "1",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "smpp_command": "submit_sm",
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
@@ -190,7 +193,7 @@ class TestClient(TestCase):
             self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
             self.assertEqual(
                 mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
-                "bind_transceiver_resp",
+                naz.SmppCommand.BIND_TRANSCEIVER_RESP,
             )
 
     def test_speficic_handlers(self):
@@ -226,7 +229,9 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_command"], "unbind_resp")
+            self.assertEqual(
+                mock_naz_send_data.mock.call_args[1]["smpp_command"], naz.SmppCommand.UNBIND_RESP
+            )
 
     def test_speficic_handlers_deliver_sm(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
@@ -242,7 +247,8 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], "deliver_sm_resp"
+                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"],
+                naz.SmppCommand.DELIVER_SM_RESP,
             )
 
     def test_unbind(self):
@@ -250,14 +256,18 @@ class TestClient(TestCase):
             self._run(self.cli.unbind())
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_command"], "unbind")
+            self.assertEqual(
+                mock_naz_send_data.mock.call_args[1]["smpp_command"], naz.SmppCommand.UNBIND
+            )
 
     def test_enquire_link(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
-            self.assertEqual(mock_naz_send_data.mock.call_args[1]["smpp_command"], "enquire_link")
+            self.assertEqual(
+                mock_naz_send_data.mock.call_args[1]["smpp_command"], naz.SmppCommand.ENQUIRE_LINK
+            )
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
@@ -289,7 +299,7 @@ class TestClient(TestCase):
                 "version": "1",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "smpp_command": "submit_sm",
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
@@ -350,7 +360,9 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_hook_response.mock.called)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], "submit_sm_resp")
+            self.assertEqual(
+                mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM_RESP
+            )
             self.assertEqual(mock_hook_response.mock.call_args[1]["correlation_id"], None)
 
     def test_receving_data(self):
@@ -385,7 +397,8 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], "enquire_link_resp"
+                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"],
+                naz.SmppCommand.ENQUIRE_LINK_RESP,
             )
 
     def test_retry_after(self):
@@ -407,7 +420,7 @@ class TestClient(TestCase):
                 "version": "1",
                 "correlation_id": correlation_id,
                 "short_message": short_message,
-                "smpp_command": "submit_sm",
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }

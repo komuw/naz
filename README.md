@@ -298,7 +298,7 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```bash
 {
     "version": "1",
-    "smpp_command": "submit_sm",
+    "smpp_command": naz.SmppCommand.SUBMIT_SM,
     "short_message": string,
     "correlation_id": string,
     "source_addr": string,

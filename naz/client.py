@@ -509,7 +509,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids["enquire_link_resp"]
+        command_id = self.command_ids[SmppCommand.ENQUIRE_LINK_RESP]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
@@ -602,7 +602,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids["deliver_sm_resp"]
+        command_id = self.command_ids[SmppCommand.DELIVER_SM_RESP]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
@@ -756,7 +756,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids["submit_sm"]
+        command_id = self.command_ids[SmppCommand.SUBMIT_SM]
         # the status for success see section 5.1.3
         command_status = 0x00000000  # not used for `submit_sm`
         try:
@@ -1190,14 +1190,14 @@ class Client:
             )
 
         if smpp_command in [
-            "bind_transceiver",
-            "unbind_resp",
-            "submit_sm",  # We dont expect SMSC to send `submit_sm` to us.
-            "deliver_sm_resp",
+            SmppCommand.BIND_TRANSCEIVER,
+            SmppCommand.UNBIND_RESP,
+            SmppCommand.SUBMIT_SM,  # We dont expect SMSC to send `submit_sm` to us.
+            SmppCommand.DELIVER_SM_RESP,
             # we will never send a deliver_sm request to SMSC, which means we never
             # have to handle deliver_sm_resp
-            "enquire_link_resp",
-            "generic_nack",  # we can ignore this
+            SmppCommand.ENQUIRE_LINK_RESP,
+            SmppCommand.GENERIC_NACK,  # we can ignore this
         ]:
             # we never have to handle this
             pass
