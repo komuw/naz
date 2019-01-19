@@ -7,6 +7,10 @@ upload:
 	@twine upload dist/* -r testpypi
 	@pip install -U -i https://testpypi.python.org/pypi naz
 
+
+VERSION_STRING=$$(cat naz/__version__.py | grep "__version__" | sed -e 's/"__version__"://' | sed -e 's/,//g' | sed -e 's/"//g' | sed -e 's/ //g')
+LAST_TAG=$$(git describe --tags --abbrev=0)
+COMMIT_MESSAGES_SINCE_LAST_TAG=$$(git log "$(LAST_TAG)"...master)
 uploadprod:
 	@rm -rf build
 	@rm -rf dist
@@ -14,6 +18,9 @@ uploadprod:
 	@python setup.py sdist
 	@python setup.py bdist_wheel
 	@twine upload dist/*
+	@printf "\n creating git tag: $(VERSION_STRING) \n"
+	@printf "\n with commit message $(COMMIT_MESSAGES_SINCE_LAST_TAG) \n" && git tag -a "$(VERSION_STRING)" -m "$(COMMIT_MESSAGES_SINCE_LAST_TAG)"
+	@printf "\n git push the tag::\n" && git push --all -u --follow-tags
 	@pip install -U naz
 
 # you can run single testcase as;
