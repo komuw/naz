@@ -12,12 +12,12 @@ class BaseHook:
     after a response is received from SMSC.
     """
 
-    async def request(self, smpp_event: str, correlation_id: typing.Optional[str] = None) -> None:
+    async def request(self, smpp_command: str, correlation_id: typing.Optional[str] = None) -> None:
         """
         called before a request is sent to SMSC.
 
-        :param smpp_event:                  (mandatory) [str]
-            any one of the SMSC event/command_id;
+        :param smpp_command:                  (mandatory) [str]
+            any one of the SMSC command;
                 bind_transceiver, bind_transceiver_resp,
                 unbind, unbind_resp,
                 submit_sm, submit_sm_resp,
@@ -29,12 +29,14 @@ class BaseHook:
         """
         raise NotImplementedError("request method must be implemented.")
 
-    async def response(self, smpp_event: str, correlation_id: typing.Optional[str] = None) -> None:
+    async def response(
+        self, smpp_command: str, correlation_id: typing.Optional[str] = None
+    ) -> None:
         """
         called after a response is received from SMSC.
 
-        :param smpp_event:                  (mandatory) [str]
-            any one of the SMSC event/command_id;
+        :param smpp_command:                  (mandatory) [str]
+            any one of the SMSC command;
                 bind_transceiver, bind_transceiver_resp,
                 unbind, unbind_resp,
                 submit_sm, submit_sm_resp,
@@ -55,7 +57,7 @@ class SimpleHook(BaseHook):
     def __init__(self, logger) -> None:
         self.logger: logging.Logger = logger
 
-    async def request(self, smpp_event: str, correlation_id: typing.Optional[str] = None) -> None:
+    async def request(self, smpp_command: str, correlation_id: typing.Optional[str] = None) -> None:
         """
         hook method that is called just before a request is sent to SMSC.
         """
@@ -63,12 +65,14 @@ class SimpleHook(BaseHook):
             {
                 "event": "naz.SimpleHook.request",
                 "stage": "start",
-                "smpp_event": smpp_event,
+                "smpp_command": smpp_command,
                 "correlation_id": correlation_id,
             }
         )
 
-    async def response(self, smpp_event: str, correlation_id: typing.Optional[str] = None) -> None:
+    async def response(
+        self, smpp_command: str, correlation_id: typing.Optional[str] = None
+    ) -> None:
         """
         hook method that is called just after a response is gotten from SMSC.
         """
@@ -76,7 +80,7 @@ class SimpleHook(BaseHook):
             {
                 "event": "naz.SimpleHook.response",
                 "stage": "start",
-                "smpp_event": smpp_event,
+                "smpp_command": smpp_command,
                 "correlation_id": correlation_id,
             }
         )

@@ -63,7 +63,7 @@ for i in range(0, 4):
     print("submit_sm round:", i)
     item_to_enqueue = {
         "version": "1",
-        "smpp_event": "submit_sm",
+        "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
@@ -131,9 +131,9 @@ run:
 {'event': 'naz.Client.connect', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 {'event': 'naz.Client.connect', 'stage': 'end', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 {'event': 'naz.Client.tranceiver_bind', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
-{'event': 'naz.Client.send_data', 'stage': 'start', 'smpp_event': 'bind_transceiver', 'correlation_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
-{'event': 'naz.SimpleHook.request', 'stage': 'start', 'smpp_event': 'bind_transceiver', 'correlation_id': None, 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
-{'event': 'naz.Client.send_data', 'stage': 'end', 'smpp_event': 'bind_transceiver', 'correlation_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.send_data', 'stage': 'start', 'smpp_command': 'bind_transceiver', 'correlation_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.SimpleHook.request', 'stage': 'start', 'smpp_command': 'bind_transceiver', 'correlation_id': None, 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.send_data', 'stage': 'end', 'smpp_command': 'bind_transceiver', 'correlation_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 {'event': 'naz.Client.tranceiver_bind', 'stage': 'end', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 {'event': 'naz.Client.send_forever', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 ```              
@@ -209,10 +209,10 @@ import naz
 from prometheus_client import Counter
 
 class MyPrometheusHook(naz.hooks.BaseHook):
-    async def request(self, smpp_event, correlation_id):
+    async def request(self, smpp_command, correlation_id):
         c = Counter('my_requests', 'Description of counter')
         c.inc() # Increment by 1
-    async def response(self, smpp_event, correlation_id):
+    async def response(self, smpp_command, correlation_id):
         c = Counter('my_responses', 'Description of counter')
         c.inc() # Increment by 1
 
@@ -228,10 +228,10 @@ import sqlite3
 import naz
 
 class SetMessageStateHook(naz.hooks.BaseHook):
-    async def request(self, smpp_event, correlation_id):
+    async def request(self, smpp_command, correlation_id):
         pass
-    async def response(self, smpp_event, correlation_id):
-        if smpp_event == naz.SmppEvent.DELIVER_SM:
+    async def response(self, smpp_command, correlation_id):
+        if smpp_command == naz.SmppCommand.DELIVER_SM:
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()
             t = (correlation_id,)
@@ -298,7 +298,7 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```bash
 {
     "version": "1",
-    "smpp_event": "submit_sm",
+    "smpp_command": naz.SmppCommand.SUBMIT_SM,
     "short_message": string,
     "correlation_id": string,
     "source_addr": string,
@@ -342,7 +342,7 @@ then in your application, queue items to the queue;
 for i in range(0, 4):
     item_to_enqueue = {
         "version": "1",
-        "smpp_event": "submit_sm",
+        "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
@@ -411,7 +411,7 @@ for i in range(0, 5):
     print("submit_sm round:", i)
     item_to_enqueue = {
         "version": "1",
-        "smpp_event": "submit_sm",
+        "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
