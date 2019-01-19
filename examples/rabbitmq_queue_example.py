@@ -133,7 +133,7 @@ cli = naz.Client(
 
 item_to_enqueue = {
     "version": "1",
-    "smpp_command": "submit_sm",
+    "smpp_command": naz.SmppCommand.SUBMIT_SM,
     "short_message": "Hello World",
     "correlation_id": "myid12345",
     "source_addr": "254722111111",

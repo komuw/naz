@@ -63,7 +63,7 @@ for i in range(0, 4):
     print("submit_sm round:", i)
     item_to_enqueue = {
         "version": "1",
-        "smpp_command": "submit_sm",
+        "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
@@ -342,7 +342,7 @@ then in your application, queue items to the queue;
 for i in range(0, 4):
     item_to_enqueue = {
         "version": "1",
-        "smpp_command": "submit_sm",
+        "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",
@@ -411,7 +411,7 @@ for i in range(0, 5):
     print("submit_sm round:", i)
     item_to_enqueue = {
         "version": "1",
-        "smpp_command": "submit_sm",
+        "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
         "correlation_id": "myid12345",
         "source_addr": "254722111111",

@@ -519,7 +519,7 @@ class Client:
             "version": self.naz_message_protocol_version,
             "correlation_id": correlation_id,
             "pdu": full_pdu,
-            "smpp_command": "enquire_link_resp",
+            "smpp_command": SmppCommand.ENQUIRE_LINK_RESP,
         }
         try:
             await self.outboundqueue.enqueue(item_to_enqueue)
@@ -612,7 +612,7 @@ class Client:
             "version": self.naz_message_protocol_version,
             "correlation_id": correlation_id,
             "pdu": full_pdu,
-            "smpp_command": "deliver_sm_resp",
+            "smpp_command": SmppCommand.DELIVER_SM_RESP,
         }
         try:
             await self.outboundqueue.enqueue(item_to_enqueue)
@@ -681,7 +681,7 @@ class Client:
         )
         item_to_enqueue = {
             "version": self.naz_message_protocol_version,
-            "smpp_command": "submit_sm",
+            "smpp_command": SmppCommand.SUBMIT_SM,
             "short_message": short_message,
             "correlation_id": correlation_id,
             "source_addr": source_addr,
