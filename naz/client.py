@@ -1262,7 +1262,9 @@ class Client:
                     "correlation_id": correlation_id,
                     "command_status": command_status_value.code,
                     "state": command_status_value.description,
-                    "error": "unknown command",
+                    "error": "the smpp event: {0} has not been implemented in naz. please create a github issue.".format(
+                        smpp_event
+                    ),
                 }
             )
 
