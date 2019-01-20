@@ -45,7 +45,7 @@ class Client:
         # xxxxxx00 store-and-forward
         # xx0010xx Short Message contains ESME Delivery Acknowledgement
         # 00xxxxxx No specific features selected
-        esm_class=0b00001000,  # section 5.2.12
+        esm_class=0b00000011,  # section 5.2.12
         protocol_id=0x00000000,
         priority_flag=0x00000000,
         schedule_delivery_time="",
