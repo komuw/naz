@@ -363,16 +363,16 @@ class Client:
         body = (
             body
             + self.codec_class.encode(self.system_id, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + self.codec_class.encode(self.password, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + self.codec_class.encode(self.system_type, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
             + self.codec_class.encode(self.address_range, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
         )
 
         # header
@@ -598,7 +598,7 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + self.codec_class.encode(message_id, self.encoding) + chr(0).encode("latin-1")
+        body = body + self.codec_class.encode(message_id, self.encoding) + chr(0).encode()
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
@@ -730,22 +730,22 @@ class Client:
         body = (
             body
             + self.codec_class.encode(self.service_type, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
             + self.codec_class.encode(source_addr, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
             + self.codec_class.encode(destination_addr, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
             + self.codec_class.encode(self.schedule_delivery_time, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + self.codec_class.encode(self.validity_period, self.encoding)
-            + chr(0).encode("latin-1")
+            + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
@@ -880,6 +880,11 @@ class Client:
                 }
             )
 
+        # We use writer.drain() which is a flow control method that interacts with the IO write buffer.
+        # When the size of the buffer reaches the high watermark,
+        # drain blocks until the size of the buffer is drained down to the low watermark and writing can be resumed.
+        # When there is nothing to wait for, the drain() returns immediately.
+        # ref: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.drain
         self.writer.write(msg)
         await self.writer.drain()
         self.logger.info(
