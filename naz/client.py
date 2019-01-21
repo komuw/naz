@@ -299,7 +299,7 @@ class Client:
 
         # dictionary of sequence_number and their corresponding log_id
         # this will be used to track different pdu's and user generated log_id
-        self.seq_correl = {}
+        self.seq_log = {}
 
         # the messages that are published to a queue by either naz
         # or user application should be versioned.
@@ -380,7 +380,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_correl[sequence_number] = log_id
+            self.seq_log[sequence_number] = log_id
         except Exception as e:
             self.logger.exception(
                 {"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)}
@@ -431,7 +431,7 @@ class Client:
                 sequence_number = self.sequence_generator.next_sequence()
                 # associate sequence_number with log_id.
                 # this will enable us to also associate responses and thus enhancing traceability of all workflows
-                self.seq_correl[sequence_number] = log_id
+                self.seq_log[sequence_number] = log_id
             except Exception as e:
                 self.logger.exception(
                     {
@@ -708,7 +708,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_correl[sequence_number] = log_id
+            self.seq_log[sequence_number] = log_id
         except Exception as e:
             self.logger.exception(
                 {
@@ -1034,7 +1034,7 @@ class Client:
         command_status = struct.unpack(">I", command_status_header_data)[0]
         sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
         # get associated user supplied log_id if any, free mem while at it.
-        log_id = self.seq_correl.pop(sequence_number, None)
+        log_id = self.seq_log.pop(sequence_number, None)
 
         smpp_command = self.search_by_command_id_code(command_id)
         if not smpp_command:
@@ -1241,7 +1241,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_correl[sequence_number] = log_id
+            self.seq_log[sequence_number] = log_id
         except Exception as e:
             self.logger.exception(
                 {"event": "naz.Client.unbind", "stage": "end", "error": str(e), "log_id": log_id}
