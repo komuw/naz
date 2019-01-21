@@ -903,7 +903,6 @@ class Client:
                     smpp_command = item_to_dequeue["smpp_command"]
                     if smpp_command == SmppCommand.SUBMIT_SM:
                         short_message = item_to_dequeue["short_message"]
-                        log_id = item_to_dequeue["log_id"]
                         source_addr = item_to_dequeue["source_addr"]
                         destination_addr = item_to_dequeue["destination_addr"]
                         full_pdu = await self.build_submit_sm_pdu(
