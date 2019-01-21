@@ -79,7 +79,7 @@ for i in range(0, 5):
         "version": "1",
         "smpp_command": naz.SmppCommand.SUBMIT_SM,
         "short_message": "Hello World-{0}".format(str(i)),
-        "correlation_id": "myid12345",
+        "log_id": "myid12345",
         "source_addr": "254722111111",
         "destination_addr": "254722999999",
     }

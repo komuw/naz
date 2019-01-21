@@ -125,7 +125,7 @@ Your application should enqueue a dictionary object with any parameters but the 
     "version": "1",
     "smpp_command": naz.SmppCommand.SUBMIT_SM,
     "short_message": string,
-    "correlation_id": string,
+    "log_id": string,
     "source_addr": string,
     "destination_addr": string
 }
