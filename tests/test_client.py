@@ -142,30 +142,28 @@ class TestClient(TestCase):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             reader, writer = self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
-            correlation_id = "12345"
+            log_id = "12345"
             self._run(
                 self.cli.submit_sm(
                     short_message="hello smpp",
-                    correlation_id=correlation_id,
+                    log_id=log_id,
                     source_addr="9090",
                     destination_addr="254722000111",
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
-            self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["correlation_id"], correlation_id
-            )
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["log_id"], log_id)
             self.assertEqual(
                 mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
             )
 
     def test_submit_sm_sending(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            correlation_id = "12345"
+            log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
                 "version": "1",
-                "correlation_id": correlation_id,
+                "log_id": log_id,
                 "short_message": short_message,
                 "smpp_command": naz.SmppCommand.SUBMIT_SM,
                 "source_addr": "2547000000",
@@ -204,7 +202,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    correlation_id="correlation_id",
+                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     total_pdu_length=16,
@@ -221,7 +219,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.UNBIND,
-                    correlation_id="correlation_id",
+                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     total_pdu_length=16,
@@ -239,7 +237,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    correlation_id="correlation_id",
+                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     total_pdu_length=16,
@@ -293,11 +291,11 @@ class TestClient(TestCase):
                 throttle_handler=throttle_handler,
             )
 
-            correlation_id = "12345"
+            log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
                 "version": "1",
-                "correlation_id": correlation_id,
+                "log_id": log_id,
                 "short_message": short_message,
                 "smpp_command": naz.SmppCommand.SUBMIT_SM,
                 "source_addr": "2547000000",
@@ -322,7 +320,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    correlation_id="correlation_id",
+                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     total_pdu_length=16,
@@ -342,7 +340,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    correlation_id="correlation_id",
+                    log_id="log_id",
                     command_status=0x00000058,
                     sequence_number=sequence_number,
                     total_pdu_length=16,
@@ -363,7 +361,7 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM_RESP
             )
-            self.assertEqual(mock_hook_response.mock.call_args[1]["correlation_id"], None)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], None)
 
     def test_receving_data(self):
         with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
@@ -389,7 +387,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    correlation_id="correlation_id",
+                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
                     total_pdu_length=16,
@@ -414,11 +412,11 @@ class TestClient(TestCase):
 
     def test_session_state(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            correlation_id = "12345"
+            log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
                 "version": "1",
-                "correlation_id": correlation_id,
+                "log_id": log_id,
                 "short_message": short_message,
                 "smpp_command": naz.SmppCommand.SUBMIT_SM,
                 "source_addr": "2547000000",

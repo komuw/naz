@@ -12,7 +12,7 @@ class BaseHook:
     after a response is received from SMSC.
     """
 
-    async def request(self, smpp_command: str, correlation_id: typing.Optional[str] = None) -> None:
+    async def request(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
         """
         called before a request is sent to SMSC.
 
@@ -23,15 +23,13 @@ class BaseHook:
                 submit_sm, submit_sm_resp,
                 deliver_sm, deliver_sm_resp,
                 enquire_link, enquire_link_resp, generic_nack
-        :param correlation_id:                  (mandatory) [str]
+        :param log_id:                  (mandatory) [str]
             an ID that a user's application had previously supplied to user
             to track/correlate different messages.
         """
         raise NotImplementedError("request method must be implemented.")
 
-    async def response(
-        self, smpp_command: str, correlation_id: typing.Optional[str] = None
-    ) -> None:
+    async def response(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
         """
         called after a response is received from SMSC.
 
@@ -42,7 +40,7 @@ class BaseHook:
                 submit_sm, submit_sm_resp,
                 deliver_sm, deliver_sm_resp,
                 enquire_link, enquire_link_resp, generic_nack
-        :param correlation_id:                  (mandatory) [str]
+        :param log_id:                  (mandatory) [str]
             an ID that a user's application had previously supplied to user
             to track/correlate different messages.
         """
@@ -57,7 +55,7 @@ class SimpleHook(BaseHook):
     def __init__(self, logger) -> None:
         self.logger: logging.Logger = logger
 
-    async def request(self, smpp_command: str, correlation_id: typing.Optional[str] = None) -> None:
+    async def request(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
         """
         hook method that is called just before a request is sent to SMSC.
         """
@@ -66,13 +64,11 @@ class SimpleHook(BaseHook):
                 "event": "naz.SimpleHook.request",
                 "stage": "start",
                 "smpp_command": smpp_command,
-                "correlation_id": correlation_id,
+                "log_id": log_id,
             }
         )
 
-    async def response(
-        self, smpp_command: str, correlation_id: typing.Optional[str] = None
-    ) -> None:
+    async def response(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
         """
         hook method that is called just after a response is gotten from SMSC.
         """
@@ -81,6 +77,6 @@ class SimpleHook(BaseHook):
                 "event": "naz.SimpleHook.response",
                 "stage": "start",
                 "smpp_command": smpp_command,
-                "correlation_id": correlation_id,
+                "log_id": log_id,
             }
         )

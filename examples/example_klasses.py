@@ -146,7 +146,7 @@ if __name__ == "__main__":
             "version": "1",
             "smpp_command": naz.SmppCommand.SUBMIT_SM,
             "short_message": "Hello World-{0}".format(str(i)),
-            "correlation_id": "myid1234-{0}".format(str(i)),
+            "log_id": "myid1234-{0}".format(str(i)),
             "source_addr": "254722111111",
             "destination_addr": "254722999999",
         }

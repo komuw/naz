@@ -135,7 +135,7 @@ item_to_enqueue = {
     "version": "1",
     "smpp_command": naz.SmppCommand.SUBMIT_SM,
     "short_message": "Hello World",
-    "correlation_id": "myid12345",
+    "log_id": "myid12345",
     "source_addr": "254722111111",
     "destination_addr": "254722999999",
 }
