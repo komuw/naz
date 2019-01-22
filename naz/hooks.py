@@ -1,4 +1,3 @@
-import typing
 import logging
 
 
@@ -12,7 +11,7 @@ class BaseHook:
     after a response is received from SMSC.
     """
 
-    async def request(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
+    async def request(self, smpp_command: str, log_id: str) -> None:
         """
         called before a request is sent to SMSC.
 
@@ -29,7 +28,7 @@ class BaseHook:
         """
         raise NotImplementedError("request method must be implemented.")
 
-    async def response(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
+    async def response(self, smpp_command: str, log_id: str) -> None:
         """
         called after a response is received from SMSC.
 
@@ -55,7 +54,7 @@ class SimpleHook(BaseHook):
     def __init__(self, logger) -> None:
         self.logger: logging.Logger = logger
 
-    async def request(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
+    async def request(self, smpp_command: str, log_id: str) -> None:
         """
         hook method that is called just before a request is sent to SMSC.
         """
@@ -68,7 +67,7 @@ class SimpleHook(BaseHook):
             }
         )
 
-    async def response(self, smpp_command: str, log_id: typing.Optional[str] = None) -> None:
+    async def response(self, smpp_command: str, log_id: str) -> None:
         """
         hook method that is called just after a response is gotten from SMSC.
         """
