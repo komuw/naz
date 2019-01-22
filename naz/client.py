@@ -380,7 +380,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id
+            self.seq_log[sequence_number] = log_id + "."
         except Exception as e:
             self.logger.exception(
                 {"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)}
@@ -431,7 +431,7 @@ class Client:
                 sequence_number = self.sequence_generator.next_sequence()
                 # associate sequence_number with log_id.
                 # this will enable us to also associate responses and thus enhancing traceability of all workflows
-                self.seq_log[sequence_number] = log_id
+                self.seq_log[sequence_number] = log_id + "."
             except Exception as e:
                 self.logger.exception(
                     {
@@ -656,7 +656,9 @@ class Client:
             }
         )
 
-    async def build_submit_sm_pdu(self, short_message, log_id, source_addr, destination_addr):
+    async def build_submit_sm_pdu(
+        self, short_message, log_id, metadata, source_addr, destination_addr
+    ):
         self.logger.info(
             {
                 "event": "naz.Client.build_submit_sm_pdu",
@@ -708,7 +710,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id
+            self.seq_log[sequence_number] = log_id + "." + metadata
         except Exception as e:
             self.logger.exception(
                 {
@@ -740,7 +742,7 @@ class Client:
         )
         return full_pdu
 
-    async def send_data(self, smpp_command, msg, log_id):
+    async def send_data(self, smpp_command, msg, log_id, hook_metadata=""):
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -812,7 +814,9 @@ class Client:
 
         # call user's hook for requests
         try:
-            await self.hook.request(smpp_command=smpp_command, log_id=log_id)
+            await self.hook.request(
+                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
+            )
         except Exception as e:
             self.logger.exception(
                 {
@@ -901,12 +905,13 @@ class Client:
                     log_id = item_to_dequeue["log_id"]
                     item_to_dequeue["version"]  # version is a required field
                     smpp_command = item_to_dequeue["smpp_command"]
+                    hook_metadata = item_to_dequeue.get("hook_metadata", "")
                     if smpp_command == SmppCommand.SUBMIT_SM:
                         short_message = item_to_dequeue["short_message"]
                         source_addr = item_to_dequeue["source_addr"]
                         destination_addr = item_to_dequeue["destination_addr"]
                         full_pdu = await self.build_submit_sm_pdu(
-                            short_message, log_id, source_addr, destination_addr
+                            short_message, log_id, hook_metadata, source_addr, destination_addr
                         )
                     else:
                         full_pdu = item_to_dequeue["pdu"]
@@ -924,7 +929,12 @@ class Client:
                     )
                     continue
 
-                await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
+                await self.send_data(
+                    smpp_command=smpp_command,
+                    msg=full_pdu,
+                    log_id=log_id,
+                    hook_metadata=hook_metadata,
+                )
                 self.logger.info(
                     {
                         "event": "naz.Client.send_forever",
@@ -1035,6 +1045,9 @@ class Client:
         sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
         # get associated user supplied log_id if any, free mem while at it.
         log_id = self.seq_log.pop(sequence_number, None)
+        hook_metadata = ""
+        if log_id:
+            log_id, hook_metadata = log_id.split(".")
 
         smpp_command = self.search_by_command_id_code(command_id)
         if not smpp_command:
@@ -1052,7 +1065,9 @@ class Client:
         try:
             # todo: send log_id to response hook, when we are eventually able to relate
             # everything to a log_id
-            await self.hook.response(smpp_command=smpp_command, log_id=log_id)
+            await self.hook.response(
+                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
+            )
         except Exception as e:
             self.logger.exception(
                 {
@@ -1241,7 +1256,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id
+            self.seq_log[sequence_number] = log_id + "."
         except Exception as e:
             self.logger.exception(
                 {"event": "naz.Client.unbind", "stage": "end", "error": str(e), "log_id": log_id}
