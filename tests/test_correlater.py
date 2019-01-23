@@ -4,6 +4,7 @@
 import sys
 import json
 import time
+import mock
 import asyncio
 import logging
 from unittest import TestCase
@@ -12,6 +13,19 @@ import naz
 
 
 logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
+
+
+def AsyncMock(*args, **kwargs):
+    """
+    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
+    """
+    m = mock.MagicMock(*args, **kwargs)
+
+    async def mock_coro(*args, **kwargs):
+        return m(*args, **kwargs)
+
+    mock_coro.mock = m
+    return mock_coro
 
 
 class TestCorrelater(TestCase):
@@ -88,6 +102,26 @@ class TestCorrelater(TestCase):
         log_id, hook_metadata = self._run(self.correlater.get(sequence_number="sequence_number"))
         self.assertEqual(log_id, "MyLogID")
         self.assertEqual(hook_metadata, "MyHookMetadata")
+
+    def test_get_calls_delete(self):
+        with mock.patch(
+            "naz.correlater.SimpleCorrelater.delete_after_ttl", new=AsyncMock()
+        ) as mock_correlater_delete_after_ttl:
+            self._run(self.correlater.get(sequence_number="sequence_number"))
+            self.assertTrue(mock_correlater_delete_after_ttl.mock.called)
+
+    def test_put_calls_delete(self):
+        with mock.patch(
+            "naz.correlater.SimpleCorrelater.delete_after_ttl", new=AsyncMock()
+        ) as mock_correlater_delete_after_ttl:
+            self._run(
+                self.correlater.put(
+                    sequence_number="sequence_number",
+                    log_id="MyLogID",
+                    hook_metadata="MyHookMetadata",
+                )
+            )
+            self.assertTrue(mock_correlater_delete_after_ttl.mock.called)
 
 
 class TestBenchmarkCorrelater(TestCase):
