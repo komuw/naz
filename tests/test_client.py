@@ -3,6 +3,7 @@
 
 import os
 import sys
+import json
 import asyncio
 import logging
 from unittest import TestCase
@@ -429,4 +430,36 @@ class TestClient(TestCase):
             self.assertIn(
                 "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: OPEN",
                 str(raised_exception.exception),
+            )
+
+    def test_correlater_put_called(self):
+        with mock.patch(
+            "naz.correlater.SimpleCorrelater.put", new=AsyncMock()
+        ) as mock_correlater_put, mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
+            hook_metadata = json.dumps(_hook_metadata)
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+                "hook_metadata": hook_metadata,
+            }
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.send_forever(TESTING=True))
+            self.assertTrue(mock_correlater_put.mock.called)
+
+            self.assertEqual(mock_correlater_put.mock.call_args[1]["log_id"], log_id)
+            self.assertEqual(mock_correlater_put.mock.call_args[1]["hook_metadata"], hook_metadata)
+            self.assertEqual(
+                json.loads(mock_correlater_put.mock.call_args[1]["hook_metadata"]), _hook_metadata
             )
