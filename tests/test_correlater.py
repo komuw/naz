@@ -155,3 +155,36 @@ class TestBenchmarkCorrelater(TestCase):
         )
         self.assertEqual(len(self.correlater.store.keys()), 1)
         self.assertEqual(self.correlater.store["end_ttl"]["hook_metadata"], "hook_metadata-end_ttl")
+
+    def test_get_benchmark(self):
+        now = time.monotonic()
+        far_back = now - (self.max_ttl * 10)
+
+        # first store 100K items
+        f = open("tests/correlater_store_with_100K_items.json", "r")
+        x = f.read()
+        f.close()
+        y = json.loads(x)
+        for key in list(y.keys()):
+            y[key]["stored_at"] = far_back
+        self.correlater.store = y
+
+        # wait for all 100K items to reach max ttl
+        time.sleep(self.max_ttl + 0.2)
+        # then try to get an item thus triggering a delete of all 100K items
+        # and check how long that operation takes
+        start = time.monotonic()
+        log_id, hook_metadata = self._run(self.correlater.get(sequence_number="99999"))
+        end = time.monotonic()
+        diff = end - start
+        print(
+            "getting 1 item while the store already has 100K items that have reached max_ttl took {0} seconds.".format(
+                diff
+            )
+        )
+        self.assertTrue(
+            diff < 0.1,
+            msg="getting 1 item while the store already has 100K items that have reached max_ttl should not take longer than 0.1 seconds",
+        )
+        self.assertEqual(log_id, "log_id-99999")
+        self.assertEqual(hook_metadata, "hook_metadata-99999")
