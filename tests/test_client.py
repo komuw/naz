@@ -502,9 +502,7 @@ class TestClient(TestCase):
     def test_correlater_get_called(self):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.get", new=AsyncMock()
-        ) as mock_correlater_get, mock.patch(
-            "naz.Client.speficic_handlers", new=AsyncMock()
-        ) as mock_naz_speficic_handlers:
+        ) as mock_correlater_get, mock.patch("naz.Client.speficic_handlers", new=AsyncMock()):
             self._run(
                 self.cli.parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
