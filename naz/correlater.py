@@ -43,6 +43,9 @@ class SimpleCorrelater(BaseCorrelater):
     The storage is done in memory using a python dictionary.
 
     SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.
+    When instantiating a SimpleCorrelater, you can supply a max_ttl which is the time in seconds that an item
+    is going to be stored. After the expiration of max_ttl seconds that item will/may be deleted.
+
     The storage looks like:
         {
             "sequence_number1": {
@@ -58,12 +61,19 @@ class SimpleCorrelater(BaseCorrelater):
         }
     """
 
-    def __init__(self, max_ttl: float = 15 * 60) -> None:
+    def __init__(self, max_ttl: float = 60 * 60) -> None:
+        """
+        :param max_ttl: (optional) [float]
+           the time in seconds that an item is going to be stored.
+           After the expiration of max_ttl seconds that item will/may be deleted.
+           The default value is 3600 seconds(1hour)
+        """
         self.store: dict = {}
         self.max_ttl: float = max_ttl
 
     async def put(self, sequence_number: str, log_id: str, hook_metadata: str) -> None:
         """
+        store relation of SMPP sequence_number and log_id and/or hook_metadata
         """
         stored_at = time.monotonic()
         self.store[sequence_number] = {
@@ -76,6 +86,7 @@ class SimpleCorrelater(BaseCorrelater):
 
     async def get(self, sequence_number: str) -> (str, str):
         """
+        get relation of SMPP sequence_number and log_id and/or hook_metadata
         """
         item = self.store.get(sequence_number)
         if not item:
@@ -88,6 +99,10 @@ class SimpleCorrelater(BaseCorrelater):
         return item["log_id"], item["hook_metadata"]
 
     async def delete_after_ttl(self):
+        """
+        iterate over all stored items and delete any that are
+        older than self.max_ttl seconds
+        """
         now = time.monotonic()
         for key in list(self.store.keys()):
             stored_at = self.store[key]["stored_at"]
