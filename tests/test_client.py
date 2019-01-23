@@ -364,6 +364,41 @@ class TestClient(TestCase):
             )
             self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "")
 
+    def test_hook_called_with_metadata(self):
+        with mock.patch(
+            "naz.hooks.SimpleHook.request", new=AsyncMock()
+        ) as mock_hook_request, mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
+            hook_metadata = json.dumps(_hook_metadata)
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+                "hook_metadata": hook_metadata,
+            }
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.send_forever(TESTING=True))
+
+            self.assertTrue(mock_hook_request.mock.called)
+            self.assertEqual(
+                mock_hook_request.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
+            )
+            self.assertEqual(mock_hook_request.mock.call_args[1]["log_id"], log_id)
+            self.assertEqual(mock_hook_request.mock.call_args[1]["hook_metadata"], hook_metadata)
+            self.assertEqual(
+                json.loads(mock_hook_request.mock.call_args[1]["hook_metadata"]), _hook_metadata
+            )
+
     def test_receving_data(self):
         with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
             submit_sm_resp_pdu = (
