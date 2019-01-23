@@ -118,11 +118,16 @@ class TestBenchmarkCorrelater(TestCase):
         return loop.run_until_complete(coro)
 
     def test_put_benchmark(self):
+        now = time.monotonic()
+        far_back = now - (self.max_ttl * 10)
+
         # first store 100K items
         f = open("tests/correlater_store_with_100K_items.json", "r")
         x = f.read()
         f.close()
         y = json.loads(x)
+        for key in list(y.keys()):
+            y[key]["stored_at"] = far_back
         self.correlater.store = y
 
         # wait for all 100K items to reach max ttl
