@@ -657,7 +657,7 @@ class Client:
         )
 
     async def build_submit_sm_pdu(
-        self, short_message, log_id, metadata, source_addr, destination_addr
+        self, short_message, log_id, hook_metadata, source_addr, destination_addr
     ):
         self.logger.info(
             {
@@ -710,7 +710,7 @@ class Client:
             sequence_number = self.sequence_generator.next_sequence()
             # associate sequence_number with log_id.
             # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id + "." + metadata
+            self.seq_log[sequence_number] = log_id + "." + hook_metadata
         except Exception as e:
             self.logger.exception(
                 {
