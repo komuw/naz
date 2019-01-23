@@ -179,13 +179,13 @@ class TestBenchmarkCorrelater(TestCase):
         end = time.monotonic()
         diff = end - start
         print(
-            "putting 1 item while the store already has 100K items that have reached max_ttl took {0} seconds.".format(
+            "\n putting 1 item while the store already has 100K items that have reached max_ttl took {0} seconds.".format(
                 diff
             )
         )
         self.assertTrue(
-            diff < 0.1,
-            msg="putting 1 item while the store already has 100K items that have reached max_ttl should not take longer than 0.1 seconds",
+            diff < 0.2,
+            msg="putting 1 item while the store already has 100K items that have reached max_ttl should not take longer than 0.2 seconds",
         )
         self.assertEqual(len(self.correlater.store.keys()), 1)
         self.assertEqual(self.correlater.store["end_ttl"]["hook_metadata"], "hook_metadata-end_ttl")
@@ -212,13 +212,13 @@ class TestBenchmarkCorrelater(TestCase):
         end = time.monotonic()
         diff = end - start
         print(
-            "getting 1 item while the store already has 100K items that have reached max_ttl took {0} seconds.".format(
+            "\n getting 1 item while the store already has 100K items that have reached max_ttl took {0} seconds.".format(
                 diff
             )
         )
         self.assertTrue(
-            diff < 0.1,
-            msg="getting 1 item while the store already has 100K items that have reached max_ttl should not take longer than 0.1 seconds",
+            diff < 0.2,
+            msg="getting 1 item while the store already has 100K items that have reached max_ttl should not take longer than 0.2 seconds",
         )
         self.assertEqual(log_id, "log_id-99999")
         self.assertEqual(hook_metadata, "hook_metadata-99999")
