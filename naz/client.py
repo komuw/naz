@@ -67,7 +67,7 @@ class Client:
         hook=None,
         sequence_generator=None,
         throttle_handler=None,
-        correlater=None,
+        correlation_handler=None,
     ):
         """
         todo: add docs
@@ -301,9 +301,9 @@ class Client:
 
         # class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata
         # this will be used to track different pdu's and user generated log_id
-        self.correlater = correlater
-        if not self.correlater:
-            self.correlater = correlater.SimpleCorrelater()
+        self.correlation_handler = correlation_handler
+        if not self.correlation_handler:
+            self.correlation_handler = correlater.SimpleCorrelater()
 
         # the messages that are published to a queue by either naz
         # or user application should be versioned.
@@ -409,7 +409,7 @@ class Client:
         # associate sequence_number with log_id.
         # this will enable us to also associate responses and thus enhancing traceability of all workflows
         try:
-            await self.correlater.put(
+            await self.correlation_handler.put(
                 sequence_number=sequence_number, log_id=log_id, hook_metadata=""
             )
         except Exception as e:
@@ -491,7 +491,7 @@ class Client:
                 )
 
             try:
-                await self.correlater.put(
+                await self.correlation_handler.put(
                     sequence_number=sequence_number, log_id=log_id, hook_metadata=""
                 )
             except Exception as e:
@@ -843,7 +843,7 @@ class Client:
             )
 
         try:
-            await self.correlater.put(
+            await self.correlation_handler.put(
                 sequence_number=sequence_number, log_id=log_id, hook_metadata=hook_metadata
             )
         except Exception as e:
@@ -1177,7 +1177,9 @@ class Client:
 
         # get associated user supplied log_id if any
         try:
-            log_id, hook_metadata = await self.correlater.get(sequence_number=sequence_number)
+            log_id, hook_metadata = await self.correlation_handler.get(
+                sequence_number=sequence_number
+            )
         except Exception as e:
             log_id, hook_metadata = "", ""
             self.logger.exception(
@@ -1422,7 +1424,7 @@ class Client:
             )
 
         try:
-            await self.correlater.put(
+            await self.correlation_handler.put(
                 sequence_number=sequence_number, log_id=log_id, hook_metadata=""
             )
         except Exception as e:
