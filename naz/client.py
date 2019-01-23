@@ -9,6 +9,7 @@ from . import hooks
 from . import nazcodec
 from . import sequence
 from . import throttle
+from . import correlater
 from . import ratelimiter
 
 
@@ -66,6 +67,7 @@ class Client:
         hook=None,
         sequence_generator=None,
         throttle_handler=None,
+        correlater=None,
     ):
         """
         todo: add docs
@@ -297,9 +299,11 @@ class Client:
         if not self.throttle_handler:
             self.throttle_handler = throttle.SimpleThrottleHandler(logger=self.logger)
 
-        # dictionary of sequence_number and their corresponding log_id
+        # class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata
         # this will be used to track different pdu's and user generated log_id
-        self.seq_log = {}
+        self.correlater = correlater
+        if not self.correlater:
+            self.correlater = correlater.SimpleCorrelater()
 
         # the messages that are published to a queue by either naz
         # or user application should be versioned.
@@ -350,9 +354,15 @@ class Client:
         return reader, writer
 
     async def tranceiver_bind(self):
+        smpp_command = SmppCommand.BIND_TRANSCEIVER
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
-            {"event": "naz.Client.tranceiver_bind", "stage": "start", "log_id": log_id}
+            {
+                "event": "naz.Client.tranceiver_bind",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
         )
         # body
         body = b""
@@ -383,7 +393,12 @@ class Client:
             self.seq_log[sequence_number] = log_id + "."
         except Exception as e:
             self.logger.exception(
-                {"event": "naz.Client.tranceiver_bind", "stage": "end", "error": str(e)}
+                {
+                    "event": "naz.Client.tranceiver_bind",
+                    "stage": "end",
+                    "error": str(e),
+                    "smpp_command": smpp_command,
+                }
             )
 
         if sequence_number > self.max_sequence_number:
@@ -393,11 +408,32 @@ class Client:
                     sequence_number, self.max_sequence_number
                 )
             )
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
+        try:
+            await self.correlater.put(sequence_number=sequence_number, log_id="", hook_metadata="")
+        except Exception as e:
+            self.logger.exception(
+                {
+                    "event": "naz.Client.tranceiver_bind",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "correlater put error",
+                    "error": str(e),
+                }
+            )
+
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
-        await self.send_data(smpp_command=SmppCommand.BIND_TRANSCEIVER, msg=full_pdu, log_id=log_id)
-        self.logger.info({"event": "naz.Client.tranceiver_bind", "stage": "end", "log_id": log_id})
+        await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
+        self.logger.info(
+            {
+                "event": "naz.Client.tranceiver_bind",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
+        )
         return full_pdu
 
     async def enquire_link(self, TESTING=False):

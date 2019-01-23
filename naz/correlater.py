@@ -8,7 +8,7 @@ class BaseCorrelater:
     implement the get and put methods with the type signatures shown.
 
     A Correlater is class that naz uses to store relations between SMPP sequence numbers
-    and user applications' log_id's.
+    and user applications' log_id's and/or hook_metadata.
     """
 
     async def put(self, sequence_number: str, log_id: str, hook_metadata: str) -> None:
@@ -45,11 +45,16 @@ class SimpleCorrelater(BaseCorrelater):
     SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.
     The storage looks like:
         {
-        "sequence_number": {
-            "log_id": "log_id",
-            "hook_metadata": "hook_metadata",
-            "stored_at": 681.109023565
-          }
+            "sequence_number1": {
+                "log_id": "log_id1",
+                "hook_metadata": "hook_metadata1",
+                "stored_at": 681.109023565
+            },
+           "sequence_number1": {
+            "log_id": "log_id2",
+            "hook_metadata": "hook_metadata2",
+            "stored_at": 682.109023565
+           }
         }
     """
 

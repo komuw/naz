@@ -56,6 +56,7 @@ enquire_link_interval | time in seconds to wait before sending an `enquire_link`
 rateLimiter | python class implementing rate limitation | naz.ratelimiter.SimpleRateLimiter
 hook | python class implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
 throttle_handler | python class implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
+correlater | A python class that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
