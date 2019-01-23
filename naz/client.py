@@ -388,9 +388,6 @@ class Client:
         command_status = self.command_statuses["ESME_ROK"].code
         try:
             sequence_number = self.sequence_generator.next_sequence()
-            # associate sequence_number with log_id.
-            # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id + "."
         except Exception as e:
             self.logger.exception(
                 {
@@ -409,8 +406,12 @@ class Client:
                 )
             )
 
+        # associate sequence_number with log_id.
+        # this will enable us to also associate responses and thus enhancing traceability of all workflows
         try:
-            await self.correlater.put(sequence_number=sequence_number, log_id="", hook_metadata="")
+            await self.correlater.put(
+                sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+            )
         except Exception as e:
             self.logger.exception(
                 {
@@ -447,6 +448,7 @@ class Client:
 
         `enquire_link` has no body.
         """
+        smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
             if self.current_session_state != SmppSessionState.BOUND_TRX:
                 # you can only send enquire_link request when session state is BOUND_TRX
@@ -454,7 +456,12 @@ class Client:
 
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self.logger.info(
-                {"event": "naz.Client.enquire_link", "stage": "start", "log_id": log_id}
+                {
+                    "event": "naz.Client.enquire_link",
+                    "stage": "start",
+                    "log_id": log_id,
+                    "smpp_command": smpp_command,
+                }
             )
             # body
             body = b""
@@ -465,9 +472,6 @@ class Client:
             command_status = 0x00000000  # not used for `enquire_link`
             try:
                 sequence_number = self.sequence_generator.next_sequence()
-                # associate sequence_number with log_id.
-                # this will enable us to also associate responses and thus enhancing traceability of all workflows
-                self.seq_log[sequence_number] = log_id + "."
             except Exception as e:
                 self.logger.exception(
                     {
@@ -475,6 +479,7 @@ class Client:
                         "stage": "end",
                         "error": str(e),
                         "log_id": log_id,
+                        "smpp_command": smpp_command,
                     }
                 )
             if sequence_number > self.max_sequence_number:
@@ -484,14 +489,37 @@ class Client:
                         sequence_number, self.max_sequence_number
                     )
                 )
+
+            try:
+                await self.correlater.put(
+                    sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                )
+            except Exception as e:
+                self.logger.exception(
+                    {
+                        "event": "naz.Client.enquire_link",
+                        "stage": "end",
+                        "smpp_command": smpp_command,
+                        "log_id": log_id,
+                        "state": "correlater put error",
+                        "error": str(e),
+                    }
+                )
+
             header = struct.pack(
                 ">IIII", command_length, command_id, command_status, sequence_number
             )
-
             full_pdu = header + body
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-            await self.send_data(smpp_command=SmppCommand.ENQUIRE_LINK, msg=full_pdu, log_id=log_id)
-            self.logger.info({"event": "naz.Client.enquire_link", "stage": "end", "log_id": log_id})
+            await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
+            self.logger.info(
+                {
+                    "event": "naz.Client.enquire_link",
+                    "stage": "end",
+                    "log_id": log_id,
+                    "smpp_command": smpp_command,
+                }
+            )
             if TESTING:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
@@ -507,9 +535,15 @@ class Client:
 
         `enquire_link_resp` has no body.
         """
+        smpp_command = SmppCommand.ENQUIRE_LINK_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
-            {"event": "naz.Client.enquire_link_resp", "stage": "start", "log_id": log_id}
+            {
+                "event": "naz.Client.enquire_link_resp",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
         )
 
         # body
@@ -527,7 +561,7 @@ class Client:
             "version": self.naz_message_protocol_version,
             "log_id": log_id,
             "pdu": full_pdu,
-            "smpp_command": SmppCommand.ENQUIRE_LINK_RESP,
+            "smpp_command": smpp_command,
         }
         try:
             await self.outboundqueue.enqueue(item_to_enqueue)
@@ -538,10 +572,16 @@ class Client:
                     "stage": "end",
                     "error": str(e),
                     "log_id": log_id,
+                    "smpp_command": smpp_command,
                 }
             )
         self.logger.info(
-            {"event": "naz.Client.enquire_link_resp", "stage": "end", "log_id": log_id}
+            {
+                "event": "naz.Client.enquire_link_resp",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
         )
 
     async def unbind_resp(self, sequence_number):
@@ -555,8 +595,16 @@ class Client:
 
         `unbind_resp` has no body.
         """
+        smpp_command = SmppCommand.UNBIND_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
-        self.logger.info({"event": "naz.Client.unbind_resp", "stage": "start", "log_id": log_id})
+        self.logger.info(
+            {
+                "event": "naz.Client.unbind_resp",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
+        )
 
         # body
         body = b""
@@ -570,8 +618,15 @@ class Client:
 
         full_pdu = header + body
         # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data(smpp_command=SmppCommand.UNBIND_RESP, msg=full_pdu, log_id=log_id)
-        self.logger.info({"event": "naz.Client.unbind_resp", "stage": "end", "log_id": log_id})
+        await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
+        self.logger.info(
+            {
+                "event": "naz.Client.unbind_resp",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
+        )
 
     async def deliver_sm_resp(self, sequence_number):
         """
@@ -585,9 +640,15 @@ class Client:
         BODY::
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
+        smpp_command = SmppCommand.DELIVER_SM_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
-            {"event": "naz.Client.deliver_sm_resp", "stage": "start", "log_id": log_id}
+            {
+                "event": "naz.Client.deliver_sm_resp",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
         )
         # body
         body = b""
@@ -596,7 +657,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppCommand.DELIVER_SM_RESP]
+        command_id = self.command_ids[smpp_command]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
@@ -606,7 +667,7 @@ class Client:
             "version": self.naz_message_protocol_version,
             "log_id": log_id,
             "pdu": full_pdu,
-            "smpp_command": SmppCommand.DELIVER_SM_RESP,
+            "smpp_command": smpp_command,
         }
         try:
             await self.outboundqueue.enqueue(item_to_enqueue)
@@ -617,10 +678,18 @@ class Client:
                     "stage": "end",
                     "error": str(e),
                     "log_id": log_id,
+                    "smpp_command": smpp_command,
                 }
             )
 
-        self.logger.info({"event": "naz.Client.deliver_sm_resp", "stage": "end", "log_id": log_id})
+        self.logger.info(
+            {
+                "event": "naz.Client.deliver_sm_resp",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
+        )
 
     # this method just enqueues a submit_sm msg to queue
     async def submit_sm(self, short_message, log_id, source_addr, destination_addr):
@@ -657,6 +726,7 @@ class Client:
                u cant use both `short_message` and `message_payload`
             2. Octet String - A series of octets, not necessarily NULL terminated.
         """
+        smpp_command = SmppCommand.SUBMIT_SM
         self.logger.info(
             {
                 "event": "naz.Client.submit_sm",
@@ -665,11 +735,12 @@ class Client:
                 "short_message": short_message,
                 "source_addr": source_addr,
                 "destination_addr": destination_addr,
+                "smpp_command": smpp_command,
             }
         )
         item_to_enqueue = {
             "version": self.naz_message_protocol_version,
-            "smpp_command": SmppCommand.SUBMIT_SM,
+            "smpp_command": smpp_command,
             "short_message": short_message,
             "log_id": log_id,
             "source_addr": source_addr,
@@ -679,7 +750,13 @@ class Client:
             await self.outboundqueue.enqueue(item_to_enqueue)
         except Exception as e:
             self.logger.exception(
-                {"event": "naz.Client.submit_sm", "stage": "end", "error": str(e), "log_id": log_id}
+                {
+                    "event": "naz.Client.submit_sm",
+                    "stage": "end",
+                    "error": str(e),
+                    "log_id": log_id,
+                    "smpp_command": smpp_command,
+                }
             )
         self.logger.info(
             {
@@ -689,12 +766,14 @@ class Client:
                 "short_message": short_message,
                 "source_addr": source_addr,
                 "destination_addr": destination_addr,
+                "smpp_command": smpp_command,
             }
         )
 
     async def build_submit_sm_pdu(
         self, short_message, log_id, hook_metadata, source_addr, destination_addr
     ):
+        smpp_command = SmppCommand.SUBMIT_SM
         self.logger.info(
             {
                 "event": "naz.Client.build_submit_sm_pdu",
@@ -703,6 +782,7 @@ class Client:
                 "short_message": short_message,
                 "source_addr": source_addr,
                 "destination_addr": destination_addr,
+                "smpp_command": smpp_command,
             }
         )
         encoded_short_message = self.codec_class.encode(short_message, self.encoding)
@@ -744,9 +824,6 @@ class Client:
         command_status = 0x00000000  # not used for `submit_sm`
         try:
             sequence_number = self.sequence_generator.next_sequence()
-            # associate sequence_number with log_id.
-            # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id + "." + hook_metadata
         except Exception as e:
             self.logger.exception(
                 {
@@ -754,6 +831,7 @@ class Client:
                     "stage": "end",
                     "error": str(e),
                     "log_id": log_id,
+                    "smpp_command": smpp_command,
                 }
             )
         if sequence_number > self.max_sequence_number:
@@ -763,9 +841,25 @@ class Client:
                     sequence_number, self.max_sequence_number
                 )
             )
+
+        try:
+            await self.correlater.put(
+                sequence_number=sequence_number, log_id=log_id, hook_metadata=hook_metadata
+            )
+        except Exception as e:
+            self.logger.exception(
+                {
+                    "event": "naz.Client.build_submit_sm_pdu",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "correlater put error",
+                    "error": str(e),
+                }
+            )
+
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
-
         self.logger.info(
             {
                 "event": "naz.Client.build_submit_sm_pdu",
@@ -774,6 +868,7 @@ class Client:
                 "short_message": short_message,
                 "source_addr": source_addr,
                 "destination_addr": destination_addr,
+                "smpp_command": smpp_command,
             }
         )
         return full_pdu
@@ -1079,11 +1174,21 @@ class Client:
         command_id = struct.unpack(">I", command_id_header_data)[0]
         command_status = struct.unpack(">I", command_status_header_data)[0]
         sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
-        # get associated user supplied log_id if any, free mem while at it.
-        log_id = self.seq_log.pop(sequence_number, None)
-        hook_metadata = ""
-        if log_id:
-            log_id, hook_metadata = log_id.split(".")
+
+        # get associated user supplied log_id if any
+        try:
+            log_id, hook_metadata = await self.correlater.get(sequence_number=sequence_number)
+        except Exception as e:
+            log_id, hook_metadata = "", ""
+            self.logger.exception(
+                {
+                    "event": "naz.Client.parse_response_pdu",
+                    "stage": "start",
+                    "log_id": log_id,
+                    "state": "correlater get error",
+                    "error": str(e),
+                }
+            )
 
         smpp_command = self.search_by_command_id_code(command_id)
         if not smpp_command:
@@ -1279,8 +1384,16 @@ class Client:
 
         clients/users should call this method when winding down.
         """
+        smpp_command = SmppCommand.UNBIND
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
-        self.logger.info({"event": "naz.Client.unbind", "stage": "start", "log_id": log_id})
+        self.logger.info(
+            {
+                "event": "naz.Client.unbind",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
+        )
         # body
         body = b""
 
@@ -1290,12 +1403,15 @@ class Client:
         command_status = 0x00000000  # not used for `unbind`
         try:
             sequence_number = self.sequence_generator.next_sequence()
-            # associate sequence_number with log_id.
-            # this will enable us to also associate responses and thus enhancing traceability of all workflows
-            self.seq_log[sequence_number] = log_id + "."
         except Exception as e:
             self.logger.exception(
-                {"event": "naz.Client.unbind", "stage": "end", "error": str(e), "log_id": log_id}
+                {
+                    "event": "naz.Client.unbind",
+                    "stage": "end",
+                    "error": str(e),
+                    "log_id": log_id,
+                    "smpp_command": smpp_command,
+                }
             )
         if sequence_number > self.max_sequence_number:
             # prevent third party sequence_generators from ruining our party
@@ -1304,12 +1420,35 @@ class Client:
                     sequence_number, self.max_sequence_number
                 )
             )
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
+        try:
+            await self.correlater.put(
+                sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+            )
+        except Exception as e:
+            self.logger.exception(
+                {
+                    "event": "naz.Client.unbind",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "correlater put error",
+                    "error": str(e),
+                }
+            )
+
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
         # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
-        await self.send_data(smpp_command=SmppCommand.UNBIND, msg=full_pdu, log_id=log_id)
-        self.logger.info({"event": "naz.Client.unbind", "stage": "end", "log_id": log_id})
+        await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
+        self.logger.info(
+            {
+                "event": "naz.Client.unbind",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            }
+        )
 
 
 class NazLoggingAdapter(logging.LoggerAdapter):
