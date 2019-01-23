@@ -361,7 +361,7 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM_RESP
             )
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], None)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "")
 
     def test_receving_data(self):
         with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
