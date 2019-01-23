@@ -149,5 +149,6 @@ if __name__ == "__main__":
             "log_id": "myid1234-{0}".format(str(i)),
             "source_addr": "254722111111",
             "destination_addr": "254722999999",
+            "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
         }
         loop.run_until_complete(ExampleRedisQueueInstance.enqueue(item_to_enqueue))
