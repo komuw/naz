@@ -293,7 +293,7 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value.value
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
@@ -332,7 +332,6 @@ class Client:
                 }
             )
 
-        import pdb;pdb.set_trace()
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
         await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
@@ -461,7 +460,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -521,7 +520,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -567,7 +566,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -1135,9 +1134,10 @@ class Client:
         """
         # todo: pliz find a better way of doing this.
         # this will cause global warming with useless computation
-        command_status_value = self.search_by_command_status_code(command_status)
+        CommandStatus = self.search_by_command_status_code(command_status)
+        import pdb;pdb.set_trace()
 
-        if command_status != SmppCommandStatus.ESME_ROK.value:
+        if CommandStatus.value.value != SmppCommandStatus.ESME_ROK.value.value:
             # we got an error from SMSC
             self.logger.exception(
                 {
@@ -1145,8 +1145,8 @@ class Client:
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "command_status": command_status_value.code,
-                    "state": command_status_value.description,
+                    "command_status": CommandStatus.value.value,
+                    "state": CommandStatus.value.description,
                 }
             )
         else:
@@ -1156,16 +1156,16 @@ class Client:
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "command_status": command_status_value.code,
+                    "command_status": CommandStatus.value.value,
                     "state": command_status_value.description,
                 }
             )
 
         try:
             # call throttling handler
-            if command_status == SmppCommandStatus.ESME_ROK.value:
+            if command_status == SmppCommandStatus.ESME_ROK.value.value:
                 await self.throttle_handler.not_throttled()
-            elif command_status == SmppCommandStatus.ESME_RTHROTTLED.value:
+            elif command_status == SmppCommandStatus.ESME_RTHROTTLED.value.value:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self.logger.exception(
@@ -1194,7 +1194,7 @@ class Client:
         elif smpp_command == SmppCommand.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
-            if command_status == SmppCommandStatus.ESME_ROK.value:
+            if command_status == SmppCommandStatus.ESME_ROK.value.value:
                 self.current_session_state = SmppSessionState.BOUND_TRX
         elif smpp_command == SmppCommand.UNBIND:
             # we need to handle this since we need to send unbind_resp
