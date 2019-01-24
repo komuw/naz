@@ -228,6 +228,7 @@ def main():
             cli.send_forever(TESTING=dry_run),
             cli.receive_data(TESTING=dry_run),
             cli.enquire_link(TESTING=dry_run),
+            loop=loop,
         )
         loop.run_until_complete(tasks)
         loop.run_until_complete(cli.unbind())

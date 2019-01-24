@@ -3,6 +3,7 @@
 
 import os
 import sys
+import json
 import asyncio
 import logging
 from unittest import TestCase
@@ -97,7 +98,8 @@ class TestClient(TestCase):
         else:
             pass
 
-    def _run(self, coro):
+    @staticmethod
+    def _run(coro):
         """
         helper function that runs any coroutine in an event loop and passes its return value back to the caller.
         https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
@@ -361,7 +363,42 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM_RESP
             )
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], None)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "")
+
+    def test_hook_called_with_metadata(self):
+        with mock.patch(
+            "naz.hooks.SimpleHook.request", new=AsyncMock()
+        ) as mock_hook_request, mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
+            hook_metadata = json.dumps(_hook_metadata)
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+                "hook_metadata": hook_metadata,
+            }
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.send_forever(TESTING=True))
+
+            self.assertTrue(mock_hook_request.mock.called)
+            self.assertEqual(
+                mock_hook_request.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
+            )
+            self.assertEqual(mock_hook_request.mock.call_args[1]["log_id"], log_id)
+            self.assertEqual(mock_hook_request.mock.call_args[1]["hook_metadata"], hook_metadata)
+            self.assertEqual(
+                json.loads(mock_hook_request.mock.call_args[1]["hook_metadata"]), _hook_metadata
+            )
 
     def test_receving_data(self):
         with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
@@ -430,3 +467,47 @@ class TestClient(TestCase):
                 "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: OPEN",
                 str(raised_exception.exception),
             )
+
+    def test_correlater_put_called(self):
+        with mock.patch(
+            "naz.correlater.SimpleCorrelater.put", new=AsyncMock()
+        ) as mock_correlater_put, mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
+            hook_metadata = json.dumps(_hook_metadata)
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+                "hook_metadata": hook_metadata,
+            }
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.send_forever(TESTING=True))
+            self.assertTrue(mock_correlater_put.mock.called)
+
+            self.assertEqual(mock_correlater_put.mock.call_args[1]["log_id"], log_id)
+            self.assertEqual(mock_correlater_put.mock.call_args[1]["hook_metadata"], hook_metadata)
+            self.assertEqual(
+                json.loads(mock_correlater_put.mock.call_args[1]["hook_metadata"]), _hook_metadata
+            )
+
+    def test_correlater_get_called(self):
+        with mock.patch(
+            "naz.correlater.SimpleCorrelater.get", new=AsyncMock()
+        ) as mock_correlater_get, mock.patch("naz.Client.speficic_handlers", new=AsyncMock()):
+            self._run(
+                self.cli.parse_response_pdu(
+                    pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
+                )
+            )
+            self.assertTrue(mock_correlater_get.mock.called)
+            self.assertTrue(mock_correlater_get.mock.call_args[1]["sequence_number"])
