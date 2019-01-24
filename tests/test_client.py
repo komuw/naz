@@ -98,7 +98,8 @@ class TestClient(TestCase):
         else:
             pass
 
-    def _run(self, coro):
+    @staticmethod
+    def _run(coro):
         """
         helper function that runs any coroutine in an event loop and passes its return value back to the caller.
         https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code

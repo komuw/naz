@@ -51,7 +51,8 @@ class TestCorrelater(TestCase):
     def tearDown(self):
         pass
 
-    def _run(self, coro):
+    @staticmethod
+    def _run(coro):
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(coro)
 
@@ -147,7 +148,8 @@ class TestBenchmarkCorrelater(TestCase):
     def tearDown(self):
         pass
 
-    def _run(self, coro):
+    @staticmethod
+    def _run(coro):
         loop = asyncio.get_event_loop()
         return loop.run_until_complete(coro)
 
