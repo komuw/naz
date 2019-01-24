@@ -61,13 +61,13 @@ class TestRateLimit(TestCase):
 
     def test_no_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
-            for i in range(0, self.max_tokens):
+            for _ in range(0, self.max_tokens):
                 self._run(self.rateLimiter.limit())
             self.assertFalse(mock_sleep.mock.called)
 
     def test_token_exhaustion_causes_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
-            for i in range(0, self.max_tokens * 2):
+            for _ in range(0, self.max_tokens * 2):
                 self._run(self.rateLimiter.limit())
             self.assertTrue(mock_sleep.mock.called)
             self.assertEqual(mock_sleep.mock.call_args[0][0], self.delay_for_tokens)
@@ -79,7 +79,7 @@ class TestRateLimit(TestCase):
         )
         msgs_delivered = []
         now = time.monotonic()
-        for i in range(0, send_rate * 4):
+        for _ in range(0, send_rate * 4):
             z = self._run(rLimiter.limit())
             msgs_delivered.append(z)
 
