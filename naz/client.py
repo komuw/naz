@@ -1442,9 +1442,6 @@ class SmppCommandStatus(enum.Enum):
     ESME_RINVSRCADR = _commandStatus(
         code="ESME_RINVSRCADR", value=0x0000000A, description="Invalid Source Address"
     )
-    ESME_RINVSRCADR = _commandStatus(
-        code="ESME_RINVSRCADR", value=0x0000000A, description="Invalid Source Address"
-    )
     ESME_RINVDSTADR = _commandStatus(
         code="ESME_RINVDSTADR", value=0x0000000B, description="Invalid Dest Addr"
     )
