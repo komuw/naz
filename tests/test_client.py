@@ -204,12 +204,13 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
+
             self.assertTrue(mock_naz_enquire_link_resp.mock.called)
             self.assertEqual(
                 mock_naz_enquire_link_resp.mock.call_args[1]["sequence_number"], sequence_number
@@ -221,10 +222,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.UNBIND,
-                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_naz_send_data.mock.called)
@@ -239,10 +240,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
@@ -322,10 +323,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_not_throttled.mock.called)
@@ -342,10 +343,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    log_id="log_id",
                     command_status=0x00000058,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_throttled.mock.called)
@@ -424,10 +425,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    log_id="log_id",
                     command_status=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)

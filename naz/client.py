@@ -13,12 +13,6 @@ from . import correlater
 from . import ratelimiter
 
 
-# todo:
-# 1. add configurable retries
-# 2. metrics, what is happening
-# 3. run end-to-end integration tests in ci.
-
-
 class Client:
     """
     """
@@ -1164,9 +1158,6 @@ class Client:
         self.logger.info({"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
-        command_length_header_data = header_data[:4]
-        total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
-
         command_id_header_data = header_data[4:8]
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
@@ -1204,31 +1195,12 @@ class Client:
             )
             raise ValueError("command_id:{0} is unknown.".format(command_id))
 
-        # call user's hook for responses
-        try:
-            # todo: send log_id to response hook, when we are eventually able to relate
-            # everything to a log_id
-            await self.hook.response(
-                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
-            )
-        except Exception as e:
-            self.logger.exception(
-                {
-                    "event": "naz.Client.parse_response_pdu",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "response hook error",
-                    "error": str(e),
-                }
-            )
-
         await self.speficic_handlers(
             smpp_command=smpp_command,
             command_status=command_status,
             sequence_number=sequence_number,
             log_id=log_id,
-            total_pdu_length=total_pdu_length,
+            hook_metadata=hook_metadata,
         )
         self.logger.info(
             {
@@ -1241,7 +1213,7 @@ class Client:
         )
 
     async def speficic_handlers(
-        self, smpp_command, command_status, sequence_number, log_id, total_pdu_length
+        self, smpp_command, command_status, sequence_number, log_id, hook_metadata
     ):
         """
         this handles parsing speficic
@@ -1320,7 +1292,6 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-            # todo: call user's hook in here. we should correlate user's supplied log_id and sequence_number
             pass
         elif smpp_command == SmppCommand.DELIVER_SM:
             # HEADER::
@@ -1370,6 +1341,27 @@ class Client:
                     "error": "the smpp_command:{0} has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
+                }
+            )
+
+        # call user's hook for responses
+        try:
+            await self.hook.response(
+                smpp_command=smpp_command,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                response_code=command_status_value.code,
+                response_description=command_status_value.description,
+            )
+        except Exception as e:
+            self.logger.exception(
+                {
+                    "event": "naz.Client.speficic_handlers",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "response hook error",
+                    "error": str(e),
                 }
             )
 
