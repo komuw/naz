@@ -9,6 +9,9 @@ class BaseCorrelater:
 
     A Correlater is class that naz uses to store relations between SMPP sequence numbers
     and user applications' log_id's and/or hook_metadata.
+
+    Please note that this correlation is BEST EFFORT; it is not guaranteed(nor guaranteed to be reliable.)
+    One reason is that the SMPP spec mandates `sequence_number` to  wrap around after 0x7FFFFFFF(2,147,483,647) ≈ 2billion.
     """
 
     async def put(self, sequence_number: str, log_id: str, hook_metadata: str) -> None:
