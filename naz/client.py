@@ -332,6 +332,7 @@ class Client:
                 }
             )
 
+        import pdb;pdb.set_trace()
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
         await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
@@ -1372,7 +1373,7 @@ class NazLoggingAdapter(logging.LoggerAdapter):
             return "{0}".format(merged_log_event), kwargs
 
 
-class SmppSessionState(enum.Enum):
+class SmppSessionState:
     """
     see section 2.2 of SMPP spec document v3.4
     we are ignoring the other states since we are only concerning ourselves with an ESME in Transceiver mode.
@@ -1387,7 +1388,7 @@ class SmppSessionState(enum.Enum):
     CLOSED = "CLOSED"
 
 
-class SmppCommand(enum.Enum):
+class SmppCommand:
     """
     see section 4 of SMPP spec document v3.4
     """
