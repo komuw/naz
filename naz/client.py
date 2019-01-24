@@ -383,7 +383,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppCommand.BIND_TRANSCEIVER]
+        command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
         command_status = self.command_statuses["ESME_ROK"].code
         try:
@@ -468,7 +468,7 @@ class Client:
 
             # header
             command_length = 16 + len(body)  # 16 is for headers
-            command_id = self.command_ids[SmppCommand.ENQUIRE_LINK]
+            command_id = self.command_ids[smpp_command]
             command_status = 0x00000000  # not used for `enquire_link`
             try:
                 sequence_number = self.sequence_generator.next_sequence()
@@ -551,7 +551,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppCommand.ENQUIRE_LINK_RESP]
+        command_id = self.command_ids[smpp_command]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
@@ -611,7 +611,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppCommand.UNBIND_RESP]
+        command_id = self.command_ids[smpp_command]
         command_status = self.command_statuses["ESME_ROK"].code
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
@@ -819,7 +819,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppCommand.SUBMIT_SM]
+        command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
         command_status = 0x00000000  # not used for `submit_sm`
         try:
@@ -1401,7 +1401,7 @@ class Client:
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
-        command_id = self.command_ids[SmppCommand.UNBIND]
+        command_id = self.command_ids[smpp_command]
         command_status = 0x00000000  # not used for `unbind`
         try:
             sequence_number = self.sequence_generator.next_sequence()
