@@ -120,7 +120,8 @@ cli = naz.Client(
 
 ## 2. naz enqueued message protocol. 
 Your application enqueues an item in the form of a json object to a queue of it's choice and then `naz` dequeues that message, converts it into a python object and uses the parameters in there to send the message to the right place.        
-`naz` supports the following items:     
+`naz` supports the following items:       
+
 *parameter* | *meaning*     | type | *expectation*
 ---         | ---           | ---  | ---     
 version     | the current version of the naz message protocol | string | mandatory
@@ -129,7 +130,8 @@ log_id | a unique identify of this request | string | mandatory
 short_message | message to send to SMSC | string | optional (it is however mandatory for `naz.SmppCommand.SUBMIT_SM`)
 source_addr | the identifier(eg msisdn) of the message sender | string | optional (it is however mandatory for `naz.SmppCommand.SUBMIT_SM`)
 destination_addr | the identifier(eg msisdn) of the message recipient | string | optional (it is however mandatory for `naz.SmppCommand.SUBMIT_SM`)
-hook_metadata | additional metadata that you would like to be passed on to hooks | string | optional
+hook_metadata | additional metadata that you would like to be passed on to hooks | string | optional     
+
 
 **Note:** The enqueued item has a `version` field. This indicates the current version of the naz message protocol.    
 A future version of `naz` may ship with a different message protocol that may require different mandatory fields to be in the 
