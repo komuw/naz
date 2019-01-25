@@ -1,4 +1,3 @@
-import enum
 import struct
 import random
 import string
@@ -223,9 +222,10 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
     def search_by_command_id_code(self, command_id_code):
-        for key, val in self.command_ids.items():
-            if val == command_id_code:
-                return key
+        for key, val in SmppCommandStatus.__dict__.items():
+            if not key.startswith("__"):
+                if command_id_code == val.value:
+                    return val
         return None
 
     def search_by_command_status_code(self, command_status_code):
@@ -293,7 +293,7 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
-        command_status = SmppCommandStatus.ESME_ROK.value.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
@@ -460,7 +460,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -520,7 +520,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -566,7 +566,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -1135,9 +1135,8 @@ class Client:
         # todo: pliz find a better way of doing this.
         # this will cause global warming with useless computation
         CommandStatus = self.search_by_command_status_code(command_status)
-        import pdb;pdb.set_trace()
 
-        if CommandStatus.value.value != SmppCommandStatus.ESME_ROK.value.value:
+        if CommandStatus.value.value != SmppCommandStatus.ESME_ROK.value:
             # we got an error from SMSC
             self.logger.exception(
                 {
@@ -1163,9 +1162,9 @@ class Client:
 
         try:
             # call throttling handler
-            if command_status == SmppCommandStatus.ESME_ROK.value.value:
+            if command_status == SmppCommandStatus.ESME_ROK.value:
                 await self.throttle_handler.not_throttled()
-            elif command_status == SmppCommandStatus.ESME_RTHROTTLED.value.value:
+            elif command_status == SmppCommandStatus.ESME_RTHROTTLED.value:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self.logger.exception(
@@ -1194,7 +1193,7 @@ class Client:
         elif smpp_command == SmppCommand.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
-            if command_status == SmppCommandStatus.ESME_ROK.value.value:
+            if command_status == SmppCommandStatus.ESME_ROK.value:
                 self.current_session_state = SmppSessionState.BOUND_TRX
         elif smpp_command == SmppCommand.UNBIND:
             # we need to handle this since we need to send unbind_resp
@@ -1409,7 +1408,7 @@ class SmppCommand:
 _commandStatus = collections.namedtuple("CommandStatus", "code value description")
 
 
-class SmppCommandStatus(enum.Enum):
+class SmppCommandStatus:
     """
     see section 5.1.3 of smpp ver 3.4 spec document
     """
