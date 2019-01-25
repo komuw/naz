@@ -1,6 +1,7 @@
 import struct
 import random
 import string
+import typing
 import asyncio
 import logging
 import collections
@@ -1414,10 +1415,7 @@ class SmppCommand:
     GENERIC_NACK = "generic_nack"
 
 
-from typing import NamedTuple
-
-
-class CommandStatus(NamedTuple):
+class CommandStatus(typing.NamedTuple):
     code: str
     value: int
     description: str
