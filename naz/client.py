@@ -1266,9 +1266,6 @@ class Client:
                 }
             )
 
-        import pdb
-
-        pdb.set_trace()
         # call user's hook for responses
         try:
             await self.hook.response(
