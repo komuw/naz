@@ -222,6 +222,7 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
     def search_by_command_id_code(self, command_id_code):
+        import pdb;pdb.set_trace()
         for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
                 if command_id_code == val.value:
