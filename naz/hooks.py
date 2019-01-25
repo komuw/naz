@@ -40,7 +40,7 @@ class BaseHook:
         smpp_command: str,
         log_id: str,
         hook_metadata: str,
-        response_status: "naz.client.CommandStatus",
+        response_status: "naz.CommandStatus",
     ) -> None:
         """
         called after a response is received from SMSC.
@@ -91,7 +91,7 @@ class SimpleHook(BaseHook):
         smpp_command: str,
         log_id: str,
         hook_metadata: str,
-        response_status: "naz.client.CommandStatus",
+        response_status: "naz.CommandStatus",
     ) -> None:
         """
         hook method that is called just after a response is gotten from SMSC.
