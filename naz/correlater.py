@@ -1,4 +1,5 @@
 import time
+from typing import Tuple
 
 
 class BaseCorrelater:
@@ -29,7 +30,7 @@ class BaseCorrelater:
         """
         raise NotImplementedError("put method must be implemented.")
 
-    async def get(self, sequence_number: str) -> (str, str):
+    async def get(self, sequence_number: str) -> Tuple[str, str]:
         """
         called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
 
@@ -87,7 +88,7 @@ class SimpleCorrelater(BaseCorrelater):
         # garbage collect
         await self.delete_after_ttl()
 
-    async def get(self, sequence_number: str) -> (str, str):
+    async def get(self, sequence_number: str) -> Tuple[str, str]:
         """
         get relation of SMPP sequence_number and log_id and/or hook_metadata
         """
@@ -101,7 +102,7 @@ class SimpleCorrelater(BaseCorrelater):
         await self.delete_after_ttl()
         return item["log_id"], item["hook_metadata"]
 
-    async def delete_after_ttl(self):
+    async def delete_after_ttl(self) -> None:
         """
         iterate over all stored items and delete any that are
         older than self.max_ttl seconds

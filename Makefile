@@ -38,4 +38,4 @@ test:
 	@printf "\n run flake8::\n" && flake8 .
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
-	@printf "\n run mypy::\n" && mypy --show-column-numbers -m naz.q -m naz.throttle -m naz.ratelimiter -m naz.hooks -m naz.sequence -m naz.correlater
+	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
