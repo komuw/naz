@@ -216,7 +216,7 @@ class MyPrometheusHook(naz.hooks.BaseHook):
                        smpp_command,
                        log_id,
                        hook_metadata,
-                       response_status):
+                       smsc_response):
         c = Counter('my_responses', 'Description of counter')
         c.inc() # Increment by 1
 
@@ -238,7 +238,7 @@ class SetMessageStateHook(naz.hooks.BaseHook):
                        smpp_command,
                        log_id,
                        hook_metadata,
-                       response_status):
+                       smsc_response):
         if smpp_command == naz.SmppCommand.DELIVER_SM:
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()

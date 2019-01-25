@@ -1275,7 +1275,7 @@ class Client:
                 smpp_command=smpp_command,
                 log_id=log_id,
                 hook_metadata=hook_metadata,
-                response_status=commandStatus,
+                smsc_response=commandStatus,
             )
         except Exception as e:
             self.logger.exception(
@@ -1417,12 +1417,14 @@ class SmppCommand:
     GENERIC_NACK = "generic_nack"
 
 
-
 from typing import NamedTuple
+
+
 class CommandStatus(NamedTuple):
     code: str
     value: int
     description: str
+
 
 class _SmppCommandStatus:
     """
