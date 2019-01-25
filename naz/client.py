@@ -227,10 +227,12 @@ class Client:
                 return key
         return None
 
+
     def search_by_command_status_code(self, command_status_code):
-        for member in SmppCommandStatus:
-            if command_status_code == member.value.value:
-                return member
+        for key, val in SmppCommandStatus.__dict__.items():
+            if not key.startswith("__"):
+                if command_status_code == val.value:
+                    return val
         return None
 
     @staticmethod
@@ -1134,6 +1136,7 @@ class Client:
         # todo: pliz find a better way of doing this.
         # this will cause global warming with useless computation
         CommandStatus = self.search_by_command_status_code(command_status)
+        import pdb;pdb.set_trace()
 
         if CommandStatus.value.value != SmppCommandStatus.ESME_ROK.value:
             # we got an error from SMSC
