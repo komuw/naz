@@ -2,7 +2,7 @@ import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import naz
+    import naz  # noqa: F401
 
 
 class BaseHook:
