@@ -44,7 +44,7 @@ You are also encouraged to consult any documentation of the SMSC partner that yo
 #### (ii) naz specific parameters
 *parameter* | *meaning*     | *default value*
 ---       | ---         | ---     
-encoding | encoding used to encode messages been sent to SMSC | gsm0338
+encoding | encoding<sup>1</sup> used to encode messages been sent to SMSC | gsm0338
 sequence_generator | python class used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
 outboundqueue | python class implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
 client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
@@ -147,4 +147,9 @@ example(in json):
 "destination_addr": "254722111111", 
 "hook_metadata": "{\\"telco\\": \\"verizon\\", \\"customer_id\\": 123456}"
 }'
-``` 
+```       
+
+
+
+**References:**       
+1. consult the python standard encodings: https://docs.python.org/3/library/codecs.html#standard-encodings       
