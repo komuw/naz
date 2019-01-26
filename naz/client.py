@@ -1159,7 +1159,7 @@ class Client:
                     "error": str(e),
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": command_status_value.description,
+                    "state": commandStatus.description,
                 }
             )
 
@@ -1233,8 +1233,8 @@ class Client:
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "command_status": command_status_value.code,
-                    "state": command_status_value.description,
+                    "command_status": commandStatus.code,
+                    "state": commandStatus.description,
                     "error": "the smpp_command:{0} has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
