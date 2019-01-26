@@ -146,7 +146,7 @@ To see help:
 
 `naz-cli --help`   
 ```shell         
-naz is an SMPP client.     
+naz is an async SMPP client.     
 example usage: naz-cli --config /path/to/my_config.json
 
 optional arguments:

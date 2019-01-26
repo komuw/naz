@@ -62,7 +62,7 @@ def make_parser():
     """
     parser = argparse.ArgumentParser(
         prog="naz",
-        description="""naz is an SMPP client.
+        description="""naz is an async SMPP client.
                 example usage:
                 naz-cli \
                 --config /path/to/my_config.json
