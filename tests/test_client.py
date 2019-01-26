@@ -204,7 +204,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
                     log_id="log_id",
                     hook_metadata="hook_metadata",
@@ -222,7 +222,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.UNBIND,
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
                     log_id="log_id",
                     hook_metadata="hook_metadata",
@@ -240,7 +240,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
                     log_id="log_id",
                     hook_metadata="hook_metadata",
@@ -323,7 +323,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
                     log_id="log_id",
                     hook_metadata="hook_metadata",
@@ -343,7 +343,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    command_status=0x00000058,
+                    command_status_value=0x00000058,
                     sequence_number=sequence_number,
                     log_id="log_id",
                     hook_metadata="hook_metadata",
@@ -425,7 +425,7 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
                     log_id="log_id",
                     hook_metadata="hook_metadata",
