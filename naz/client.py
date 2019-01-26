@@ -931,7 +931,7 @@ class Client:
                     else:
                         full_pdu = item_to_dequeue["pdu"]
                 except KeyError as e:
-                    e = ValueError(
+                    e = KeyError(
                         "enqueued message/object is missing required field:{}".format(str(e))
                     )
                     self.logger.exception(
