@@ -190,7 +190,7 @@ class Client:
 
     @staticmethod
     def find_data_coding(encoding):
-        for key, val in _SmppDataCoding.__dict__.items():
+        for key, val in SmppDataCoding.__dict__.items():
             if not key.startswith("__"):
                 if encoding == val.code:
                     return val.value
@@ -205,7 +205,7 @@ class Client:
     @staticmethod
     def search_by_command_status_value(command_status_value):
         # TODO: find a cheaper(better) way of doing this
-        for key, val in _SmppCommandStatus.__dict__.items():
+        for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
                 if command_status_value == val.value:
                     return val
@@ -270,7 +270,7 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
-        command_status = _SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
@@ -437,7 +437,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = _SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -497,7 +497,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = _SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -543,7 +543,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = _SmppCommandStatus.ESME_ROK.value
+        command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -1122,7 +1122,7 @@ class Client:
                     "error": "command_status:{0} is unknown.".format(command_status_value),
                 }
             )
-        elif commandStatus.value != _SmppCommandStatus.ESME_ROK.value:
+        elif commandStatus.value != SmppCommandStatus.ESME_ROK.value:
             # we got an error from SMSC
             self.logger.exception(
                 {
@@ -1148,9 +1148,9 @@ class Client:
 
         try:
             # call throttling handler
-            if commandStatus.value == _SmppCommandStatus.ESME_ROK.value:
+            if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
                 await self.throttle_handler.not_throttled()
-            elif commandStatus.value == _SmppCommandStatus.ESME_RTHROTTLED.value:
+            elif commandStatus.value == SmppCommandStatus.ESME_RTHROTTLED.value:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self.logger.exception(
@@ -1179,7 +1179,7 @@ class Client:
         elif smpp_command == SmppCommand.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
-            if commandStatus.value == _SmppCommandStatus.ESME_ROK.value:
+            if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
                 self.current_session_state = SmppSessionState.BOUND_TRX
         elif smpp_command == SmppCommand.UNBIND:
             # we need to handle this since we need to send unbind_resp
@@ -1396,7 +1396,7 @@ class CommandStatus(typing.NamedTuple):
     description: str
 
 
-class _SmppCommandStatus:
+class SmppCommandStatus:
     """
     see section 5.1.3 of smpp ver 3.4 spec document
     """
@@ -1590,7 +1590,7 @@ class DataCoding(typing.NamedTuple):
     description: str
 
 
-class _SmppDataCoding:
+class SmppDataCoding:
     """
     see section 5.2.19 of smpp ver 3.4 spec document.
     also see:
