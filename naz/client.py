@@ -1,6 +1,7 @@
 import struct
 import random
 import string
+import typing
 import asyncio
 import logging
 import collections
@@ -11,12 +12,6 @@ from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
-
-
-# todo:
-# 1. add configurable retries
-# 2. metrics, what is happening
-# 3. run end-to-end integration tests in ci.
 
 
 class Client:
@@ -150,93 +145,6 @@ class Client:
             SmppCommand.GENERIC_NACK: 0x80000000,
         }
 
-        # see section 5.1.3 of smpp ver 3.4 spec document
-        CommandStatus = collections.namedtuple("CommandStatus", "code description")
-        self.command_statuses = {
-            "ESME_ROK": CommandStatus(0x00000000, "Success"),
-            "ESME_RINVMSGLEN": CommandStatus(0x00000001, "Message Length is invalid"),
-            "ESME_RINVCMDLEN": CommandStatus(0x00000002, "Command Length is invalid"),
-            "ESME_RINVCMDID": CommandStatus(0x00000003, "Invalid Command ID"),
-            "ESME_RINVBNDSTS": CommandStatus(0x00000004, "Incorrect BIND Status for given command"),
-            "ESME_RALYBND": CommandStatus(0x00000005, "ESME Already in Bound State"),
-            "ESME_RINVPRTFLG": CommandStatus(0x00000006, "Invalid Priority Flag"),
-            "ESME_RINVREGDLVFLG": CommandStatus(0x00000007, "Invalid Registered Delivery Flag"),
-            "ESME_RSYSERR": CommandStatus(0x00000008, "System Error"),
-            "Reserved": CommandStatus(0x00000009, "Reserved"),
-            "ESME_RINVSRCADR": CommandStatus(0x0000000A, "Invalid Source Address"),
-            "ESME_RINVDSTADR": CommandStatus(0x0000000B, "Invalid Dest Addr"),
-            "ESME_RINVMSGID": CommandStatus(0x0000000C, "Message ID is invalid"),
-            "ESME_RBINDFAIL": CommandStatus(0x0000000D, "Bind Failed"),
-            "ESME_RINVPASWD": CommandStatus(0x0000000E, "Invalid Password"),
-            "ESME_RINVSYSID": CommandStatus(0x0000000F, "Invalid System ID"),
-            "REserved": CommandStatus(
-                0x00000010, "Reserved"
-            ),  # key has different capitalization to avoid clash
-            "ESME_RCANCELFAIL": CommandStatus(0x00000011, "Cancel SM Failed"),
-            "ReServed": CommandStatus(0x00000012, "Reserved"),
-            "ESME_RREPLACEFAIL": CommandStatus(0x00000013, "Replace SM Failed"),
-            "ESME_RMSGQFUL": CommandStatus(0x00000014, "Message Queue Full"),
-            "ESME_RINVSERTYP": CommandStatus(0x00000015, "Invalid Service Type"),
-            # Reserved 0x00000016 - 0x00000032 Reserved
-            "ESME_RINVNUMDESTS": CommandStatus(0x00000033, "Invalid number of destinations"),
-            "ESME_RINVDLNAME": CommandStatus(0x00000034, "Invalid Distribution List name"),
-            # Reserved 0x00000035 - 0x0000003F Reserved
-            "ESME_RINVDESTFLAG": CommandStatus(
-                0x00000040, "Destination flag is invalid (submit_multi)"
-            ),
-            "ResErved": CommandStatus(0x00000041, "Reserved"),
-            "ESME_RINVSUBREP": CommandStatus(
-                0x00000042,
-                "Invalid (submit with replace) request(i.e. submit_sm with replace_if_present_flag set)",
-            ),
-            "ESME_RINVESMCLASS": CommandStatus(0x00000043, "Invalid esm_class field data"),
-            "ESME_RCNTSUBDL": CommandStatus(0x00000044, "Cannot Submit to Distribution List"),
-            "ESME_RSUBMITFAIL": CommandStatus(0x00000045, "Submit_sm or submit_multi failed"),
-            # Reserved 0x00000046 - 0x00000047 Reserved
-            "ESME_RINVSRCTON": CommandStatus(0x00000048, "Invalid Source address TON"),
-            "ESME_RINVSRCNPI": CommandStatus(0x00000049, "Invalid Source address NPI"),
-            "ESME_RINVDSTTON": CommandStatus(0x00000050, "Invalid Destination address TON"),
-            "ESME_RINVDSTNPI": CommandStatus(0x00000051, "Invalid Destination address NPI"),
-            "ReseRved": CommandStatus(0x00000052, "Reserved"),
-            "ESME_RINVSYSTYP": CommandStatus(0x00000053, "Invalid system_type field"),
-            "ESME_RINVREPFLAG": CommandStatus(0x00000054, "Invalid replace_if_present flag"),
-            "ESME_RINVNUMMSGS": CommandStatus(0x00000055, "Invalid number of messages"),
-            # Reserved 0x00000056 - 0x00000057 Reserved
-            "ESME_RTHROTTLED": CommandStatus(
-                0x00000058, "Throttling error (ESME has exceeded allowed message limits)"
-            ),
-            # Reserved 0x00000059 - 0x00000060 Reserved
-            "ESME_RINVSCHED": CommandStatus(0x00000061, "Invalid Scheduled Delivery Time"),
-            "ESME_RINVEXPIRY": CommandStatus(
-                0x00000062, "Invalid message validity period (Expiry time)"
-            ),
-            "ESME_RINVDFTMSGID": CommandStatus(
-                0x00000063, "Predefined Message Invalid or Not Found"
-            ),
-            "ESME_RX_T_APPN": CommandStatus(0x00000064, "ESME Receiver Temporary App Error Code"),
-            "ESME_RX_P_APPN": CommandStatus(0x00000065, "ESME Receiver Permanent App Error Code"),
-            "ESME_RX_R_APPN": CommandStatus(0x00000066, "ESME Receiver Reject Message Error Code"),
-            "ESME_RQUERYFAIL": CommandStatus(0x00000067, "query_sm request failed"),
-            # Reserved 0x00000068 - 0x000000BF Reserved
-            "ESME_RINVOPTPARSTREAM": CommandStatus(
-                0x000000C0, "Error in the optional part of the PDU Body."
-            ),
-            "ESME_ROPTPARNOTALLWD": CommandStatus(0x000000C1, "Optional Parameter not allowed"),
-            "ESME_RINVPARLEN": CommandStatus(0x000000C2, "Invalid Parameter Length."),
-            "ESME_RMISSINGOPTPARAM": CommandStatus(
-                0x000000C3, "Expected Optional Parameter missing"
-            ),
-            "ESME_RINVOPTPARAMVAL": CommandStatus(0x000000C4, "Invalid Optional Parameter Value"),
-            # Reserved 0x000000C5 - 0x000000FD Reserved
-            "ESME_RDELIVERYFAILURE": CommandStatus(
-                0x000000FE, "Delivery Failure (used for data_sm_resp)"
-            ),
-            "ESME_RUNKNOWNERR": CommandStatus(0x000000FF, "Unknown Error"),
-            # Reserved for SMPP extension 0x00000100 - 0x000003FF Reserved for SMPP extension
-            # Reserved for SMSC vendor specific errors 0x00000400 - 0x000004FF Reserved for SMSC vendor specific errors
-            # Reserved 0x00000500 - 0xFFFFFFFF Reserved
-        }
-
         # see section 5.2.19
         DataCoding = collections.namedtuple("DataCoding", "code description")
         # the keys to the `data_codings` dict are the names of the codecs as defined in https://docs.python.org/3.6/library/codecs.html
@@ -320,11 +228,13 @@ class Client:
                 return key
         return None
 
-    def search_by_command_status_code(self, command_status_code):
-        for key, val in self.command_statuses.items():
-            if val.code == command_status_code:
-                return key, val
-        return None, None
+    def search_by_command_status_value(self, command_status_value):
+        # TODO: find a cheaper(better) way of doing this
+        for key, val in _SmppCommandStatus.__dict__.items():
+            if not key.startswith("__"):
+                if command_status_value == val.value:
+                    return val
+        return None
 
     @staticmethod
     def retry_after(current_retries):
@@ -385,7 +295,7 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
-        command_status = self.command_statuses["ESME_ROK"].code
+        command_status = _SmppCommandStatus.ESME_ROK.value
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
@@ -552,7 +462,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = self.command_statuses["ESME_ROK"].code
+        command_status = _SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -612,7 +522,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = self.command_statuses["ESME_ROK"].code
+        command_status = _SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -658,7 +568,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = self.command_statuses["ESME_ROK"].code
+        command_status = _SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -1164,9 +1074,6 @@ class Client:
         self.logger.info({"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
-        command_length_header_data = header_data[:4]
-        total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
-
         command_id_header_data = header_data[4:8]
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
@@ -1204,31 +1111,12 @@ class Client:
             )
             raise ValueError("command_id:{0} is unknown.".format(command_id))
 
-        # call user's hook for responses
-        try:
-            # todo: send log_id to response hook, when we are eventually able to relate
-            # everything to a log_id
-            await self.hook.response(
-                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
-            )
-        except Exception as e:
-            self.logger.exception(
-                {
-                    "event": "naz.Client.parse_response_pdu",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "response hook error",
-                    "error": str(e),
-                }
-            )
-
         await self.speficic_handlers(
             smpp_command=smpp_command,
-            command_status=command_status,
+            command_status_value=command_status,
             sequence_number=sequence_number,
             log_id=log_id,
-            total_pdu_length=total_pdu_length,
+            hook_metadata=hook_metadata,
         )
         self.logger.info(
             {
@@ -1241,18 +1129,25 @@ class Client:
         )
 
     async def speficic_handlers(
-        self, smpp_command, command_status, sequence_number, log_id, total_pdu_length
+        self, smpp_command, command_status_value, sequence_number, log_id, hook_metadata
     ):
         """
         this handles parsing speficic
         """
-        # todo: pliz find a better way of doing this.
-        # this will cause global warming with useless computation
-        command_status_name, command_status_value = self.search_by_command_status_code(
-            command_status
+        commandStatus = self.search_by_command_status_value(
+            command_status_value=command_status_value
         )
-
-        if command_status != self.command_statuses["ESME_ROK"].code:
+        if not commandStatus:
+            self.logger.exception(
+                {
+                    "event": "naz.Client.speficic_handlers",
+                    "stage": "start",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "error": "command_status:{0} is unknown.".format(command_status_value),
+                }
+            )
+        elif commandStatus.value != _SmppCommandStatus.ESME_ROK.value:
             # we got an error from SMSC
             self.logger.exception(
                 {
@@ -1260,8 +1155,8 @@ class Client:
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "command_status": command_status_value.code,
-                    "state": command_status_value.description,
+                    "command_status": commandStatus.value,
+                    "state": commandStatus.description,
                 }
             )
         else:
@@ -1271,16 +1166,16 @@ class Client:
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "command_status": command_status_value.code,
-                    "state": command_status_value.description,
+                    "command_status": commandStatus.value,
+                    "state": commandStatus.description,
                 }
             )
 
         try:
             # call throttling handler
-            if command_status == self.command_statuses["ESME_ROK"].code:
+            if commandStatus.value == _SmppCommandStatus.ESME_ROK.value:
                 await self.throttle_handler.not_throttled()
-            elif command_status == self.command_statuses["ESME_RTHROTTLED"].code:
+            elif commandStatus.value == _SmppCommandStatus.ESME_RTHROTTLED.value:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self.logger.exception(
@@ -1309,7 +1204,7 @@ class Client:
         elif smpp_command == SmppCommand.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
-            if command_status == self.command_statuses["ESME_ROK"].code:
+            if commandStatus.value == _SmppCommandStatus.ESME_ROK.value:
                 self.current_session_state = SmppSessionState.BOUND_TRX
         elif smpp_command == SmppCommand.UNBIND:
             # we need to handle this since we need to send unbind_resp
@@ -1320,7 +1215,6 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-            # todo: call user's hook in here. we should correlate user's supplied log_id and sequence_number
             pass
         elif smpp_command == SmppCommand.DELIVER_SM:
             # HEADER::
@@ -1370,6 +1264,26 @@ class Client:
                     "error": "the smpp_command:{0} has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
+                }
+            )
+
+        # call user's hook for responses
+        try:
+            await self.hook.response(
+                smpp_command=smpp_command,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                smsc_response=commandStatus,
+            )
+        except Exception as e:
+            self.logger.exception(
+                {
+                    "event": "naz.Client.speficic_handlers",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "response hook error",
+                    "error": str(e),
                 }
             )
 
@@ -1499,3 +1413,197 @@ class SmppCommand:
     ENQUIRE_LINK = "enquire_link"
     ENQUIRE_LINK_RESP = "enquire_link_resp"
     GENERIC_NACK = "generic_nack"
+
+
+class CommandStatus(typing.NamedTuple):
+    code: str
+    value: int
+    description: str
+
+
+class _SmppCommandStatus:
+    """
+    see section 5.1.3 of smpp ver 3.4 spec document
+    """
+
+    ESME_ROK = CommandStatus(code="ESME_ROK", value=0x00000000, description="Success")
+    ESME_RINVMSGLEN = CommandStatus(
+        code="ESME_RINVMSGLEN", value=0x00000001, description="Message Length is invalid"
+    )
+    ESME_RINVCMDLEN = CommandStatus(
+        code="ESME_RINVCMDLEN", value=0x00000002, description="Command Length is invalid"
+    )
+    ESME_RINVCMDID = CommandStatus(
+        code="ESME_RINVCMDID", value=0x00000003, description="Invalid Command ID"
+    )
+    ESME_RINVBNDSTS = CommandStatus(
+        code="ESME_RINVBNDSTS",
+        value=0x00000004,
+        description="Incorrect BIND Status for given command",
+    )
+    ESME_RALYBND = CommandStatus(
+        code="ESME_RALYBND", value=0x00000005, description="ESME Already in Bound State"
+    )
+    ESME_RINVPRTFLG = CommandStatus(
+        code="ESME_RINVPRTFLG", value=0x00000006, description="Invalid Priority Flag"
+    )
+    ESME_RINVREGDLVFLG = CommandStatus(
+        code="ESME_RINVREGDLVFLG", value=0x00000007, description="Invalid Registered Delivery Flag"
+    )
+    ESME_RSYSERR = CommandStatus(code="ESME_RSYSERR", value=0x00000008, description="System Error")
+    # Reserved =  CommandStatus(code="Reserved", value=0x00000009,description= "Reserved")
+    ESME_RINVSRCADR = CommandStatus(
+        code="ESME_RINVSRCADR", value=0x0000000A, description="Invalid Source Address"
+    )
+    ESME_RINVDSTADR = CommandStatus(
+        code="ESME_RINVDSTADR", value=0x0000000B, description="Invalid Dest Addr"
+    )
+    ESME_RINVMSGID = CommandStatus(
+        code="ESME_RINVMSGID", value=0x0000000C, description="Message ID is invalid"
+    )
+    ESME_RBINDFAIL = CommandStatus(
+        code="ESME_RBINDFAIL", value=0x0000000D, description="Bind Failed"
+    )
+    ESME_RINVPASWD = CommandStatus(
+        code="ESME_RINVPASWD", value=0x0000000E, description="Invalid Password"
+    )
+    ESME_RINVSYSID = CommandStatus(
+        code="ESME_RINVSYSID", value=0x0000000F, description="Invalid System ID"
+    )
+    # Reserved =  CommandStatus(code="Reserved", value=0x00000010,description= "Reserved")
+    ESME_RCANCELFAIL = CommandStatus(
+        code="ESME_RCANCELFAIL", value=0x00000011, description="Cancel SM Failed"
+    )
+    # Reserved =  CommandStatus(code="Reserved", value=0x00000012,description= "Reserved")
+    ESME_RREPLACEFAIL = CommandStatus(
+        code="ESME_RREPLACEFAIL", value=0x00000013, description="Replace SM Failed"
+    )
+    ESME_RMSGQFUL = CommandStatus(
+        code="ESME_RMSGQFUL", value=0x00000014, description="Message Queue Full"
+    )
+    ESME_RINVSERTYP = CommandStatus(
+        code="ESME_RINVSERTYP", value=0x00000015, description="Invalid Service Type"
+    )
+    # Reserved 0x00000016 - 0x00000032 Reserved
+    ESME_RINVNUMDESTS = CommandStatus(
+        code="ESME_RINVNUMDESTS", value=0x00000033, description="Invalid number of destinations"
+    )
+    ESME_RINVDLNAME = CommandStatus(
+        code="ESME_RINVNUMDESTS", value=0x00000034, description="Invalid Distribution List name"
+    )
+    # Reserved 0x00000035 - 0x0000003F Reserved
+    ESME_RINVDESTFLAG = CommandStatus(
+        code="ESME_RINVDESTFLAG",
+        value=0x00000040,
+        description="Destination flag is invalid (submit_multi)",
+    )
+    # Reserved =  CommandStatus(code="Reserved", value=0x00000041,description= "Reserved")
+    ESME_RINVSUBREP = CommandStatus(
+        code="ESME_RINVSUBREP",
+        value=0x00000042,
+        description="Invalid (submit with replace) request(i.e. submit_sm with replace_if_present_flag set)",
+    )
+    ESME_RINVESMCLASS = CommandStatus(
+        code="ESME_RINVESMCLASS", value=0x00000043, description="Invalid esm_class field data"
+    )
+    ESME_RCNTSUBDL = CommandStatus(
+        code="ESME_RCNTSUBDL", value=0x00000044, description="Cannot Submit to Distribution List"
+    )
+    ESME_RSUBMITFAIL = CommandStatus(
+        code="ESME_RSUBMITFAIL", value=0x00000045, description="Submit_sm or submit_multi failed"
+    )
+    # Reserved 0x00000046 - 0x00000047 Reserved
+    ESME_RINVSRCTON = CommandStatus(
+        code="ESME_RINVSRCTON", value=0x00000048, description="Invalid Source address TON"
+    )
+    ESME_RINVSRCNPI = CommandStatus(
+        code="ESME_RINVSRCNPI", value=0x00000049, description="Invalid Source address NPI"
+    )
+    ESME_RINVDSTTON = CommandStatus(
+        code="ESME_RINVDSTTON", value=0x00000050, description="Invalid Destination address TON"
+    )
+    ESME_RINVDSTNPI = CommandStatus(
+        code="ESME_RINVDSTNPI", value=0x00000051, description="Invalid Destination address NPI"
+    )
+    # Reserved =  CommandStatus(code="Reserved", value=0x00000052,description= "Reserved")
+    ESME_RINVSYSTYP = CommandStatus(
+        code="ESME_RINVSYSTYP", value=0x00000053, description="Invalid system_type field"
+    )
+    ESME_RINVREPFLAG = CommandStatus(
+        code="ESME_RINVREPFLAG", value=0x00000054, description="Invalid replace_if_present flag"
+    )
+    ESME_RINVNUMMSGS = CommandStatus(
+        code="ESME_RINVNUMMSGS", value=0x00000055, description="Invalid number of messages"
+    )
+    # Reserved 0x00000056 - 0x00000057 Reserved
+    ESME_RTHROTTLED = CommandStatus(
+        code="ESME_RTHROTTLED",
+        value=0x00000058,
+        description="Throttling error (ESME has exceeded allowed message limits)",
+    )
+    # Reserved 0x00000059 - 0x00000060 Reserved
+    ESME_RINVSCHED = CommandStatus(
+        code="ESME_RINVSCHED", value=0x00000061, description="Invalid Scheduled Delivery Time"
+    )
+    ESME_RINVEXPIRY = CommandStatus(
+        code="ESME_RINVEXPIRY",
+        value=0x00000062,
+        description="Invalid message validity period (Expiry time)",
+    )
+    ESME_RINVDFTMSGID = CommandStatus(
+        code="ESME_RINVDFTMSGID",
+        value=0x00000063,
+        description="Predefined Message Invalid or Not Found",
+    )
+    ESME_RX_T_APPN = CommandStatus(
+        code="ESME_RX_T_APPN",
+        value=0x00000064,
+        description="ESME Receiver Temporary App Error Code",
+    )
+    ESME_RX_P_APPN = CommandStatus(
+        code="ESME_RX_P_APPN",
+        value=0x00000065,
+        description="ESME Receiver Permanent App Error Code",
+    )
+    ESME_RX_R_APPN = CommandStatus(
+        code="ESME_RX_R_APPN",
+        value=0x00000066,
+        description="ESME Receiver Reject Message Error Code",
+    )
+    ESME_RQUERYFAIL = CommandStatus(
+        code="ESME_RQUERYFAIL", value=0x00000067, description="query_sm request failed"
+    )
+    # Reserved 0x00000068 - 0x000000BF Reserved
+    ESME_RINVOPTPARSTREAM = CommandStatus(
+        code="ESME_RINVOPTPARSTREAM",
+        value=0x000000C0,
+        description="Error in the optional part of the PDU Body.",
+    )
+    ESME_ROPTPARNOTALLWD = CommandStatus(
+        code="ESME_ROPTPARNOTALLWD", value=0x000000C1, description="Optional Parameter not allowed"
+    )
+    ESME_RINVPARLEN = CommandStatus(
+        code="ESME_RINVPARLEN", value=0x000000C2, description="Invalid Parameter Length."
+    )
+    ESME_RMISSINGOPTPARAM = CommandStatus(
+        code="ESME_RMISSINGOPTPARAM",
+        value=0x000000C3,
+        description="Expected Optional Parameter missing",
+    )
+    ESME_RINVOPTPARAMVAL = CommandStatus(
+        code="ESME_RINVOPTPARAMVAL",
+        value=0x000000C4,
+        description="Invalid Optional Parameter Value",
+    )
+    # Reserved 0x000000C5 - 0x000000FD Reserved
+    ESME_RDELIVERYFAILURE = CommandStatus(
+        code="ESME_RDELIVERYFAILURE",
+        value=0x000000FE,
+        description="Delivery Failure (used for data_sm_resp)",
+    )
+    ESME_RUNKNOWNERR = CommandStatus(
+        code="ESME_RUNKNOWNERR", value=0x000000FF, description="Unknown Error"
+    )
+    # Reserved for SMPP extension 0x00000100 - 0x000003FF Reserved for SMPP extension
+    # Reserved for SMSC vendor specific errors 0x00000400 - 0x000004FF Reserved for SMSC vendor specific errors
+    # Reserved 0x00000500 - 0xFFFFFFFF Reserved

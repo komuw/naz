@@ -1,5 +1,8 @@
-import typing
 import logging
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import naz  # noqa: F401
 
 
 class BaseHook:
@@ -12,9 +15,7 @@ class BaseHook:
     after a response is received from SMSC.
     """
 
-    async def request(
-        self, smpp_command: str, log_id: str, hook_metadata: typing.Optional[str] = None
-    ) -> None:
+    async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
         """
         called before a request is sent to SMSC.
 
@@ -35,7 +36,7 @@ class BaseHook:
         raise NotImplementedError("request method must be implemented.")
 
     async def response(
-        self, smpp_command: str, log_id: str, hook_metadata: typing.Optional[str] = None
+        self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: "naz.CommandStatus"
     ) -> None:
         """
         called after a response is received from SMSC.
@@ -53,6 +54,8 @@ class BaseHook:
         :param hook_metadata:                  (optional) [str]
             a string that a user's application had previously supplied to naz
             that it may want to be correlated with the log_id.
+        :param smsc_response:                  (optional) [naz.CommandStatus]
+            the response from SMSC.
         """
         raise NotImplementedError("response method must be implemented.")
 
@@ -65,9 +68,7 @@ class SimpleHook(BaseHook):
     def __init__(self, logger) -> None:
         self.logger: logging.Logger = logger
 
-    async def request(
-        self, smpp_command: str, log_id: str, hook_metadata: typing.Optional[str] = None
-    ) -> None:
+    async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
         """
         hook method that is called just before a request is sent to SMSC.
         """
@@ -82,7 +83,7 @@ class SimpleHook(BaseHook):
         )
 
     async def response(
-        self, smpp_command: str, log_id: str, hook_metadata: typing.Optional[str] = None
+        self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: "naz.CommandStatus"
     ) -> None:
         """
         hook method that is called just after a response is gotten from SMSC.
@@ -94,5 +95,6 @@ class SimpleHook(BaseHook):
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
+                "smsc_response": smsc_response.description,
             }
         )

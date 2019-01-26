@@ -209,10 +209,14 @@ import naz
 from prometheus_client import Counter
 
 class MyPrometheusHook(naz.hooks.BaseHook):
-    async def request(self, smpp_command, log_id):
+    async def request(self, smpp_command, log_id, hook_metadata):
         c = Counter('my_requests', 'Description of counter')
         c.inc() # Increment by 1
-    async def response(self, smpp_command, log_id):
+    async def response(self,
+                       smpp_command,
+                       log_id,
+                       hook_metadata,
+                       smsc_response):
         c = Counter('my_responses', 'Description of counter')
         c.inc() # Increment by 1
 
@@ -228,9 +232,13 @@ import sqlite3
 import naz
 
 class SetMessageStateHook(naz.hooks.BaseHook):
-    async def request(self, smpp_command, log_id):
+    async def request(self, smpp_command, log_id, hook_metadata):
         pass
-    async def response(self, smpp_command, log_id):
+    async def response(self,
+                       smpp_command,
+                       log_id,
+                       hook_metadata,
+                       smsc_response):
         if smpp_command == naz.SmppCommand.DELIVER_SM:
             conn = sqlite3.connect('mySmsDB.db')
             c = conn.cursor()

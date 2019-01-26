@@ -204,12 +204,13 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    log_id="log_id",
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
+
             self.assertTrue(mock_naz_enquire_link_resp.mock.called)
             self.assertEqual(
                 mock_naz_enquire_link_resp.mock.call_args[1]["sequence_number"], sequence_number
@@ -221,10 +222,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.UNBIND,
-                    log_id="log_id",
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_naz_send_data.mock.called)
@@ -239,10 +240,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    log_id="log_id",
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
@@ -322,10 +323,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    log_id="log_id",
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_not_throttled.mock.called)
@@ -342,10 +343,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.DELIVER_SM,
-                    log_id="log_id",
-                    command_status=0x00000058,
+                    command_status_value=0x00000058,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_throttled.mock.called)
@@ -424,10 +425,10 @@ class TestClient(TestCase):
             self._run(
                 self.cli.speficic_handlers(
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
-                    log_id="log_id",
-                    command_status=0,
+                    command_status_value=0,
                     sequence_number=sequence_number,
-                    total_pdu_length=16,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
                 )
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
@@ -503,7 +504,8 @@ class TestClient(TestCase):
     def test_correlater_get_called(self):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.get", new=AsyncMock()
-        ) as mock_correlater_get, mock.patch("naz.Client.speficic_handlers", new=AsyncMock()):
+        ) as mock_correlater_get:
+            mock_correlater_get.return_value = "log_id", "hook_metadata"
             self._run(
                 self.cli.parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
