@@ -168,7 +168,7 @@ class Client:
         if not self.logger.handlers:
             self.logger.addHandler(handler)
         self.logger.setLevel(self.loglevel)
-        self.logger:NazLoggingAdapter = NazLoggingAdapter(self.logger, extra_log_data)
+        self.logger: NazLoggingAdapter = NazLoggingAdapter(self.logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
@@ -217,13 +217,13 @@ class Client:
         return None
 
     @staticmethod
-    def search_by_command_status_value(command_status_value: int) -> Optional[CommandStatus]:
+    def search_by_command_status_value(command_status_value: int) -> CommandStatus:
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
                 if command_status_value == val.value:
                     return val
-        return None
+        raise ValueError("CommandStatus of value:{0} does not exist.".format(command_status_value))
 
     @staticmethod
     def retry_after(current_retries):
