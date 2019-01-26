@@ -145,41 +145,7 @@ class Client:
             SmppCommand.GENERIC_NACK: 0x80000000,
         }
 
-        # see section 5.2.19
-        DataCoding = collections.namedtuple("DataCoding", "code description")
-        # the keys to the `data_codings` dict are the names of the codecs as defined in https://docs.python.org/3.6/library/codecs.html
-        # that is if they exist in that document.
-        self.data_codings = {
-            "gsm0338": DataCoding(0b00000000, "SMSC Default Alphabet"),
-            "ascii": DataCoding(0b00000001, "IA5(CCITT T.50) / ASCII(ANSI X3.4)"),
-            "octet_unspecified_I": DataCoding(0b00000010, "Octet unspecified(8 - bit binary)"),
-            "latin_1": DataCoding(0b00000011, "Latin 1 (ISO - 8859 - 1)"),
-            "octet_unspecified_II": DataCoding(0b00000100, "Octet unspecified(8 - bit binary)"),
-            # iso2022_jp, iso2022jp and iso-2022-jp are aliases
-            # see: https://stackoverflow.com/a/43240579/2768067
-            "iso2022_jp": DataCoding(0b00000101, "JIS(X 0208 - 1990)"),
-            "iso8859_5": DataCoding(0b00000110, "Cyrllic(ISO - 8859 - 5)"),
-            "iso8859_8": DataCoding(0b00000111, "Latin / Hebrew(ISO - 8859 - 8)"),
-            # see: https://stackoverflow.com/a/14488478/2768067
-            "utf_16_be": DataCoding(0b00001000, "UCS2(ISO / IEC - 10646)"),
-            "ucs2": DataCoding(0b00001000, "UCS2(ISO / IEC - 10646)"),
-            "shift_jis": DataCoding(0b00001001, "Pictogram Encoding"),
-            "iso2022jp": DataCoding(0b00001010, "ISO - 2022 - JP(Music Codes)"),
-            "reservedI": DataCoding(0b00001011, "reserved"),
-            "reservedII": DataCoding(0b00001100, "reserved"),
-            # not the same as iso2022_jp but ...
-            "iso-2022-jp": DataCoding(0b00001101, "Extended Kanji JIS(X 0212 - 1990)"),
-            "euc_kr": DataCoding(0b00001110, "KS C 5601"),
-            # 00001111 - 10111111 reserved
-            # 0b1100xxxx GSM MWI control - see [GSM 03.38]
-            # 0b1101xxxx GSM MWI control - see [GSM 03.38]
-            # 0b1110xxxx reserved
-            # 0b1111xxxx GSM message class control - see [GSM 03.38]
-        }
-        # also see:
-        # https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260
-
-        self.data_coding = self.data_codings[self.encoding].code
+        self.data_coding = self.find_data_coding(self.encoding)
 
         self.reader = None
         self.writer = None
@@ -222,13 +188,22 @@ class Client:
 
         self.current_session_state = SmppSessionState.CLOSED
 
+    @staticmethod
+    def find_data_coding(encoding):
+        for key, val in _SmppDataCoding.__dict__.items():
+            if not key.startswith("__"):
+                if encoding == val.code:
+                    return val.value
+        raise ValueError("That encoding:{0} is not recognised.".format(encoding))
+
     def search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
             if val == command_id_code:
                 return key
         return None
 
-    def search_by_command_status_value(self, command_status_value):
+    @staticmethod
+    def search_by_command_status_value(command_status_value):
         # TODO: find a cheaper(better) way of doing this
         for key, val in _SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
@@ -1607,3 +1582,68 @@ class _SmppCommandStatus:
     # Reserved for SMPP extension 0x00000100 - 0x000003FF Reserved for SMPP extension
     # Reserved for SMSC vendor specific errors 0x00000400 - 0x000004FF Reserved for SMSC vendor specific errors
     # Reserved 0x00000500 - 0xFFFFFFFF Reserved
+
+
+class DataCoding(typing.NamedTuple):
+    code: str
+    value: int
+    description: str
+
+
+class _SmppDataCoding:
+    """
+    see section 5.2.19 of smpp ver 3.4 spec document.
+    also see:
+      1. https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260
+      2. https://docs.python.org/3/library/codecs.html
+      3. https://docs.python.org/3/library/codecs.html#standard-encodings 
+    
+    The attributes of this class are equivalent to some of the names found in the python standard-encodings documentation
+    ie; https://docs.python.org/3/library/codecs.html#standard-encodings 
+    """
+
+    gsm0338 = DataCoding(code="gsm0338", value=0b00000000, description="SMSC Default Alphabet")
+    ascii = DataCoding(
+        code="ascii", value=0b00000001, description="IA5(CCITT T.50) / ASCII(ANSI X3.4)"
+    )
+    octet_unspecified_I = DataCoding(
+        code="octet_unspecified_I",
+        value=0b00000010,
+        description="Octet unspecified(8 - bit binary)",
+    )
+    latin_1 = DataCoding(code="latin_1", value=0b00000011, description="Latin 1 (ISO - 8859 - 1)")
+    octet_unspecified_II = DataCoding(
+        code="octet_unspecified_II",
+        value=0b00000100,
+        description="Octet unspecified(8 - bit binary)",
+    )
+    # iso2022_jp, iso2022jp and iso-2022-jp are aliases
+    # see: https://stackoverflow.com/a/43240579/2768067
+    iso2022_jp = DataCoding(code="iso2022_jp", value=0b00000101, description="JIS(X 0208 - 1990)")
+    iso8859_5 = DataCoding(
+        code="iso8859_5", value=0b00000110, description="Cyrllic(ISO - 8859 - 5)"
+    )
+    iso8859_8 = DataCoding(
+        code="iso8859_8", value=0b00000111, description="Latin / Hebrew(ISO - 8859 - 8)"
+    )
+    # see: https://stackoverflow.com/a/14488478/2768067
+    utf_16_be = DataCoding(
+        code="utf_16_be", value=0b00001000, description="UCS2(ISO / IEC - 10646)"
+    )
+    ucs2 = DataCoding(code="ucs2", value=0b00001000, description="UCS2(ISO / IEC - 10646)")
+    shift_jis = DataCoding(code="shift_jis", value=0b00001001, description="Pictogram Encoding")
+    iso2022jp = DataCoding(
+        code="iso2022jp", value=0b00001010, description="ISO - 2022 - JP(Music Codes)"
+    )
+    # reservedI= DataCoding(code="reservedI", value=0b00001011, description= "reserved")
+    # reservedII= DataCoding(code="reservedII", value=0b00001100, description= "reserved")
+    euc_kr = DataCoding(code="euc_kr", value=0b00001110, description="KS C 5601")
+
+    # not the same as iso2022_jp but ... ¯\_(ツ)_/¯
+    # iso-2022-jp=DataCoding(code="iso-2022-jp", value=0b00001101, description="Extended Kanji JIS(X 0212 - 1990)")
+
+    # 00001111 - 10111111 reserved
+    # 0b1100xxxx GSM MWI control - see [GSM 03.38]
+    # 0b1101xxxx GSM MWI control - see [GSM 03.38]
+    # 0b1110xxxx reserved
+    # 0b1111xxxx GSM message class control - see [GSM 03.38]
