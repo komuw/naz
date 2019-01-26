@@ -513,3 +513,24 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_correlater_get.mock.called)
             self.assertTrue(mock_correlater_get.mock.call_args[1]["sequence_number"])
+
+    def test_instantiate_bad_encoding(self):
+        encoding = "unknownEncoding"
+
+        def mock_create_client():
+            naz.Client(
+                async_loop=self.loop,
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password="password",
+                encoding=encoding,
+                outboundqueue=self.outboundqueue,
+            )
+
+        self.assertRaises(ValueError, mock_create_client)
+        with self.assertRaises(ValueError) as raised_exception:
+            mock_create_client()
+        self.assertIn(
+            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
+        )
