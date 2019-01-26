@@ -13,56 +13,62 @@ from . import correlater
 from . import ratelimiter
 
 
+from asyncio.streams import StreamReader, StreamWriter
+from asyncio.unix_events import _UnixSelectorEventLoop
+from examples.example_klasses import ExampleRedisQueue, MyRateLimiter, MySeqGen
+from typing import Any, Dict, Tuple, Union, Optional
+
+
 class Client:
     """
     """
 
     def __init__(
         self,
-        async_loop,
-        smsc_host,
-        smsc_port,
-        system_id,
-        password,
-        outboundqueue,
-        client_id=None,
-        system_type="",
-        addr_ton=0,
-        addr_npi=0,
-        address_range="",
-        encoding="gsm0338",
-        interface_version=34,
-        service_type="CMT",  # section 5.2.11
-        source_addr_ton=0x00000001,  # section 5.2.5
-        source_addr_npi=0x00000001,
-        dest_addr_ton=0x00000001,
-        dest_addr_npi=0x00000001,
+        async_loop: _UnixSelectorEventLoop,
+        smsc_host: str,
+        smsc_port: int,
+        system_id: str,
+        password: str,
+        outboundqueue: ExampleRedisQueue,
+        client_id: Optional[str] = None,
+        system_type: str = "",
+        addr_ton: int = 0,
+        addr_npi: int = 0,
+        address_range: str = "",
+        encoding: str = "gsm0338",
+        interface_version: int = 34,
+        service_type: str = "CMT",  # section 5.2.11
+        source_addr_ton: int = 0x00000001,  # section 5.2.5
+        source_addr_npi: int = 0x00000001,
+        dest_addr_ton: int = 0x00000001,
+        dest_addr_npi: int = 0x00000001,
         # xxxxxx00 store-and-forward
         # xx0010xx Short Message contains ESME Delivery Acknowledgement
         # 00xxxxxx No specific features selected
-        esm_class=0b00000011,  # section 5.2.12
-        protocol_id=0x00000000,
-        priority_flag=0x00000000,
-        schedule_delivery_time="",
-        validity_period="",
+        esm_class: int = 0b00000011,  # section 5.2.12
+        protocol_id: int = 0x00000000,
+        priority_flag: int = 0x00000000,
+        schedule_delivery_time: str = "",
+        validity_period: str = "",
         # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
         # xxxx01xx SME Delivery Acknowledgement requested
         # xxx0xxxx No Intermediate notification requested
         # all other values reserved
-        registered_delivery=0b00000001,  # see section 5.2.17
-        replace_if_present_flag=0x00000000,
-        sm_default_msg_id=0x00000000,
-        enquire_link_interval=300,
-        loglevel="DEBUG",
-        log_metadata=None,
-        codec_class=None,
-        codec_errors_level="strict",
-        rateLimiter=None,
-        hook=None,
-        sequence_generator=None,
-        throttle_handler=None,
-        correlation_handler=None,
-    ):
+        registered_delivery: int = 0b00000001,  # see section 5.2.17
+        replace_if_present_flag: int = 0x00000000,
+        sm_default_msg_id: int = 0x00000000,
+        enquire_link_interval: int = 300,
+        loglevel: str = "DEBUG",
+        log_metadata: Optional[Dict[str, str]] = None,
+        codec_class: None = None,
+        codec_errors_level: str = "strict",
+        rateLimiter: Optional[MyRateLimiter] = None,
+        hook: None = None,
+        sequence_generator: Optional[MySeqGen] = None,
+        throttle_handler: None = None,
+        correlation_handler: None = None,
+    ) -> None:
         """
         todo: add docs
         """
@@ -188,21 +194,21 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
     @staticmethod
-    def find_data_coding(encoding):
+    def find_data_coding(encoding: str) -> int:
         for key, val in SmppDataCoding.__dict__.items():
             if not key.startswith("__"):
                 if encoding == val.code:
                     return val.value
         raise ValueError("That encoding:{0} is not recognised.".format(encoding))
 
-    def search_by_command_id_code(self, command_id_code):
+    def search_by_command_id_code(self, command_id_code: int) -> Optional[str]:
         for key, val in self.command_ids.items():
             if val == command_id_code:
                 return key
         return None
 
     @staticmethod
-    def search_by_command_status_value(command_status_value):
+    def search_by_command_status_value(command_status_value: int) -> Optional[CommandStatus]:
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
@@ -226,7 +232,7 @@ class Client:
         else:
             return 60 * (1 * (2 ** current_retries))
 
-    async def connect(self):
+    async def connect(self) -> Tuple[StreamReader, StreamWriter]:
         self.logger.info({"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
@@ -237,7 +243,7 @@ class Client:
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
 
-    async def tranceiver_bind(self):
+    async def tranceiver_bind(self) -> bytes:
         smpp_command = SmppCommand.BIND_TRANSCEIVER
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
@@ -321,7 +327,7 @@ class Client:
         )
         return full_pdu
 
-    async def enquire_link(self, TESTING=False):
+    async def enquire_link(self, TESTING: bool = False):
         """
         HEADER::
         # enquire_link has the following pdu header:
@@ -655,8 +661,13 @@ class Client:
         )
 
     async def build_submit_sm_pdu(
-        self, short_message, log_id, hook_metadata, source_addr, destination_addr
-    ):
+        self,
+        short_message: str,
+        log_id: str,
+        hook_metadata: str,
+        source_addr: str,
+        destination_addr: str,
+    ) -> bytes:
         smpp_command = SmppCommand.SUBMIT_SM
         self.logger.info(
             {
@@ -757,7 +768,9 @@ class Client:
         )
         return full_pdu
 
-    async def send_data(self, smpp_command, msg, log_id, hook_metadata=""):
+    async def send_data(
+        self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
+    ) -> None:
         """
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
@@ -861,7 +874,7 @@ class Client:
             }
         )
 
-    async def send_forever(self, TESTING=False):
+    async def send_forever(self, TESTING: bool = False):
         retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
@@ -988,7 +1001,7 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
-    async def receive_data(self, TESTING=False):
+    async def receive_data(self, TESTING: bool = False):
         """
         """
         retry_count = 0
@@ -1042,7 +1055,7 @@ class Client:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
 
-    async def parse_response_pdu(self, pdu):
+    async def parse_response_pdu(self, pdu: bytes) -> None:
         """
         """
         self.logger.info({"event": "naz.Client.parse_response_pdu", "stage": "start"})
@@ -1103,8 +1116,13 @@ class Client:
         )
 
     async def speficic_handlers(
-        self, smpp_command, command_status_value, sequence_number, log_id, hook_metadata
-    ):
+        self,
+        smpp_command: str,
+        command_status_value: int,
+        sequence_number: int,
+        log_id: str,
+        hook_metadata: str,
+    ) -> None:
         """
         this handles parsing speficic
         """
@@ -1347,7 +1365,17 @@ class NazLoggingAdapter(logging.LoggerAdapter):
     'log_metadata' key, whose value in brackets is apended to the log message.
     """
 
-    def process(self, msg, kwargs):
+    def process(
+        self,
+        msg: Union[
+            Dict[str, str],
+            str,
+            Dict[str, Union[str, bool]],
+            Dict[str, Union[str, int]],
+            Dict[str, Union[str, float, int]],
+        ],
+        kwargs: Dict[Any, Any],
+    ) -> Tuple[str, Dict[Any, Any]]:
         if isinstance(msg, str):
             return msg, kwargs
         else:
