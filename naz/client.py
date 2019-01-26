@@ -156,8 +156,8 @@ class Client:
 
         self.data_coding = self.find_data_coding(self.encoding)
 
-        self.reader: Optional[StreamReader] = None
-        self.writer: Optional[StreamWriter] = None
+        self.reader: Any = None
+        self.writer: Any = None
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         extra_log_data = {"log_metadata": self.log_metadata}
@@ -246,8 +246,8 @@ class Client:
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
-        self.reader = reader
-        self.writer = writer
+        self.reader: StreamReader = reader
+        self.writer: StreamWriter = writer
         self.logger.info({"event": "naz.Client.connect", "stage": "end"})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
@@ -1374,17 +1374,7 @@ class NazLoggingAdapter(logging.LoggerAdapter):
     'log_metadata' key, whose value in brackets is apended to the log message.
     """
 
-    def process(
-        self,
-        msg: Union[
-            Dict[str, str],
-            str,
-            Dict[str, Union[str, bool]],
-            Dict[str, Union[str, int]],
-            Dict[str, Union[str, float, int]],
-        ],
-        kwargs: Dict[Any, Any],
-    ) -> Tuple[str, Dict[Any, Any]]:
+    def process(self, msg, kwargs):
         if isinstance(msg, str):
             return msg, kwargs
         else:
