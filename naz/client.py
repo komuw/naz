@@ -161,14 +161,14 @@ class Client:
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         extra_log_data = {"log_metadata": self.log_metadata}
-        self.logger = logging.getLogger("naz.client")
+        self._logger = logging.getLogger("naz.client")
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel(self.loglevel)
-        self.logger: NazLoggingAdapter = NazLoggingAdapter(self.logger, extra_log_data)
+        if not self._logger.handlers:
+            self._logger.addHandler(handler)
+        self._logger.setLevel(self.loglevel)
+        self.logger: logging.LoggerAdapter = NazLoggingAdapter(self._logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
