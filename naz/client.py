@@ -12,15 +12,7 @@ from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
-
-from .stuff import *
-
-from asyncio.streams import StreamReader, StreamWriter
-from asyncio.unix_events import _UnixSelectorEventLoop
-from typing import Any, Dict, Tuple, Union, Optional
-
-if typing.TYPE_CHECKING:
-    from examples.example_klasses import ExampleRedisQueue, MyRateLimiter, MySeqGen
+from . import smpp_types
 
 
 class Client:
@@ -29,13 +21,13 @@ class Client:
 
     def __init__(
         self,
-        async_loop: _UnixSelectorEventLoop,
+        async_loop: asyncio.events.AbstractEventLoop,
         smsc_host: str,
         smsc_port: int,
         system_id: str,
         password: str,
         outboundqueue: q.BaseOutboundQueue,
-        client_id: Optional[str] = None,
+        client_id=None,
         system_type: str = "",
         addr_ton: int = 0,
         addr_npi: int = 0,
@@ -64,7 +56,7 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: int = 300,
         loglevel: str = "DEBUG",
-        log_metadata: Optional[Dict[str, str]] = None,
+        log_metadata=None,
         codec_class=None,
         codec_errors_level: str = "strict",
         rateLimiter=None,
@@ -98,7 +90,9 @@ class Client:
         self.outboundqueue = outboundqueue
         self.client_id = client_id
         if not self.client_id:
-            self.client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
+            self.client_id: str = "".join(
+                random.choices(string.ascii_uppercase + string.digits, k=17)
+            )
         self.system_type = system_type
         self.interface_version = interface_version
         self.addr_ton = addr_ton
@@ -114,7 +108,7 @@ class Client:
         self.loglevel = loglevel.upper()
         self.log_metadata = log_metadata
         if not self.log_metadata:
-            self.log_metadata = {}
+            self.log_metadata: typing.Dict[typing.Any, typing.Any] = {}
         self.log_metadata.update(
             {"smsc_host": self.smsc_host, "system_id": system_id, "client_id": self.client_id}
         )
@@ -141,23 +135,23 @@ class Client:
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
         self.command_ids = {
-            SmppCommand.BIND_TRANSCEIVER: 0x00000009,
-            SmppCommand.BIND_TRANSCEIVER_RESP: 0x80000009,
-            SmppCommand.UNBIND: 0x00000006,
-            SmppCommand.UNBIND_RESP: 0x80000006,
-            SmppCommand.SUBMIT_SM: 0x00000004,
-            SmppCommand.SUBMIT_SM_RESP: 0x80000004,
-            SmppCommand.DELIVER_SM: 0x00000005,
-            SmppCommand.DELIVER_SM_RESP: 0x80000005,
-            SmppCommand.ENQUIRE_LINK: 0x00000015,
-            SmppCommand.ENQUIRE_LINK_RESP: 0x80000015,
-            SmppCommand.GENERIC_NACK: 0x80000000,
+            smpp_types.SmppCommand.BIND_TRANSCEIVER: 0x00000009,
+            smpp_types.SmppCommand.BIND_TRANSCEIVER_RESP: 0x80000009,
+            smpp_types.SmppCommand.UNBIND: 0x00000006,
+            smpp_types.SmppCommand.UNBIND_RESP: 0x80000006,
+            smpp_types.SmppCommand.SUBMIT_SM: 0x00000004,
+            smpp_types.SmppCommand.SUBMIT_SM_RESP: 0x80000004,
+            smpp_types.SmppCommand.DELIVER_SM: 0x00000005,
+            smpp_types.SmppCommand.DELIVER_SM_RESP: 0x80000005,
+            smpp_types.SmppCommand.ENQUIRE_LINK: 0x00000015,
+            smpp_types.SmppCommand.ENQUIRE_LINK_RESP: 0x80000015,
+            smpp_types.SmppCommand.GENERIC_NACK: 0x80000000,
         }
 
         self.data_coding = self.find_data_coding(self.encoding)
 
-        self.reader: Any = None
-        self.writer: Any = None
+        self.reader: typing.Any = None
+        self.writer: typing.Any = None
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         extra_log_data = {"log_metadata": self.log_metadata}
@@ -199,31 +193,35 @@ class Client:
         # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
         self.naz_message_protocol_version = "1"
 
-        self.current_session_state = SmppSessionState.CLOSED
+        self.current_session_state = smpp_types.SmppSessionState.CLOSED
         # reveal_locals()
 
     @staticmethod
     def find_data_coding(encoding: str) -> int:
-        for key, val in SmppDataCoding.__dict__.items():
+        for key, val in smpp_types.SmppDataCoding.__dict__.items():
             if not key.startswith("__"):
                 if encoding == val.code:
                     return val.value
         raise ValueError("That encoding:{0} is not recognised.".format(encoding))
 
-    def search_by_command_id_code(self, command_id_code: int) -> Optional[str]:
+    def search_by_command_id_code(self, command_id_code: int) -> str:
         for key, val in self.command_ids.items():
             if val == command_id_code:
                 return key
-        return None
+        raise ValueError(
+            "smpp_types.SmppCommand of value:{0} does not exist.".format(command_id_code)
+        )
 
     @staticmethod
-    def search_by_command_status_value(command_status_value: int) -> CommandStatus:
+    def search_by_command_status_value(command_status_value: int) -> smpp_types.CommandStatus:
         # TODO: find a cheaper(better) way of doing this
-        for key, val in SmppCommandStatus.__dict__.items():
+        for key, val in smpp_types.SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
                 if command_status_value == val.value:
                     return val
-        raise ValueError("CommandStatus of value:{0} does not exist.".format(command_status_value))
+        raise ValueError(
+            "smpp_types.CommandStatus of value:{0} does not exist.".format(command_status_value)
+        )
 
     @staticmethod
     def retry_after(current_retries):
@@ -241,19 +239,21 @@ class Client:
         else:
             return 60 * (1 * (2 ** current_retries))
 
-    async def connect(self) -> Tuple[StreamReader, StreamWriter]:
+    async def connect(
+        self
+    ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
         self.logger.info({"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
-        self.reader: StreamReader = reader
-        self.writer: StreamWriter = writer
+        self.reader: asyncio.streams.StreamReader = reader
+        self.writer: asyncio.streams.StreamWriter = writer
         self.logger.info({"event": "naz.Client.connect", "stage": "end"})
-        self.current_session_state = SmppSessionState.OPEN
+        self.current_session_state = smpp_types.SmppSessionState.OPEN
         return reader, writer
 
     async def tranceiver_bind(self) -> bytes:
-        smpp_command = SmppCommand.BIND_TRANSCEIVER
+        smpp_command = smpp_types.SmppCommand.BIND_TRANSCEIVER
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {
@@ -284,7 +284,7 @@ class Client:
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = smpp_types.SmppCommandStatus.ESME_ROK.value
         try:
             sequence_number = self.sequence_generator.next_sequence()
         except Exception as e:
@@ -347,9 +347,9 @@ class Client:
 
         `enquire_link` has no body.
         """
-        smpp_command = SmppCommand.ENQUIRE_LINK
+        smpp_command = smpp_types.SmppCommand.ENQUIRE_LINK
         while True:
-            if self.current_session_state != SmppSessionState.BOUND_TRX:
+            if self.current_session_state != smpp_types.SmppSessionState.BOUND_TRX:
                 # you can only send enquire_link request when session state is BOUND_TRX
                 await asyncio.sleep(self.enquire_link_interval)
 
@@ -434,7 +434,7 @@ class Client:
 
         `enquire_link_resp` has no body.
         """
-        smpp_command = SmppCommand.ENQUIRE_LINK_RESP
+        smpp_command = smpp_types.SmppCommand.ENQUIRE_LINK_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {
@@ -451,7 +451,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = smpp_types.SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -494,7 +494,7 @@ class Client:
 
         `unbind_resp` has no body.
         """
-        smpp_command = SmppCommand.UNBIND_RESP
+        smpp_command = smpp_types.SmppCommand.UNBIND_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {
@@ -511,7 +511,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = smpp_types.SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -539,7 +539,7 @@ class Client:
         BODY::
         message_id, c-octet String, 1octet. This field is unused and is set to NULL.
         """
-        smpp_command = SmppCommand.DELIVER_SM_RESP
+        smpp_command = smpp_types.SmppCommand.DELIVER_SM_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {
@@ -557,7 +557,7 @@ class Client:
         # header
         command_length = 16 + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
+        command_status = smpp_types.SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
@@ -625,7 +625,7 @@ class Client:
                u cant use both `short_message` and `message_payload`
             2. Octet String - A series of octets, not necessarily NULL terminated.
         """
-        smpp_command = SmppCommand.SUBMIT_SM
+        smpp_command = smpp_types.SmppCommand.SUBMIT_SM
         self.logger.info(
             {
                 "event": "naz.Client.submit_sm",
@@ -677,7 +677,7 @@ class Client:
         source_addr: str,
         destination_addr: str,
     ) -> bytes:
-        smpp_command = SmppCommand.SUBMIT_SM
+        smpp_command = smpp_types.SmppCommand.SUBMIT_SM
         self.logger.info(
             {
                 "event": "naz.Client.build_submit_sm_pdu",
@@ -807,7 +807,7 @@ class Client:
 
         # check session state to see if we can send messages.
         # see section 2.3 of SMPP spec document v3.4
-        if self.current_session_state == SmppSessionState.CLOSED:
+        if self.current_session_state == smpp_types.SmppSessionState.CLOSED:
             error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
                 smpp_command, self.current_session_state
             )
@@ -823,13 +823,12 @@ class Client:
                 }
             )
             raise ValueError(error_msg)
-        elif self.current_session_state == SmppSessionState.OPEN and smpp_command not in [
-            "bind_transmitter",
-            "bind_receiver",
-            "bind_transceiver",
-        ]:
+        elif (
+            self.current_session_state == smpp_types.SmppSessionState.OPEN
+            and smpp_command not in ["bind_transmitter", "bind_receiver", "bind_transceiver"]
+        ):
             # only the smpp_command's listed above are allowed by SMPP spec to be sent
-            # if current_session_state == SmppSessionState.OPEN
+            # if current_session_state == smpp_types.SmppSessionState.OPEN
             error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
                 smpp_command, self.current_session_state
             )
@@ -943,7 +942,7 @@ class Client:
                     item_to_dequeue["version"]  # version is a required field
                     smpp_command = item_to_dequeue["smpp_command"]
                     hook_metadata = item_to_dequeue.get("hook_metadata", "")
-                    if smpp_command == SmppCommand.SUBMIT_SM:
+                    if smpp_command == smpp_types.SmppCommand.SUBMIT_SM:
                         short_message = item_to_dequeue["short_message"]
                         source_addr = item_to_dequeue["source_addr"]
                         destination_addr = item_to_dequeue["destination_addr"]
@@ -1148,7 +1147,7 @@ class Client:
                     "error": "command_status:{0} is unknown.".format(command_status_value),
                 }
             )
-        elif commandStatus.value != SmppCommandStatus.ESME_ROK.value:
+        elif commandStatus.value != smpp_types.SmppCommandStatus.ESME_ROK.value:
             # we got an error from SMSC
             self.logger.exception(
                 {
@@ -1174,9 +1173,9 @@ class Client:
 
         try:
             # call throttling handler
-            if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
+            if commandStatus.value == smpp_types.SmppCommandStatus.ESME_ROK.value:
                 await self.throttle_handler.not_throttled()
-            elif commandStatus.value == SmppCommandStatus.ESME_RTHROTTLED.value:
+            elif commandStatus.value == smpp_types.SmppCommandStatus.ESME_RTHROTTLED.value:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self.logger.exception(
@@ -1191,33 +1190,33 @@ class Client:
             )
 
         if smpp_command in [
-            SmppCommand.BIND_TRANSCEIVER,
-            SmppCommand.UNBIND_RESP,
-            SmppCommand.SUBMIT_SM,  # We dont expect SMSC to send `submit_sm` to us.
-            SmppCommand.DELIVER_SM_RESP,
+            smpp_types.SmppCommand.BIND_TRANSCEIVER,
+            smpp_types.SmppCommand.UNBIND_RESP,
+            smpp_types.SmppCommand.SUBMIT_SM,  # We dont expect SMSC to send `submit_sm` to us.
+            smpp_types.SmppCommand.DELIVER_SM_RESP,
             # we will never send a deliver_sm request to SMSC, which means we never
             # have to handle deliver_sm_resp
-            SmppCommand.ENQUIRE_LINK_RESP,
-            SmppCommand.GENERIC_NACK,  # we can ignore this
+            smpp_types.SmppCommand.ENQUIRE_LINK_RESP,
+            smpp_types.SmppCommand.GENERIC_NACK,  # we can ignore this
         ]:
             # we never have to handle this
             pass
-        elif smpp_command == SmppCommand.BIND_TRANSCEIVER_RESP:
+        elif smpp_command == smpp_types.SmppCommand.BIND_TRANSCEIVER_RESP:
             # the body of `bind_transceiver_resp` only has `system_id` which is a
             # C-Octet String of variable length upto 16 octets
-            if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
-                self.current_session_state = SmppSessionState.BOUND_TRX
-        elif smpp_command == SmppCommand.UNBIND:
+            if commandStatus.value == smpp_types.SmppCommandStatus.ESME_ROK.value:
+                self.current_session_state = smpp_types.SmppSessionState.BOUND_TRX
+        elif smpp_command == smpp_types.SmppCommand.UNBIND:
             # we need to handle this since we need to send unbind_resp
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number)
-        elif smpp_command == SmppCommand.SUBMIT_SM_RESP:
+        elif smpp_command == smpp_types.SmppCommand.SUBMIT_SM_RESP:
             # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             pass
-        elif smpp_command == SmppCommand.DELIVER_SM:
+        elif smpp_command == smpp_types.SmppCommand.DELIVER_SM:
             # HEADER::
             # command_length, int, 4octet
             # command_id, int, 4octet. `deliver_sm`
@@ -1249,7 +1248,7 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
-        elif smpp_command == SmppCommand.ENQUIRE_LINK:
+        elif smpp_command == smpp_types.SmppCommand.ENQUIRE_LINK:
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
             await self.enquire_link_resp(sequence_number=sequence_number)
@@ -1301,7 +1300,7 @@ class Client:
 
         clients/users should call this method when winding down.
         """
-        smpp_command = SmppCommand.UNBIND
+        smpp_command = smpp_types.SmppCommand.UNBIND
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
             {

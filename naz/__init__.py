@@ -1,8 +1,9 @@
 from .client import Client  # noqa: F401
-from .client import SmppCommand  # noqa: F401
-from .client import SmppDataCoding  # noqa: F401
-from .client import CommandStatus  # noqa: F401
-from .client import SmppCommandStatus  # noqa: F401
+
+from .smpp_types import SmppCommand  # noqa: F401
+from .smpp_types import SmppDataCoding  # noqa: F401
+from .smpp_types import CommandStatus  # noqa: F401
+from .smpp_types import SmppCommandStatus  # noqa: F401
 
 from . import q  # noqa: F401
 from . import throttle  # noqa: F401
