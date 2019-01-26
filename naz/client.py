@@ -4,7 +4,6 @@ import string
 import typing
 import asyncio
 import logging
-import collections
 
 from . import hooks
 from . import nazcodec
@@ -1596,10 +1595,10 @@ class SmppDataCoding:
     also see:
       1. https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260
       2. https://docs.python.org/3/library/codecs.html
-      3. https://docs.python.org/3/library/codecs.html#standard-encodings 
-    
+      3. https://docs.python.org/3/library/codecs.html#standard-encodings
+
     The attributes of this class are equivalent to some of the names found in the python standard-encodings documentation
-    ie; https://docs.python.org/3/library/codecs.html#standard-encodings 
+    ie; https://docs.python.org/3/library/codecs.html#standard-encodings
     """
 
     gsm0338 = DataCoding(code="gsm0338", value=0b00000000, description="SMSC Default Alphabet")
