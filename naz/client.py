@@ -168,7 +168,7 @@ class Client:
         if not self.logger.handlers:
             self.logger.addHandler(handler)
         self.logger.setLevel(self.loglevel)
-        self.logger = NazLoggingAdapter(self.logger, extra_log_data)
+        self.logger:NazLoggingAdapter = NazLoggingAdapter(self.logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
