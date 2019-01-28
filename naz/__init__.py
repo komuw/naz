@@ -11,12 +11,10 @@ naz has no third-party dependencies and it requires python version 3.6+
 
 naz is in active development and it's API may change in backward incompatible ways.
 
-https://pypi.python.org/pypi/naz
-
-
+It is available in [pypi]
 
 [Wikipedia]: https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer
-
+[pypi]: https://pypi.python.org/pypi/naz
 """
 from .client import Client  # noqa: F401
 from .client import SmppCommand  # noqa: F401
