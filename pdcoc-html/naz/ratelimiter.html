@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.1" />
+<title>naz.ratelimiter API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id=^header-]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:1px solid #ddd;margin:1em 0 1em 4ch}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{background:#ffc;font-weight:400;font-size:.8em;width:11em;text-transform:uppercase;padding:0px 8px;border:1px solid #fd6;border-radius:5px;cursor:pointer}.source summary:hover{background:#fe9 !important}.source[open] summary{background:#fda}.source pre{max-height:500px;overflow-y:scroll;margin-bottom:15px}.hlist{list-syle:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink;]</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a,a:visited{text-decoration:underline}a[href]:after{content:" (" attr(href) ")"}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>naz.ratelimiter</code> module</h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">import time
+import asyncio
+import logging
+
+
+class BaseRateLimiter:
+    &#34;&#34;&#34;
+    Interface that must be implemented to satisfy naz&#39;s rate limiter.
+    User implementations should inherit this class and
+    implement the limit method with the type signatures shown.
+    &#34;&#34;&#34;
+
+    async def limit(self) -&gt; None:
+        raise NotImplementedError(&#34;limit method must be implemented.&#34;)
+
+
+class SimpleRateLimiter(BaseRateLimiter):
+    &#34;&#34;&#34;
+    simple implementation of a token bucket rate limiting algo.
+    https://en.wikipedia.org/wiki/Token_bucket
+    todo: check that the algo actually works.
+
+    Usage:
+        rateLimiter = SimpleRateLimiter(logger=myLogger, send_rate=10, max_tokens=25)
+        await rateLimiter.limit()
+        send_messsages()
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        send_rate: float = 100_000,
+        max_tokens: float = 100_000,
+        delay_for_tokens: float = 1,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+        :param send_rate:                  (optional) [float]
+            the maximum rate, in messages/second, at which naz can send messages to SMSC.
+        :param max_tokens:                  (optional) [int]
+            the total number of mesages naz can send before rate limiting kicks in.
+        :param delay_for_tokens:                  (optional) [float]
+            the duration in seconds which to wait for before checking for token availability after they had finished.
+
+        send_rate and max_tokens should generally be of equal value.
+        &#34;&#34;&#34;
+        self.send_rate: float = send_rate
+        self.max_tokens: float = max_tokens
+        self.delay_for_tokens: float = (delay_for_tokens)
+        self.tokens: float = self.max_tokens
+        self.updated_at: float = time.monotonic()
+
+        self.logger = logger
+        self.messages_delivered: int = 0
+        self.effective_send_rate: float = 0
+
+    async def limit(self) -&gt; None:
+        self.logger.info({&#34;event&#34;: &#34;naz.SimpleRateLimiter.limit&#34;, &#34;stage&#34;: &#34;start&#34;})
+        while self.tokens &lt; 1:
+            self.add_new_tokens()
+            # todo: sleep in an exponetial manner upto a maximum then wrap around.
+            await asyncio.sleep(self.delay_for_tokens)
+            self.logger.info(
+                {
+                    &#34;event&#34;: &#34;naz.SimpleRateLimiter.limit&#34;,
+                    &#34;stage&#34;: &#34;end&#34;,
+                    &#34;state&#34;: &#34;limiting rate&#34;,
+                    &#34;send_rate&#34;: self.send_rate,
+                    &#34;delay&#34;: self.delay_for_tokens,
+                    &#34;effective_send_rate&#34;: self.effective_send_rate,
+                }
+            )
+
+        self.messages_delivered += 1
+        self.tokens -= 1
+
+    def add_new_tokens(self) -&gt; None:
+        now = time.monotonic()
+        time_since_update = now - self.updated_at
+        self.effective_send_rate = self.messages_delivered / time_since_update
+        new_tokens = time_since_update * self.send_rate
+        if new_tokens &gt; 1:
+            self.tokens = min(self.tokens + new_tokens, self.max_tokens)
+            self.updated_at = now
+            self.messages_delivered = 0}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="naz.ratelimiter.BaseRateLimiter"><code class="flex name class">
+<span>class <span class="ident">BaseRateLimiter</span></span>
+</code></dt>
+<dd>
+<section class="desc"><p>Interface that must be implemented to satisfy naz's rate limiter.
+User implementations should inherit this class and
+implement the limit method with the type signatures shown.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class BaseRateLimiter:
+    &#34;&#34;&#34;
+    Interface that must be implemented to satisfy naz&#39;s rate limiter.
+    User implementations should inherit this class and
+    implement the limit method with the type signatures shown.
+    &#34;&#34;&#34;
+
+    async def limit(self) -&gt; None:
+        raise NotImplementedError(&#34;limit method must be implemented.&#34;)}</code></pre>
+</details>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="naz.ratelimiter.SimpleRateLimiter" href="#naz.ratelimiter.SimpleRateLimiter">SimpleRateLimiter</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="naz.ratelimiter.BaseRateLimiter.limit"><code class="name flex">
+<span>async def <span class="ident">limit</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">async def limit(self) -&gt; None:
+    raise NotImplementedError(&#34;limit method must be implemented.&#34;)}</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="naz.ratelimiter.SimpleRateLimiter"><code class="flex name class">
+<span>class <span class="ident">SimpleRateLimiter</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="naz.ratelimiter.BaseRateLimiter" href="#naz.ratelimiter.BaseRateLimiter">BaseRateLimiter</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><dl>
+<dt>simple implementation of a token bucket rate limiting algo.</dt>
+<dt><strong><code>https</code></strong> :&ensp;//<a title="en.wikipedia.org" href="/en.wikipedia.org.ext"><code>en.wikipedia.org</code></a>/<code>wiki</code>/<code>Token_bucket</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p>todo: check that the algo actually works.</p>
+<h2 id="usage">Usage</h2>
+<p>rateLimiter = SimpleRateLimiter(logger=myLogger, send_rate=10, max_tokens=25)
+await rateLimiter.limit()
+send_messsages()</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class SimpleRateLimiter(BaseRateLimiter):
+    &#34;&#34;&#34;
+    simple implementation of a token bucket rate limiting algo.
+    https://en.wikipedia.org/wiki/Token_bucket
+    todo: check that the algo actually works.
+
+    Usage:
+        rateLimiter = SimpleRateLimiter(logger=myLogger, send_rate=10, max_tokens=25)
+        await rateLimiter.limit()
+        send_messsages()
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        send_rate: float = 100_000,
+        max_tokens: float = 100_000,
+        delay_for_tokens: float = 1,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+        :param send_rate:                  (optional) [float]
+            the maximum rate, in messages/second, at which naz can send messages to SMSC.
+        :param max_tokens:                  (optional) [int]
+            the total number of mesages naz can send before rate limiting kicks in.
+        :param delay_for_tokens:                  (optional) [float]
+            the duration in seconds which to wait for before checking for token availability after they had finished.
+
+        send_rate and max_tokens should generally be of equal value.
+        &#34;&#34;&#34;
+        self.send_rate: float = send_rate
+        self.max_tokens: float = max_tokens
+        self.delay_for_tokens: float = (delay_for_tokens)
+        self.tokens: float = self.max_tokens
+        self.updated_at: float = time.monotonic()
+
+        self.logger = logger
+        self.messages_delivered: int = 0
+        self.effective_send_rate: float = 0
+
+    async def limit(self) -&gt; None:
+        self.logger.info({&#34;event&#34;: &#34;naz.SimpleRateLimiter.limit&#34;, &#34;stage&#34;: &#34;start&#34;})
+        while self.tokens &lt; 1:
+            self.add_new_tokens()
+            # todo: sleep in an exponetial manner upto a maximum then wrap around.
+            await asyncio.sleep(self.delay_for_tokens)
+            self.logger.info(
+                {
+                    &#34;event&#34;: &#34;naz.SimpleRateLimiter.limit&#34;,
+                    &#34;stage&#34;: &#34;end&#34;,
+                    &#34;state&#34;: &#34;limiting rate&#34;,
+                    &#34;send_rate&#34;: self.send_rate,
+                    &#34;delay&#34;: self.delay_for_tokens,
+                    &#34;effective_send_rate&#34;: self.effective_send_rate,
+                }
+            )
+
+        self.messages_delivered += 1
+        self.tokens -= 1
+
+    def add_new_tokens(self) -&gt; None:
+        now = time.monotonic()
+        time_since_update = now - self.updated_at
+        self.effective_send_rate = self.messages_delivered / time_since_update
+        new_tokens = time_since_update * self.send_rate
+        if new_tokens &gt; 1:
+            self.tokens = min(self.tokens + new_tokens, self.max_tokens)
+            self.updated_at = now
+            self.messages_delivered = 0}</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="naz.ratelimiter.SimpleRateLimiter.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, logger, send_rate=100000, max_tokens=100000, delay_for_tokens=1)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>:param send_rate:
+(optional) [float]
+the maximum rate, in messages/second, at which naz can send messages to SMSC.
+:param max_tokens:
+(optional) [int]
+the total number of mesages naz can send before rate limiting kicks in.
+:param delay_for_tokens:
+(optional) [float]
+the duration in seconds which to wait for before checking for token availability after they had finished.</p>
+<p>send_rate and max_tokens should generally be of equal value.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(
+    self,
+    logger: logging.Logger,
+    send_rate: float = 100_000,
+    max_tokens: float = 100_000,
+    delay_for_tokens: float = 1,
+) -&gt; None:
+    &#34;&#34;&#34;
+    :param send_rate:                  (optional) [float]
+        the maximum rate, in messages/second, at which naz can send messages to SMSC.
+    :param max_tokens:                  (optional) [int]
+        the total number of mesages naz can send before rate limiting kicks in.
+    :param delay_for_tokens:                  (optional) [float]
+        the duration in seconds which to wait for before checking for token availability after they had finished.
+
+    send_rate and max_tokens should generally be of equal value.
+    &#34;&#34;&#34;
+    self.send_rate: float = send_rate
+    self.max_tokens: float = max_tokens
+    self.delay_for_tokens: float = (delay_for_tokens)
+    self.tokens: float = self.max_tokens
+    self.updated_at: float = time.monotonic()
+
+    self.logger = logger
+    self.messages_delivered: int = 0
+    self.effective_send_rate: float = 0}</code></pre>
+</details>
+</dd>
+<dt id="naz.ratelimiter.SimpleRateLimiter.add_new_tokens"><code class="name flex">
+<span>def <span class="ident">add_new_tokens</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def add_new_tokens(self) -&gt; None:
+    now = time.monotonic()
+    time_since_update = now - self.updated_at
+    self.effective_send_rate = self.messages_delivered / time_since_update
+    new_tokens = time_since_update * self.send_rate
+    if new_tokens &gt; 1:
+        self.tokens = min(self.tokens + new_tokens, self.max_tokens)
+        self.updated_at = now
+        self.messages_delivered = 0}</code></pre>
+</details>
+</dd>
+<dt id="naz.ratelimiter.SimpleRateLimiter.limit"><code class="name flex">
+<span>async def <span class="ident">limit</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">async def limit(self) -&gt; None:
+    self.logger.info({&#34;event&#34;: &#34;naz.SimpleRateLimiter.limit&#34;, &#34;stage&#34;: &#34;start&#34;})
+    while self.tokens &lt; 1:
+        self.add_new_tokens()
+        # todo: sleep in an exponetial manner upto a maximum then wrap around.
+        await asyncio.sleep(self.delay_for_tokens)
+        self.logger.info(
+            {
+                &#34;event&#34;: &#34;naz.SimpleRateLimiter.limit&#34;,
+                &#34;stage&#34;: &#34;end&#34;,
+                &#34;state&#34;: &#34;limiting rate&#34;,
+                &#34;send_rate&#34;: self.send_rate,
+                &#34;delay&#34;: self.delay_for_tokens,
+                &#34;effective_send_rate&#34;: self.effective_send_rate,
+            }
+        )
+
+    self.messages_delivered += 1
+    self.tokens -= 1}</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="naz" href="index.html">naz</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="naz.ratelimiter.BaseRateLimiter" href="#naz.ratelimiter.BaseRateLimiter">BaseRateLimiter</a></code></h4>
+<ul class="">
+<li><code><a title="naz.ratelimiter.BaseRateLimiter.limit" href="#naz.ratelimiter.BaseRateLimiter.limit">limit</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="naz.ratelimiter.SimpleRateLimiter" href="#naz.ratelimiter.SimpleRateLimiter">SimpleRateLimiter</a></code></h4>
+<ul class="">
+<li><code><a title="naz.ratelimiter.SimpleRateLimiter.__init__" href="#naz.ratelimiter.SimpleRateLimiter.__init__">__init__</a></code></li>
+<li><code><a title="naz.ratelimiter.SimpleRateLimiter.add_new_tokens" href="#naz.ratelimiter.SimpleRateLimiter.add_new_tokens">add_new_tokens</a></code></li>
+<li><code><a title="naz.ratelimiter.SimpleRateLimiter.limit" href="#naz.ratelimiter.SimpleRateLimiter.limit">limit</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>

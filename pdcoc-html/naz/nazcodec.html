@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.5.1" />
+<title>naz.nazcodec API documentation</title>
+<meta name="description" content="" />
+<link href='https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css' rel='stylesheet'>
+<link href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/8.0.0/sanitize.min.css' rel='stylesheet'>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" rel="stylesheet">
+<style>.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id=^header-]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:1px solid #ddd;margin:1em 0 1em 4ch}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{font-weight:bold}#index h4 + ul{margin-bottom:.6em}#index .two-column{column-count:2}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.name small{font-weight:normal}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary{background:#ffc;font-weight:400;font-size:.8em;width:11em;text-transform:uppercase;padding:0px 8px;border:1px solid #fd6;border-radius:5px;cursor:pointer}.source summary:hover{background:#fe9 !important}.source[open] summary{background:#fda}.source pre{max-height:500px;overflow-y:scroll;margin-bottom:15px}.hlist{list-syle:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}.admonition{padding:.1em .5em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink;]</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a,a:visited{text-decoration:underline}a[href]:after{content:" (" attr(href) ")"}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title"><code>naz.nazcodec</code> module</h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python"># The code in this file is copied from https://github.com/praekelt/vumi/blob/master/vumi/codecs/vumi_codecs.py
+# which is in turn largely copied from http://stackoverflow.com/questions/13130935/decode-7-bit-gsm
+# Vumi&#39;s license is included below:
+
+# Copyright (c) Praekelt Foundation and individual contributors.
+# All rights reserved.
+
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+
+#     1.  Redistributions of source code must retain the above copyright notice,
+#         this list of conditions and the following disclaimer.
+
+#     2.  Redistributions in binary form must reproduce the above copyright
+#         notice, this list of conditions and the following disclaimer in the
+#         documentation and/or other materials provided with the distribution.
+
+#     3.  Neither the name of the Praekelt Foundation nor the names of its
+#         contributors may be used to endorse or promote products derived from
+#         this software without specific prior written permission.
+
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &#34;AS IS&#34;
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+
+import codecs
+import sys
+
+
+# An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
+# however, I&#39;m guessing that vumi has been in use longer and we should thus go with it.
+
+
+class NazCodecException(Exception):
+    pass
+
+
+class GSM7BitCodec(codecs.Codec):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+
+    gsm_basic_charset = (
+        &#34;@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\&#34;#¤%&amp;&#39;()*+,-./0123456789:;&#34;
+        &#34;&lt;=&gt;?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäö&#34;
+        &#34;ñüà&#34;
+    )
+
+    gsm_basic_charset_map = dict((l, i) for i, l in enumerate(gsm_basic_charset))
+
+    gsm_extension = (
+        &#34;````````````````````^```````````````````{}`````\\````````````[~]`&#34;
+        &#34;|````````````````````````````````````€``````````````````````````&#34;
+    )
+
+    gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
+
+    def encode(self, string_to_encode, errors=&#34;strict&#34;):
+        &#34;&#34;&#34;
+        errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;
+        eg:
+            xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;) will fail with UnicodeEncodeError
+            but
+            xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;, &#39;replace&#39;) will return b&#39;Zo?&#39;
+            and
+            xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;, &#39;ignore&#39;) will return b&#39;Zo&#39;
+        &#34;&#34;&#34;
+        result = []
+        for position, c in enumerate(string_to_encode):
+            idx = self.gsm_basic_charset_map.get(c)
+            if idx is not None:
+                result.append(chr(idx))
+                continue
+            idx = self.gsm_extension_map.get(c)
+            if idx is not None:
+                result.append(chr(27) + chr(idx))
+            else:
+                result.append(self.handle_encode_error(c, errors, position, string_to_encode))
+
+        obj = &#34;&#34;.join(result)
+        # this is equivalent to;
+        # import six; six.b(&#39;someString&#39;)
+        # see:
+        # https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625
+        obj = obj.encode(&#34;latin-1&#34;)
+        return (obj, len(obj))
+
+    def handle_encode_error(self, char, handler_type, position, obj):
+        handler = getattr(self, &#34;handle_encode_%s_error&#34; % (handler_type,), None)
+        if handler is None:
+            raise NazCodecException(&#34;Invalid errors type %s for GSM7BitCodec&#34;, handler_type)
+        return handler(char, position, obj)
+
+    def handle_encode_strict_error(self, char, position, obj):
+        raise UnicodeEncodeError(&#34;gsm0338&#34;, char, position, position + 1, repr(obj))
+
+    def handle_encode_ignore_error(self, char, position, obj):
+        return &#34;&#34;
+
+    def handle_encode_replace_error(self, char, position, obj):
+        return chr(self.gsm_basic_charset_map.get(&#34;?&#34;))
+
+    def decode(self, byte_string, errors=&#34;strict&#34;):
+        &#34;&#34;&#34;
+        errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;
+        &#34;&#34;&#34;
+        res = iter(byte_string)
+        result = []
+        for position, c in enumerate(res):
+            try:
+                if c == 27:
+                    c = next(res)
+                    result.append(self.gsm_extension[c])
+                else:
+                    result.append(self.gsm_basic_charset[c])
+            except IndexError as indexErrorException:
+                result.append(
+                    self.handle_decode_error(c, errors, position, byte_string, indexErrorException)
+                )
+
+        obj = &#34;&#34;.join(result)
+        return (obj, len(obj))
+
+    def handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
+        handler = getattr(self, &#34;handle_decode_%s_error&#34; % (handler_type,), None)
+        if handler is None:
+            raise NazCodecException(&#34;Invalid errors type %s for GSM7BitCodec&#34;, handler_type)
+        return handler(char, position, obj, indexErrorException)
+
+    def handle_decode_strict_error(self, char, position, obj, indexErrorException):
+        raise UnicodeDecodeError(
+            &#34;gsm0338&#34;, chr(char).encode(&#34;latin-1&#34;), position, position + 1, repr(obj)
+        ) from indexErrorException
+
+    def handle_decode_ignore_error(self, char, position, obj, indexErrorException):
+        return &#34;&#34;
+
+    def handle_decode_replace_error(self, char, position, obj, indexErrorException):
+        return &#34;?&#34;
+
+
+class UCS2Codec(codecs.Codec):
+    &#34;&#34;&#34;
+    UCS2 is for all intents &amp; purposes assumed to be the same as
+    big endian UTF16.
+    &#34;&#34;&#34;
+
+    def encode(self, input, errors=&#34;strict&#34;):
+        return codecs.utf_16_be_encode(input, errors)
+
+    def decode(self, input, errors=&#34;strict&#34;):
+        return codecs.utf_16_be_decode(input, errors)
+
+
+class NazCodec(object):
+    &#34;&#34;&#34;
+    usage:
+        ncodec = NazCodec()
+
+        ncodec.encode(&#34;Zoë&#34;, &#34;utf-16be&#34;)
+        ncodec.encode(&#34;Zoë&#34;, &#34;utf-8&#34;)
+        ncodec.encode(&#34;HÜLK&#34;, &#39;gsm0338&#39;)
+
+        ncodec.decode(b&#39;Zo\xc3\xab&#39;, &#39;gsm0338&#39;, &#39;ignore&#39;)
+        ncodec.decode(b&#39;Zo\xc3\xab&#39;, &#39;utf8&#39;)
+    &#34;&#34;&#34;
+
+    custom_codecs = {&#34;gsm0338&#34;: GSM7BitCodec(), &#34;ucs2&#34;: UCS2Codec()}
+
+    def __init__(self, errors=&#34;strict&#34;):
+        self.errors = errors
+
+    def encode(self, string_to_encode, encoding=None, errors=None):
+        &#34;&#34;&#34;
+        you should call encode on a string. ie in python3 we write;
+          &#39;sss&#39;.encode() # b&#39;sss&#39;
+        &#34;&#34;&#34;
+        if not errors:
+            errors = self.errors
+
+        if not isinstance(string_to_encode, str):
+            raise NazCodecException(&#34;Only strings accepted for encoding.&#34;)
+        encoding = encoding or sys.getdefaultencoding()
+        if encoding in self.custom_codecs:
+            encoder = self.custom_codecs[encoding].encode
+        else:
+            encoder = codecs.getencoder(encoding)
+        obj, length = encoder(string_to_encode, errors)
+        return obj
+
+    def decode(self, byte_string, encoding=None, errors=None):
+        &#34;&#34;&#34;
+        you should call decode on a byte. ie in python3 we write;
+          b&#39;sss&#39;.decode() # &#39;sss&#39;
+        &#34;&#34;&#34;
+        if not errors:
+            errors = self.errors
+
+        if not isinstance(byte_string, (bytes, bytearray)):
+            raise NazCodecException(&#34;Only bytestrings accepted for decoding.&#34;)
+        encoding = encoding or sys.getdefaultencoding()
+        if encoding in self.custom_codecs:
+            decoder = self.custom_codecs[encoding].decode
+        else:
+            decoder = codecs.getdecoder(encoding)
+        obj, length = decoder(byte_string, errors)
+        return obj}</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="naz.nazcodec.GSM7BitCodec"><code class="flex name class">
+<span>class <span class="ident">GSM7BitCodec</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="codecs.Codec" href="/codecs.Codec.ext">codecs.Codec</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class GSM7BitCodec(codecs.Codec):
+    &#34;&#34;&#34;
+    &#34;&#34;&#34;
+
+    gsm_basic_charset = (
+        &#34;@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\x1bÆæßÉ !\&#34;#¤%&amp;&#39;()*+,-./0123456789:;&#34;
+        &#34;&lt;=&gt;?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäö&#34;
+        &#34;ñüà&#34;
+    )
+
+    gsm_basic_charset_map = dict((l, i) for i, l in enumerate(gsm_basic_charset))
+
+    gsm_extension = (
+        &#34;````````````````````^```````````````````{}`````\\````````````[~]`&#34;
+        &#34;|````````````````````````````````````€``````````````````````````&#34;
+    )
+
+    gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
+
+    def encode(self, string_to_encode, errors=&#34;strict&#34;):
+        &#34;&#34;&#34;
+        errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;
+        eg:
+            xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;) will fail with UnicodeEncodeError
+            but
+            xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;, &#39;replace&#39;) will return b&#39;Zo?&#39;
+            and
+            xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;, &#39;ignore&#39;) will return b&#39;Zo&#39;
+        &#34;&#34;&#34;
+        result = []
+        for position, c in enumerate(string_to_encode):
+            idx = self.gsm_basic_charset_map.get(c)
+            if idx is not None:
+                result.append(chr(idx))
+                continue
+            idx = self.gsm_extension_map.get(c)
+            if idx is not None:
+                result.append(chr(27) + chr(idx))
+            else:
+                result.append(self.handle_encode_error(c, errors, position, string_to_encode))
+
+        obj = &#34;&#34;.join(result)
+        # this is equivalent to;
+        # import six; six.b(&#39;someString&#39;)
+        # see:
+        # https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625
+        obj = obj.encode(&#34;latin-1&#34;)
+        return (obj, len(obj))
+
+    def handle_encode_error(self, char, handler_type, position, obj):
+        handler = getattr(self, &#34;handle_encode_%s_error&#34; % (handler_type,), None)
+        if handler is None:
+            raise NazCodecException(&#34;Invalid errors type %s for GSM7BitCodec&#34;, handler_type)
+        return handler(char, position, obj)
+
+    def handle_encode_strict_error(self, char, position, obj):
+        raise UnicodeEncodeError(&#34;gsm0338&#34;, char, position, position + 1, repr(obj))
+
+    def handle_encode_ignore_error(self, char, position, obj):
+        return &#34;&#34;
+
+    def handle_encode_replace_error(self, char, position, obj):
+        return chr(self.gsm_basic_charset_map.get(&#34;?&#34;))
+
+    def decode(self, byte_string, errors=&#34;strict&#34;):
+        &#34;&#34;&#34;
+        errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;
+        &#34;&#34;&#34;
+        res = iter(byte_string)
+        result = []
+        for position, c in enumerate(res):
+            try:
+                if c == 27:
+                    c = next(res)
+                    result.append(self.gsm_extension[c])
+                else:
+                    result.append(self.gsm_basic_charset[c])
+            except IndexError as indexErrorException:
+                result.append(
+                    self.handle_decode_error(c, errors, position, byte_string, indexErrorException)
+                )
+
+        obj = &#34;&#34;.join(result)
+        return (obj, len(obj))
+
+    def handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
+        handler = getattr(self, &#34;handle_decode_%s_error&#34; % (handler_type,), None)
+        if handler is None:
+            raise NazCodecException(&#34;Invalid errors type %s for GSM7BitCodec&#34;, handler_type)
+        return handler(char, position, obj, indexErrorException)
+
+    def handle_decode_strict_error(self, char, position, obj, indexErrorException):
+        raise UnicodeDecodeError(
+            &#34;gsm0338&#34;, chr(char).encode(&#34;latin-1&#34;), position, position + 1, repr(obj)
+        ) from indexErrorException
+
+    def handle_decode_ignore_error(self, char, position, obj, indexErrorException):
+        return &#34;&#34;
+
+    def handle_decode_replace_error(self, char, position, obj, indexErrorException):
+        return &#34;?&#34;}</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="naz.nazcodec.GSM7BitCodec.gsm_basic_charset"><code class="name">var <span class="ident">gsm_basic_charset</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.gsm_basic_charset_map"><code class="name">var <span class="ident">gsm_basic_charset_map</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.gsm_extension"><code class="name">var <span class="ident">gsm_extension</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.gsm_extension_map"><code class="name">var <span class="ident">gsm_extension_map</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="naz.nazcodec.GSM7BitCodec.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>self, byte_string, errors=&#39;strict&#39;)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>errors can be 'strict', 'replace' or 'ignore'</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def decode(self, byte_string, errors=&#34;strict&#34;):
+    &#34;&#34;&#34;
+    errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;
+    &#34;&#34;&#34;
+    res = iter(byte_string)
+    result = []
+    for position, c in enumerate(res):
+        try:
+            if c == 27:
+                c = next(res)
+                result.append(self.gsm_extension[c])
+            else:
+                result.append(self.gsm_basic_charset[c])
+        except IndexError as indexErrorException:
+            result.append(
+                self.handle_decode_error(c, errors, position, byte_string, indexErrorException)
+            )
+
+    obj = &#34;&#34;.join(result)
+    return (obj, len(obj))}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>self, string_to_encode, errors=&#39;strict&#39;)</span>
+</code></dt>
+<dd>
+<section class="desc"><dl>
+<dt>errors can be 'strict', 'replace' or 'ignore'</dt>
+<dt><strong><code>eg</code></strong></dt>
+<dd>xcodec.encode("Zoë","gsm0338") will fail with UnicodeEncodeError
+but
+xcodec.encode("Zoë","gsm0338", 'replace') will return b'Zo?'
+and
+xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def encode(self, string_to_encode, errors=&#34;strict&#34;):
+    &#34;&#34;&#34;
+    errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;
+    eg:
+        xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;) will fail with UnicodeEncodeError
+        but
+        xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;, &#39;replace&#39;) will return b&#39;Zo?&#39;
+        and
+        xcodec.encode(&#34;Zoë&#34;,&#34;gsm0338&#34;, &#39;ignore&#39;) will return b&#39;Zo&#39;
+    &#34;&#34;&#34;
+    result = []
+    for position, c in enumerate(string_to_encode):
+        idx = self.gsm_basic_charset_map.get(c)
+        if idx is not None:
+            result.append(chr(idx))
+            continue
+        idx = self.gsm_extension_map.get(c)
+        if idx is not None:
+            result.append(chr(27) + chr(idx))
+        else:
+            result.append(self.handle_encode_error(c, errors, position, string_to_encode))
+
+    obj = &#34;&#34;.join(result)
+    # this is equivalent to;
+    # import six; six.b(&#39;someString&#39;)
+    # see:
+    # https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625
+    obj = obj.encode(&#34;latin-1&#34;)
+    return (obj, len(obj))}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_decode_error"><code class="name flex">
+<span>def <span class="ident">handle_decode_error</span></span>(<span>self, char, handler_type, position, obj, indexErrorException)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
+    handler = getattr(self, &#34;handle_decode_%s_error&#34; % (handler_type,), None)
+    if handler is None:
+        raise NazCodecException(&#34;Invalid errors type %s for GSM7BitCodec&#34;, handler_type)
+    return handler(char, position, obj, indexErrorException)}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_decode_ignore_error"><code class="name flex">
+<span>def <span class="ident">handle_decode_ignore_error</span></span>(<span>self, char, position, obj, indexErrorException)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_decode_ignore_error(self, char, position, obj, indexErrorException):
+    return &#34;&#34;}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_decode_replace_error"><code class="name flex">
+<span>def <span class="ident">handle_decode_replace_error</span></span>(<span>self, char, position, obj, indexErrorException)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_decode_replace_error(self, char, position, obj, indexErrorException):
+    return &#34;?&#34;}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_decode_strict_error"><code class="name flex">
+<span>def <span class="ident">handle_decode_strict_error</span></span>(<span>self, char, position, obj, indexErrorException)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_decode_strict_error(self, char, position, obj, indexErrorException):
+    raise UnicodeDecodeError(
+        &#34;gsm0338&#34;, chr(char).encode(&#34;latin-1&#34;), position, position + 1, repr(obj)
+    ) from indexErrorException}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_encode_error"><code class="name flex">
+<span>def <span class="ident">handle_encode_error</span></span>(<span>self, char, handler_type, position, obj)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_encode_error(self, char, handler_type, position, obj):
+    handler = getattr(self, &#34;handle_encode_%s_error&#34; % (handler_type,), None)
+    if handler is None:
+        raise NazCodecException(&#34;Invalid errors type %s for GSM7BitCodec&#34;, handler_type)
+    return handler(char, position, obj)}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_encode_ignore_error"><code class="name flex">
+<span>def <span class="ident">handle_encode_ignore_error</span></span>(<span>self, char, position, obj)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_encode_ignore_error(self, char, position, obj):
+    return &#34;&#34;}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_encode_replace_error"><code class="name flex">
+<span>def <span class="ident">handle_encode_replace_error</span></span>(<span>self, char, position, obj)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_encode_replace_error(self, char, position, obj):
+    return chr(self.gsm_basic_charset_map.get(&#34;?&#34;))}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.GSM7BitCodec.handle_encode_strict_error"><code class="name flex">
+<span>def <span class="ident">handle_encode_strict_error</span></span>(<span>self, char, position, obj)</span>
+</code></dt>
+<dd>
+<section class="desc"></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def handle_encode_strict_error(self, char, position, obj):
+    raise UnicodeEncodeError(&#34;gsm0338&#34;, char, position, position + 1, repr(obj))}</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="naz.nazcodec.NazCodec"><code class="flex name class">
+<span>class <span class="ident">NazCodec</span></span>
+</code></dt>
+<dd>
+<section class="desc"><dl>
+<dt><strong><code>usage</code></strong></dt>
+<dd>
+<p>ncodec = NazCodec()</p>
+<p>ncodec.encode("Zoë", "utf-16be")
+ncodec.encode("Zoë", "utf-8")
+ncodec.encode("HÜLK", 'gsm0338')</p>
+<p>ncodec.decode(b'ZoÃ«', 'gsm0338', 'ignore')
+ncodec.decode(b'ZoÃ«', 'utf8')</p>
+</dd>
+</dl></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class NazCodec(object):
+    &#34;&#34;&#34;
+    usage:
+        ncodec = NazCodec()
+
+        ncodec.encode(&#34;Zoë&#34;, &#34;utf-16be&#34;)
+        ncodec.encode(&#34;Zoë&#34;, &#34;utf-8&#34;)
+        ncodec.encode(&#34;HÜLK&#34;, &#39;gsm0338&#39;)
+
+        ncodec.decode(b&#39;Zo\xc3\xab&#39;, &#39;gsm0338&#39;, &#39;ignore&#39;)
+        ncodec.decode(b&#39;Zo\xc3\xab&#39;, &#39;utf8&#39;)
+    &#34;&#34;&#34;
+
+    custom_codecs = {&#34;gsm0338&#34;: GSM7BitCodec(), &#34;ucs2&#34;: UCS2Codec()}
+
+    def __init__(self, errors=&#34;strict&#34;):
+        self.errors = errors
+
+    def encode(self, string_to_encode, encoding=None, errors=None):
+        &#34;&#34;&#34;
+        you should call encode on a string. ie in python3 we write;
+          &#39;sss&#39;.encode() # b&#39;sss&#39;
+        &#34;&#34;&#34;
+        if not errors:
+            errors = self.errors
+
+        if not isinstance(string_to_encode, str):
+            raise NazCodecException(&#34;Only strings accepted for encoding.&#34;)
+        encoding = encoding or sys.getdefaultencoding()
+        if encoding in self.custom_codecs:
+            encoder = self.custom_codecs[encoding].encode
+        else:
+            encoder = codecs.getencoder(encoding)
+        obj, length = encoder(string_to_encode, errors)
+        return obj
+
+    def decode(self, byte_string, encoding=None, errors=None):
+        &#34;&#34;&#34;
+        you should call decode on a byte. ie in python3 we write;
+          b&#39;sss&#39;.decode() # &#39;sss&#39;
+        &#34;&#34;&#34;
+        if not errors:
+            errors = self.errors
+
+        if not isinstance(byte_string, (bytes, bytearray)):
+            raise NazCodecException(&#34;Only bytestrings accepted for decoding.&#34;)
+        encoding = encoding or sys.getdefaultencoding()
+        if encoding in self.custom_codecs:
+            decoder = self.custom_codecs[encoding].decode
+        else:
+            decoder = codecs.getdecoder(encoding)
+        obj, length = decoder(byte_string, errors)
+        return obj}</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="naz.nazcodec.NazCodec.custom_codecs"><code class="name">var <span class="ident">custom_codecs</span></code></dt>
+<dd>
+<section class="desc"></section>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="naz.nazcodec.NazCodec.__init__"><code class="name flex">
+<span>def <span class="ident">__init__</span></span>(<span>self, errors=&#39;strict&#39;)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Initialize self.
+See help(type(self)) for accurate signature.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def __init__(self, errors=&#34;strict&#34;):
+    self.errors = errors}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.NazCodec.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>self, byte_string, encoding=None, errors=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>you should call decode on a byte. ie in python3 we write;
+b'sss'.decode() # 'sss'</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def decode(self, byte_string, encoding=None, errors=None):
+    &#34;&#34;&#34;
+    you should call decode on a byte. ie in python3 we write;
+      b&#39;sss&#39;.decode() # &#39;sss&#39;
+    &#34;&#34;&#34;
+    if not errors:
+        errors = self.errors
+
+    if not isinstance(byte_string, (bytes, bytearray)):
+        raise NazCodecException(&#34;Only bytestrings accepted for decoding.&#34;)
+    encoding = encoding or sys.getdefaultencoding()
+    if encoding in self.custom_codecs:
+        decoder = self.custom_codecs[encoding].decode
+    else:
+        decoder = codecs.getdecoder(encoding)
+    obj, length = decoder(byte_string, errors)
+    return obj}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.NazCodec.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>self, string_to_encode, encoding=None, errors=None)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>you should call encode on a string. ie in python3 we write;
+'sss'.encode() # b'sss'</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def encode(self, string_to_encode, encoding=None, errors=None):
+    &#34;&#34;&#34;
+    you should call encode on a string. ie in python3 we write;
+      &#39;sss&#39;.encode() # b&#39;sss&#39;
+    &#34;&#34;&#34;
+    if not errors:
+        errors = self.errors
+
+    if not isinstance(string_to_encode, str):
+        raise NazCodecException(&#34;Only strings accepted for encoding.&#34;)
+    encoding = encoding or sys.getdefaultencoding()
+    if encoding in self.custom_codecs:
+        encoder = self.custom_codecs[encoding].encode
+    else:
+        encoder = codecs.getencoder(encoding)
+    obj, length = encoder(string_to_encode, errors)
+    return obj}</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="naz.nazcodec.NazCodecException"><code class="flex name class">
+<span>class <span class="ident">NazCodecException</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="builtins.Exception" href="/builtins.Exception.ext">builtins.Exception</a>, <a title="builtins.BaseException" href="/builtins.BaseException.ext">builtins.BaseException</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Common base class for all non-exit exceptions.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class NazCodecException(Exception):
+    pass}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.UCS2Codec"><code class="flex name class">
+<span>class <span class="ident">UCS2Codec</span></span>
+<span>(</span><span><small>ancestors:</small> <a title="codecs.Codec" href="/codecs.Codec.ext">codecs.Codec</a>)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>UCS2 is for all intents &amp; purposes assumed to be the same as
+big endian UTF16.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">class UCS2Codec(codecs.Codec):
+    &#34;&#34;&#34;
+    UCS2 is for all intents &amp; purposes assumed to be the same as
+    big endian UTF16.
+    &#34;&#34;&#34;
+
+    def encode(self, input, errors=&#34;strict&#34;):
+        return codecs.utf_16_be_encode(input, errors)
+
+    def decode(self, input, errors=&#34;strict&#34;):
+        return codecs.utf_16_be_decode(input, errors)}</code></pre>
+</details>
+<h3>Methods</h3>
+<dl>
+<dt id="naz.nazcodec.UCS2Codec.decode"><code class="name flex">
+<span>def <span class="ident">decode</span></span>(<span>self, input, errors=&#39;strict&#39;)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Decodes the object input and returns a tuple (output
+object, length consumed).</p>
+<p>input must be an object which provides the bf_getreadbuf
+buffer slot. Python strings, buffer objects and memory
+mapped files are examples of objects providing this slot.</p>
+<p>errors defines the error handling to apply. It defaults to
+'strict' handling.</p>
+<p>The method may not store state in the Codec instance. Use
+StreamReader for codecs which have to keep state in order to
+make decoding efficient.</p>
+<p>The decoder must be able to handle zero length input and
+return an empty object of the output object type in this
+situation.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def decode(self, input, errors=&#34;strict&#34;):
+    return codecs.utf_16_be_decode(input, errors)}</code></pre>
+</details>
+</dd>
+<dt id="naz.nazcodec.UCS2Codec.encode"><code class="name flex">
+<span>def <span class="ident">encode</span></span>(<span>self, input, errors=&#39;strict&#39;)</span>
+</code></dt>
+<dd>
+<section class="desc"><p>Encodes the object input and returns a tuple (output
+object, length consumed).</p>
+<p>errors defines the error handling to apply. It defaults to
+'strict' handling.</p>
+<p>The method may not store state in the Codec instance. Use
+StreamWriter for codecs which have to keep state in order to
+make encoding efficient.</p>
+<p>The encoder must be able to handle zero length input and
+return an empty object of the output object type in this
+situation.</p></section>
+<details class="source">
+<summary>Source code</summary>
+<pre><code class="python">def encode(self, input, errors=&#34;strict&#34;):
+    return codecs.utf_16_be_encode(input, errors)}</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="naz" href="index.html">naz</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="naz.nazcodec.GSM7BitCodec" href="#naz.nazcodec.GSM7BitCodec">GSM7BitCodec</a></code></h4>
+<ul class="two-column">
+<li><code><a title="naz.nazcodec.GSM7BitCodec.decode" href="#naz.nazcodec.GSM7BitCodec.decode">decode</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.encode" href="#naz.nazcodec.GSM7BitCodec.encode">encode</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.gsm_basic_charset" href="#naz.nazcodec.GSM7BitCodec.gsm_basic_charset">gsm_basic_charset</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.gsm_basic_charset_map" href="#naz.nazcodec.GSM7BitCodec.gsm_basic_charset_map">gsm_basic_charset_map</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.gsm_extension" href="#naz.nazcodec.GSM7BitCodec.gsm_extension">gsm_extension</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.gsm_extension_map" href="#naz.nazcodec.GSM7BitCodec.gsm_extension_map">gsm_extension_map</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_decode_error" href="#naz.nazcodec.GSM7BitCodec.handle_decode_error">handle_decode_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_decode_ignore_error" href="#naz.nazcodec.GSM7BitCodec.handle_decode_ignore_error">handle_decode_ignore_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_decode_replace_error" href="#naz.nazcodec.GSM7BitCodec.handle_decode_replace_error">handle_decode_replace_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_decode_strict_error" href="#naz.nazcodec.GSM7BitCodec.handle_decode_strict_error">handle_decode_strict_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_encode_error" href="#naz.nazcodec.GSM7BitCodec.handle_encode_error">handle_encode_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_encode_ignore_error" href="#naz.nazcodec.GSM7BitCodec.handle_encode_ignore_error">handle_encode_ignore_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_encode_replace_error" href="#naz.nazcodec.GSM7BitCodec.handle_encode_replace_error">handle_encode_replace_error</a></code></li>
+<li><code><a title="naz.nazcodec.GSM7BitCodec.handle_encode_strict_error" href="#naz.nazcodec.GSM7BitCodec.handle_encode_strict_error">handle_encode_strict_error</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="naz.nazcodec.NazCodec" href="#naz.nazcodec.NazCodec">NazCodec</a></code></h4>
+<ul class="">
+<li><code><a title="naz.nazcodec.NazCodec.__init__" href="#naz.nazcodec.NazCodec.__init__">__init__</a></code></li>
+<li><code><a title="naz.nazcodec.NazCodec.custom_codecs" href="#naz.nazcodec.NazCodec.custom_codecs">custom_codecs</a></code></li>
+<li><code><a title="naz.nazcodec.NazCodec.decode" href="#naz.nazcodec.NazCodec.decode">decode</a></code></li>
+<li><code><a title="naz.nazcodec.NazCodec.encode" href="#naz.nazcodec.NazCodec.encode">encode</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="naz.nazcodec.NazCodecException" href="#naz.nazcodec.NazCodecException">NazCodecException</a></code></h4>
+</li>
+<li>
+<h4><code><a title="naz.nazcodec.UCS2Codec" href="#naz.nazcodec.UCS2Codec">UCS2Codec</a></code></h4>
+<ul class="">
+<li><code><a title="naz.nazcodec.UCS2Codec.decode" href="#naz.nazcodec.UCS2Codec.decode">decode</a></code></li>
+<li><code><a title="naz.nazcodec.UCS2Codec.encode" href="#naz.nazcodec.UCS2Codec.encode">encode</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.5.1</a>.</p>
+</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+<script>hljs.initHighlightingOnLoad()</script>
+</body>
+</html>
