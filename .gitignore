@@ -45,3 +45,6 @@ coverage.xml
 
 # mypy
 *.mypy_cache/
+
+# sphinx
+sphinx-build

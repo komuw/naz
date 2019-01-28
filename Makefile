@@ -39,3 +39,6 @@ test:
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
+
+sphinx:
+	@sphinx-build sphinx-docs sphinx-build
