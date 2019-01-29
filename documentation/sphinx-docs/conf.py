@@ -24,7 +24,7 @@ author = "Komu Wairagu"
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}
-with open(os.path.join(here, "../naz", "__version__.py"), "r") as f:
+with open(os.path.join(here, "../../naz", "__version__.py"), "r") as f:
     x = f.read()
     y = x.replace("about = ", "")
     about = ast.literal_eval(y)

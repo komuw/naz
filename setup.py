@@ -65,7 +65,14 @@ setup(
     # simple. Or you can use find_packages().
     # packages=['naz'],
     packages=find_packages(
-        exclude=["documentation", "*tests*", "examples", ".github", "sphinx-docs", "sphinx-build"]
+        exclude=[
+            "documentation",
+            "*tests*",
+            "examples",
+            ".github",
+            "documentation/sphinx-docs",
+            "sphinx-build",
+        ]
     ),
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
