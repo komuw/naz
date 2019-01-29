@@ -11,3 +11,4 @@ Welcome to naz
     queue
     ratelimiter
     sequence
+    throttle

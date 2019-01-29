@@ -4,14 +4,21 @@ import logging
 
 class BaseThrottleHandler:
     """
-    Interface that must be implemented to satisfy naz's throttle handling.
-    User implementations should subclassing this class and
-    implement the allow_request, not_throttled and throttled methods with the type signatures shown.
+    This is the interface that must be implemented to satisfy naz's throttle handling.
+    User implementations should inherit this class and
+    implement the :func:`throttled <BaseThrottleHandler.throttled>`, :func:`not_throttled <BaseThrottleHandler.not_throttled>`,
+    :func:`allow_request <BaseThrottleHandler.allow_request>` and
+    :func:`throttle_delay <BaseThrottleHandler.throttle_delay>` methods with the type signatures shown.
+
+    When an SMPP client exceeds it's rate limit, or when the SMSC is under load or for whatever reason;
+    The SMSC may decide to start throtlling requests from that particular client.
+    When it does so, it replies to the client with a throttling status. Under such conditions, it is important for the client to start
+    rate limiting itself. The way naz implements this self imposed self-regulation is via Throttle Handlers.
     """
 
     async def throttled(self) -> None:
         """
-        this method will be called by naz everytime we get a throttling(ESME_RTHROTTLED) response from SMSC
+        this method will be called by naz everytime we get a throttling response from SMSC.
         """
         raise NotImplementedError("throttled method must be implemented.")
 
@@ -30,13 +37,27 @@ class BaseThrottleHandler:
 
     async def throttle_delay(self) -> float:
         """
-        if the last allow_request method call returned False(thus denying sending a request), naz will call the throttle_delay method
+        if the last :func:`allow_request <BaseThrottleHandler.allow_request>` method call returned False(thus denying sending a request),
+        naz will call the throttle_delay method
         to determine how long in seconds to wait before calling allow_request again.
         """
         raise NotImplementedError("throttle_delay method must be implemented.")
 
 
 class SimpleThrottleHandler(BaseThrottleHandler):
+    """
+    This is an implementation of BaseThrottleHandler.
+
+    It works by:
+
+    - calculating the percentage of responses from the SMSC that are THROTTLING responses.
+    - if that percentage goes above :attr:`deny_request_at <SimpleThrottleHandler.deny_request_at>` percent AND \
+    total number of responses from SMSC is greater than :attr:`sample_size <SimpleThrottleHandler.sample_size>` over \
+    :attr:`sampling_period <SimpleThrottleHandler.sampling_period>` seconds
+    - then deny making anymore requests to SMSC
+
+    """
+
     def __init__(
         self,
         logger: logging.Logger,
@@ -46,20 +67,11 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         throttle_wait: float = 3,
     ) -> None:
         """
-        :param sampling_period:                  (optional) [float]
-            the duration in seconds over which we will calculate the percentage of throttled responses.
-        :param sample_size:                  (optional) [int]
-            the minimum number of responses we should have got from SMSC over :sampling_period duration to enable us make a decision.
-        :param deny_request_at:                  (optional) [float]
-            the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.
-        :param throttle_wait:                  (optional) [float]
-            the time in seconds to wait before calling allow_request after the last allow_request that returned False.
-
-        usage:
-            throttle_handeler = SimpleThrottleHandler(sampling_period=180, sample_size=45, deny_request_at=1.2)
-                this will calculate the percentage of throttles we are getting from SMSC.
-                If the percentage of throttles goes above 1.2% over a period of 180 seconds and the total number of responses from
-                SMSC is greater than 45, then deny making more requests to SMSC, ELSE allow requests to SMSC to continue
+        Parameters:
+            sampling_period: the duration in seconds over which we will calculate the percentage of throttled responses.
+            sample_size: the minimum number of responses we should have got from SMSC over :sampling_period duration to enable us make a decision.
+            deny_request_at: the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.
+            throttle_wait: the time in seconds to wait before calling allow_request after the last allow_request that returned False.
         """
         self.NON_throttle_responses: int = 0
         self.throttle_responses: int = 0
