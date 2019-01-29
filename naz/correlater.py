@@ -43,14 +43,14 @@ class SimpleCorrelater(BaseCorrelater):
     """
     A simple implementation of BaseCorrelater.
     It stores the correlation/relation between a given SMPP sequence_number and a user supplied log_id and/or hook_metadata.
-    The storage is done in memory using a python dictionary.
 
     SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.
-    When instantiating a SimpleCorrelater, you can supply a max_ttl which is the time in seconds that an item
-    is going to be stored. After the expiration of max_ttl seconds that item will/may be deleted.
 
-    The storage looks like:
-        {
+     The storage is done in memory using a python dictionary. The storage looks like:
+    
+    .. code-block:: python
+
+       {
             "sequence_number1": {
                 "log_id": "log_id1",
                 "hook_metadata": "hook_metadata1",
@@ -61,6 +61,7 @@ class SimpleCorrelater(BaseCorrelater):
             "hook_metadata": "hook_metadata2",
             "stored_at": 682.109023565
            }
+           ...
         }
     """
 
