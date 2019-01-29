@@ -5,6 +5,6 @@ Welcome to naz
 .. toctree::
     install
     client
-    queue
     correlater
-
+    hooks
+    queue

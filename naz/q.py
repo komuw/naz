@@ -34,7 +34,7 @@ class BaseOutboundQueue:
 class SimpleOutboundQueue(BaseOutboundQueue):
     """
     This is an in-memory implementation of BaseOutboundQueue.
-    It should only be used for tests and demo purposes.
+    Note: It should only be used for tests and demo purposes.
     """
 
     def __init__(self, maxsize: int, loop: asyncio.events.AbstractEventLoop) -> None:
