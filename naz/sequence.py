@@ -19,7 +19,7 @@ class BaseSequenceGenerator:
 
 class SimpleSequenceGenerator(BaseSequenceGenerator):
     """
-    This is an in-memory implementation of BaseSequenceGenerator.
+    This is an implementation of BaseSequenceGenerator.
     """
 
     min_sequence_number: int = 0x00000001

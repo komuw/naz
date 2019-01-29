@@ -22,7 +22,7 @@ class BaseRateLimiter:
 
 class SimpleRateLimiter(BaseRateLimiter):
     """
-    This is an in-memory implementation of BaseRateLimiter.
+    This is an implementation of BaseRateLimiter.
 
     It does rate limiting using a `token bucket rate limiting algorithm <https://en.wikipedia.org/wiki/Token_bucket>`_
 
