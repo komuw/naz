@@ -6,13 +6,13 @@ class BaseCorrelater:
     """
     Interface that must be implemented to satisfy naz's Correlater.
     User implementations should inherit this class and
-    implement the get and put methods with the type signatures shown.
+    implement the :func:`get <BaseCorrelater.get>` and :func:`put <BaseCorrelater.put>` methods with the type signatures shown.
 
     A Correlater is class that naz uses to store relations between SMPP sequence numbers
     and user applications' log_id's and/or hook_metadata.
 
-    Please note that this correlation is BEST EFFORT; it is not guaranteed(nor guaranteed to be reliable.)
-    One reason is that the SMPP spec mandates `sequence_number` to  wrap around after 0x7FFFFFFF(2,147,483,647) ≈ 2billion.
+    Note: This correlation is on a BEST effort basis; it is not guaranteed to be reliable.
+    One reason is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.
     """
 
     async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
@@ -32,6 +32,9 @@ class BaseCorrelater:
 
         Parameters:
             sequence_number: SMPP sequence_number
+        
+        Returns:
+            log_id and hook_metadata
         """
         raise NotImplementedError("get method must be implemented.")
 
@@ -65,16 +68,12 @@ class SimpleCorrelater(BaseCorrelater):
         """
         Parameters:
             max_ttl: The time in seconds that an item is going to be stored.
-                    After the expiration of max_ttl seconds that item will/may be deleted.
-                    The default value is 3600 seconds(1hour)
+                    After the expiration of max_ttl seconds, that item will be deleted.
         """
         self.store: dict = {}
         self.max_ttl: float = max_ttl
 
     async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
-        """
-        store relation of SMPP sequence_number and log_id and/or hook_metadata
-        """
         stored_at = time.monotonic()
         self.store[sequence_number] = {
             "log_id": log_id,
@@ -85,9 +84,6 @@ class SimpleCorrelater(BaseCorrelater):
         await self.delete_after_ttl()
 
     async def get(self, sequence_number: int) -> Tuple[str, str]:
-        """
-        get relation of SMPP sequence_number and log_id and/or hook_metadata
-        """
         item = self.store.get(sequence_number)
         if not item:
             # garbage collect

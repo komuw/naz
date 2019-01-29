@@ -24,6 +24,9 @@ class BaseOutboundQueue:
     async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
         """
         dequeue an item.
+
+        Returns:
+            item that was dequeued
         """
         raise NotImplementedError("dequeue method must be implemented.")
 
