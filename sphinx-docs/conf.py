@@ -16,8 +16,8 @@ import os
 import sys
 
 
-sys.path.insert(0, os.path.abspath(".."))  # '~/myDirectories/naz'
-sys.path.insert(0, os.path.abspath("../naz"))  # '~/myDirectories/naz/naz'
+# sys.path.insert(0, os.path.abspath(".."))  # '~/myDirectories/naz'
+# sys.path.insert(0, os.path.abspath("../naz"))  # '~/myDirectories/naz/naz'
 
 # import pdb
 
