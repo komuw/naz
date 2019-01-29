@@ -41,4 +41,4 @@ test:
 	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
 
 sphinx:
-	@sphinx-build sphinx-docs sphinx-build
+	@sphinx-build -a -E sphinx-docs sphinx-build
