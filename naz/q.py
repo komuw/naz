@@ -34,6 +34,10 @@ class SimpleOutboundQueue(BaseOutboundQueue):
     def __init__(self, maxsize: int, loop: asyncio.events.AbstractEventLoop) -> None:
         """
         maxsize is the max number of items(not size) that can be put in the queue.
+
+        Parameters:
+            maxsize: The maxsize
+            loop: you know loop
         """
         self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize, loop=loop)
 
