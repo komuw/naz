@@ -34,6 +34,7 @@ class BaseOutboundQueue:
 class SimpleOutboundQueue(BaseOutboundQueue):
     """
     This is an in-memory implementation of BaseOutboundQueue.
+
     Note: It should only be used for tests and demo purposes.
     """
 

@@ -50,7 +50,7 @@ outboundqueue | python class implementing some queueing mechanism. messages to b
 client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
 loglevel | the level at which to log | DEBUG
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
-codec_class | python class to be used to encode/decode messages | naz.nazcodec.NazCodec
+codec_class | python class to be used to encode/decode messages | naz.nazcodec.SimpleNazCodec
 codec_errors_level | same meaning as the `errors` argument to pythons' `encode` method as [defined here](https://docs.python.org/3/library/codecs.html#codecs.encode) | strict
 enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 90
 rateLimiter | python class implementing rate limitation | naz.ratelimiter.SimpleRateLimiter

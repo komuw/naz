@@ -112,7 +112,7 @@ class Client:
         self.codec_errors_level = codec_errors_level
         self.codec_class = codec_class
         if not self.codec_class:
-            self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
+            self.codec_class = nazcodec.SimpleNazCodec(errors=self.codec_errors_level)
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton

@@ -2,6 +2,6 @@ nazcodec
 ---------------
 
 .. automodule:: naz.nazcodec
-    :members: NazCodec
+    :members: BaseNazCodec, SimpleNazCodec
     :show-inheritance:
 

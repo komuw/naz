@@ -160,17 +160,60 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_decode(input, errors)
 
 
-class NazCodec(object):
+class BaseNazCodec:
     """
-    usage:
-        ncodec = NazCodec()
+    This is the interface that must be implemented to satisfy naz's encoding/decoding.
+    User implementations should inherit this class and
+    implement the :func:`encode <BaseNazCodec.encode>` and :func:`decode <BaseNazCodec.decode>` methods with the type signatures shown.
 
-        ncodec.encode("Zoë", "utf-16be")
-        ncodec.encode("Zoë", "utf-8")
-        ncodec.encode("HÜLK", 'gsm0338')
+    naz calls an implementation of this class to encode/decode messages.
+    """
 
-        ncodec.decode(b'Zo\xc3\xab', 'gsm0338', 'ignore')
-        ncodec.decode(b'Zo\xc3\xab', 'utf8')
+    def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
+        """
+        return an encoded version of the string as a bytes object
+
+        Parameters:
+            string_to_encode: the string to encode
+            encoding: encoding scheme. eg utf-8, gsm0338 etc
+            errors: `same as defined in pythons codec.encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ 
+        
+        Returns:
+            encoded version of input string
+        """
+        raise NotImplementedError("encode method must be implemented.")
+
+    def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
+        """
+        return a string decoded from the given bytes.
+
+       Parameters:
+            byte_string: the bytes to decode
+            encoding: encoding scheme. eg utf-8, gsm0338 etc
+            errors: `same as defined in pythons codec.decode <https://docs.python.org/3/library/codecs.html#codecs.decode>`_ 
+        """
+        raise NotImplementedError("decode method must be implemented.")
+
+
+class SimpleNazCodec(BaseNazCodec):
+    """
+    This is an implementation of BaseNazCodec.
+    
+    SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
+    This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ 
+
+    example usage:
+
+    .. code-block:: python
+
+       ncodec = SimpleNazCodec()
+
+       ncodec.encode("Zoë", "utf-16be")
+       ncodec.encode("Zoë", "utf-8")
+       ncodec.encode("HÜLK", 'gsm0338')
+
+       ncodec.decode(b'Zo\xc3\xab', 'gsm0338', 'ignore')
+       ncodec.decode(b'Zo\xc3\xab', 'utf8')
     """
 
     custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
@@ -178,11 +221,7 @@ class NazCodec(object):
     def __init__(self, errors="strict"):
         self.errors = errors
 
-    def encode(self, string_to_encode, encoding=None, errors=None):
-        """
-        you should call encode on a string. ie in python3 we write;
-          'sss'.encode() # b'sss'
-        """
+    def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
         if not errors:
             errors = self.errors
 
@@ -196,11 +235,7 @@ class NazCodec(object):
         obj, length = encoder(string_to_encode, errors)
         return obj
 
-    def decode(self, byte_string, encoding=None, errors=None):
-        """
-        you should call decode on a byte. ie in python3 we write;
-          b'sss'.decode() # 'sss'
-        """
+    def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
         if not errors:
             errors = self.errors
 

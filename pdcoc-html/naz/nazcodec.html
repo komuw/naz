@@ -184,10 +184,10 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_decode(input, errors)
 
 
-class NazCodec(object):
+class SimpleNazCodec(object):
     &#34;&#34;&#34;
     usage:
-        ncodec = NazCodec()
+        ncodec = SimpleNazCodec()
 
         ncodec.encode(&#34;Zoë&#34;, &#34;utf-16be&#34;)
         ncodec.encode(&#34;Zoë&#34;, &#34;utf-8&#34;)
@@ -552,14 +552,14 @@ xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'</dd>
 </dd>
 </dl>
 </dd>
-<dt id="naz.nazcodec.NazCodec"><code class="flex name class">
-<span>class <span class="ident">NazCodec</span></span>
+<dt id="naz.nazcodec.SimpleNazCodec"><code class="flex name class">
+<span>class <span class="ident">SimpleNazCodec</span></span>
 </code></dt>
 <dd>
 <section class="desc"><dl>
 <dt><strong><code>usage</code></strong></dt>
 <dd>
-<p>ncodec = NazCodec()</p>
+<p>ncodec = SimpleNazCodec()</p>
 <p>ncodec.encode("Zoë", "utf-16be")
 ncodec.encode("Zoë", "utf-8")
 ncodec.encode("HÜLK", 'gsm0338')</p>
@@ -569,10 +569,10 @@ ncodec.decode(b'ZoÃ«', 'utf8')</p>
 </dl></section>
 <details class="source">
 <summary>Source code</summary>
-<pre><code class="python">class NazCodec(object):
+<pre><code class="python">class SimpleNazCodec(object):
     &#34;&#34;&#34;
     usage:
-        ncodec = NazCodec()
+        ncodec = SimpleNazCodec()
 
         ncodec.encode(&#34;Zoë&#34;, &#34;utf-16be&#34;)
         ncodec.encode(&#34;Zoë&#34;, &#34;utf-8&#34;)
@@ -625,14 +625,14 @@ ncodec.decode(b'ZoÃ«', 'utf8')</p>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="naz.nazcodec.NazCodec.custom_codecs"><code class="name">var <span class="ident">custom_codecs</span></code></dt>
+<dt id="naz.nazcodec.SimpleNazCodec.custom_codecs"><code class="name">var <span class="ident">custom_codecs</span></code></dt>
 <dd>
 <section class="desc"></section>
 </dd>
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="naz.nazcodec.NazCodec.__init__"><code class="name flex">
+<dt id="naz.nazcodec.SimpleNazCodec.__init__"><code class="name flex">
 <span>def <span class="ident">__init__</span></span>(<span>self, errors=&#39;strict&#39;)</span>
 </code></dt>
 <dd>
@@ -644,7 +644,7 @@ See help(type(self)) for accurate signature.</p></section>
     self.errors = errors}</code></pre>
 </details>
 </dd>
-<dt id="naz.nazcodec.NazCodec.decode"><code class="name flex">
+<dt id="naz.nazcodec.SimpleNazCodec.decode"><code class="name flex">
 <span>def <span class="ident">decode</span></span>(<span>self, byte_string, encoding=None, errors=None)</span>
 </code></dt>
 <dd>
@@ -671,7 +671,7 @@ b'sss'.decode() # 'sss'</p></section>
     return obj}</code></pre>
 </details>
 </dd>
-<dt id="naz.nazcodec.NazCodec.encode"><code class="name flex">
+<dt id="naz.nazcodec.SimpleNazCodec.encode"><code class="name flex">
 <span>def <span class="ident">encode</span></span>(<span>self, string_to_encode, encoding=None, errors=None)</span>
 </code></dt>
 <dd>
@@ -816,12 +816,12 @@ situation.</p></section>
 </ul>
 </li>
 <li>
-<h4><code><a title="naz.nazcodec.NazCodec" href="#naz.nazcodec.NazCodec">NazCodec</a></code></h4>
+<h4><code><a title="naz.nazcodec.SimpleNazCodec" href="#naz.nazcodec.SimpleNazCodec">SimpleNazCodec</a></code></h4>
 <ul class="">
-<li><code><a title="naz.nazcodec.NazCodec.__init__" href="#naz.nazcodec.NazCodec.__init__">__init__</a></code></li>
-<li><code><a title="naz.nazcodec.NazCodec.custom_codecs" href="#naz.nazcodec.NazCodec.custom_codecs">custom_codecs</a></code></li>
-<li><code><a title="naz.nazcodec.NazCodec.decode" href="#naz.nazcodec.NazCodec.decode">decode</a></code></li>
-<li><code><a title="naz.nazcodec.NazCodec.encode" href="#naz.nazcodec.NazCodec.encode">encode</a></code></li>
+<li><code><a title="naz.nazcodec.SimpleNazCodec.__init__" href="#naz.nazcodec.SimpleNazCodec.__init__">__init__</a></code></li>
+<li><code><a title="naz.nazcodec.SimpleNazCodec.custom_codecs" href="#naz.nazcodec.SimpleNazCodec.custom_codecs">custom_codecs</a></code></li>
+<li><code><a title="naz.nazcodec.SimpleNazCodec.decode" href="#naz.nazcodec.SimpleNazCodec.decode">decode</a></code></li>
+<li><code><a title="naz.nazcodec.SimpleNazCodec.encode" href="#naz.nazcodec.SimpleNazCodec.encode">encode</a></code></li>
 </ul>
 </li>
 <li>

@@ -41,7 +41,7 @@ logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG
 
 class TestNazCodec(TestCase):
     def setUp(self):
-        self.codec = naz.nazcodec.NazCodec()
+        self.codec = naz.nazcodec.SimpleNazCodec()
 
     def test_byte_encode_guard(self):
         self.assertRaises(naz.nazcodec.NazCodecException, self.codec.encode, b"some bytes")
