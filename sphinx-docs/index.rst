@@ -6,4 +6,5 @@ Welcome to naz
     install
     client
     queue
+    correlater
 

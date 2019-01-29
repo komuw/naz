@@ -15,27 +15,23 @@ class BaseCorrelater:
     One reason is that the SMPP spec mandates `sequence_number` to  wrap around after 0x7FFFFFFF(2,147,483,647) ≈ 2billion.
     """
 
-    async def put(self, sequence_number: str, log_id: str, hook_metadata: str) -> None:
+    async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
         """
-         called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
+        called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
 
-        :param sequence_number:                  (mandatory) [str]
-            SMPP sequence_number
-        :param log_id:                  (mandatory) [str]
-            an ID that a user's application had previously supplied to naz
-            to track/correlate different messages.
-        :param hook_metadata:                  (optional) [str]
-            a string that a user's application had previously supplied to naz
-            that it may want to be correlated with the log_id.
+        Parameters:
+            sequence_number: SMPP sequence_number
+            log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
+            hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
         """
         raise NotImplementedError("put method must be implemented.")
 
-    async def get(self, sequence_number: str) -> Tuple[str, str]:
+    async def get(self, sequence_number: int) -> Tuple[str, str]:
         """
         called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
 
-        :param sequence_number:                  (mandatory) [str]
-            SMPP sequence_number
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         raise NotImplementedError("get method must be implemented.")
 
@@ -67,15 +63,15 @@ class SimpleCorrelater(BaseCorrelater):
 
     def __init__(self, max_ttl: float = 60 * 60) -> None:
         """
-        :param max_ttl: (optional) [float]
-           the time in seconds that an item is going to be stored.
-           After the expiration of max_ttl seconds that item will/may be deleted.
-           The default value is 3600 seconds(1hour)
+        Parameters:
+            max_ttl: The time in seconds that an item is going to be stored.
+                    After the expiration of max_ttl seconds that item will/may be deleted.
+                    The default value is 3600 seconds(1hour)
         """
         self.store: dict = {}
         self.max_ttl: float = max_ttl
 
-    async def put(self, sequence_number: str, log_id: str, hook_metadata: str) -> None:
+    async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
         """
         store relation of SMPP sequence_number and log_id and/or hook_metadata
         """
@@ -88,7 +84,7 @@ class SimpleCorrelater(BaseCorrelater):
         # garbage collect
         await self.delete_after_ttl()
 
-    async def get(self, sequence_number: str) -> Tuple[str, str]:
+    async def get(self, sequence_number: int) -> Tuple[str, str]:
         """
         get relation of SMPP sequence_number and log_id and/or hook_metadata
         """
