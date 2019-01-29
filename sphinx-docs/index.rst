@@ -7,4 +7,5 @@ Welcome to naz
     client
     correlater
     hooks
+    nazcodec
     queue
