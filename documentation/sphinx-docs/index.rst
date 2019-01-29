@@ -10,3 +10,4 @@ Welcome to naz
     nazcodec
     queue
     ratelimiter
+    sequence
