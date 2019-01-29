@@ -32,7 +32,7 @@ class BaseCorrelater:
 
         Parameters:
             sequence_number: SMPP sequence_number
-        
+
         Returns:
             log_id and hook_metadata
         """
@@ -47,7 +47,7 @@ class SimpleCorrelater(BaseCorrelater):
     SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.
 
      The storage is done in memory using a python dictionary. The storage looks like:
-    
+
     .. code-block:: python
 
        {

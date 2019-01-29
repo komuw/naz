@@ -176,8 +176,8 @@ class BaseNazCodec:
         Parameters:
             string_to_encode: the string to encode
             encoding: encoding scheme. eg utf-8, gsm0338 etc
-            errors: `same as defined in pythons codec.encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ 
-        
+            errors: `same as defined in pythons codec.encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_
+
         Returns:
             encoded version of input string
         """
@@ -190,7 +190,7 @@ class BaseNazCodec:
        Parameters:
             byte_string: the bytes to decode
             encoding: encoding scheme. eg utf-8, gsm0338 etc
-            errors: `same as defined in pythons codec.decode <https://docs.python.org/3/library/codecs.html#codecs.decode>`_ 
+            errors: `same as defined in pythons codec.decode <https://docs.python.org/3/library/codecs.html#codecs.decode>`_
         """
         raise NotImplementedError("decode method must be implemented.")
 
@@ -198,9 +198,9 @@ class BaseNazCodec:
 class SimpleNazCodec(BaseNazCodec):
     """
     This is an implementation of BaseNazCodec.
-    
+
     SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
-    This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ 
+    This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_
 
     example usage:
 
