@@ -112,7 +112,7 @@ class Client:
         self.codec_errors_level = codec_errors_level
         self.codec_class = codec_class
         if not self.codec_class:
-            self.codec_class = nazcodec.SimpleNazCodec(errors=self.codec_errors_level)
+            self.codec_class = nazcodec.SimpleNazCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -252,16 +252,16 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.system_id, self.encoding)
+            + self.codec_class.encode(self.system_id, self.encoding, self.codec_errors_level)
             + chr(0).encode()
-            + self.codec_class.encode(self.password, self.encoding)
+            + self.codec_class.encode(self.password, self.encoding, self.codec_errors_level)
             + chr(0).encode()
-            + self.codec_class.encode(self.system_type, self.encoding)
+            + self.codec_class.encode(self.system_type, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
-            + self.codec_class.encode(self.address_range, self.encoding)
+            + self.codec_class.encode(self.address_range, self.encoding, self.codec_errors_level)
             + chr(0).encode()
         )
 
@@ -537,7 +537,11 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + self.codec_class.encode(message_id, self.encoding) + chr(0).encode()
+        body = (
+            body
+            + self.codec_class.encode(message_id, self.encoding, self.codec_errors_level)
+            + chr(0).encode()
+        )
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
@@ -669,36 +673,40 @@ class Client:
                 "smpp_command": smpp_command,
             }
         )
-        encoded_short_message = self.codec_class.encode(short_message, self.encoding)
+        encoded_short_message = self.codec_class.encode(
+            short_message, self.encoding, self.codec_errors_level
+        )
         sm_length = len(encoded_short_message)
 
         # body
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.service_type, self.encoding)
+            + self.codec_class.encode(self.service_type, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
-            + self.codec_class.encode(source_addr, self.encoding)
+            + self.codec_class.encode(source_addr, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
-            + self.codec_class.encode(destination_addr, self.encoding)
+            + self.codec_class.encode(destination_addr, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
-            + self.codec_class.encode(self.schedule_delivery_time, self.encoding)
+            + self.codec_class.encode(
+                self.schedule_delivery_time, self.encoding, self.codec_errors_level
+            )
             + chr(0).encode()
-            + self.codec_class.encode(self.validity_period, self.encoding)
+            + self.codec_class.encode(self.validity_period, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
             + struct.pack(">B", self.sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec_class.encode(short_message, self.encoding)
+            + self.codec_class.encode(short_message, self.encoding, self.codec_errors_level)
         )
 
         # header
@@ -767,7 +775,7 @@ class Client:
 
         log_msg = ""
         try:
-            log_msg = self.codec_class.decode(msg, self.encoding)
+            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
             # do not log password, redact it from logs.
             if self.password in log_msg:
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
@@ -825,7 +833,7 @@ class Client:
             raise ValueError(error_msg)
 
         if isinstance(msg, str):
-            msg = self.codec_class.encode(msg, self.encoding)
+            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
 
         # call user's hook for requests
         try:

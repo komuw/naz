@@ -218,13 +218,7 @@ class SimpleNazCodec(BaseNazCodec):
 
     custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
 
-    def __init__(self, errors="strict"):
-        self.errors = errors
-
     def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
-        if not errors:
-            errors = self.errors
-
         if not isinstance(string_to_encode, str):
             raise NazCodecException("Only strings accepted for encoding.")
         encoding = encoding or sys.getdefaultencoding()
@@ -236,9 +230,6 @@ class SimpleNazCodec(BaseNazCodec):
         return obj
 
     def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
-        if not errors:
-            errors = self.errors
-
         if not isinstance(byte_string, (bytes, bytearray)):
             raise NazCodecException("Only bytestrings accepted for decoding.")
         encoding = encoding or sys.getdefaultencoding()
