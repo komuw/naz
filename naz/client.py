@@ -75,6 +75,7 @@ class Client:
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: int = 300,
+        log_handler=None,
         loglevel: str = "DEBUG",
         log_metadata=None,
         codec_class=None,
@@ -115,6 +116,7 @@ class Client:
             outboundqueue:	python class instance implementing some queueing mechanism. \
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
+            log_handler: python class instance to be used for logging
             loglevel:	the level at which to log
             log_metadata: metadata that will be included in all log statements
             codec_class: python class instance to be used to encode/decode messages
@@ -211,15 +213,20 @@ class Client:
         self.writer: typing.Any = None
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
-        extra_log_data = {"log_metadata": self.log_metadata}
-        self._logger = logging.getLogger("naz.client")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        if not self._logger.handlers:
-            self._logger.addHandler(handler)
-        self._logger.setLevel(self.loglevel)
-        self.logger: logging.LoggerAdapter = logger.NazLoggingAdapter(self._logger, extra_log_data)
+        # extra_log_data = {"log_metadata": self.log_metadata}
+        # self._logger = logging.getLogger("naz.client")
+        # handler = logging.StreamHandler()
+        # formatter = logging.Formatter("%(message)s")
+        # handler.setFormatter(formatter)
+        # if not self._logger.handlers:
+        #     self._logger.addHandler(handler)
+        # self._logger.setLevel(self.loglevel)
+
+        # NB: currently, naz only uses to log levels; INFO and EXCEPTION
+        self.logger = log_handler
+        if not self.logger:
+            self.logger  = logger.SimpleBaseLogger()
+        self.logger.register(loglevel=self.loglevel, log_metadata=self.log_metadata)
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
@@ -247,6 +254,12 @@ class Client:
         self.naz_message_protocol_version = "1"
 
         self.current_session_state = SmppSessionState.CLOSED
+
+    def _log(self, level, log_data):
+        try:
+            self.logger.log(level, log_data)
+        except Exception as e:
+            pass
 
     @staticmethod
     def _find_data_coding(encoding):
@@ -293,13 +306,13 @@ class Client:
         """
         make a network connection to SMSC server.
         """
-        self.logger.info({"event": "naz.Client.connect", "stage": "start"})
+        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
-        self.logger.info({"event": "naz.Client.connect", "stage": "end"})
+        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end"})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
 
