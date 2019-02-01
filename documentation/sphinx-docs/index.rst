@@ -1,9 +1,18 @@
-naz documentation
-------------------
-Welcome to naz
+=======================================================================
+ naz - naz is an async SMPP client.
+=======================================================================
 
+
+Contents
+========
 .. toctree::
-    install
+    :maxdepth: 2
+
+    introduction
+
+API reference
+=============
+.. toctree::
     client
     correlater
     hooks
