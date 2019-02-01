@@ -287,7 +287,9 @@ class Client:
         else:
             return 60 * (1 * (2 ** current_retries))
 
-    async def connect(self) -> None:
+    async def connect(
+        self
+    ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
         """
         make a network connection to SMSC server.
         """
