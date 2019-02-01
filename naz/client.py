@@ -207,8 +207,8 @@ class Client:
 
         self.data_coding = self._find_data_coding(self.encoding)
 
-        self.reader = None
-        self.writer = None
+        self.reader: typing.Any = None
+        self.writer: typing.Any = None
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         extra_log_data = {"log_metadata": self.log_metadata}
@@ -297,8 +297,8 @@ class Client:
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
-        self.reader = reader
-        self.writer = writer
+        self.reader: asyncio.streams.StreamReader = reader
+        self.writer: asyncio.streams.StreamWriter = writer
         self.logger.info({"event": "naz.Client.connect", "stage": "end"})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
