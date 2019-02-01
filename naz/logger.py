@@ -14,7 +14,8 @@ class BaseLogger:
 
     def register(self, loglevel: str, log_metadata: dict) -> None:
         """
-        called when a naz client is been instantiated.
+        called when a naz client is been instantiated so that the logger can be
+        notified of log_metadata that a user supplied to a naz client.
 
         Parameters:
             loglevel: logging level eg DEBUG
