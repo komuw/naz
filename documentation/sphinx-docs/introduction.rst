@@ -174,6 +174,7 @@ by default, naz annotates all log events with smsc_host, system_id and client_id
 For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
 
 .. code-block:: python
+
     import naz
 
     class KVlogger(naz.logger.BaseLogger):
