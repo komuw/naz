@@ -1,3 +1,4 @@
+import typing
 import logging
 
 
@@ -54,6 +55,7 @@ class SimpleBaseLogger(BaseLogger):
             logger_name: name of the logger
         """
         self.logger_name = logger_name
+        self.logger: typing.Any = None
 
     def register(self, loglevel: str, log_metadata: dict) -> None:
         self._logger = logging.getLogger(self.logger_name)
@@ -66,6 +68,8 @@ class SimpleBaseLogger(BaseLogger):
         self.logger: logging.LoggerAdapter = NazLoggingAdapter(self._logger, log_metadata)
 
     def log(self, level: int, log_data: dict) -> None:
+        if not self.logger:
+            self.register(loglevel="DEBUG", log_metadata={})
         if level >= logging.ERROR:
             self.logger.log(level, log_data, exc_info=True)
         else:

@@ -106,14 +106,8 @@ def main():
     """
     """
     _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
-    logger = logging.getLogger("naz.cli")
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter("%(message)s")
-    handler.setFormatter(formatter)
-    if not logger.handlers:
-        logger.addHandler(handler)
-    logger.setLevel("DEBUG")
-    logger.info({"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
+    logger = naz.logger.SimpleBaseLogger("naz.cli")
+    logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
 
     loop = asyncio.get_event_loop()
     try:
@@ -129,7 +123,6 @@ def main():
         loglevel = (
             kwargs.get("loglevel").upper() if kwargs.get("loglevel") else args.loglevel.upper()
         )
-        logger.setLevel(loglevel)
         log_metadata = kwargs.get("log_metadata")
         if not log_metadata:
             log_metadata = {}
@@ -144,15 +137,15 @@ def main():
                 "client_id": client_id,
             }
         )
-        extra_log_data = {"log_metadata": log_metadata}
-        logger = naz.NazLoggingAdapter(logger, extra_log_data)
+        logger.register(loglevel=loglevel, log_metadata=log_metadata)
 
-        logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
+        logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:
-            logger.warn(
+            logger.log(
+                logging.WARN,
                 "\n\n\t {} \n\n".format(
                     "Naz: Caution; You have activated dry-run, naz may not behave correctly."
-                )
+                ),
             )
 
         # Load custom classes
@@ -167,7 +160,7 @@ def main():
         if inspect.isclass(outboundqueue):
             # DO NOT instantiate class instance, fail with appropriate error instead.
             msg = "outboundqueue should be a class instance."
-            logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
+            logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
             sys.exit(77)
 
         sequence_generator = kwargs.get("sequence_generator")
@@ -177,7 +170,7 @@ def main():
             kwargs["sequence_generator"] = sequence_generator
             if inspect.isclass(sequence_generator):
                 msg = "sequence_generator should be a class instance."
-                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
+                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
 
         codec_class = kwargs.get("codec_class")
@@ -186,7 +179,7 @@ def main():
             kwargs["codec_class"] = codec_class
             if inspect.isclass(codec_class):
                 msg = "codec_class should be a class instance."
-                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
+                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
         rateLimiter = kwargs.get("rateLimiter")
         if rateLimiter:
@@ -194,7 +187,7 @@ def main():
             kwargs["rateLimiter"] = rateLimiter
             if inspect.isclass(rateLimiter):
                 msg = "rateLimiter should be a class instance."
-                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
+                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
         hook = kwargs.get("hook")
         if hook:
@@ -202,7 +195,7 @@ def main():
             kwargs["hook"] = hook
             if inspect.isclass(hook):
                 msg = "hook should be a class instance."
-                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
+                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
         throttle_handler = kwargs.get("throttle_handler")
         if throttle_handler:
@@ -210,7 +203,7 @@ def main():
             kwargs["throttle_handler"] = throttle_handler
             if inspect.isclass(throttle_handler):
                 msg = "throttle_handler should be a class instance."
-                logger.exception({"event": "naz.cli.main", "stage": "end", "error": msg})
+                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
                 sys.exit(77)
 
         if dry_run:
@@ -234,10 +227,10 @@ def main():
         loop.run_until_complete(cli.unbind())
         cli.writer.close()
     except Exception as e:
-        logger.exception({"event": "naz.cli.main", "stage": "end", "error": str(e)})
+        logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
     finally:
-        logger.info({"event": "naz.cli.main", "stage": "end"})
+        logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "end"})
 
 
 if __name__ == "__main__":
