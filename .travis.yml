@@ -29,3 +29,15 @@ script:
   - coverage erase
   - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*cli/test_*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
   - coverage report --show-missing --fail-under=84
+  - |
+    if [ "$TRAVIS_BRANCH" == "master" ]; then
+        printf "\n $TRAVIS_BRANCH branch, ignoring check for relese notes \n"
+    else
+        ChangedFiles=`git diff --name-only origin/master`
+        case "$ChangedFiles" in
+            *CHANGELOG.*)
+                printf "\n Thanks, your commits include update to release notes. \n";;
+            *)
+                printf "\n You should add release notes to CHANGELOG.md \n" && exit 77;;
+        esac
+    fi
