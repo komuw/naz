@@ -262,7 +262,7 @@ class Client:
         logger can log.
         """
         try:
-            self.logger.log(logging.DEBUG, {"sanity_check_logger": "sanity_check_logger"})
+            self.logger.log(logging.DEBUG, {"event": "sanity_check_logger"})
         except Exception as e:
             raise e
 
