@@ -950,7 +950,9 @@ class Client:
             }
         )
 
-    async def send_forever(self, TESTING: bool = False) -> typing.Union[str, None]:
+    async def send_forever(
+        self, TESTING: bool = False
+    ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
         """
         In loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
 
@@ -1080,7 +1082,7 @@ class Client:
                     continue
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
-                    return "throttle_handler_denied_request"
+                    return {"throttle_handler_denied_request": "throttle_handler_denied_request"}
                 continue
 
     async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
