@@ -386,7 +386,10 @@ class Client:
 
     async def enquire_link(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
-        send a ENQUIRE_LINK pdu to SMSC.
+        send an ENQUIRE_LINK pdu to SMSC.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
         """
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
@@ -466,7 +469,10 @@ class Client:
 
     async def enquire_link_resp(self, sequence_number: int) -> None:
         """
-        send a ENQUIRE_LINK_RESP pdu to SMSC.
+        send an ENQUIRE_LINK_RESP pdu to SMSC.
+
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         smpp_command = SmppCommand.ENQUIRE_LINK_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -519,7 +525,10 @@ class Client:
 
     async def unbind_resp(self, sequence_number: int) -> None:
         """
-        send a UNBIND_RESP pdu to SMSC.
+        send an UNBIND_RESP pdu to SMSC.
+
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         smpp_command = SmppCommand.UNBIND_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -557,6 +566,9 @@ class Client:
     async def deliver_sm_resp(self, sequence_number: int) -> None:
         """
         send a DELIVER_SM_RESP pdu to SMSC.
+
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         smpp_command = SmppCommand.DELIVER_SM_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -618,7 +630,7 @@ class Client:
         self, short_message: str, log_id: str, source_addr: str, destination_addr: str
     ) -> None:
         """
-        enqueues a SUBMIT_SM pdu to client.outboundqueue.
+        enqueues a SUBMIT_SM pdu to :attr:`outboundqueue <Client.outboundqueue>`
         That PDU will later on be sent to SMSC.
 
         Parameters:
@@ -933,7 +945,13 @@ class Client:
             }
         )
 
-    async def send_forever(self, TESTING=False):
+    async def send_forever(self, TESTING: bool = False) -> typing.Union[str, None]:
+        """
+        In loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
+        """
         retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
@@ -1060,8 +1078,12 @@ class Client:
                     return "throttle_handler_denied_request"
                 continue
 
-    async def receive_data(self, TESTING=False):
+    async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
+        In loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client.parse_response_pdu>`.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
         """
         retry_count = 0
         while True:
@@ -1114,8 +1136,13 @@ class Client:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
 
-    async def parse_response_pdu(self, pdu):
+    async def parse_response_pdu(self, pdu: bytes) -> None:
         """
+        Take the bytes that have been read from network and parse them into their corresponding PDU.
+        The resulting PDU is then handed over to :func:`speficic_handlers <Client.speficic_handlers>`
+
+        Parameters:
+            pdu: PDU in bytes, that have been read from network
         """
         self.logger.info({"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
@@ -1175,10 +1202,22 @@ class Client:
         )
 
     async def speficic_handlers(
-        self, smpp_command, command_status_value, sequence_number, log_id, hook_metadata
-    ):
+        self,
+        smpp_command: str,
+        command_status_value: int,
+        sequence_number: int,
+        log_id: str,
+        hook_metadata: str,
+    ) -> None:
         """
-        this handles parsing speficic
+        This routes the various different SMPP PDU to their respective handlers.
+
+        Parameters:
+            smpp_command: type of PDU been sent. eg bind_transceiver
+            command_status_value: the response code from SMSC for a specific PDU
+            sequence_number: SMPP sequence_number
+            log_id: a unique identify of this request
+            hook_metadata: additional metadata that you would like to be passed on to hooks
         """
         commandStatus = self._search_by_command_status_value(
             command_status_value=command_status_value
@@ -1333,18 +1372,9 @@ class Client:
                 }
             )
 
-    async def unbind(self):
+    async def unbind(self) -> None:
         """
-        HEADER::
-        # unbind has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `unbind`
-        command_status, int, 4octet. Not used. Set to NULL
-        sequence_number, int, 4octet.
-
-        `unbind` has no body.
-
-        clients/users should call this method when winding down.
+        send an UNBIND pdu to SMSC.
         """
         smpp_command = SmppCommand.UNBIND
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
