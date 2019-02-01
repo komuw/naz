@@ -15,6 +15,6 @@ from .state import (  # noqa: F401
     DataCoding,
     SmppDataCoding,
 )
-
+from .logger import NazLoggingAdapter  # noqa: F401
 
 from . import __version__  # noqa: F401
