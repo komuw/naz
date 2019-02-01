@@ -100,7 +100,7 @@ html_theme = "alabaster"
 # see: https://github.com/bitprophet/alabaster/blob/master/docs/customization.rst
 html_theme_options = {
     "description": "naz is an async SMPP client.",
-    "github_banner": True,
+    "github_banner": False,
     "travis_button": False,  # see: https://github.com/bitprophet/alabaster/pull/147
     "badge_branch": "master",
     "codecov_button": True,
@@ -205,7 +205,7 @@ epub_exclude_files = ["search.html"]
 # -- Options for todo extension ----------------------------------------------
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
-todo_include_todos = True
+todo_include_todos = False
 
 
 def skip(app, what, name, obj, would_skip, options):
