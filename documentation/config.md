@@ -9,7 +9,7 @@ The parameters are divided into two categories,
 #### (i) smpp spec parameters        
 *parameter* | *meaning*     | *default value*
 ---       | ---         | ---
-smsc_host | the IP address(or doamin name) of the SMSC gateway | N/A
+smsc_host | the IP address(or domain name) of the SMSC gateway/server | N/A
 smsc_port        | the port at which SMSC is listening on       |  N/A
 system_id | Identifies the ESME system requesting to bind as a transceiver with the SMSC. | N/A
 password | The password to  be used by the SMSC to authenticate the ESME requesting to bind. | N/A
@@ -45,18 +45,18 @@ You are also encouraged to consult any documentation of the SMSC partner that yo
 *parameter* | *meaning*     | *default value*
 ---       | ---         | ---     
 encoding | encoding<sup>1</sup> used to encode messages been sent to SMSC | gsm0338
-sequence_generator | python class used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
-outboundqueue | python class implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
+sequence_generator | python class instance used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
+outboundqueue | python class instance implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
 client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
 loglevel | the level at which to log | DEBUG
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
-codec_class | python class to be used to encode/decode messages | naz.nazcodec.SimpleNazCodec
+codec_class | python class instance to be used to encode/decode messages | naz.nazcodec.SimpleNazCodec
 codec_errors_level | same meaning as the `errors` argument to pythons' `encode` method as [defined here](https://docs.python.org/3/library/codecs.html#codecs.encode) | strict
 enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 90
-rateLimiter | python class implementing rate limitation | naz.ratelimiter.SimpleRateLimiter
-hook | python class implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
-throttle_handler | python class implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
-correlation_handler | A python class that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
+rateLimiter | python class instance implementing rate limitation | naz.ratelimiter.SimpleRateLimiter
+hook | python class instance implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
+throttle_handler | python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
+correlation_handler | A python class instance that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
