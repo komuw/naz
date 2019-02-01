@@ -170,6 +170,9 @@ So, for example if you wanted to annotate all log-events with a release version 
 and then these will show up in all log events.
 by default, naz annotates all log events with smsc_host, system_id and client_id
 
+``naz`` also gives you the ability to supply your own logger. 
+
+
 3.2.2 hooks
 =====================
 a hook is a class with two methods request and response, ie it implements naz's BaseHook interface as defined here.

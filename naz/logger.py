@@ -48,8 +48,15 @@ class SimpleBaseLogger(BaseLogger):
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
 
+    def __init__(self, logger_name: str):
+        """
+        Parameters:
+            logger_name: name of the logger
+        """
+        self.logger_name = logger_name
+
     def register(self, loglevel: str, log_metadata: dict) -> None:
-        self._logger = logging.getLogger("naz.client")
+        self._logger = logging.getLogger(self.logger_name)
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
