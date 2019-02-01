@@ -3,3 +3,4 @@
 - Add sphinx documentation: https://github.com/komuw/naz/pull/92
 - Start tracking changes in a changelog
 - Add more type hints and also run `mypy` across the entire repo: https://github.com/komuw/naz/pull/92
+- It's now possible to bring your own logger: https://github.com/komuw/naz/pull/93
