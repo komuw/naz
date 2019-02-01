@@ -97,6 +97,20 @@ html_theme = "alabaster"
 # documentation.
 #
 # html_theme_options = {}
+# see: https://github.com/bitprophet/alabaster/blob/master/docs/customization.rst
+html_theme_options = {
+    "description": "naz is an async SMPP client.",
+    "github_banner": True,
+    "travis_button": False,  # see: https://github.com/bitprophet/alabaster/pull/147
+    "badge_branch": "master",
+    "codecov_button": True,
+    "show_related": True,
+    "github_user": "komuw",
+    "pre_bg": "#4c4c4c",
+    "github_repo": "naz",
+    "github_type": "star",
+    "github_button": True,
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
