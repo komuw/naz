@@ -1,4 +1,7 @@
-class BaseSequenceGenerator:
+import abc
+
+
+class BaseSequenceGenerator(abc.ABC):
     """
     Interface that must be implemented to satisfy naz's sequence generator.
     User implementations should inherit this class and
@@ -10,6 +13,7 @@ class BaseSequenceGenerator:
     The sequence_number should wrap around when it reaches the maximum allowed by SMPP specification.
     """
 
+    @abc.abstractmethod
     def next_sequence(self) -> int:
         """
         method that returns a monotonically increasing Integer in the range 1 - 2,147,483,647

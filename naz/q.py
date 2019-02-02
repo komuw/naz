@@ -1,9 +1,9 @@
+import abc
 import asyncio
-
 import typing
 
 
-class BaseOutboundQueue:
+class BaseOutboundQueue(abc.ABC):
     """
     This is the interface that must be implemented to satisfy naz's outbound queue.
     User implementations should inherit this class and
@@ -12,6 +12,7 @@ class BaseOutboundQueue:
     naz calls an implementation of this class to enqueue and/or dequeue an item.
     """
 
+    @abc.abstractmethod
     async def enqueue(self, item: dict) -> None:
         """
         enqueue/save an item.
@@ -21,6 +22,7 @@ class BaseOutboundQueue:
         """
         raise NotImplementedError("enqueue method must be implemented.")
 
+    @abc.abstractmethod
     async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
         """
         dequeue an item.
