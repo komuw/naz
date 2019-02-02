@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 import functools
@@ -68,7 +69,7 @@ cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
-    password="password",
+    password=os.getenv("password", "password"),
     outboundqueue=outboundqueue,
 )
 

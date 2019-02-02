@@ -63,7 +63,7 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, string_to_encode, errors="strict"):
+    def encode(self, input, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         eg:
@@ -74,7 +74,7 @@ class GSM7BitCodec(codecs.Codec):
             xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'
         """
         result = []
-        for position, c in enumerate(string_to_encode):
+        for position, c in enumerate(input):
             idx = self.gsm_basic_charset_map.get(c)
             if idx is not None:
                 result.append(chr(idx))
@@ -83,7 +83,7 @@ class GSM7BitCodec(codecs.Codec):
             if idx is not None:
                 result.append(chr(27) + chr(idx))
             else:
-                result.append(self.handle_encode_error(c, errors, position, string_to_encode))
+                result.append(self.handle_encode_error(c, errors, position, input))
 
         obj = "".join(result)
         # this is equivalent to;
@@ -99,20 +99,22 @@ class GSM7BitCodec(codecs.Codec):
             raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
         return handler(char, position, obj)
 
-    def handle_encode_strict_error(self, char, position, obj):
+    @staticmethod
+    def handle_encode_strict_error(char, position, obj):
         raise UnicodeEncodeError("gsm0338", char, position, position + 1, repr(obj))
 
-    def handle_encode_ignore_error(self, char, position, obj):
+    @staticmethod
+    def handle_encode_ignore_error(char, position, obj):
         return ""
 
     def handle_encode_replace_error(self, char, position, obj):
         return chr(self.gsm_basic_charset_map.get("?"))
 
-    def decode(self, byte_string, errors="strict"):
+    def decode(self, input, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         """
-        res = iter(byte_string)
+        res = iter(input)
         result = []
         for position, c in enumerate(res):
             try:
@@ -123,7 +125,7 @@ class GSM7BitCodec(codecs.Codec):
                     result.append(self.gsm_basic_charset[c])
             except IndexError as indexErrorException:
                 result.append(
-                    self.handle_decode_error(c, errors, position, byte_string, indexErrorException)
+                    self.handle_decode_error(c, errors, position, input, indexErrorException)
                 )
 
         obj = "".join(result)
@@ -135,15 +137,18 @@ class GSM7BitCodec(codecs.Codec):
             raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
         return handler(char, position, obj, indexErrorException)
 
-    def handle_decode_strict_error(self, char, position, obj, indexErrorException):
+    @staticmethod
+    def handle_decode_strict_error(char, position, obj, indexErrorException):
         raise UnicodeDecodeError(
             "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj)
         ) from indexErrorException
 
-    def handle_decode_ignore_error(self, char, position, obj, indexErrorException):
+    @staticmethod
+    def handle_decode_ignore_error(char, position, obj, indexErrorException):
         return ""
 
-    def handle_decode_replace_error(self, char, position, obj, indexErrorException):
+    @staticmethod
+    def handle_decode_replace_error(char, position, obj, indexErrorException):
         return "?"
 
 
@@ -228,7 +233,7 @@ class SimpleNazCodec(BaseNazCodec):
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        obj, length = encoder(string_to_encode, errors)
+        obj, _ = encoder(string_to_encode, errors)
         return obj
 
     def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
@@ -239,5 +244,5 @@ class SimpleNazCodec(BaseNazCodec):
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-        obj, length = decoder(byte_string, errors)
+        obj, _ = decoder(byte_string, errors)
         return obj

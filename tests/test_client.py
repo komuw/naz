@@ -70,7 +70,7 @@ class TestClient(TestCase):
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
-            password="password",
+            password=os.getenv("password", "password"),
             outboundqueue=self.outboundqueue,
         )
 
@@ -114,7 +114,7 @@ class TestClient(TestCase):
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
-                password="password",
+                password=os.getenv("password", "password"),
                 log_metadata="bad-Type",
                 outboundqueue=self.outboundqueue,
             )
@@ -172,7 +172,7 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
 
-            reader, writer = self._run(self.cli.connect())
+            self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
             self._run(self.cli.send_forever(TESTING=True))
@@ -289,7 +289,7 @@ class TestClient(TestCase):
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
-                password="password",
+                password=os.getenv("password", "password"),
                 outboundqueue=self.outboundqueue,
                 throttle_handler=throttle_handler,
             )
@@ -304,9 +304,9 @@ class TestClient(TestCase):
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
-            reader, writer = self._run(cli.connect())
+            self._run(cli.connect())
             # mock SMSC throttling naz
-            for i in range(0, sample_size * 2):
+            for _ in range(0, sample_size * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.send_forever(TESTING=True))
@@ -461,7 +461,7 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
 
-            reader, writer = self._run(self.cli.connect())
+            self._run(self.cli.connect())
             with self.assertRaises(ValueError) as raised_exception:
                 self._run(self.cli.send_forever(TESTING=True))
             self.assertIn(
@@ -523,7 +523,7 @@ class TestClient(TestCase):
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
-                password="password",
+                password=os.getenv("password", "password"),
                 encoding=encoding,
                 outboundqueue=self.outboundqueue,
             )
