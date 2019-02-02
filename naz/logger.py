@@ -44,7 +44,7 @@ class SimpleBaseLogger(BaseLogger):
 
     .. code-block:: python
 
-        logger = SimpleBaseLogger()
+        logger = SimpleBaseLogger("myLogger")
         logger.bind(loglevel="INFO",
                     log_metadata={"customer_id": "34541"})
         logger.log(logging.INFO,
@@ -81,7 +81,8 @@ class SimpleBaseLogger(BaseLogger):
 class NazLoggingAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
         if isinstance(msg, str):
-            return msg, kwargs
+            merged_msg = "{0} {1}".format(msg, self.extra)
+            return merged_msg, kwargs
         else:
-            merged_log_event = {**msg, **self.extra}
-            return "{0}".format(merged_log_event), kwargs
+            merged_msg = {**msg, **self.extra}
+            return "{0}".format(merged_msg), kwargs
