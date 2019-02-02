@@ -4,10 +4,10 @@
 naz is an async SMPP client.
 It's name is derived from Kenyan hip hop artiste, Nazizi.
 
-``SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC).`` - Wikipedia
+``SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs), Routing Entities(REs) and Short Message Service Center(SMSC).`` - `Wikipedia <https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer>`_
 
-naz currently only supports SMPP version 3.4.
-naz has no third-party dependencies and it requires python version 3.6+
+| naz currently only supports SMPP version 3.4.
+| naz has no third-party dependencies and it requires python version 3.6+
 
 naz is in active development and it's API may change in backward incompatible ways.
 
@@ -78,14 +78,14 @@ NB:
 
 * (a) For more information about all the parameters that `naz.Client` can take, consult the `documentation here <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
 * (b) More examples can be found `here <https://github.com/komuw/naz/tree/master/examples>`_ 
-* (c) if you need a SMSC server/gateway to test with, you can use the docker-compose file in this repo to bring up an SMSC simulator.
-      That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your outboundqueue.
+* (c) if you need an SMSC server/gateway to test with, you can use the `docker-compose <https://github.com/komuw/naz/blob/master/docker-compose.yml>`_ file in the ``naz`` repo to bring up an SMSC simulator.
+      That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your `naz.q.BaseOutboundQueue`.
 
 
 
 2.2 As a cli app
 =====================
-``naz`` also ships with a commandline interface app called ``naz-cli``.
+``naz`` also ships with a commandline interface app called ``naz-cli`` (it is also installed by default when you `pip install naz`).
 
 create a json config file, eg; `/tmp/my_config.json`
 
@@ -131,8 +131,9 @@ NB:
 
 3.1 async everywhere
 =====================
-SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.
-It thus makes sense to write your SMPP client in an async manner. We leverage python3's async/await to do so. And if you do not like python's inbuilt event loop, you can bring your own. eg; to use uvloop;
+| SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.
+| It thus makes sense to write your SMPP client in an async manner. We leverage python3's async/await to do so.
+| And if you do not like python's inbuilt event loop, you can bring your own. eg; to use uvloop;
 
 .. code-block:: python
 
@@ -156,8 +157,8 @@ It thus makes sense to write your SMPP client in an async manner. We leverage py
 
 3.2.1 logging
 =====================
-In ``naz`` you have the ability to annotate all the log events that naz will generate with anything you want.
-So, for example if you wanted to annotate all log-events with a release version and your app's running environment.
+| In ``naz`` you have the ability to annotate all the log events that naz will generate with anything you want.
+| So, for example if you wanted to annotate all log-events with a release version and your app's running environment.
 
 .. code-block:: python
 
@@ -167,8 +168,8 @@ So, for example if you wanted to annotate all log-events with a release version 
         log_metadata={ "environment": "production", "release": "canary"},
     )
 
-and then these will show up in all log events.
-by default, naz annotates all log events with smsc_host, system_id and client_id
+| and then these will show up in all log events.
+| by default, naz annotates all log events with smsc_host, system_id and client_id
 
 ``naz`` also gives you the ability to supply your own logger. 
 For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
@@ -202,10 +203,10 @@ For example if you wanted ``naz`` to use key=value style of logging, then just c
 
 3.2.2 hooks
 =====================
-a hook is a class with two methods request and response, ie it implements naz's BaseHook interface as defined here.
-naz will call the request method just before sending request to SMSC and also call the response method just after getting response from SMSC.
-the default hook that naz uses is naz.hooks.SimpleHook which does nothing but logs.
-If you wanted, for example to keep metrics of all requests and responses to SMSC in your prometheus setup;
+| A hook is a class with two methods `request` and `response`, ie it implements naz's ``naz.hooks.BaseHook`` interface.
+| ``naz`` will call the `request` method just before sending request to SMSC and also call the `response` method just after getting response from SMSC.
+| The default hook that naz uses is ``naz.hooks.SimpleHook`` which just logs the request and response.
+| If you wanted, for example to keep metrics of all requests and responses to SMSC in your prometheus setup;
 
 .. code-block:: python
 
@@ -263,9 +264,10 @@ another example is if you want to update a database record whenever you get a de
 
 3.3 Rate limiting
 =====================
-Sometimes you want to control the rate at which the client sends requests to an SMSC/server. naz lets you do this, by allowing you to specify a custom rate limiter. By default, naz uses a simple token bucket rate limiting algorithm implemented here.
-You can customize naz's ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the BaseRateLimiter interface found here )
-To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
+| Sometimes you want to control the rate at which the client sends requests to an SMSC/server. ``naz`` lets you do this, by allowing you to specify a custom rate limiter.
+| By default, naz uses a simple token bucket rate limiting algorithm implemented in ``naz.ratelimiter.SimpleRateLimiter``
+| You can customize naz's ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the ``naz.ratelimiter.BaseRateLimiter`` interface)
+| To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
 
 .. code-block:: python
 
@@ -281,9 +283,8 @@ To customize the default ratelimiter, for example to send at a rate of 35 reques
 
 3.4 Throttle handling
 =====================
-Sometimes, when a client sends requests to an SMSC/server, the SMSC may reply with an ESME_RTHROTTLED status.
-
-This can happen, say if the client has surpassed the rate at which it is supposed to send requests at, or the SMSC is under load or for whatever reason ¯_(ツ)_/¯
+| Sometimes, when a client sends requests to an SMSC/server, the SMSC may reply with an ESME_RTHROTTLED status.
+| This can happen, say if the client has surpassed the rate at which it is supposed to send requests at, or the SMSC is under load or for whatever reason ¯_(ツ)_/¯
 
 The way naz handles throtlling is via Throttle handlers.
 A throttle handler is a class that implements the ``naz.BaseThrottleHandler``
@@ -308,10 +309,10 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 
 It's via a queuing interface. Your application queues messages to a queue, ``naz`` consumes from that queue and then naz sends those messages to SMSC/server.
 
-You can implement the queuing mechanism any way you like, so long as it satisfies the ``naz.BaseOutboundQueue``
+You can implement the queuing mechanism any way you like, so long as it satisfies the ``naz.q.BaseOutboundQueue``
 
-Your application should call that class's enqueue method to enqueue messages.
-Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:
+| Your application should call that class's enqueue method to enqueue messages.
+| Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:
 
 .. code-block:: bash
 
@@ -326,8 +327,10 @@ Your application should enqueue a dictionary/json object with any parameters but
 
 For more information about all the parameters that are needed in the enqueued json object, consult the `documentation <https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol>`_ 
 
-naz ships with a simple queue implementation called ``naz.q.SimpleOutboundQueue``
-An example of using that;
+| naz ships with a simple queue implementation called ``naz.q.SimpleOutboundQueue``
+| **NB:** ``naz.q.SimpleOutboundQueue`` should only be used for demo/test purposes.
+
+An example of using that queue;
 
 .. code-block:: python
 
