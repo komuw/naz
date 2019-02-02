@@ -33,7 +33,6 @@ script:
     git remote set-branches --add origin master # https://github.com/travis-ci/travis-ci/issues/6069
     git fetch
     printf "\n current branch is $TRAVIS_BRANCH \n"
-    git branch -a
     if [ "$TRAVIS_BRANCH" == "master" ]; then
         printf "\n $TRAVIS_BRANCH branch, ignoring check for relese notes \n"
     else

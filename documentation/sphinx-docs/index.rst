@@ -22,3 +22,4 @@ API reference
     sequence
     throttle
     state
+    logger
