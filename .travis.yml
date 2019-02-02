@@ -30,6 +30,8 @@ script:
   - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*cli/test_*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
   - coverage report --show-missing --fail-under=84
   - |
+    git remote set-branches --add origin master
+    git fetch
     printf "\n current branch is $TRAVIS_BRANCH \n"
     git branch -a
     if [ "$TRAVIS_BRANCH" == "master" ]; then
