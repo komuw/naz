@@ -304,9 +304,9 @@ class TestClient(TestCase):
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
-            reader, writer = self._run(cli.connect())
+            self._run(cli.connect())
             # mock SMSC throttling naz
-            for i in range(0, sample_size * 2):
+            for _ in range(0, sample_size * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.send_forever(TESTING=True))
@@ -461,7 +461,7 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
 
-            reader, writer = self._run(self.cli.connect())
+            self._run(self.cli.connect())
             with self.assertRaises(ValueError) as raised_exception:
                 self._run(self.cli.send_forever(TESTING=True))
             self.assertIn(

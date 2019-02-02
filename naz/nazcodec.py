@@ -135,15 +135,18 @@ class GSM7BitCodec(codecs.Codec):
             raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
         return handler(char, position, obj, indexErrorException)
 
-    def handle_decode_strict_error(self, char, position, obj, indexErrorException):
+    @staticmethod
+    def handle_decode_strict_error(char, position, obj, indexErrorException):
         raise UnicodeDecodeError(
             "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj)
         ) from indexErrorException
 
-    def handle_decode_ignore_error(self, char, position, obj, indexErrorException):
+    @staticmethod
+    def handle_decode_ignore_error(char, position, obj, indexErrorException):
         return ""
 
-    def handle_decode_replace_error(self, char, position, obj, indexErrorException):
+    @staticmethod
+    def handle_decode_replace_error(char, position, obj, indexErrorException):
         return "?"
 
 
@@ -239,5 +242,5 @@ class SimpleNazCodec(BaseNazCodec):
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-        obj, length = decoder(byte_string, errors)
+        obj, _ = decoder(byte_string, errors)
         return obj

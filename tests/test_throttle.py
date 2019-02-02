@@ -64,7 +64,7 @@ class TestThrottle(TestCase):
     def test_reset(self):
         throttles = 13
         NON_throttles = 25
-        for i in range(0, throttles):
+        for _ in range(0, throttles):
             self._run(self.throttle_handler.throttled())
         for i in range(0, NON_throttles):
             self._run(self.throttle_handler.not_throttled())
