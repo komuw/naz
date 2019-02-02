@@ -8,7 +8,7 @@ env:
 
 before_install:
 - pwd
-- sudo apt -y update; sudo apt-get -y install pandoc curl git
+- sudo apt -y update; sudo apt-get -y install pandoc curl
 
 install:
   - pwd; ls -lsha
@@ -31,10 +31,11 @@ script:
   - coverage report --show-missing --fail-under=84
   - |
     printf "\n current branch is $TRAVIS_BRANCH \n"
+    git branch -a
     if [ "$TRAVIS_BRANCH" == "master" ]; then
         printf "\n $TRAVIS_BRANCH branch, ignoring check for relese notes \n"
     else
-        ChangedFiles=`git diff --name-only $TRAVIS_BRANCH origin/master`
+        ChangedFiles=`git diff --name-only $TRAVIS_BRANCH remotes/origin/master`
         case "$ChangedFiles" in
             *CHANGELOG.*)
                 printf "\n Thanks, your commits include update to release notes. \n";;
