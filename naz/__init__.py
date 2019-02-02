@@ -17,5 +17,4 @@ from .state import (  # noqa: F401
     SmppDataCoding,
 )
 
-
 from . import __version__  # noqa: F401

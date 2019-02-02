@@ -213,16 +213,6 @@ class Client:
         self.writer: typing.Any = None
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
-        # extra_log_data = {"log_metadata": self.log_metadata}
-        # self._logger = logging.getLogger("naz.client")
-        # handler = logging.StreamHandler()
-        # formatter = logging.Formatter("%(message)s")
-        # handler.setFormatter(formatter)
-        # if not self._logger.handlers:
-        #     self._logger.addHandler(handler)
-        # self._logger.setLevel(self.loglevel)
-
-        # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         self.logger = log_handler
         if not self.logger:
             self.logger = logger.SimpleBaseLogger("naz.client")
