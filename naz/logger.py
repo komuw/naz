@@ -6,22 +6,23 @@ class BaseLogger:
     """
     Interface that must be implemented to satisfy naz's logger.
     User implementations should inherit this class and
-    implement the :func:`register <BaseLogger.register>` and :func:`log <BaseLogger.log>` methods with the type signatures shown.
+    implement the :func:`bind <BaseLogger.bind>` and :func:`log <BaseLogger.log>` methods with the type signatures shown.
 
     A logger is class with methods that are called whenever naz wants to log something.
     This enables developers to implement logging in any way that they want.
     """
 
-    def register(self, loglevel: str, log_metadata: dict) -> None:
+    def bind(self, loglevel: str, log_metadata: dict) -> None:
         """
         called when a naz client is been instantiated so that the logger can be
-        notified of log_metadata that a user supplied to a naz client.
+        notified of loglevel & log_metadata that a user supplied to a naz client.
+        The logger can choose to bind these log_metadata to itself.
 
         Parameters:
             loglevel: logging level eg DEBUG
             log_metadata: log metadata that can be included in all log statements
         """
-        raise NotImplementedError("register method must be implemented.")
+        raise NotImplementedError("bind method must be implemented.")
 
     def log(self, level: int, log_data: dict) -> None:
         """
@@ -44,8 +45,8 @@ class SimpleBaseLogger(BaseLogger):
     .. code-block:: python
 
         logger = SimpleBaseLogger()
-        logger.register(loglevel="INFO",
-                        log_metadata={"customer_id": "34541"})
+        logger.bind(loglevel="INFO",
+                    log_metadata={"customer_id": "34541"})
         logger.log(logging.INFO,
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
@@ -58,7 +59,7 @@ class SimpleBaseLogger(BaseLogger):
         self.logger_name = logger_name
         self.logger: typing.Any = None
 
-    def register(self, loglevel: str, log_metadata: dict) -> None:
+    def bind(self, loglevel: str, log_metadata: dict) -> None:
         self._logger = logging.getLogger(self.logger_name)
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
@@ -70,7 +71,7 @@ class SimpleBaseLogger(BaseLogger):
 
     def log(self, level: int, log_data: dict) -> None:
         if not self.logger:
-            self.register(loglevel="DEBUG", log_metadata={})
+            self.bind(loglevel="DEBUG", log_metadata={})
         if level >= logging.ERROR:
             self.logger.log(level, log_data, exc_info=True)
         else:

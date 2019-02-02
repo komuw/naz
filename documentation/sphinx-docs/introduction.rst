@@ -186,7 +186,7 @@ For example if you wanted ``naz`` to use key=value style of logging, then just c
             if not self.logger.handlers:
                 self.logger.addHandler(handler)
             self.logger.setLevel("DEBUG")
-        def register(self, loglevel, log_metadata):
+        def bind(self, loglevel, log_metadata):
             pass
         def log(self, level, log_data):
             # implementation of key=value log renderer

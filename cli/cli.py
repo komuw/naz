@@ -137,7 +137,7 @@ def main():
                 "client_id": client_id,
             }
         )
-        logger.register(loglevel=loglevel, log_metadata=log_metadata)
+        logger.bind(loglevel=loglevel, log_metadata=log_metadata)
 
         logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:
