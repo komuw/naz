@@ -9,29 +9,20 @@ class BaseHook:
     """
     Interface that must be implemented to satisfy naz's hooks.
     User implementations should inherit this class and
-    implement the request and response methods with the type signatures shown.
+    implement the :func:`request <BaseHook.request>` and :func:`response <BaseHook.response>` methods with the type signatures shown.
 
-    A hook is class with hook methods that are called before a request is sent to SMSC and
-    after a response is received from SMSC.
+    A hook is class with methods that are called just before a request is sent to SMSC and
+    just after a response is received from SMSC.
     """
 
     async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
         """
         called before a request is sent to SMSC.
 
-        :param smpp_command:                  (mandatory) [str]
-            any one of the SMSC command;
-                bind_transceiver, bind_transceiver_resp,
-                unbind, unbind_resp,
-                submit_sm, submit_sm_resp,
-                deliver_sm, deliver_sm_resp,
-                enquire_link, enquire_link_resp, generic_nack
-        :param log_id:                  (mandatory) [str]
-            an ID that a user's application had previously supplied to naz
-            to track/correlate different messages.
-        :param hook_metadata:                  (optional) [str]
-            a string that a user's application had previously supplied to naz
-            that it may want to be correlated with the log_id.
+        Parameters:
+            smpp_command: any one of the SMSC commands eg submit_sm
+            log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
+            hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
         """
         raise NotImplementedError("request method must be implemented.")
 
@@ -41,37 +32,25 @@ class BaseHook:
         """
         called after a response is received from SMSC.
 
-        :param smpp_command:                  (mandatory) [str]
-            any one of the SMSC command;
-                bind_transceiver, bind_transceiver_resp,
-                unbind, unbind_resp,
-                submit_sm, submit_sm_resp,
-                deliver_sm, deliver_sm_resp,
-                enquire_link, enquire_link_resp, generic_nack
-        :param log_id:                  (mandatory) [str]
-            an ID that a user's application had previously supplied to naz
-            to track/correlate different messages.
-        :param hook_metadata:                  (optional) [str]
-            a string that a user's application had previously supplied to naz
-            that it may want to be correlated with the log_id.
-        :param smsc_response:                  (optional) [naz.CommandStatus]
-            the response from SMSC.
+        Parameters:
+            smpp_command: any one of the SMSC commands eg submit_sm_resp
+            log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
+            hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
+            smsc_response: the response from SMSC.
         """
         raise NotImplementedError("response method must be implemented.")
 
 
 class SimpleHook(BaseHook):
     """
-    class implementing naz's Hook interface.
+    This is an implementation of BaseHook.
+    When this class is called by naz, it just logs the request or response.
     """
 
     def __init__(self, logger) -> None:
         self.logger: logging.Logger = logger
 
     async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
-        """
-        hook method that is called just before a request is sent to SMSC.
-        """
         self.logger.info(
             {
                 "event": "naz.SimpleHook.request",
@@ -85,9 +64,6 @@ class SimpleHook(BaseHook):
     async def response(
         self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: "naz.CommandStatus"
     ) -> None:
-        """
-        hook method that is called just after a response is gotten from SMSC.
-        """
         self.logger.info(
             {
                 "event": "naz.SimpleHook.response",

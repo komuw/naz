@@ -5,66 +5,127 @@ import typing
 import asyncio
 import logging
 
+from . import q
 from . import hooks
+from . import logger
 from . import nazcodec
 from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
 
+from .state import SmppSessionState, SmppCommand, SmppCommandStatus, SmppDataCoding
+
 
 class Client:
     """
+    The SMPP client that will interact with SMSC/server.
+
+    Example declaration:
+
+    .. code-block:: python
+
+        import asyncio
+        import naz
+        loop = asyncio.get_event_loop()
+        outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+        client = naz.Client(
+                async_loop=loop,
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password="password",
+                outboundqueue=outboundqueue,
+            )
     """
 
     def __init__(
         self,
-        async_loop,
-        smsc_host,
-        smsc_port,
-        system_id,
-        password,
-        outboundqueue,
+        async_loop: asyncio.events.AbstractEventLoop,
+        smsc_host: str,
+        smsc_port: int,
+        system_id: str,
+        password: str,
+        outboundqueue: q.BaseOutboundQueue,
         client_id=None,
-        system_type="",
-        addr_ton=0,
-        addr_npi=0,
-        address_range="",
-        encoding="gsm0338",
-        interface_version=34,
-        service_type="CMT",  # section 5.2.11
-        source_addr_ton=0x00000001,  # section 5.2.5
-        source_addr_npi=0x00000001,
-        dest_addr_ton=0x00000001,
-        dest_addr_npi=0x00000001,
+        system_type: str = "",
+        addr_ton: int = 0,
+        addr_npi: int = 0,
+        address_range: str = "",
+        encoding: str = "gsm0338",
+        interface_version: int = 34,
+        service_type: str = "CMT",  # section 5.2.11
+        source_addr_ton: int = 0x00000001,  # section 5.2.5
+        source_addr_npi: int = 0x00000001,
+        dest_addr_ton: int = 0x00000001,
+        dest_addr_npi: int = 0x00000001,
         # xxxxxx00 store-and-forward
         # xx0010xx Short Message contains ESME Delivery Acknowledgement
         # 00xxxxxx No specific features selected
-        esm_class=0b00000011,  # section 5.2.12
-        protocol_id=0x00000000,
-        priority_flag=0x00000000,
-        schedule_delivery_time="",
-        validity_period="",
+        esm_class: int = 0b00000011,  # section 5.2.12
+        protocol_id: int = 0x00000000,
+        priority_flag: int = 0x00000000,
+        schedule_delivery_time: str = "",
+        validity_period: str = "",
         # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
         # xxxx01xx SME Delivery Acknowledgement requested
         # xxx0xxxx No Intermediate notification requested
         # all other values reserved
-        registered_delivery=0b00000001,  # see section 5.2.17
-        replace_if_present_flag=0x00000000,
-        sm_default_msg_id=0x00000000,
-        enquire_link_interval=300,
-        loglevel="DEBUG",
+        registered_delivery: int = 0b00000001,  # see section 5.2.17
+        replace_if_present_flag: int = 0x00000000,
+        sm_default_msg_id: int = 0x00000000,
+        enquire_link_interval: int = 300,
+        loglevel: str = "DEBUG",
         log_metadata=None,
         codec_class=None,
-        codec_errors_level="strict",
+        codec_errors_level: str = "strict",
         rateLimiter=None,
         hook=None,
         sequence_generator=None,
         throttle_handler=None,
         correlation_handler=None,
-    ):
+    ) -> None:
         """
-        todo: add docs
+        Parameters:
+            async_loop: asyncio event loop.
+            smsc_host:	the IP address(or domain name) of the SMSC gateway/server
+            smsc_port:	the port at which SMSC is listening on
+            system_id:	Identifies the ESME system requesting to bind as a transceiver with the SMSC.
+            password:	The password to be used by the SMSC to authenticate the ESME requesting to bind.
+            system_type:	Identifies the type of ESME system requesting to bind with the SMSC.
+            addr_ton:	Type of Number of the ESME address.
+            addr_npi:	Numbering Plan Indicator (NPI) for ESME address(es) served via this SMPP transceiver session
+            address_range:	A single ESME address or a range of ESME addresses served via this SMPP transceiver session.
+            interface_version:	Indicates the version of the SMPP protocol supported by the ESME.
+            service_type:	Indicates the SMS Application service associated with the message
+            source_addr_ton:	Type of Number of message originator.
+            source_addr_npi:	Numbering Plan Identity of message originator.
+            dest_addr_ton:	Type of Number for destination.
+            dest_addr_npi:	Numbering Plan Identity of destination
+            esm_class:	Indicates Message Mode & Message Type.
+            protocol_id:	Protocol Identifier. Network specific field.
+            priority_flag:	Designates the priority level of the message.
+            schedule_delivery_time:	The short message is to be scheduled by the SMSC for delivery.
+            validity_period:	The validity period of this message.
+            registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
+            replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
+            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
+            encoding:	encoding1 used to encode messages been sent to SMSC
+            sequence_generator:	python class instance used to generate sequence_numbers
+            outboundqueue:	python class instance implementing some queueing mechanism. \
+                messages to be sent to SMSC are queued using the said mechanism before been sent
+            client_id:	a unique string identifying a naz client class instance
+            loglevel:	the level at which to log
+            log_metadata: metadata that will be included in all log statements
+            codec_class: python class instance to be used to encode/decode messages
+            codec_errors_level:	same meaning as the errors argument to pythons' encode method as defined here
+            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
+            rateLimiter: python class instance implementing rate limitation
+            hook: python class instance implemeting functionality/hooks to be called by naz \
+                just before sending request to SMSC and just after getting response from SMSC
+            throttle_handler: python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC
+            correlation_handler: A python class instance that naz uses to store relations between \
+                SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
         """
         if loglevel.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
@@ -112,7 +173,7 @@ class Client:
         self.codec_errors_level = codec_errors_level
         self.codec_class = codec_class
         if not self.codec_class:
-            self.codec_class = nazcodec.NazCodec(errors=self.codec_errors_level)
+            self.codec_class = nazcodec.SimpleNazCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -144,21 +205,21 @@ class Client:
             SmppCommand.GENERIC_NACK: 0x80000000,
         }
 
-        self.data_coding = self.find_data_coding(self.encoding)
+        self.data_coding = self._find_data_coding(self.encoding)
 
-        self.reader = None
-        self.writer = None
+        self.reader: typing.Any = None
+        self.writer: typing.Any = None
 
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         extra_log_data = {"log_metadata": self.log_metadata}
-        self.logger = logging.getLogger("naz.client")
+        self._logger = logging.getLogger("naz.client")
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel(self.loglevel)
-        self.logger = NazLoggingAdapter(self.logger, extra_log_data)
+        if not self._logger.handlers:
+            self._logger.addHandler(handler)
+        self._logger.setLevel(self.loglevel)
+        self.logger: logging.LoggerAdapter = logger.NazLoggingAdapter(self._logger, extra_log_data)
 
         self.rateLimiter = rateLimiter
         if not self.rateLimiter:
@@ -188,21 +249,21 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
     @staticmethod
-    def find_data_coding(encoding):
+    def _find_data_coding(encoding):
         for key, val in SmppDataCoding.__dict__.items():
             if not key.startswith("__"):
                 if encoding == val.code:
                     return val.value
         raise ValueError("That encoding:{0} is not recognised.".format(encoding))
 
-    def search_by_command_id_code(self, command_id_code):
+    def _search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
             if val == command_id_code:
                 return key
         return None
 
     @staticmethod
-    def search_by_command_status_value(command_status_value):
+    def _search_by_command_status_value(command_status_value):
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
@@ -211,7 +272,7 @@ class Client:
         return None
 
     @staticmethod
-    def retry_after(current_retries):
+    def _retry_after(current_retries):
         """
         retries will happen in this sequence;
         1min, 2min, 4min, 8min, 16min, 32min, 16min, 16min, 16min ...
@@ -226,18 +287,26 @@ class Client:
         else:
             return 60 * (1 * (2 ** current_retries))
 
-    async def connect(self):
+    async def connect(
+        self
+    ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
+        """
+        make a network connection to SMSC server.
+        """
         self.logger.info({"event": "naz.Client.connect", "stage": "start"})
         reader, writer = await asyncio.open_connection(
             self.smsc_host, self.smsc_port, loop=self.async_loop
         )
-        self.reader = reader
-        self.writer = writer
+        self.reader: asyncio.streams.StreamReader = reader
+        self.writer: asyncio.streams.StreamWriter = writer
         self.logger.info({"event": "naz.Client.connect", "stage": "end"})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
 
-    async def tranceiver_bind(self):
+    async def tranceiver_bind(self) -> None:
+        """
+        send a BIND_RECEIVER pdu to SMSC.
+        """
         smpp_command = SmppCommand.BIND_TRANSCEIVER
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self.logger.info(
@@ -252,16 +321,16 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.system_id, self.encoding)
+            + self.codec_class.encode(self.system_id, self.encoding, self.codec_errors_level)
             + chr(0).encode()
-            + self.codec_class.encode(self.password, self.encoding)
+            + self.codec_class.encode(self.password, self.encoding, self.codec_errors_level)
             + chr(0).encode()
-            + self.codec_class.encode(self.system_type, self.encoding)
+            + self.codec_class.encode(self.system_type, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
-            + self.codec_class.encode(self.address_range, self.encoding)
+            + self.codec_class.encode(self.address_range, self.encoding, self.codec_errors_level)
             + chr(0).encode()
         )
 
@@ -319,18 +388,13 @@ class Client:
                 "smpp_command": smpp_command,
             }
         )
-        return full_pdu
 
-    async def enquire_link(self, TESTING=False):
+    async def enquire_link(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
-        HEADER::
-        # enquire_link has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `enquire_link`
-        command_status, int, 4octet. Not used. Set to NULL
-        sequence_number, int, 4octet.
+        send an ENQUIRE_LINK pdu to SMSC.
 
-        `enquire_link` has no body.
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
         """
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
@@ -408,16 +472,12 @@ class Client:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
 
-    async def enquire_link_resp(self, sequence_number):
+    async def enquire_link_resp(self, sequence_number: int) -> None:
         """
-        HEADER::
-        # enquire_link_resp has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `enquire_link_resp`
-        command_status, int, 4octet. ESME_ROK (Success)
-        sequence_number, int, 4octet. Set to the same sequence number of original `enquire_link` PDU
+        send an ENQUIRE_LINK_RESP pdu to SMSC.
 
-        `enquire_link_resp` has no body.
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         smpp_command = SmppCommand.ENQUIRE_LINK_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -468,16 +528,12 @@ class Client:
             }
         )
 
-    async def unbind_resp(self, sequence_number):
+    async def unbind_resp(self, sequence_number: int) -> None:
         """
-        HEADER::
-        # unbind_resp has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `unbind_resp`
-        command_status, int, 4octet. Indicates outcome of original unbind request, eg ESME_ROK (Success)
-        sequence_number, int, 4octet. Set to the same sequence number of original `unbind` PDU
+        send an UNBIND_RESP pdu to SMSC.
 
-        `unbind_resp` has no body.
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         smpp_command = SmppCommand.UNBIND_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -512,17 +568,12 @@ class Client:
             }
         )
 
-    async def deliver_sm_resp(self, sequence_number):
+    async def deliver_sm_resp(self, sequence_number: int) -> None:
         """
-        HEADER::
-        # deliver_sm_resp has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `deliver_sm_resp`
-        command_status, int, 4octet. Indicates outcome of deliver_sm request, eg. ESME_ROK (Success)
-        sequence_number, int, 4octet.  Set to the same sequence_number of `deliver_sm` PDU.
+        send a DELIVER_SM_RESP pdu to SMSC.
 
-        BODY::
-        message_id, c-octet String, 1octet. This field is unused and is set to NULL.
+        Parameters:
+            sequence_number: SMPP sequence_number
         """
         smpp_command = SmppCommand.DELIVER_SM_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -537,7 +588,11 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + self.codec_class.encode(message_id, self.encoding) + chr(0).encode()
+        body = (
+            body
+            + self.codec_class.encode(message_id, self.encoding, self.codec_errors_level)
+            + chr(0).encode()
+        )
 
         # header
         command_length = 16 + len(body)  # 16 is for headers
@@ -576,16 +631,27 @@ class Client:
         )
 
     # this method just enqueues a submit_sm msg to queue
-    async def submit_sm(self, short_message, log_id, source_addr, destination_addr):
+    async def submit_sm(
+        self, short_message: str, log_id: str, source_addr: str, destination_addr: str
+    ) -> None:
         """
-        HEADER::
-        # submit_sm has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `submit_sm`
-        command_status, int, 4octet. Not used. Set to NULL
-        sequence_number, int, 4octet.  The associated submit_sm_resp PDU will echo this sequence number.
+        enqueues a SUBMIT_SM pdu to :attr:`outboundqueue <Client.outboundqueue>`
+        That PDU will later on be sent to SMSC.
 
-        BODY::
+        Parameters:
+            short_message: message to send to SMSC
+            log_id: a unique identify of this request
+            source_addr: the identifier(eg msisdn) of the message sender
+            destination_addr: the identifier(eg msisdn) of the message recipient
+        """
+        # HEADER::
+        # submit_sm has the following pdu header:
+        # command_length, int, 4octet
+        # command_id, int, 4octet. `submit_sm`
+        # command_status, int, 4octet. Not used. Set to NULL
+        # sequence_number, int, 4octet.  The associated submit_sm_resp PDU will echo this sequence number.
+
+        # BODY::
         # submit_sm has the following pdu body. NB: They SHOULD be put in the body in the ORDER presented here.
         # service_type, c-octet str, max 6octet. eg NULL, "USSD", "CMT" etc
         # source_addr_ton, int , 1octet,
@@ -605,11 +671,11 @@ class Client:
         # sm_default_msg_id, int, 1octet. SMSC index of a pre-defined(`canned`) message.  If not using an SMSC canned message, set to NULL
         # sm_length, int, 1octet. Length in octets of the `short_message`.
         # short_message, Octet-String(NOT c-octet str), 0-254 octets.
-        NB: 1. Applications which need to send messages longer than 254 octets should use the `message_payload` optional parameter.
-               In this case the `sm_length` field should be set to zero
-               u cant use both `short_message` and `message_payload`
-            2. Octet String - A series of octets, not necessarily NULL terminated.
-        """
+        # NB: 1. Applications which need to send messages longer than 254 octets should use the `message_payload` optional parameter.
+        #        In this case the `sm_length` field should be set to zero
+        #        u cant use both `short_message` and `message_payload`
+        #     2. Octet String - A series of octets, not necessarily NULL terminated.
+
         smpp_command = SmppCommand.SUBMIT_SM
         self.logger.info(
             {
@@ -656,7 +722,17 @@ class Client:
 
     async def build_submit_sm_pdu(
         self, short_message, log_id, hook_metadata, source_addr, destination_addr
-    ):
+    ) -> bytes:
+        """
+        builds a SUBMIT_SM pdu.
+
+        Parameters:
+            short_message: message to send to SMSC
+            log_id: a unique identify of this request
+            hook_metadata: additional metadata that you would like to be passed on to hooks
+            source_addr: the identifier(eg msisdn) of the message sender
+            destination_addr: the identifier(eg msisdn) of the message recipient
+        """
         smpp_command = SmppCommand.SUBMIT_SM
         self.logger.info(
             {
@@ -669,36 +745,40 @@ class Client:
                 "smpp_command": smpp_command,
             }
         )
-        encoded_short_message = self.codec_class.encode(short_message, self.encoding)
+        encoded_short_message = self.codec_class.encode(
+            short_message, self.encoding, self.codec_errors_level
+        )
         sm_length = len(encoded_short_message)
 
         # body
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.service_type, self.encoding)
+            + self.codec_class.encode(self.service_type, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
-            + self.codec_class.encode(source_addr, self.encoding)
+            + self.codec_class.encode(source_addr, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
-            + self.codec_class.encode(destination_addr, self.encoding)
+            + self.codec_class.encode(destination_addr, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
-            + self.codec_class.encode(self.schedule_delivery_time, self.encoding)
+            + self.codec_class.encode(
+                self.schedule_delivery_time, self.encoding, self.codec_errors_level
+            )
             + chr(0).encode()
-            + self.codec_class.encode(self.validity_period, self.encoding)
+            + self.codec_class.encode(self.validity_period, self.encoding, self.codec_errors_level)
             + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
             + struct.pack(">B", self.sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec_class.encode(short_message, self.encoding)
+            + self.codec_class.encode(short_message, self.encoding, self.codec_errors_level)
         )
 
         # header
@@ -757,17 +837,26 @@ class Client:
         )
         return full_pdu
 
-    async def send_data(self, smpp_command, msg, log_id, hook_metadata=""):
+    async def send_data(
+        self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
+    ) -> None:
         """
+        Sends PDU's to SMSC through/over a network connection(down the wire).
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
-        see: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.write
+        It also accts as a flow control method that interacts with the IO write buffer.
+
+        Parameters:
+            smpp_command: type of PDU been sent. eg bind_transceiver
+            msg: PDU to be sent to SMSC over the network connection.
+            log_id: a unique identify of this request
+            hook_metadata: additional metadata that you would like to be passed on to hooks
         """
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
 
         log_msg = ""
         try:
-            log_msg = self.codec_class.decode(msg, self.encoding)
+            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
             # do not log password, redact it from logs.
             if self.password in log_msg:
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
@@ -825,7 +914,7 @@ class Client:
             raise ValueError(error_msg)
 
         if isinstance(msg, str):
-            msg = self.codec_class.encode(msg, self.encoding)
+            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
 
         # call user's hook for requests
         try:
@@ -861,7 +950,15 @@ class Client:
             }
         )
 
-    async def send_forever(self, TESTING=False):
+    async def send_forever(
+        self, TESTING: bool = False
+    ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
+        """
+        In loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
+        """
         retry_count = 0
         while True:
             self.logger.info({"event": "naz.Client.send_forever", "stage": "start"})
@@ -900,7 +997,7 @@ class Client:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
                     retry_count += 1
-                    poll_queue_interval = self.retry_after(retry_count)
+                    poll_queue_interval = self._retry_after(retry_count)
                     self.logger.exception(
                         {
                             "event": "naz.Client.send_forever",
@@ -985,11 +1082,15 @@ class Client:
                     continue
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
-                    return "throttle_handler_denied_request"
+                    return {"throttle_handler_denied_request": "throttle_handler_denied_request"}
                 continue
 
-    async def receive_data(self, TESTING=False):
+    async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
+        In loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client.parse_response_pdu>`.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
         """
         retry_count = 0
         while True:
@@ -998,7 +1099,7 @@ class Client:
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
                 retry_count += 1
-                poll_read_interval = self.retry_after(retry_count)
+                poll_read_interval = self._retry_after(retry_count)
                 self.logger.info(
                     {
                         "event": "naz.Client.receive_data",
@@ -1042,8 +1143,13 @@ class Client:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
 
-    async def parse_response_pdu(self, pdu):
+    async def parse_response_pdu(self, pdu: bytes) -> None:
         """
+        Take the bytes that have been read from network and parse them into their corresponding PDU.
+        The resulting PDU is then handed over to :func:`speficic_handlers <Client.speficic_handlers>`
+
+        Parameters:
+            pdu: PDU in bytes, that have been read from network
         """
         self.logger.info({"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
@@ -1073,7 +1179,7 @@ class Client:
                 }
             )
 
-        smpp_command = self.search_by_command_id_code(command_id)
+        smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
             self.logger.exception(
                 {
@@ -1103,12 +1209,24 @@ class Client:
         )
 
     async def speficic_handlers(
-        self, smpp_command, command_status_value, sequence_number, log_id, hook_metadata
-    ):
+        self,
+        smpp_command: str,
+        command_status_value: int,
+        sequence_number: int,
+        log_id: str,
+        hook_metadata: str,
+    ) -> None:
         """
-        this handles parsing speficic
+        This routes the various different SMPP PDU to their respective handlers.
+
+        Parameters:
+            smpp_command: type of PDU been sent. eg bind_transceiver
+            command_status_value: the response code from SMSC for a specific PDU
+            sequence_number: SMPP sequence_number
+            log_id: a unique identify of this request
+            hook_metadata: additional metadata that you would like to be passed on to hooks
         """
-        commandStatus = self.search_by_command_status_value(
+        commandStatus = self._search_by_command_status_value(
             command_status_value=command_status_value
         )
         if not commandStatus:
@@ -1261,18 +1379,9 @@ class Client:
                 }
             )
 
-    async def unbind(self):
+    async def unbind(self) -> None:
         """
-        HEADER::
-        # unbind has the following pdu header:
-        command_length, int, 4octet
-        command_id, int, 4octet. `unbind`
-        command_status, int, 4octet. Not used. Set to NULL
-        sequence_number, int, 4octet.
-
-        `unbind` has no body.
-
-        clients/users should call this method when winding down.
+        send an UNBIND pdu to SMSC.
         """
         smpp_command = SmppCommand.UNBIND
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
@@ -1339,310 +1448,3 @@ class Client:
                 "smpp_command": smpp_command,
             }
         )
-
-
-class NazLoggingAdapter(logging.LoggerAdapter):
-    """
-    This example adapter expects the passed in dict-like object to have a
-    'log_metadata' key, whose value in brackets is apended to the log message.
-    """
-
-    def process(self, msg, kwargs):
-        if isinstance(msg, str):
-            return msg, kwargs
-        else:
-            log_metadata = self.extra.get("log_metadata")
-            merged_log_event = {**msg, **log_metadata}
-            return "{0}".format(merged_log_event), kwargs
-
-
-class SmppSessionState:
-    """
-    see section 2.2 of SMPP spec document v3.4
-    we are ignoring the other states since we are only concerning ourselves with an ESME in Transceiver mode.
-    """
-
-    # An ESME has established a network connection to the SMSC but has not yet issued a Bind request.
-    OPEN = "OPEN"
-    # A connected ESME has requested to bind as an ESME Transceiver (by issuing a bind_transceiver PDU)
-    # and has received a response from the SMSC authorising its Bind request.
-    BOUND_TRX = "BOUND_TRX"
-    # An ESME has unbound from the SMSC and has closed the network connection. The SMSC may also unbind from the ESME.
-    CLOSED = "CLOSED"
-
-
-class SmppCommand:
-    """
-    see section 4 of SMPP spec document v3.4
-    """
-
-    BIND_TRANSCEIVER = "bind_transceiver"
-    BIND_TRANSCEIVER_RESP = "bind_transceiver_resp"
-    UNBIND = "unbind"
-    UNBIND_RESP = "unbind_resp"
-    SUBMIT_SM = "submit_sm"
-    SUBMIT_SM_RESP = "submit_sm_resp"
-    DELIVER_SM = "deliver_sm"
-    DELIVER_SM_RESP = "deliver_sm_resp"
-    ENQUIRE_LINK = "enquire_link"
-    ENQUIRE_LINK_RESP = "enquire_link_resp"
-    GENERIC_NACK = "generic_nack"
-
-
-class CommandStatus(typing.NamedTuple):
-    code: str
-    value: int
-    description: str
-
-
-class SmppCommandStatus:
-    """
-    see section 5.1.3 of smpp ver 3.4 spec document
-    """
-
-    ESME_ROK = CommandStatus(code="ESME_ROK", value=0x00000000, description="Success")
-    ESME_RINVMSGLEN = CommandStatus(
-        code="ESME_RINVMSGLEN", value=0x00000001, description="Message Length is invalid"
-    )
-    ESME_RINVCMDLEN = CommandStatus(
-        code="ESME_RINVCMDLEN", value=0x00000002, description="Command Length is invalid"
-    )
-    ESME_RINVCMDID = CommandStatus(
-        code="ESME_RINVCMDID", value=0x00000003, description="Invalid Command ID"
-    )
-    ESME_RINVBNDSTS = CommandStatus(
-        code="ESME_RINVBNDSTS",
-        value=0x00000004,
-        description="Incorrect BIND Status for given command",
-    )
-    ESME_RALYBND = CommandStatus(
-        code="ESME_RALYBND", value=0x00000005, description="ESME Already in Bound State"
-    )
-    ESME_RINVPRTFLG = CommandStatus(
-        code="ESME_RINVPRTFLG", value=0x00000006, description="Invalid Priority Flag"
-    )
-    ESME_RINVREGDLVFLG = CommandStatus(
-        code="ESME_RINVREGDLVFLG", value=0x00000007, description="Invalid Registered Delivery Flag"
-    )
-    ESME_RSYSERR = CommandStatus(code="ESME_RSYSERR", value=0x00000008, description="System Error")
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000009,description= "Reserved")
-    ESME_RINVSRCADR = CommandStatus(
-        code="ESME_RINVSRCADR", value=0x0000000A, description="Invalid Source Address"
-    )
-    ESME_RINVDSTADR = CommandStatus(
-        code="ESME_RINVDSTADR", value=0x0000000B, description="Invalid Dest Addr"
-    )
-    ESME_RINVMSGID = CommandStatus(
-        code="ESME_RINVMSGID", value=0x0000000C, description="Message ID is invalid"
-    )
-    ESME_RBINDFAIL = CommandStatus(
-        code="ESME_RBINDFAIL", value=0x0000000D, description="Bind Failed"
-    )
-    ESME_RINVPASWD = CommandStatus(
-        code="ESME_RINVPASWD", value=0x0000000E, description="Invalid Password"
-    )
-    ESME_RINVSYSID = CommandStatus(
-        code="ESME_RINVSYSID", value=0x0000000F, description="Invalid System ID"
-    )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000010,description= "Reserved")
-    ESME_RCANCELFAIL = CommandStatus(
-        code="ESME_RCANCELFAIL", value=0x00000011, description="Cancel SM Failed"
-    )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000012,description= "Reserved")
-    ESME_RREPLACEFAIL = CommandStatus(
-        code="ESME_RREPLACEFAIL", value=0x00000013, description="Replace SM Failed"
-    )
-    ESME_RMSGQFUL = CommandStatus(
-        code="ESME_RMSGQFUL", value=0x00000014, description="Message Queue Full"
-    )
-    ESME_RINVSERTYP = CommandStatus(
-        code="ESME_RINVSERTYP", value=0x00000015, description="Invalid Service Type"
-    )
-    # Reserved 0x00000016 - 0x00000032 Reserved
-    ESME_RINVNUMDESTS = CommandStatus(
-        code="ESME_RINVNUMDESTS", value=0x00000033, description="Invalid number of destinations"
-    )
-    ESME_RINVDLNAME = CommandStatus(
-        code="ESME_RINVNUMDESTS", value=0x00000034, description="Invalid Distribution List name"
-    )
-    # Reserved 0x00000035 - 0x0000003F Reserved
-    ESME_RINVDESTFLAG = CommandStatus(
-        code="ESME_RINVDESTFLAG",
-        value=0x00000040,
-        description="Destination flag is invalid (submit_multi)",
-    )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000041,description= "Reserved")
-    ESME_RINVSUBREP = CommandStatus(
-        code="ESME_RINVSUBREP",
-        value=0x00000042,
-        description="Invalid (submit with replace) request(i.e. submit_sm with replace_if_present_flag set)",
-    )
-    ESME_RINVESMCLASS = CommandStatus(
-        code="ESME_RINVESMCLASS", value=0x00000043, description="Invalid esm_class field data"
-    )
-    ESME_RCNTSUBDL = CommandStatus(
-        code="ESME_RCNTSUBDL", value=0x00000044, description="Cannot Submit to Distribution List"
-    )
-    ESME_RSUBMITFAIL = CommandStatus(
-        code="ESME_RSUBMITFAIL", value=0x00000045, description="Submit_sm or submit_multi failed"
-    )
-    # Reserved 0x00000046 - 0x00000047 Reserved
-    ESME_RINVSRCTON = CommandStatus(
-        code="ESME_RINVSRCTON", value=0x00000048, description="Invalid Source address TON"
-    )
-    ESME_RINVSRCNPI = CommandStatus(
-        code="ESME_RINVSRCNPI", value=0x00000049, description="Invalid Source address NPI"
-    )
-    ESME_RINVDSTTON = CommandStatus(
-        code="ESME_RINVDSTTON", value=0x00000050, description="Invalid Destination address TON"
-    )
-    ESME_RINVDSTNPI = CommandStatus(
-        code="ESME_RINVDSTNPI", value=0x00000051, description="Invalid Destination address NPI"
-    )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000052,description= "Reserved")
-    ESME_RINVSYSTYP = CommandStatus(
-        code="ESME_RINVSYSTYP", value=0x00000053, description="Invalid system_type field"
-    )
-    ESME_RINVREPFLAG = CommandStatus(
-        code="ESME_RINVREPFLAG", value=0x00000054, description="Invalid replace_if_present flag"
-    )
-    ESME_RINVNUMMSGS = CommandStatus(
-        code="ESME_RINVNUMMSGS", value=0x00000055, description="Invalid number of messages"
-    )
-    # Reserved 0x00000056 - 0x00000057 Reserved
-    ESME_RTHROTTLED = CommandStatus(
-        code="ESME_RTHROTTLED",
-        value=0x00000058,
-        description="Throttling error (ESME has exceeded allowed message limits)",
-    )
-    # Reserved 0x00000059 - 0x00000060 Reserved
-    ESME_RINVSCHED = CommandStatus(
-        code="ESME_RINVSCHED", value=0x00000061, description="Invalid Scheduled Delivery Time"
-    )
-    ESME_RINVEXPIRY = CommandStatus(
-        code="ESME_RINVEXPIRY",
-        value=0x00000062,
-        description="Invalid message validity period (Expiry time)",
-    )
-    ESME_RINVDFTMSGID = CommandStatus(
-        code="ESME_RINVDFTMSGID",
-        value=0x00000063,
-        description="Predefined Message Invalid or Not Found",
-    )
-    ESME_RX_T_APPN = CommandStatus(
-        code="ESME_RX_T_APPN",
-        value=0x00000064,
-        description="ESME Receiver Temporary App Error Code",
-    )
-    ESME_RX_P_APPN = CommandStatus(
-        code="ESME_RX_P_APPN",
-        value=0x00000065,
-        description="ESME Receiver Permanent App Error Code",
-    )
-    ESME_RX_R_APPN = CommandStatus(
-        code="ESME_RX_R_APPN",
-        value=0x00000066,
-        description="ESME Receiver Reject Message Error Code",
-    )
-    ESME_RQUERYFAIL = CommandStatus(
-        code="ESME_RQUERYFAIL", value=0x00000067, description="query_sm request failed"
-    )
-    # Reserved 0x00000068 - 0x000000BF Reserved
-    ESME_RINVOPTPARSTREAM = CommandStatus(
-        code="ESME_RINVOPTPARSTREAM",
-        value=0x000000C0,
-        description="Error in the optional part of the PDU Body.",
-    )
-    ESME_ROPTPARNOTALLWD = CommandStatus(
-        code="ESME_ROPTPARNOTALLWD", value=0x000000C1, description="Optional Parameter not allowed"
-    )
-    ESME_RINVPARLEN = CommandStatus(
-        code="ESME_RINVPARLEN", value=0x000000C2, description="Invalid Parameter Length."
-    )
-    ESME_RMISSINGOPTPARAM = CommandStatus(
-        code="ESME_RMISSINGOPTPARAM",
-        value=0x000000C3,
-        description="Expected Optional Parameter missing",
-    )
-    ESME_RINVOPTPARAMVAL = CommandStatus(
-        code="ESME_RINVOPTPARAMVAL",
-        value=0x000000C4,
-        description="Invalid Optional Parameter Value",
-    )
-    # Reserved 0x000000C5 - 0x000000FD Reserved
-    ESME_RDELIVERYFAILURE = CommandStatus(
-        code="ESME_RDELIVERYFAILURE",
-        value=0x000000FE,
-        description="Delivery Failure (used for data_sm_resp)",
-    )
-    ESME_RUNKNOWNERR = CommandStatus(
-        code="ESME_RUNKNOWNERR", value=0x000000FF, description="Unknown Error"
-    )
-    # Reserved for SMPP extension 0x00000100 - 0x000003FF Reserved for SMPP extension
-    # Reserved for SMSC vendor specific errors 0x00000400 - 0x000004FF Reserved for SMSC vendor specific errors
-    # Reserved 0x00000500 - 0xFFFFFFFF Reserved
-
-
-class DataCoding(typing.NamedTuple):
-    code: str
-    value: int
-    description: str
-
-
-class SmppDataCoding:
-    """
-    see section 5.2.19 of smpp ver 3.4 spec document.
-    also see:
-      1. https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260
-      2. https://docs.python.org/3/library/codecs.html
-      3. https://docs.python.org/3/library/codecs.html#standard-encodings
-
-    The attributes of this class are equivalent to some of the names found in the python standard-encodings documentation
-    ie; https://docs.python.org/3/library/codecs.html#standard-encodings
-    """
-
-    gsm0338 = DataCoding(code="gsm0338", value=0b00000000, description="SMSC Default Alphabet")
-    ascii = DataCoding(
-        code="ascii", value=0b00000001, description="IA5(CCITT T.50) / ASCII(ANSI X3.4)"
-    )
-    octet_unspecified_I = DataCoding(
-        code="octet_unspecified_I",
-        value=0b00000010,
-        description="Octet unspecified(8 - bit binary)",
-    )
-    latin_1 = DataCoding(code="latin_1", value=0b00000011, description="Latin 1 (ISO - 8859 - 1)")
-    octet_unspecified_II = DataCoding(
-        code="octet_unspecified_II",
-        value=0b00000100,
-        description="Octet unspecified(8 - bit binary)",
-    )
-    # iso2022_jp, iso2022jp and iso-2022-jp are aliases
-    # see: https://stackoverflow.com/a/43240579/2768067
-    iso2022_jp = DataCoding(code="iso2022_jp", value=0b00000101, description="JIS(X 0208 - 1990)")
-    iso8859_5 = DataCoding(
-        code="iso8859_5", value=0b00000110, description="Cyrllic(ISO - 8859 - 5)"
-    )
-    iso8859_8 = DataCoding(
-        code="iso8859_8", value=0b00000111, description="Latin / Hebrew(ISO - 8859 - 8)"
-    )
-    # see: https://stackoverflow.com/a/14488478/2768067
-    utf_16_be = DataCoding(
-        code="utf_16_be", value=0b00001000, description="UCS2(ISO / IEC - 10646)"
-    )
-    ucs2 = DataCoding(code="ucs2", value=0b00001000, description="UCS2(ISO / IEC - 10646)")
-    shift_jis = DataCoding(code="shift_jis", value=0b00001001, description="Pictogram Encoding")
-    iso2022jp = DataCoding(
-        code="iso2022jp", value=0b00001010, description="ISO - 2022 - JP(Music Codes)"
-    )
-    # reservedI= DataCoding(code="reservedI", value=0b00001011, description= "reserved")
-    # reservedII= DataCoding(code="reservedII", value=0b00001100, description= "reserved")
-    euc_kr = DataCoding(code="euc_kr", value=0b00001110, description="KS C 5601")
-
-    # not the same as iso2022_jp but ... ¯\_(ツ)_/¯
-    # iso-2022-jp=DataCoding(code="iso-2022-jp", value=0b00001101, description="Extended Kanji JIS(X 0212 - 1990)")
-
-    # 00001111 - 10111111 reserved
-    # 0b1100xxxx GSM MWI control - see [GSM 03.38]
-    # 0b1101xxxx GSM MWI control - see [GSM 03.38]
-    # 0b1110xxxx reserved
-    # 0b1111xxxx GSM message class control - see [GSM 03.38]

@@ -64,7 +64,16 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # packages=['naz'],
-    packages=find_packages(exclude=["documentation", "*tests*", "examples", ".github"]),
+    packages=find_packages(
+        exclude=[
+            "documentation",
+            "*tests*",
+            "examples",
+            ".github",
+            "documentation/sphinx-docs",
+            "sphinx-build",
+        ]
+    ),
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
     #   py_modules=["my_module"],
@@ -78,7 +87,17 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        "dev": ["coverage", "pypandoc", "twine", "wheel", "redis==2.10.6", "pika==0.12.0"],
+        "dev": [
+            "coverage",
+            "pypandoc",
+            "twine",
+            "wheel",
+            "Sphinx==1.8.3",
+            "sphinx-autodoc-typehints==1.6.0",
+            "recommonmark==0.5.0",
+            "redis==2.10.6",
+            "pika==0.12.0",
+        ],
         "test": ["flake8", "mock", "pylint", "black", "bandit", "docker==3.4.0", "mypy"],
     },
     # If there are data files included in your packages that need to be

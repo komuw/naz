@@ -40,61 +40,74 @@ logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG
 
 
 class TestNazCodec(TestCase):
+    """
+    run tests as:
+        python -m unittest discover -v -s .
+    run one testcase as:
+        python -m unittest -v tests.test_nazcodec.TestNazCodec.test_something
+    """
+
     def setUp(self):
-        self.codec = naz.nazcodec.NazCodec()
+        self.codec = naz.nazcodec.SimpleNazCodec()
 
     def test_byte_encode_guard(self):
-        self.assertRaises(naz.nazcodec.NazCodecException, self.codec.encode, b"some bytes")
+        self.assertRaises(
+            naz.nazcodec.NazCodecException, self.codec.encode, b"some bytes", "utf-8", "strict"
+        )
 
     def test_string_decode_guard(self):
-        self.assertRaises(naz.nazcodec.NazCodecException, self.codec.decode, "unicode")
+        self.assertRaises(
+            naz.nazcodec.NazCodecException, self.codec.decode, "unicode", "utf-8", "strict"
+        )
 
     def test_default_encoding(self):
-        self.assertEqual(self.codec.encode("a"), b"a")
+        self.assertEqual(self.codec.encode("a", "utf-8", "strict"), b"a")
 
     def test_default_decoding(self):
-        self.assertEqual(self.codec.decode(b"a"), "a")
+        self.assertEqual(self.codec.decode(b"a", "utf-8", "strict"), "a")
 
     def test_encode_utf8(self):
-        self.assertEqual(self.codec.encode("Zoë", "utf-8"), b"Zo\xc3\xab")
+        self.assertEqual(self.codec.encode("Zoë", "utf-8", "strict"), b"Zo\xc3\xab")
 
     def test_decode_utf8(self):
-        self.assertEqual(self.codec.decode(b"Zo\xc3\xab", "utf-8"), "Zoë")
+        self.assertEqual(self.codec.decode(b"Zo\xc3\xab", "utf-8", "strict"), "Zoë")
 
     def test_encode_utf16be(self):
-        self.assertEqual(self.codec.encode("Zoë", "utf-16be"), b"\x00Z\x00o\x00\xeb")
+        self.assertEqual(self.codec.encode("Zoë", "utf-16be", "strict"), b"\x00Z\x00o\x00\xeb")
 
     def test_decode_utf16be(self):
-        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "utf-16be"), "Zoë")
+        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "utf-16be", "strict"), "Zoë")
 
     def test_encode_ucs2(self):
-        self.assertEqual(self.codec.encode("Zoë", "ucs2"), b"\x00Z\x00o\x00\xeb")
+        self.assertEqual(self.codec.encode("Zoë", "ucs2", "strict"), b"\x00Z\x00o\x00\xeb")
 
     def test_decode_ucs2(self):
-        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "ucs2"), "Zoë")
+        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "ucs2", "strict"), "Zoë")
 
     def test_encode_gsm0338(self):
         self.assertEqual(
-            self.codec.encode("HÜLK", "gsm0338"),
+            self.codec.encode("HÜLK", "gsm0338", "strict"),
             "".join([chr(code) for code in [72, 94, 76, 75]]).encode(),
         )
 
     def test_encode_gsm0338_extended(self):
         self.assertEqual(
-            self.codec.encode("foo €", "gsm0338"),
+            self.codec.encode("foo €", "gsm0338", "strict"),
             "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(),
         )
 
     def test_decode_gsm0338_extended(self):
         self.assertEqual(
             self.codec.decode(
-                "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(), "gsm0338"
+                "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(),
+                "gsm0338",
+                "strict",
             ),
             "foo €",
         )
 
     def test_encode_gsm0338_strict(self):
-        self.assertRaises(UnicodeEncodeError, self.codec.encode, "Zoë", "gsm0338")
+        self.assertRaises(UnicodeEncodeError, self.codec.encode, "Zoë", "gsm0338", "strict")
 
     def test_encode_gsm0338_ignore(self):
         self.assertEqual(self.codec.encode("Zoë", "gsm0338", "ignore"), b"Zo")
@@ -103,7 +116,9 @@ class TestNazCodec(TestCase):
         self.assertEqual(self.codec.encode("Zoë", "gsm0338", "replace"), b"Zo?")
 
     def test_decode_gsm0338_strict(self):
-        self.assertRaises(UnicodeDecodeError, self.codec.decode, "Zoë".encode("utf-8"), "gsm0338")
+        self.assertRaises(
+            UnicodeDecodeError, self.codec.decode, "Zoë".encode("utf-8"), "gsm0338", "strict"
+        )
 
     def test_decode_gsm0338_ignore(self):
         self.assertEqual(self.codec.decode("Zoë".encode("utf-8"), "gsm0338", "ignore"), "Zo")

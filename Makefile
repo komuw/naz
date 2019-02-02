@@ -36,6 +36,9 @@ test:
 	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=84
 	@printf "\n coverage report html::\n" && coverage html --fail-under=84 --title=naz_coverage
 	@printf "\n run flake8::\n" && flake8 .
-	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/
+	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C --unsafe-load-any-extension=y examples/ naz/ tests/ cli/ documentation/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
+
+sphinx:
+	@sphinx-build -a -E documentation/sphinx-docs/ sphinx-build

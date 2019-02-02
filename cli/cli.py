@@ -145,7 +145,7 @@ def main():
             }
         )
         extra_log_data = {"log_metadata": log_metadata}
-        logger = naz.client.NazLoggingAdapter(logger, extra_log_data)
+        logger = naz.NazLoggingAdapter(logger, extra_log_data)
 
         logger.info("\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:
