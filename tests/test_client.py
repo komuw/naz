@@ -534,3 +534,16 @@ class TestClient(TestCase):
         self.assertIn(
             "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
         )
+
+    def test_logger_called(self):
+        with mock.patch("naz.logger.SimpleBaseLogger.log") as mock_logger_log:
+            mock_logger_log.return_value = None
+            self._run(
+                self.cli.parse_response_pdu(
+                    pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
+                )
+            )
+            self.assertTrue(mock_logger_log.called)
+            self.assertEqual(
+                mock_logger_log.call_args[0][1]["event"], "naz.Client.parse_response_pdu"
+            )
