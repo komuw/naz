@@ -99,10 +99,12 @@ class GSM7BitCodec(codecs.Codec):
             raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
         return handler(char, position, obj)
 
-    def handle_encode_strict_error(self, char, position, obj):
+    @staticmethod
+    def handle_encode_strict_error(char, position, obj):
         raise UnicodeEncodeError("gsm0338", char, position, position + 1, repr(obj))
 
-    def handle_encode_ignore_error(self, char, position, obj):
+    @staticmethod
+    def handle_encode_ignore_error(char, position, obj):
         return ""
 
     def handle_encode_replace_error(self, char, position, obj):
