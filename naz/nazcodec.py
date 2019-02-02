@@ -63,7 +63,7 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, string_to_encode, errors="strict"):
+    def encode(self, input, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         eg:
@@ -74,7 +74,7 @@ class GSM7BitCodec(codecs.Codec):
             xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'
         """
         result = []
-        for position, c in enumerate(string_to_encode):
+        for position, c in enumerate(input):
             idx = self.gsm_basic_charset_map.get(c)
             if idx is not None:
                 result.append(chr(idx))
@@ -83,7 +83,7 @@ class GSM7BitCodec(codecs.Codec):
             if idx is not None:
                 result.append(chr(27) + chr(idx))
             else:
-                result.append(self.handle_encode_error(c, errors, position, string_to_encode))
+                result.append(self.handle_encode_error(c, errors, position, input))
 
         obj = "".join(result)
         # this is equivalent to;
@@ -110,11 +110,11 @@ class GSM7BitCodec(codecs.Codec):
     def handle_encode_replace_error(self, char, position, obj):
         return chr(self.gsm_basic_charset_map.get("?"))
 
-    def decode(self, byte_string, errors="strict"):
+    def decode(self, input, errors="strict"):
         """
         errors can be 'strict', 'replace' or 'ignore'
         """
-        res = iter(byte_string)
+        res = iter(input)
         result = []
         for position, c in enumerate(res):
             try:
@@ -125,7 +125,7 @@ class GSM7BitCodec(codecs.Codec):
                     result.append(self.gsm_basic_charset[c])
             except IndexError as indexErrorException:
                 result.append(
-                    self.handle_decode_error(c, errors, position, byte_string, indexErrorException)
+                    self.handle_decode_error(c, errors, position, input, indexErrorException)
                 )
 
         obj = "".join(result)
