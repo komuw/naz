@@ -201,6 +201,36 @@ For example if you wanted ``naz`` to use key=value style of logging, then just c
     )
 
 
+``naz`` also gives you the ability to supply your own logger. 
+For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
+
+.. code-block:: python
+
+    import naz
+
+    class KVlogger(naz.logger.BaseLogger):
+        def __init__(self):
+            self.logger = logging.getLogger("myKVlogger")
+            handler = logging.StreamHandler()
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            if not self.logger.handlers:
+                self.logger.addHandler(handler)
+            self.logger.setLevel("DEBUG")
+        def bind(self, loglevel, log_metadata):
+            pass
+        def log(self, level, log_data):
+            # implementation of key=value log renderer
+            message = ", ".join("{0}={1}".format(k, v) for k, v in log_data.items())
+            self.logger.log(level, message)
+
+    kvLog = KVlogger()
+    cli = naz.Client(
+        ...
+        log_handler=kvLog,
+    )
+
+
 3.2.2 hooks
 =====================
 | A hook is a class with two methods `request` and `response`, ie it implements naz's ``naz.hooks.BaseHook`` interface.
