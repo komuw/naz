@@ -233,7 +233,7 @@ class SimpleNazCodec(BaseNazCodec):
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        obj, length = encoder(string_to_encode, errors)
+        obj, _ = encoder(string_to_encode, errors)
         return obj
 
     def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:

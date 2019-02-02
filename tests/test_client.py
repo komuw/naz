@@ -172,7 +172,7 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
 
-            reader, writer = self._run(self.cli.connect())
+            self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
             self._run(self.cli.send_forever(TESTING=True))
