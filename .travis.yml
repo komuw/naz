@@ -30,11 +30,14 @@ script:
   - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*cli/test_*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
   - coverage report --show-missing --fail-under=84
   - |
+    git remote set-branches --add origin master # https://github.com/travis-ci/travis-ci/issues/6069
+    git fetch
     printf "\n current branch is $TRAVIS_BRANCH \n"
+    git branch -a
     if [ "$TRAVIS_BRANCH" == "master" ]; then
         printf "\n $TRAVIS_BRANCH branch, ignoring check for relese notes \n"
     else
-        ChangedFiles=`git diff --name-only $TRAVIS_BRANCH origin/master`
+        ChangedFiles=`git diff --name-only $TRAVIS_BRANCH remotes/origin/master`
         case "$ChangedFiles" in
             *CHANGELOG.*)
                 printf "\n Thanks, your commits include update to release notes. \n";;
