@@ -1,8 +1,9 @@
+import abc
 import typing
 import logging
 
 
-class BaseLogger:
+class BaseLogger(abc.ABC):
     """
     Interface that must be implemented to satisfy naz's logger.
     User implementations should inherit this class and
@@ -12,6 +13,7 @@ class BaseLogger:
     This enables developers to implement logging in any way that they want.
     """
 
+    @abc.abstractmethod
     def bind(self, loglevel: str, log_metadata: dict) -> None:
         """
         called when a naz client is been instantiated so that the logger can be
@@ -24,6 +26,7 @@ class BaseLogger:
         """
         raise NotImplementedError("bind method must be implemented.")
 
+    @abc.abstractmethod
     def log(self, level: int, log_data: dict) -> None:
         """
         called by naz everytime it wants to log something.

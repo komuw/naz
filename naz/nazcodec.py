@@ -31,9 +31,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-import codecs
+import abc
 import sys
+import codecs
 
 
 # An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
@@ -160,7 +160,7 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_decode(input, errors)
 
 
-class BaseNazCodec:
+class BaseNazCodec(abc.ABC):
     """
     This is the interface that must be implemented to satisfy naz's encoding/decoding.
     User implementations should inherit this class and
@@ -169,6 +169,7 @@ class BaseNazCodec:
     naz calls an implementation of this class to encode/decode messages.
     """
 
+    @abc.abstractmethod
     def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
         """
         return an encoded version of the string as a bytes object
@@ -183,6 +184,7 @@ class BaseNazCodec:
         """
         raise NotImplementedError("encode method must be implemented.")
 
+    @abc.abstractmethod
     def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
         """
         return a string decoded from the given bytes.

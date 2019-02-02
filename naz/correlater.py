@@ -1,8 +1,9 @@
+import abc
 import time
 from typing import Tuple
 
 
-class BaseCorrelater:
+class BaseCorrelater(abc.ABC):
     """
     Interface that must be implemented to satisfy naz's Correlater.
     User implementations should inherit this class and
@@ -15,6 +16,7 @@ class BaseCorrelater:
     One reason is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.
     """
 
+    @abc.abstractmethod
     async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
         """
         called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
@@ -26,6 +28,7 @@ class BaseCorrelater:
         """
         raise NotImplementedError("put method must be implemented.")
 
+    @abc.abstractmethod
     async def get(self, sequence_number: int) -> Tuple[str, str]:
         """
         called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.

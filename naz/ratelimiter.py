@@ -1,9 +1,10 @@
+import abc
 import time
 import asyncio
 import logging
 
 
-class BaseRateLimiter:
+class BaseRateLimiter(abc.ABC):
     """
     This is the interface that must be implemented to satisfy naz's rate limiting.
     User implementations should inherit this class and
@@ -13,6 +14,7 @@ class BaseRateLimiter:
     naz lets you do this, by allowing you to specify a custom rate limiter.
     """
 
+    @abc.abstractmethod
     async def limit(self) -> None:
         """
         rate limit sending of messages to SMSC.

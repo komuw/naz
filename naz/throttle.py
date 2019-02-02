@@ -1,8 +1,9 @@
+import abc
 import time
 import logging
 
 
-class BaseThrottleHandler:
+class BaseThrottleHandler(abc.ABC):
     """
     This is the interface that must be implemented to satisfy naz's throttle handling.
     User implementations should inherit this class and
@@ -16,18 +17,21 @@ class BaseThrottleHandler:
     rate limiting itself. The way naz implements this self imposed self-regulation is via Throttle Handlers.
     """
 
+    @abc.abstractmethod
     async def throttled(self) -> None:
         """
         this method will be called by naz everytime we get a throttling response from SMSC.
         """
         raise NotImplementedError("throttled method must be implemented.")
 
+    @abc.abstractmethod
     async def not_throttled(self) -> None:
         """
         this method will be called by naz everytime we get any response from SMSC that is not a throttling response.
         """
         raise NotImplementedError("not_throttled method must be implemented.")
 
+    @abc.abstractmethod
     async def allow_request(self) -> bool:
         """
         this method will be called by naz just before sending a request to SMSC.
@@ -35,6 +39,7 @@ class BaseThrottleHandler:
         """
         raise NotImplementedError("allow_request method must be implemented.")
 
+    @abc.abstractmethod
     async def throttle_delay(self) -> float:
         """
         if the last :func:`allow_request <BaseThrottleHandler.allow_request>` method call returned False(thus denying sending a request),
