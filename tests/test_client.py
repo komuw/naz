@@ -70,7 +70,7 @@ class TestClient(TestCase):
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
-            password="password",
+            password=os.getenv("password", "password"),
             outboundqueue=self.outboundqueue,
         )
 
@@ -114,7 +114,7 @@ class TestClient(TestCase):
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
-                password="password",
+                password=os.getenv("password", "password"),
                 log_metadata="bad-Type",
                 outboundqueue=self.outboundqueue,
             )
@@ -289,7 +289,7 @@ class TestClient(TestCase):
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
-                password="password",
+                password=os.getenv("password", "password"),
                 outboundqueue=self.outboundqueue,
                 throttle_handler=throttle_handler,
             )
@@ -523,7 +523,7 @@ class TestClient(TestCase):
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
-                password="password",
+                password=os.getenv("password", "password"),
                 encoding=encoding,
                 outboundqueue=self.outboundqueue,
             )
