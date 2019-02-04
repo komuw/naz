@@ -94,7 +94,6 @@ setup(
             "wheel",
             "Sphinx==1.8.3",
             "sphinx-autodoc-typehints==1.6.0",
-            "recommonmark==0.5.0",
             "redis==2.10.6",
             "pika==0.12.0",
         ],
