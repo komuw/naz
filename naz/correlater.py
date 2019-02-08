@@ -13,7 +13,7 @@ class BaseCorrelater(abc.ABC):
     and user applications' log_id's and/or hook_metadata.
 
     Note: This correlation is on a BEST effort basis; it is not guaranteed to be reliable.
-    One reason is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.
+    One reason, among others, is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.
     """
 
     @abc.abstractmethod
