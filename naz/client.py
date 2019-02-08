@@ -1215,6 +1215,19 @@ class Client:
         command_status = struct.unpack(">I", command_status_header_data)[0]
         sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
 
+        smpp_command = self._search_by_command_id_code(command_id)
+        if not smpp_command:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.parse_response_pdu",
+                    "stage": "end",
+                    "log_id": log_id,
+                    "state": "command_id:{0} is unknown.".format(command_id),
+                },
+            )
+            raise ValueError("command_id:{0} is unknown.".format(command_id))
+
         # get associated user supplied log_id if any
         try:
             log_id, hook_metadata = await self.correlation_handler.get(
@@ -1232,19 +1245,6 @@ class Client:
                     "error": str(e),
                 },
             )
-
-        smpp_command = self._search_by_command_id_code(command_id)
-        if not smpp_command:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.parse_response_pdu",
-                    "stage": "end",
-                    "log_id": log_id,
-                    "state": "command_id:{0} is unknown.".format(command_id),
-                },
-            )
-            raise ValueError("command_id:{0} is unknown.".format(command_id))
 
         await self.speficic_handlers(
             smpp_command=smpp_command,
