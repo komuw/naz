@@ -61,6 +61,7 @@ class TestCorrelater(TestCase):
         for i in range(0, length):
             self._run(
                 self.correlater.put(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM,
                     sequence_number=str(i),
                     log_id="log_id-" + str(i),
                     hook_metadata="hook_metadata-" + str(i),
@@ -75,6 +76,7 @@ class TestCorrelater(TestCase):
         for i in range(0, length):
             self._run(
                 self.correlater.put(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM,
                     sequence_number=str(i),
                     log_id="log_id-" + str(i),
                     hook_metadata="hook_metadata-" + str(i),
@@ -85,6 +87,7 @@ class TestCorrelater(TestCase):
         time.sleep(self.max_ttl + 0.2)
         self._run(
             self.correlater.put(
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
                 sequence_number="end_ttl",
                 log_id="log_id-end_ttl",
                 hook_metadata="hook_metadata-end_ttl",
@@ -96,11 +99,18 @@ class TestCorrelater(TestCase):
     def test_get(self):
         self._run(
             self.correlater.put(
-                sequence_number="sequence_number", log_id="MyLogID", hook_metadata="MyHookMetadata"
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                sequence_number="sequence_number",
+                log_id="MyLogID",
+                hook_metadata="MyHookMetadata",
             )
         )
         self.assertEqual(len(self.correlater.store.keys()), 1)
-        log_id, hook_metadata = self._run(self.correlater.get(sequence_number="sequence_number"))
+        log_id, hook_metadata = self._run(
+            self.correlater.get(
+                smpp_command=naz.SmppCommand.SUBMIT_SM, sequence_number="sequence_number"
+            )
+        )
         self.assertEqual(log_id, "MyLogID")
         self.assertEqual(hook_metadata, "MyHookMetadata")
 
@@ -108,7 +118,11 @@ class TestCorrelater(TestCase):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.delete_after_ttl", new=AsyncMock()
         ) as mock_correlater_delete_after_ttl:
-            self._run(self.correlater.get(sequence_number="sequence_number"))
+            self._run(
+                self.correlater.get(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, sequence_number="sequence_number"
+                )
+            )
             self.assertTrue(mock_correlater_delete_after_ttl.mock.called)
 
     def test_put_calls_delete(self):
@@ -117,6 +131,7 @@ class TestCorrelater(TestCase):
         ) as mock_correlater_delete_after_ttl:
             self._run(
                 self.correlater.put(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM,
                     sequence_number="sequence_number",
                     log_id="MyLogID",
                     hook_metadata="MyHookMetadata",
@@ -173,6 +188,7 @@ class TestBenchmarkCorrelater(TestCase):
         start = time.monotonic()
         self._run(
             self.correlater.put(
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
                 sequence_number="end_ttl",
                 log_id="log_id-end_ttl",
                 hook_metadata="hook_metadata-end_ttl",
@@ -210,7 +226,9 @@ class TestBenchmarkCorrelater(TestCase):
         # then try to get an item thus triggering a delete of all 100K items
         # and check how long that operation takes
         start = time.monotonic()
-        log_id, hook_metadata = self._run(self.correlater.get(sequence_number="99999"))
+        log_id, hook_metadata = self._run(
+            self.correlater.get(smpp_command=naz.SmppCommand.SUBMIT_SM, sequence_number="99999")
+        )
         end = time.monotonic()
         diff = end - start
         print(

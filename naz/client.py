@@ -381,7 +381,10 @@ class Client:
         # this will enable us to also associate responses and thus enhancing traceability of all workflows
         try:
             await self.correlation_handler.put(
-                sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                smpp_command=smpp_command,
+                sequence_number=sequence_number,
+                log_id=log_id,
+                hook_metadata="",
             )
         except Exception as e:
             self._log(
@@ -462,7 +465,10 @@ class Client:
 
             try:
                 await self.correlation_handler.put(
-                    sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    log_id=log_id,
+                    hook_metadata="",
                 )
             except Exception as e:
                 self._log(
@@ -845,7 +851,10 @@ class Client:
 
         try:
             await self.correlation_handler.put(
-                sequence_number=sequence_number, log_id=log_id, hook_metadata=hook_metadata
+                smpp_command=smpp_command,
+                sequence_number=sequence_number,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
             )
         except Exception as e:
             self._log(
@@ -1222,7 +1231,7 @@ class Client:
                 {
                     "event": "naz.Client.parse_response_pdu",
                     "stage": "end",
-                    "log_id": log_id,
+                    "log_id": "",
                     "state": "command_id:{0} is unknown.".format(command_id),
                 },
             )
@@ -1231,7 +1240,7 @@ class Client:
         # get associated user supplied log_id if any
         try:
             log_id, hook_metadata = await self.correlation_handler.get(
-                sequence_number=sequence_number
+                smpp_command=smpp_command, sequence_number=sequence_number
             )
         except Exception as e:
             log_id, hook_metadata = "", ""
@@ -1486,7 +1495,10 @@ class Client:
 
         try:
             await self.correlation_handler.put(
-                sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                smpp_command=smpp_command,
+                sequence_number=sequence_number,
+                log_id=log_id,
+                hook_metadata="",
             )
         except Exception as e:
             self._log(

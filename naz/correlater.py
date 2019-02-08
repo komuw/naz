@@ -17,11 +17,14 @@ class BaseCorrelater(abc.ABC):
     """
 
     @abc.abstractmethod
-    async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
+    async def put(
+        self, smpp_command: str, sequence_number: int, log_id: str, hook_metadata: str
+    ) -> None:
         """
         called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
 
         Parameters:
+            smpp_command: any one of the SMSC commands eg submit_sm
             sequence_number: SMPP sequence_number
             log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
             hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
@@ -29,11 +32,12 @@ class BaseCorrelater(abc.ABC):
         raise NotImplementedError("put method must be implemented.")
 
     @abc.abstractmethod
-    async def get(self, sequence_number: int) -> Tuple[str, str]:
+    async def get(self, smpp_command: str, sequence_number: int) -> Tuple[str, str]:
         """
         called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
 
         Parameters:
+            smpp_command: any one of the SMSC commands eg submit_sm
             sequence_number: SMPP sequence_number
 
         Returns:
@@ -77,7 +81,9 @@ class SimpleCorrelater(BaseCorrelater):
         self.store: dict = {}
         self.max_ttl: float = max_ttl
 
-    async def put(self, sequence_number: int, log_id: str, hook_metadata: str) -> None:
+    async def put(
+        self, smpp_command: str, sequence_number: int, log_id: str, hook_metadata: str
+    ) -> None:
         stored_at = time.monotonic()
         self.store[sequence_number] = {
             "log_id": log_id,
@@ -87,7 +93,7 @@ class SimpleCorrelater(BaseCorrelater):
         # garbage collect
         await self.delete_after_ttl()
 
-    async def get(self, sequence_number: int) -> Tuple[str, str]:
+    async def get(self, smpp_command: str, sequence_number: int) -> Tuple[str, str]:
         item = self.store.get(sequence_number)
         if not item:
             # garbage collect
