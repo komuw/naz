@@ -1,6 +1,6 @@
 import abc
 import time
-from typing import Tuple
+import typing
 
 
 class BaseCorrelater(abc.ABC):
@@ -18,7 +18,12 @@ class BaseCorrelater(abc.ABC):
 
     @abc.abstractmethod
     async def put(
-        self, smpp_command: str, sequence_number: int, log_id: str, hook_metadata: str
+        self,
+        smpp_command: str,
+        sequence_number: int,
+        log_id: str,
+        hook_metadata: str,
+        smsc_message_id: typing.Union[None, str] = None,
     ) -> None:
         """
         called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
@@ -28,17 +33,24 @@ class BaseCorrelater(abc.ABC):
             sequence_number: SMPP sequence_number
             log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
             hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
+            smsc_message_id: a unique identifier of a particular message on the SMSC. It comes from SMSC
         """
         raise NotImplementedError("put method must be implemented.")
 
     @abc.abstractmethod
-    async def get(self, smpp_command: str, sequence_number: int) -> Tuple[str, str]:
+    async def get(
+        self,
+        smpp_command: str,
+        sequence_number: int,
+        smsc_message_id: typing.Union[None, str] = None,
+    ) -> typing.Tuple[str, str]:
         """
         called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.
 
         Parameters:
             smpp_command: any one of the SMSC commands eg submit_sm
             sequence_number: SMPP sequence_number
+            smsc_message_id: a unique identifier of a particular message on the SMSC. It comes from SMSC
 
         Returns:
             log_id and hook_metadata
@@ -82,19 +94,32 @@ class SimpleCorrelater(BaseCorrelater):
         self.max_ttl: float = max_ttl
 
     async def put(
-        self, smpp_command: str, sequence_number: int, log_id: str, hook_metadata: str
+        self,
+        smpp_command: str,
+        sequence_number: int,
+        log_id: str,
+        hook_metadata: str,
+        smsc_message_id: typing.Union[None, str] = None,
     ) -> None:
+        key = sequence_number
+        if smpp_command == "submit_sm_resp":
+            key = smsc_message_id
         stored_at = time.monotonic()
-        self.store[sequence_number] = {
-            "log_id": log_id,
-            "hook_metadata": hook_metadata,
-            "stored_at": stored_at,
-        }
+        self.store[key] = {"log_id": log_id, "hook_metadata": hook_metadata, "stored_at": stored_at}
+
         # garbage collect
         await self.delete_after_ttl()
 
-    async def get(self, smpp_command: str, sequence_number: int) -> Tuple[str, str]:
-        item = self.store.get(sequence_number)
+    async def get(
+        self,
+        smpp_command: str,
+        sequence_number: int,
+        smsc_message_id: typing.Union[None, str] = None,
+    ) -> typing.Tuple[str, str]:
+        key = sequence_number
+        if smpp_command == "deliver_sm":
+            key = smsc_message_id
+        item = self.store.get(key)
         if not item:
             # garbage collect
             await self.delete_after_ttl()

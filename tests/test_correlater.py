@@ -139,6 +139,92 @@ class TestCorrelater(TestCase):
             )
             self.assertTrue(mock_correlater_delete_after_ttl.mock.called)
 
+    def test_submit_sm_deliver_sm_workflow(self):
+        """
+        To handle correlations:
+            - when sending `submit_sm` we save the sequence_number
+            - when we get `submit_sm_resp` we lookup sequence_number and use it for correlation
+            - Additionally, `submit_sm_resp` has a `message_id` in the body. This is the SMSC message ID of the submitted message.
+            - We take this `message_id` and save it.
+            - when we get a `deliver_sm` request, it includes a `receipted_message_id` in the **optional** body parameters. This is the SMSC message ID of receipted message.
+            - we get that `receipted_message_id` and use it to lookup from where we had saved the one from `submit_sm_resp`
+        
+        This test checks for the integrity of that workflow.
+        """
+        # 1. handle a SUBMIT_SM put
+        submit_sm_sequence_number = "submit_sm_sequence_number"
+        log_id = "log_id1"
+        hook_metadata = '{"campaign": "loyalty", "cohort_id": "1233"}'
+        self._run(
+            self.correlater.put(
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                sequence_number=submit_sm_sequence_number,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+            )
+        )
+        self.assertEqual(len(self.correlater.store.keys()), 1)
+        self.assertEqual(self.correlater.store[submit_sm_sequence_number]["log_id"], log_id)
+        self.assertEqual(
+            self.correlater.store[submit_sm_sequence_number]["hook_metadata"], hook_metadata
+        )
+
+        # 2. handle a SUBMIT_SM_RESP get
+        # it comes it a similar sequence_number as SUBMIT_SM
+        log_id, hook_metadata = self._run(
+            self.correlater.get(
+                smpp_command=naz.SmppCommand.SUBMIT_SM_RESP,
+                sequence_number=submit_sm_sequence_number,
+            )
+        )
+        self.assertEqual(len(self.correlater.store.keys()), 1)
+        self.assertEqual(self.correlater.store[submit_sm_sequence_number]["log_id"], log_id)
+        self.assertEqual(
+            self.correlater.store[submit_sm_sequence_number]["hook_metadata"], hook_metadata
+        )
+
+        # 3. handle a SUBMIT_SM_RESP put
+        submit_sm_resp_smsc_message_id = "909012345"
+        self._run(
+            self.correlater.put(
+                smpp_command=naz.SmppCommand.SUBMIT_SM_RESP,
+                sequence_number=submit_sm_sequence_number,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                smsc_message_id=submit_sm_resp_smsc_message_id,
+            )
+        )
+        # because we do not delete the old one, no of items is two.
+        # TODO: we should delete the old one.
+        self.assertEqual(len(self.correlater.store.keys()), 2)
+        self.assertEqual(self.correlater.store[submit_sm_sequence_number]["log_id"], log_id)
+        self.assertEqual(
+            self.correlater.store[submit_sm_sequence_number]["hook_metadata"], hook_metadata
+        )
+
+        self.assertEqual(self.correlater.store[submit_sm_resp_smsc_message_id]["log_id"], log_id)
+        self.assertEqual(
+            self.correlater.store[submit_sm_resp_smsc_message_id]["hook_metadata"], hook_metadata
+        )
+
+        # 4. handle a DELIVER_SM get
+        # it comes with its own unique sequence_number. However it has smsc_message_id that was in SUBMIT_SM_RESP
+        deliver_sm_sequence_number = "deliver_sm_sequence_number"
+        smsc_message_id = submit_sm_resp_smsc_message_id
+        log_id, hook_metadata = self._run(
+            self.correlater.get(
+                smpp_command=naz.SmppCommand.DELIVER_SM,
+                sequence_number=deliver_sm_sequence_number,
+                smsc_message_id=smsc_message_id,
+            )
+        )
+        self.assertEqual(self.correlater.store[smsc_message_id]["log_id"], log_id)
+        self.assertEqual(self.correlater.store[smsc_message_id]["hook_metadata"], hook_metadata)
+        self.assertEqual(self.correlater.store[submit_sm_resp_smsc_message_id]["log_id"], log_id)
+        self.assertEqual(
+            self.correlater.store[submit_sm_resp_smsc_message_id]["hook_metadata"], hook_metadata
+        )
+
 
 class TestBenchmarkCorrelater(TestCase):
     """
