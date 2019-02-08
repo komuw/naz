@@ -547,3 +547,18 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_logger_log.call_args[0][1]["event"], "naz.Client.parse_response_pdu"
             )
+
+    def test_parse_deliver_sm(self):
+        # see: https://github.com/mozes/smpp.pdu
+        deliver_sm_pdu = b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234\x00\x01\x0117735554070\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x11id:123456 sub:SSS dlvrd:DDD blah blah"
+        # with mock.patch(
+        #     "naz.Client.speficic_handlers", new=AsyncMock()
+        # ) as mock_naz_speficic_handlers:
+        self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+
+        self.assertTrue(mock_naz_speficic_handlers.mock.called)
+        self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+        self.assertEqual(
+            mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
+            naz.SmppCommand.BIND_TRANSCEIVER_RESP,
+        )

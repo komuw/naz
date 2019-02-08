@@ -1216,6 +1216,7 @@ class Client:
         self._log(logging.INFO, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
+        body_data = pdu[16:]
         command_id_header_data = header_data[4:8]
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
@@ -1256,6 +1257,7 @@ class Client:
             )
 
         await self.speficic_handlers(
+            body_data=body_data,
             smpp_command=smpp_command,
             command_status_value=command_status,
             sequence_number=sequence_number,
@@ -1275,6 +1277,7 @@ class Client:
 
     async def speficic_handlers(
         self,
+        body_data: bytes,
         smpp_command: str,
         command_status_value: int,
         sequence_number: int,
@@ -1285,6 +1288,7 @@ class Client:
         This routes the various different SMPP PDU to their respective handlers.
 
         Parameters:
+            body_data: PDU body
             smpp_command: type of PDU been sent. eg bind_transceiver
             command_status_value: the response code from SMSC for a specific PDU
             sequence_number: SMPP sequence_number
@@ -1376,7 +1380,32 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-            pass
+
+            smsc_message_id = self.codec_class.decode(
+                body_data, self.encoding, self.codec_errors_level
+            )
+            # associate smsc_message_id with log_id.
+            # this will enable us to also associate responses(deliver_sm) and thus enhancing traceability of all workflows
+            try:
+                await self.correlation_handler.put(
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    smsc_message_id=smsc_message_id,
+                    log_id=log_id,
+                    hook_metadata=hook_metadata,
+                )
+            except Exception as e:
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.speficic_handlers",
+                        "stage": "end",
+                        "smpp_command": smpp_command,
+                        "log_id": log_id,
+                        "state": "correlater put error",
+                        "error": str(e),
+                    },
+                )
         elif smpp_command == SmppCommand.DELIVER_SM:
             # HEADER::
             # command_length, int, 4octet
@@ -1409,6 +1438,41 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
+
+            #########################################
+            # get associated user supplied log_id if any
+            try:
+                key = None
+                for k, v in reversed(list(enumerate(reversed(body_data)))):
+                    if chr(body_data[k]) not in string.printable:
+                        key = k
+                        break
+                short_message = body_data[key + 1 :]
+                short_message = self.codec_class.decode(
+                    short_message, self.encoding, self.codec_errors_level
+                )
+                smsc_message_id = short_message.split(" ")[0].split(":")[1]
+
+                # import pdb;pdb.set_trace()
+
+                log_id, hook_metadata = await self.correlation_handler.get(
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    smsc_message_id=smsc_message_id,
+                )
+                #########################################
+            except Exception as e:
+                log_id, hook_metadata = "", ""
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.speficic_handlers",
+                        "stage": "start",
+                        "log_id": log_id,
+                        "state": "correlater get error",
+                        "error": str(e),
+                    },
+                )
         elif smpp_command == SmppCommand.ENQUIRE_LINK:
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
