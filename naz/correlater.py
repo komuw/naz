@@ -103,13 +103,22 @@ class SimpleCorrelater(BaseCorrelater):
         hook_metadata: str,
         smsc_message_id: typing.Union[None, str] = None,
     ) -> None:
-        key = sequence_number
+        stored_at = time.monotonic()
         if smpp_command == "submit_sm_resp":
             key = smsc_message_id
-        stored_at = time.monotonic()
-        # TODO: dict with smsc_message_id should replace dict with corresponding sequence_number
-        # currently we are not deduping data; we should
-        self.store[key] = {"log_id": log_id, "hook_metadata": hook_metadata, "stored_at": stored_at}
+            # TODO: dict with smsc_message_id should replace dict with corresponding sequence_number
+            # currently we are not deduping data; we should
+            self.store[smsc_message_id] = {
+                "log_id": log_id,
+                "hook_metadata": hook_metadata,
+                "stored_at": stored_at,
+            }
+        else:
+            self.store[sequence_number] = {
+                "log_id": log_id,
+                "hook_metadata": hook_metadata,
+                "stored_at": stored_at,
+            }
 
         # garbage collect
         await self.delete_after_ttl()
@@ -120,10 +129,10 @@ class SimpleCorrelater(BaseCorrelater):
         sequence_number: int,
         smsc_message_id: typing.Union[None, str] = None,
     ) -> typing.Tuple[str, str]:
-        key = sequence_number
         if smpp_command == "deliver_sm":
-            key = smsc_message_id
-        item = self.store.get(key)
+            item = self.store.get(smsc_message_id)
+        else:
+            item = self.store.get(sequence_number)
         if not item:
             # garbage collect
             await self.delete_after_ttl()
