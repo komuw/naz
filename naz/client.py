@@ -1449,8 +1449,12 @@ class Client:
                     # since after a tag, comes a tag_length which is 2 integer in size
                     # lets also skip that
                     end_of_target_tag_length = end_of_target_tag + 2
+                    end_of_target_tag_length = (
+                        end_of_target_tag_length + 1
+                    )  # because of c-octet string null termination
                     # tag_value is of size 1 - 65
-                    tag_value = body_data[end_of_target_tag_length + 1 :]
+                    end_of_tag_value = end_of_target_tag_length + 65
+                    tag_value = body_data[end_of_target_tag_length:end_of_tag_value]
                     tag_value = tag_value.replace(chr(0).encode(), b"")
                     tag_value = self.codec_class.decode(
                         tag_value, self.encoding, self.codec_errors_level

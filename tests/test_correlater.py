@@ -146,11 +146,9 @@ class TestCorrelater(TestCase):
             - when we get `submit_sm_resp` we lookup sequence_number and use it for correlation
             - Additionally, `submit_sm_resp` has a `message_id` in the body. This is the SMSC message ID of the submitted message.
             - We take this `message_id` and save it.
-            - when we get a `deliver_sm` request, it includes a `receipted_message_id` in the **optional** body parameters. This is the SMSC message ID of receipted message.
-            - we either:
-                -(a) get that `receipted_message_id` and use it to lookup from where we had saved the one from `submit_sm_resp`
-                -(b) parse the `short_message` and get the message_id from there, then and use it to lookup from where we had saved the one from `submit_sm_resp`
-         
+            - when we get a `deliver_sm` request, it includes a `receipted_message_id` in the optional body parameters.
+            - we get that `receipted_message_id` and use it to lookup from where we had saved the one from `submit_sm_resp`
+
         This test checks for the integrity of that workflow.
         """
         # 1. handle a SUBMIT_SM put
