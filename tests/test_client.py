@@ -638,7 +638,12 @@ class TestClient(TestCase):
                 # DELIVER_SM has same message_id as SUBMIT_SM_RESP but DIFFERENT sequence_number
                 value = submit_sm_resp_smsc_message_id  # 23 in length
                 value = value.encode() + chr(0).encode()  # 24 in length
-                deliver_sm_pdu = b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234\x00\x01\x0117735554070\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x11id:1618Z-0102G-2333M-25FJF sub:SSS dlvrd:DDD blah blah"
+                deliver_sm_pdu = (
+                    b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00"
+                    b"\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234"
+                    b"\x00\x01\x0117735554070\x00\x00\x00\x00\x00\x00"
+                    b"\x00\x00\x03\x00\x11id:1618Z-0102G-2333M-25FJF sub:SSS dlvrd:DDD blah blah"
+                )
                 deliver_sm_pdu = deliver_sm_pdu + tag_n_len + value
                 self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
 
