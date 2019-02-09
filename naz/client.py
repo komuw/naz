@@ -14,7 +14,7 @@ from . import throttle
 from . import correlater
 from . import ratelimiter
 
-from .state import SmppSessionState, SmppCommand, SmppCommandStatus, SmppDataCoding
+from .state import SmppSessionState, SmppCommand, SmppCommandStatus, SmppDataCoding, SmppOptionalTag
 
 
 class Client:
@@ -381,7 +381,10 @@ class Client:
         # this will enable us to also associate responses and thus enhancing traceability of all workflows
         try:
             await self.correlation_handler.put(
-                sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                smpp_command=smpp_command,
+                sequence_number=sequence_number,
+                log_id=log_id,
+                hook_metadata="",
             )
         except Exception as e:
             self._log(
@@ -462,7 +465,10 @@ class Client:
 
             try:
                 await self.correlation_handler.put(
-                    sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    log_id=log_id,
+                    hook_metadata="",
                 )
             except Exception as e:
                 self._log(
@@ -845,7 +851,10 @@ class Client:
 
         try:
             await self.correlation_handler.put(
-                sequence_number=sequence_number, log_id=log_id, hook_metadata=hook_metadata
+                smpp_command=smpp_command,
+                sequence_number=sequence_number,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
             )
         except Exception as e:
             self._log(
@@ -1207,6 +1216,7 @@ class Client:
         self._log(logging.INFO, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
+        body_data = pdu[16:]
         command_id_header_data = header_data[4:8]
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
@@ -1215,10 +1225,23 @@ class Client:
         command_status = struct.unpack(">I", command_status_header_data)[0]
         sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
 
+        smpp_command = self._search_by_command_id_code(command_id)
+        if not smpp_command:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.parse_response_pdu",
+                    "stage": "end",
+                    "log_id": "",
+                    "state": "command_id:{0} is unknown.".format(command_id),
+                },
+            )
+            raise ValueError("command_id:{0} is unknown.".format(command_id))
+
         # get associated user supplied log_id if any
         try:
             log_id, hook_metadata = await self.correlation_handler.get(
-                sequence_number=sequence_number
+                smpp_command=smpp_command, sequence_number=sequence_number
             )
         except Exception as e:
             log_id, hook_metadata = "", ""
@@ -1233,20 +1256,8 @@ class Client:
                 },
             )
 
-        smpp_command = self._search_by_command_id_code(command_id)
-        if not smpp_command:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.parse_response_pdu",
-                    "stage": "end",
-                    "log_id": log_id,
-                    "state": "command_id:{0} is unknown.".format(command_id),
-                },
-            )
-            raise ValueError("command_id:{0} is unknown.".format(command_id))
-
         await self.speficic_handlers(
+            body_data=body_data,
             smpp_command=smpp_command,
             command_status_value=command_status,
             sequence_number=sequence_number,
@@ -1266,6 +1277,7 @@ class Client:
 
     async def speficic_handlers(
         self,
+        body_data: bytes,
         smpp_command: str,
         command_status_value: int,
         sequence_number: int,
@@ -1276,6 +1288,7 @@ class Client:
         This routes the various different SMPP PDU to their respective handlers.
 
         Parameters:
+            body_data: PDU body
             smpp_command: type of PDU been sent. eg bind_transceiver
             command_status_value: the response code from SMSC for a specific PDU
             sequence_number: SMPP sequence_number
@@ -1367,7 +1380,30 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-            pass
+            smsc_message_id = body_data.replace(chr(0).encode(), b"")
+            smsc_message_id = self.codec_class.decode(
+                smsc_message_id, self.encoding, self.codec_errors_level
+            )
+            try:
+                await self.correlation_handler.put(
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    smsc_message_id=smsc_message_id,
+                    log_id=log_id,
+                    hook_metadata=hook_metadata,
+                )
+            except Exception as e:
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.speficic_handlers",
+                        "stage": "end",
+                        "smpp_command": smpp_command,
+                        "log_id": log_id,
+                        "state": "correlater put error",
+                        "error": str(e),
+                    },
+                )
         elif smpp_command == SmppCommand.DELIVER_SM:
             # HEADER::
             # command_length, int, 4octet
@@ -1400,6 +1436,44 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
+            try:
+                # get associated user supplied log_id if any
+                target_tag = struct.pack(">H", SmppOptionalTag.receipted_message_id)
+                if target_tag in body_data:
+                    # the PDU contains a `receipted_message_id` TLV optional tag
+                    position_of_target_tag = body_data.find(target_tag)
+                    # since a tag is 2 integer in size lets skip one more.
+                    end_of_target_tag = position_of_target_tag + 1
+                    # since after a tag, comes a tag_length which is 2 integer in size
+                    # lets also skip that
+                    end_of_target_tag_length = end_of_target_tag + 2
+                    end_of_target_tag_length = (
+                        end_of_target_tag_length + 1
+                    )  # because of c-octet string null termination
+                    # tag_value is of size 1 - 65
+                    end_of_tag_value = end_of_target_tag_length + 65
+                    tag_value = body_data[end_of_target_tag_length:end_of_tag_value]
+                    tag_value = tag_value.replace(chr(0).encode(), b"")
+                    tag_value = self.codec_class.decode(
+                        tag_value, self.encoding, self.codec_errors_level
+                    )
+                    log_id, hook_metadata = await self.correlation_handler.get(
+                        smpp_command=smpp_command,
+                        sequence_number=sequence_number,
+                        smsc_message_id=tag_value,
+                    )
+            except Exception as e:
+                log_id, hook_metadata = "", ""
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.speficic_handlers",
+                        "stage": "start",
+                        "log_id": log_id,
+                        "state": "correlater get error",
+                        "error": str(e),
+                    },
+                )
         elif smpp_command == SmppCommand.ENQUIRE_LINK:
             # we have to handle this. we have to return enquire_link_resp
             # it has no body
@@ -1486,7 +1560,10 @@ class Client:
 
         try:
             await self.correlation_handler.put(
-                sequence_number=sequence_number, log_id=log_id, hook_metadata=""
+                smpp_command=smpp_command,
+                sequence_number=sequence_number,
+                log_id=log_id,
+                hook_metadata="",
             )
         except Exception as e:
             self._log(

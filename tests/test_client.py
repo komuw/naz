@@ -4,6 +4,7 @@
 import os
 import sys
 import json
+import struct
 import asyncio
 import logging
 from unittest import TestCase
@@ -203,6 +204,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -221,6 +223,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.UNBIND,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -239,6 +242,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -322,6 +326,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -342,6 +347,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0x00000058,
                     sequence_number=sequence_number,
@@ -424,6 +430,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -547,3 +554,110 @@ class TestClient(TestCase):
             self.assertEqual(
                 mock_logger_log.call_args[0][1]["event"], "naz.Client.parse_response_pdu"
             )
+
+    def test_parse_deliver_sm(self):
+        with mock.patch(
+            "naz.Client.speficic_handlers", new=AsyncMock()
+        ) as mock_naz_speficic_handlers:
+            # see: https://github.com/mozes/smpp.pdu
+            deliver_sm_pdu = (
+                b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00"
+                b"\x00\x00\x9f\x88\xf1$AWSBD\x00\x01"
+                b"\x0116505551234\x00\x01\x0117735554070"
+                b"\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00"
+                b"\x11id:123456 sub:SSS dlvrd:DDD blah blah"
+            )
+            self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+
+            self.assertTrue(mock_naz_speficic_handlers.mock.called)
+            self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+            self.assertEqual(
+                mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
+                naz.SmppCommand.DELIVER_SM,
+            )
+
+    def test_submit_sm_AND_deliver_sm_correlation(self):
+        with mock.patch(
+            "naz.sequence.SimpleSequenceGenerator.next_sequence"
+        ) as mock_sequence, mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue:
+            mock_sequence_number = 909_012
+            mock_sequence.return_value = mock_sequence_number
+
+            log_id = "MyLog_id123456"
+            short_message = "hello smpp"
+            _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
+            hook_metadata = json.dumps(_hook_metadata)
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+                "hook_metadata": hook_metadata,
+            }
+
+            # 1. SEND SUBMIT_SM
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.send_forever(TESTING=True))
+            self.assertTrue(self.cli.correlation_handler.store[mock_sequence_number])
+            self.assertEqual(
+                self.cli.correlation_handler.store[mock_sequence_number]["log_id"], log_id
+            )
+            self.assertEqual(
+                self.cli.correlation_handler.store[mock_sequence_number]["hook_metadata"],
+                hook_metadata,
+            )
+
+            # 2. RECEIVE SUBMIT_SM_RESP
+            submit_sm_resp_smsc_message_id = "1618Z-0102G-2333M-25FJF"
+            body = b""
+            body = body + submit_sm_resp_smsc_message_id.encode() + chr(0).encode()
+            command_length = 16 + len(body)  # 16 is for headers
+            command_id = 0x80000004  # submit_sm_resp
+            command_status = 0x00000000  # success
+            header = struct.pack(
+                ">IIII", command_length, command_id, command_status, mock_sequence_number
+            )  # SUBMIT_SM_RESP should have same sequence_number as SUBMIT_SM
+            submit_sm_resp_full_pdu = header + body
+            self._run(self.cli.parse_response_pdu(pdu=submit_sm_resp_full_pdu))
+
+            # assert message_id  was stored
+            self.assertTrue(self.cli.correlation_handler.store[submit_sm_resp_smsc_message_id])
+            self.assertEqual(
+                self.cli.correlation_handler.store[submit_sm_resp_smsc_message_id]["log_id"], log_id
+            )
+            self.assertEqual(
+                self.cli.correlation_handler.store[submit_sm_resp_smsc_message_id]["hook_metadata"],
+                hook_metadata,
+            )
+
+            # 3. RECEIVE DELIVER_SM
+            with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+                tag = naz.SmppOptionalTag.receipted_message_id
+                length = 0x0018  # 24 in length
+                tag_n_len = struct.pack(">HH", tag, length)
+                # DELIVER_SM has same message_id as SUBMIT_SM_RESP but DIFFERENT sequence_number
+                value = submit_sm_resp_smsc_message_id  # 23 in length
+                value = value.encode() + chr(0).encode()  # 24 in length
+                deliver_sm_pdu = (
+                    b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00"
+                    b"\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234"
+                    b"\x00\x01\x0117735554070\x00\x00\x00\x00\x00\x00"
+                    b"\x00\x00\x03\x00\x11id:1618Z-0102G-2333M-25FJF sub:SSS dlvrd:DDD blah blah"
+                )
+                deliver_sm_pdu = deliver_sm_pdu + tag_n_len + value
+                self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+
+                self.assertTrue(mock_hook_response.mock.called)
+                self.assertEqual(
+                    mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.DELIVER_SM
+                )
+                self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], log_id)
+                self.assertEqual(
+                    mock_hook_response.mock.call_args[1]["hook_metadata"], hook_metadata
+                )
