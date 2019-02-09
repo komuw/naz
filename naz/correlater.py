@@ -63,7 +63,7 @@ class BaseCorrelater(abc.ABC):
 class SimpleCorrelater(BaseCorrelater):
     """
     A simple implementation of BaseCorrelater.
-    It stores the correlation/relation between a given SMPP sequence_number and a user supplied log_id and/or hook_metadata.
+    It stores the correlation/relation between a given SMPP sequence_number(and/or smsc_message_id) and a user supplied log_id and/or hook_metadata.
 
     SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.
 
@@ -73,6 +73,11 @@ class SimpleCorrelater(BaseCorrelater):
 
        {
             "sequence_number1": {
+                "log_id": "log_id1",
+                "hook_metadata": "hook_metadata1",
+                "stored_at": 681.109023565
+            },
+            "smsc_message_id1": {
                 "log_id": "log_id1",
                 "hook_metadata": "hook_metadata1",
                 "stored_at": 681.109023565
@@ -105,7 +110,6 @@ class SimpleCorrelater(BaseCorrelater):
     ) -> None:
         stored_at = time.monotonic()
         if smpp_command == "submit_sm_resp":
-            key = smsc_message_id
             # TODO: dict with smsc_message_id should replace dict with corresponding sequence_number
             # currently we are not deduping data; we should
             self.store[smsc_message_id] = {
