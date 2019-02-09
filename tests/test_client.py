@@ -204,6 +204,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -222,6 +223,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.UNBIND,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -240,6 +242,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -323,6 +326,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
                     sequence_number=sequence_number,
@@ -343,6 +347,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0x00000058,
                     sequence_number=sequence_number,
@@ -425,6 +430,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.speficic_handlers(
+                    body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
                     sequence_number=sequence_number,
