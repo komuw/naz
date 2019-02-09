@@ -14,6 +14,8 @@ class BaseCorrelater(abc.ABC):
 
     Note: This correlation is on a BEST effort basis; it is not guaranteed to be reliable.
     One reason, among others, is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.
+    Another reason is that we use receipted_message_id tag from deliver_sm to correlate a delivery notification
+    with a submit_sm_resp. However receipted_message_id is an optional parameter that SMSC may omit.
     """
 
     @abc.abstractmethod
