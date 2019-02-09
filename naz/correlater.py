@@ -105,6 +105,8 @@ class SimpleCorrelater(BaseCorrelater):
         if smpp_command == "submit_sm_resp":
             key = smsc_message_id
         stored_at = time.monotonic()
+        # TODO: dict with smsc_message_id should replace dict with corresponding sequence_number
+        # currently we are not deduping data; we should
         self.store[key] = {"log_id": log_id, "hook_metadata": hook_metadata, "stored_at": stored_at}
 
         # garbage collect

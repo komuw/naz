@@ -14,7 +14,7 @@ from . import throttle
 from . import correlater
 from . import ratelimiter
 
-from .state import SmppSessionState, SmppCommand, SmppCommandStatus, SmppDataCoding
+from .state import SmppSessionState, SmppCommand, SmppCommandStatus, SmppDataCoding, SmppOptionalTag
 
 
 class Client:
@@ -1380,9 +1380,9 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-
+            smsc_message_id = body_data.replace(chr(0).encode(), b"")
             smsc_message_id = self.codec_class.decode(
-                body_data, self.encoding, self.codec_errors_level
+                smsc_message_id, self.encoding, self.codec_errors_level
             )
             # associate smsc_message_id with log_id.
             # this will enable us to also associate responses(deliver_sm) and thus enhancing traceability of all workflows
@@ -1438,29 +1438,28 @@ class Client:
 
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
-
-            #########################################
-            # get associated user supplied log_id if any
             try:
-                key = None
-                for k, v in reversed(list(enumerate(reversed(body_data)))):
-                    if chr(body_data[k]) not in string.printable:
-                        key = k
-                        break
-                short_message = body_data[key + 1 :]
-                short_message = self.codec_class.decode(
-                    short_message, self.encoding, self.codec_errors_level
-                )
-                smsc_message_id = short_message.split(" ")[0].split(":")[1]
-
-                # import pdb;pdb.set_trace()
-
-                log_id, hook_metadata = await self.correlation_handler.get(
-                    smpp_command=smpp_command,
-                    sequence_number=sequence_number,
-                    smsc_message_id=smsc_message_id,
-                )
-                #########################################
+                # get associated user supplied log_id if any
+                target_tag = struct.pack(">H", SmppOptionalTag.receipted_message_id)
+                if target_tag in body_data:
+                    # the PDU contains a `receipted_message_id` TLV optional tag
+                    position_of_target_tag = body_data.find(target_tag)
+                    # since a tag is 2 integer in size lets skip one more.
+                    end_of_target_tag = position_of_target_tag + 1
+                    # since after a tag, comes a tag_length which is 2 integer in size
+                    # lets also skip that
+                    end_of_target_tag_length = end_of_target_tag + 2
+                    # tag_value is of size 1 - 65
+                    tag_value = body_data[end_of_target_tag_length + 1 :]
+                    tag_value = tag_value.replace(chr(0).encode(), b"")
+                    tag_value = self.codec_class.decode(
+                        tag_value, self.encoding, self.codec_errors_level
+                    )
+                    log_id, hook_metadata = await self.correlation_handler.get(
+                        smpp_command=smpp_command,
+                        sequence_number=sequence_number,
+                        smsc_message_id=tag_value,
+                    )
             except Exception as e:
                 log_id, hook_metadata = "", ""
                 self._log(
