@@ -3,7 +3,7 @@ most recent version last.
 
 
 
-**version:** v0.5.0-beta.1
+## **version:** v0.5.0-beta.1
 - Add sphinx documentation: https://github.com/komuw/naz/pull/92
 - Start tracking changes in a changelog
 - Add more type hints and also run `mypy` across the entire repo: https://github.com/komuw/naz/pull/92
@@ -12,7 +12,7 @@ most recent version last.
 - Fixed a few stylistic issues raised by codacy: https://github.com/komuw/naz/pull/96
 
 
-**version:** v0.6.0-beta.1
+## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    
     the way `naz` was handling correlations was:
     - when sending `submit_sm` we save the `sequence_number`
