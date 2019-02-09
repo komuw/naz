@@ -554,7 +554,13 @@ class TestClient(TestCase):
             "naz.Client.speficic_handlers", new=AsyncMock()
         ) as mock_naz_speficic_handlers:
             # see: https://github.com/mozes/smpp.pdu
-            deliver_sm_pdu = b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234\x00\x01\x0117735554070\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00\x11id:123456 sub:SSS dlvrd:DDD blah blah"
+            deliver_sm_pdu = (
+                b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00"
+                b"\x00\x00\x9f\x88\xf1$AWSBD\x00\x01"
+                b"\x0116505551234\x00\x01\x0117735554070"
+                b"\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00"
+                b"\x11id:123456 sub:SSS dlvrd:DDD blah blah"
+            )
             self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
 
             self.assertTrue(mock_naz_speficic_handlers.mock.called)
