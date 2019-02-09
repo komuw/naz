@@ -1384,8 +1384,6 @@ class Client:
             smsc_message_id = self.codec_class.decode(
                 smsc_message_id, self.encoding, self.codec_errors_level
             )
-            # associate smsc_message_id with log_id.
-            # this will enable us to also associate responses(deliver_sm) and thus enhancing traceability of all workflows
             try:
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
