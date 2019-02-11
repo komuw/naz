@@ -1,5 +1,5 @@
 ## naz changelog:
-most recent version last.
+most recent version is listed last.
 
 
 
