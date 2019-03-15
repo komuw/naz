@@ -1,4 +1,4 @@
-## naz changelog:
+## `naz` changelog:
 most recent version is listed first.
 
 
