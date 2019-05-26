@@ -32,30 +32,20 @@ class SimpleRateLimiter(BaseRateLimiter):
 
     .. code-block:: python
 
-        rateLimiter = SimpleRateLimiter(logger=myLogger, send_rate=10, max_tokens=25)
+        rateLimiter = SimpleRateLimiter(logger=myLogger, send_rate=10)
         await rateLimiter.limit()
         send_messsages()
     """
 
-    def __init__(
-        self,
-        logger: logging.LoggerAdapter,
-        send_rate: float = 100_000,
-        max_tokens: float = 100_000,
-        delay_for_tokens: float = 1,
-    ) -> None:
+    def __init__(self, logger: logging.LoggerAdapter, send_rate: float = 100_000) -> None:
         """
         Parameters:
             send_rate: the maximum rate, in messages/second, at which naz can send messages to SMSC.
-            max_tokens: the total number of mesages naz can send before rate limiting kicks in.
-            delay_for_tokens: the duration in seconds which to wait for before checking for token availability after they had finished.
-
-        send_rate and max_tokens should generally be of equal value.
         """
         self.send_rate: float = send_rate
-        self.max_tokens: float = max_tokens
-        self.delay_for_tokens: float = (delay_for_tokens)
+        self.max_tokens: float = self.send_rate
         self.tokens: float = self.max_tokens
+        self.delay_for_tokens: float = 1.0
         self.updated_at: float = time.monotonic()
 
         self.logger = logger

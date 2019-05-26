@@ -42,13 +42,8 @@ class TestRateLimit(TestCase):
         self.logger.setLevel("DEBUG")
 
         self.send_rate = 1
-        self.max_tokens = 1
-        self.delay_for_tokens = 1
         self.rateLimiter = naz.ratelimiter.SimpleRateLimiter(
-            logger=self.logger,
-            send_rate=self.send_rate,
-            max_tokens=self.max_tokens,
-            delay_for_tokens=self.delay_for_tokens,
+            logger=self.logger, send_rate=self.send_rate
         )
 
     def tearDown(self):
@@ -61,22 +56,20 @@ class TestRateLimit(TestCase):
 
     def test_no_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
-            for _ in range(0, self.max_tokens):
+            for _ in range(0, self.send_rate):
                 self._run(self.rateLimiter.limit())
             self.assertFalse(mock_sleep.mock.called)
 
     def test_token_exhaustion_causes_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
-            for _ in range(0, self.max_tokens * 2):
+            for _ in range(0, self.send_rate * 2):
                 self._run(self.rateLimiter.limit())
             self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.delay_for_tokens)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.rateLimiter.delay_for_tokens)
 
     def test_send_rate(self):
         send_rate = 3
-        rLimiter = naz.ratelimiter.SimpleRateLimiter(
-            logger=self.logger, send_rate=send_rate, max_tokens=3, delay_for_tokens=1
-        )
+        rLimiter = naz.ratelimiter.SimpleRateLimiter(logger=self.logger, send_rate=send_rate)
         msgs_delivered = []
         now = time.monotonic()
         for _ in range(0, send_rate * 4):
