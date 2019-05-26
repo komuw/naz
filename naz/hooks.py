@@ -55,7 +55,7 @@ class SimpleHook(BaseHook):
 
     async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
         self.logger.log(
-            logging.INFO,
+            logging.NOTSET,
             {
                 "event": "naz.SimpleHook.request",
                 "stage": "start",
@@ -69,7 +69,7 @@ class SimpleHook(BaseHook):
         self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: "naz.CommandStatus"
     ) -> None:
         self.logger.log(
-            logging.INFO,
+            logging.NOTSET,
             {
                 "event": "naz.SimpleHook.response",
                 "stage": "start",
