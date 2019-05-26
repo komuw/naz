@@ -433,17 +433,6 @@ class Client:
         """
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
-            if self.SHOULD_SHUT_DOWN:
-                self._log(
-                    logging.INFO,
-                    {
-                        "event": "naz.Client.enquire_link",
-                        "stage": "end",
-                        "state": "cleanly shutting down client.",
-                    },
-                )
-                return None
-
             if self.current_session_state != SmppSessionState.BOUND_TRX:
                 # you can only send enquire_link request when session state is BOUND_TRX
                 await asyncio.sleep(self.enquire_link_interval)
@@ -458,6 +447,17 @@ class Client:
                     "smpp_command": smpp_command,
                 },
             )
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.enquire_link",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return
+
             # body
             body = b""
 
@@ -1047,7 +1047,7 @@ class Client:
                         "state": "cleanly shutting down client.",
                     },
                 )
-                return None
+                return
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -1197,7 +1197,7 @@ class Client:
                         "state": "cleanly shutting down client.",
                     },
                 )
-                return None
+                return
 
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
