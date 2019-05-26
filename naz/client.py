@@ -133,6 +133,46 @@ class Client:
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
         """
+        self._validate_client_args(
+            async_loop=async_loop,
+            smsc_host=smsc_host,
+            smsc_port=smsc_port,
+            system_id=system_id,
+            password=password,
+            outboundqueue=outboundqueue,
+            client_id=client_id,
+            system_type=system_type,
+            addr_ton=addr_ton,
+            addr_npi=addr_npi,
+            address_range=address_range,
+            encoding=encoding,
+            interface_version=interface_version,
+            service_type=service_type,
+            source_addr_ton=source_addr_ton,
+            source_addr_npi=source_addr_npi,
+            dest_addr_ton=dest_addr_ton,
+            dest_addr_npi=dest_addr_npi,
+            esm_class=esm_class,
+            protocol_id=protocol_id,
+            priority_flag=priority_flag,
+            schedule_delivery_time=schedule_delivery_time,
+            validity_period=validity_period,
+            registered_delivery=registered_delivery,
+            replace_if_present_flag=replace_if_present_flag,
+            sm_default_msg_id=sm_default_msg_id,
+            enquire_link_interval=enquire_link_interval,
+            log_handler=log_handler,
+            loglevel=loglevel,
+            log_metadata=log_metadata,
+            codec_class=codec_class,
+            codec_errors_level=codec_errors_level,
+            rateLimiter=rateLimiter,
+            hook=hook,
+            sequence_generator=sequence_generator,
+            throttle_handler=throttle_handler,
+            correlation_handler=correlation_handler,
+            drain_duration=drain_duration,
+        )
         if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
                 """loglevel should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
@@ -258,6 +298,86 @@ class Client:
         self.drain_duration = drain_duration
         self.SHOULD_SHUT_DOWN: bool = False
         self.SUCCESFULLY_SHUT_DOWN: bool = False
+
+    def _validate_client_args(
+        self,
+        async_loop: asyncio.events.AbstractEventLoop,
+        smsc_host: str,
+        smsc_port: int,
+        system_id: str,
+        password: str,
+        outboundqueue: q.BaseOutboundQueue,
+        client_id: typing.Union[None, str],
+        system_type: str,
+        addr_ton: int,
+        addr_npi: int,
+        address_range: str,
+        encoding: str,
+        interface_version: int,
+        service_type: str,
+        source_addr_ton: int,
+        source_addr_npi: int,
+        dest_addr_ton: int,
+        dest_addr_npi: int,
+        esm_class: int,
+        protocol_id: int,
+        priority_flag: int,
+        schedule_delivery_time: str,
+        validity_period: str,
+        registered_delivery: int,
+        replace_if_present_flag: int,
+        sm_default_msg_id: int,
+        enquire_link_interval: int,
+        log_handler: typing.Union[None, logger.BaseLogger],
+        loglevel: str,
+        log_metadata: typing.Union[None, dict],
+        codec_class: typing.Union[None, nazcodec.BaseNazCodec],
+        codec_errors_level: str,
+        rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
+        hook: typing.Union[None, hooks.BaseHook],
+        sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
+        throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
+        correlation_handler: typing.Union[None, correlater.BaseCorrelater],
+        drain_duration: int,
+    ) -> None:
+        if not isinstance(async_loop, asyncio.events.AbstractEventLoop):
+            raise ValueError(
+                "`async_loop` should be of type:: `asyncio.events.AbstractEventLoop` You entered: {0}".format(
+                    type(async_loop)
+                )
+            )
+        if not isinstance(smsc_host, str):
+            raise ValueError(
+                "`smsc_host` should be of type:: `str` You entered: {0}".format(type(smsc_host))
+            )
+        if not isinstance(smsc_port, int):
+            raise ValueError(
+                "`smsc_port` should be of type:: `int` You entered: {0}".format(type(smsc_port))
+            )
+        if not isinstance(system_id, str):
+            raise ValueError(
+                "`system_id` should be of type:: `str` You entered: {0}".format(type(system_id))
+            )
+        if not isinstance(password, str):
+            raise ValueError(
+                "`password` should be of type:: `str` You entered: {0}".format(type(password))
+            )
+        if not isinstance(outboundqueue, q.BaseOutboundQueue):
+            raise ValueError(
+                "`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: {0}".format(
+                    type(outboundqueue)
+                )
+            )
+        if not isinstance(client_id, (type(None), str)):
+            raise ValueError(
+                "`client_id` should be of type:: `None` or `str` You entered: {0}".format(
+                    type(client_id)
+                )
+            )
+        if not isinstance(system_type, str):
+            raise ValueError(
+                "`system_type` should be of type:: `str` You entered: {0}".format(type(system_type))
+            )
 
     def _sanity_check_logger(self):
         """
