@@ -213,7 +213,6 @@ class Client:
         self.reader: typing.Any = None
         self.writer: typing.Any = None
 
-        # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         self.logger = log_handler
         if not self.logger:
             self.logger = logger.SimpleLogger("naz.client")
