@@ -378,6 +378,48 @@ class Client:
             raise ValueError(
                 "`system_type` should be of type:: `str` You entered: {0}".format(type(system_type))
             )
+        if not isinstance(addr_ton, int):
+            raise ValueError(
+                "`addr_ton` should be of type:: `int` You entered: {0}".format(type(addr_ton))
+            )
+        if not isinstance(addr_npi, int):
+            raise ValueError(
+                "`addr_npi` should be of type:: `int` You entered: {0}".format(type(addr_npi))
+            )
+        if not isinstance(address_range, str):
+            raise ValueError(
+                "`address_range` should be of type:: `str` You entered: {0}".format(
+                    type(address_range)
+                )
+            )
+        if not isinstance(encoding, str):
+            raise ValueError(
+                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+            )
+        if not isinstance(interface_version, int):
+            raise ValueError(
+                "`interface_version` should be of type:: `int` You entered: {0}".format(
+                    type(interface_version)
+                )
+            )
+        if not isinstance(service_type, str):
+            raise ValueError(
+                "`service_type` should be of type:: `str` You entered: {0}".format(
+                    type(service_type)
+                )
+            )
+        if not isinstance(source_addr_ton, int):
+            raise ValueError(
+                "`source_addr_ton` should be of type:: `int` You entered: {0}".format(
+                    type(source_addr_ton)
+                )
+            )
+        if not isinstance(source_addr_npi, int):
+            raise ValueError(
+                "`source_addr_npi` should be of type:: `int` You entered: {0}".format(
+                    type(source_addr_npi)
+                )
+            )
 
     def _sanity_check_logger(self):
         """
