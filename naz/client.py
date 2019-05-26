@@ -310,6 +310,7 @@ class Client:
         # 2. add jitter
         if current_retries < 0:
             current_retries = 0
+
         if current_retries >= 6:
             return 60 * 16  # 16 minutes
         else:
@@ -1098,6 +1099,8 @@ class Client:
                             "error": str(e),
                         },
                     )
+                    if self.SHOULD_SHUT_DOWN:
+                        return
                     await asyncio.sleep(poll_queue_interval)
                     continue
                 # we didn't fail to dequeue a message
@@ -1215,6 +1218,8 @@ class Client:
                         "retry_count": retry_count,
                     },
                 )
+                if self.SHOULD_SHUT_DOWN:
+                    return
                 await asyncio.sleep(poll_read_interval)
                 continue
             else:
