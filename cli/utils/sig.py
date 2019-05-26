@@ -39,7 +39,7 @@ async def _handle_termination_signal(
             "event": "naz.cli.signals",
             "stage": "start",
             "state": "received termination signal",
-            "signal": _signal,
+            "signal": _signal.name,
         },
     )
 

@@ -78,7 +78,7 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: int = 300,
         log_handler=None,
-        loglevel: str = "DEBUG",
+        loglevel: str = "INFO",
         log_metadata=None,
         codec_class=None,
         codec_errors_level: str = "strict",
@@ -449,11 +449,11 @@ class Client:
             )
             if self.SHOULD_SHUT_DOWN:
                 self._log(
-                    logging.INFO,
+                    logging.DEBUG,
                     {
                         "event": "naz.Client.enquire_link",
                         "stage": "end",
-                        "state": "cleanly shutting down client.",
+                        "state": "client is shutdown",
                     },
                 )
                 return
@@ -1257,7 +1257,7 @@ class Client:
         Parameters:
             pdu: PDU in bytes, that have been read from network
         """
-        self._log(logging.INFO, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
+        self._log(logging.DEBUG, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
         body_data = pdu[16:]
@@ -1309,7 +1309,7 @@ class Client:
             hook_metadata=hook_metadata,
         )
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.parse_response_pdu",
                 "stage": "end",
