@@ -1,3 +1,4 @@
+import os
 import struct
 import random
 import string
@@ -144,6 +145,7 @@ class Client:
                     type(log_metadata)
                 )
             )
+        self._PID = os.getpid()
 
         # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
@@ -172,7 +174,12 @@ class Client:
         if not self.log_metadata:
             self.log_metadata = {}
         self.log_metadata.update(
-            {"smsc_host": self.smsc_host, "system_id": system_id, "client_id": self.client_id}
+            {
+                "smsc_host": self.smsc_host,
+                "system_id": system_id,
+                "client_id": self.client_id,
+                "process_id": self._PID,
+            }
         )
 
         self.codec_errors_level = codec_errors_level
@@ -426,6 +433,17 @@ class Client:
         """
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.enquire_link",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return None
+
             if self.current_session_state != SmppSessionState.BOUND_TRX:
                 # you can only send enquire_link request when session state is BOUND_TRX
                 await asyncio.sleep(self.enquire_link_interval)
@@ -1635,6 +1653,7 @@ class Client:
         # sleep so that client can:
         # - stop consuming from queue
         # - finish sending any SMSes it may have already picked from queue
+        # - stop sending `enquire_link` requests
         # - send unbind to SMSC
         await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
         self.SUCCESFULLY_SHUT_DOWN = True
