@@ -297,7 +297,6 @@ class Client:
 
         self.drain_duration = drain_duration
         self.SHOULD_SHUT_DOWN: bool = False
-        self.SUCCESFULLY_SHUT_DOWN: bool = False
 
     def _validate_client_args(
         self,
@@ -1955,4 +1954,3 @@ class Client:
         # - stop sending `enquire_link` requests
         # - send unbind to SMSC
         await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
-        self.SUCCESFULLY_SHUT_DOWN = True
