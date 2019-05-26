@@ -1,6 +1,9 @@
 import abc
 import time
+import typing
 import logging
+
+from . import logger
 
 
 class BaseThrottleHandler(abc.ABC):
@@ -65,11 +68,11 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     def __init__(
         self,
-        logger: logging.LoggerAdapter,
         sampling_period: float = 180,
         sample_size: float = 50,
         deny_request_at: float = 1,
         throttle_wait: float = 3,
+        log_handler: typing.Union[None, logger.BaseLogger] = None,
     ) -> None:
         """
         Parameters:
@@ -82,11 +85,15 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         self.throttle_responses: int = 0
         self.updated_at: float = time.monotonic()
 
-        self.logger = logger
         self.sampling_period: float = sampling_period
         self.sample_size: float = sample_size
         self.deny_request_at: float = deny_request_at
         self.throttle_wait: float = throttle_wait
+
+        if log_handler is not None:
+            self.logger = log_handler
+        else:
+            self.logger = logger.SimpleLogger("naz.SimpleThrottleHandler")
 
     @property
     def percent_throttles(self) -> float:

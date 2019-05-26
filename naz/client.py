@@ -272,12 +272,12 @@ class Client:
         if hook is not None:
             self.hook = hook
         else:
-            self.hook = hooks.SimpleHook(logger=self.logger)
+            self.hook = hooks.SimpleHook()
 
         if throttle_handler is not None:
             self.throttle_handler = throttle_handler
         else:
-            self.throttle_handler = throttle.SimpleThrottleHandler(logger=self.logger)
+            self.throttle_handler = throttle.SimpleThrottleHandler()
 
         # class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata
         # this will be used to track different pdu's and user generated log_id

@@ -276,17 +276,9 @@ class TestClient(TestCase):
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            logger = logging.getLogger("naz.test")
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(message)s")
-            handler.setFormatter(formatter)
-            if not logger.handlers:
-                logger.addHandler(handler)
-            logger.setLevel("DEBUG")
-
             sample_size = 8
             throttle_handler = naz.throttle.SimpleThrottleHandler(
-                logger=logger, sampling_period=5, sample_size=sample_size, deny_request_at=0.4
+                sampling_period=5, sample_size=sample_size, deny_request_at=0.4
             )
             cli = naz.Client(
                 async_loop=self.loop,
