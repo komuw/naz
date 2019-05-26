@@ -86,6 +86,7 @@ class Client:
         sequence_generator=None,
         throttle_handler=None,
         correlation_handler=None,
+        drain_duration: int = 8,
     ) -> None:
         """
         Parameters:
@@ -129,6 +130,7 @@ class Client:
             throttle_handler: python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
+            drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
         """
         if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
@@ -245,6 +247,10 @@ class Client:
         self.naz_message_protocol_version = "1"
 
         self.current_session_state = SmppSessionState.CLOSED
+
+        self.drain_duration = drain_duration
+        self.SHOULD_SHUT_DOWN: bool = False
+        self.SUCCESFULLY_SHUT_DOWN: bool = False
 
     def _sanity_check_logger(self):
         """
@@ -1014,6 +1020,16 @@ class Client:
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.send_forever", "stage": "start"})
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.send_forever",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return None
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -1154,6 +1170,17 @@ class Client:
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "start"})
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return None
+
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
@@ -1590,3 +1617,25 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
+
+    async def shutdown(self) -> None:
+        """
+        Cleanly shutdown this client.
+        """
+        self._log(
+            logging.INFO,
+            {"event": "naz.Client.shutdown", "stage": "start", "state": "intiating shutdown"},
+        )
+        self.SHOULD_SHUT_DOWN = True
+
+        # we need to unbind first before closing writer
+        await self.unbind()
+        self.writer.close()
+
+        # sleep so that client can finish:
+        # - consuming from queue
+        # - sending any SMSes it may have already picked from queue
+        # - send unbind to SMSC
+        # we need to use asyncio.sleep so that we do not block eventloop.
+        await asyncio.sleep(self.drain_duration)
+        self.SUCCESFULLY_SHUT_DOWN = True

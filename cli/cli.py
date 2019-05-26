@@ -224,8 +224,6 @@ def main():
             loop=loop,
         )
         loop.run_until_complete(tasks)
-        loop.run_until_complete(cli.unbind())
-        cli.writer.close()
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
