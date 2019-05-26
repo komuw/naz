@@ -427,7 +427,7 @@ class Client:
 
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self._log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "naz.Client.enquire_link",
                     "stage": "start",
@@ -490,7 +490,7 @@ class Client:
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
             self._log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "naz.Client.enquire_link",
                     "stage": "end",
@@ -512,7 +512,7 @@ class Client:
         smpp_command = SmppCommand.ENQUIRE_LINK_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.enquire_link_resp",
                 "stage": "start",
@@ -552,7 +552,7 @@ class Client:
                 },
             )
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.enquire_link_resp",
                 "stage": "end",
@@ -776,7 +776,7 @@ class Client:
         """
         smpp_command = SmppCommand.SUBMIT_SM
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.build_submit_sm_pdu",
                 "stage": "start",
@@ -872,7 +872,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.build_submit_sm_pdu",
                 "stage": "end",
