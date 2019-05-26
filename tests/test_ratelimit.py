@@ -32,19 +32,8 @@ class TestRateLimit(TestCase):
     """
 
     def setUp(self):
-
-        self.logger = logging.getLogger("naz.test")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel("DEBUG")
-
         self.send_rate = 1
-        self.rateLimiter = naz.ratelimiter.SimpleRateLimiter(
-            logger=self.logger, send_rate=self.send_rate
-        )
+        self.rateLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=self.send_rate)
 
     def tearDown(self):
         pass
@@ -69,7 +58,7 @@ class TestRateLimit(TestCase):
 
     def test_send_rate(self):
         send_rate = 3
-        rLimiter = naz.ratelimiter.SimpleRateLimiter(logger=self.logger, send_rate=send_rate)
+        rLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=send_rate)
         msgs_delivered = []
         now = time.monotonic()
         for _ in range(0, send_rate * 4):

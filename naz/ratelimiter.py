@@ -1,7 +1,10 @@
 import abc
 import time
+import typing
 import asyncio
 import logging
+
+from . import logger
 
 
 class BaseRateLimiter(abc.ABC):
@@ -32,12 +35,14 @@ class SimpleRateLimiter(BaseRateLimiter):
 
     .. code-block:: python
 
-        rateLimiter = SimpleRateLimiter(logger=myLogger, send_rate=10)
+        rateLimiter = SimpleRateLimiter(send_rate=10)
         await rateLimiter.limit()
         send_messsages()
     """
 
-    def __init__(self, logger: logging.LoggerAdapter, send_rate: float = 100_000) -> None:
+    def __init__(
+        self, send_rate: float = 100_000, log_handler: typing.Union[None, logger.BaseLogger] = None
+    ) -> None:
         """
         Parameters:
             send_rate: the maximum rate, in messages/second, at which naz can send messages to SMSC.
@@ -48,9 +53,12 @@ class SimpleRateLimiter(BaseRateLimiter):
         self.delay_for_tokens: float = 1.0
         self.updated_at: float = time.monotonic()
 
-        self.logger = logger
         self.messages_delivered: int = 0
         self.effective_send_rate: float = 0
+        if log_handler is not None:
+            self.logger = log_handler
+        else:
+            self.logger = logger.SimpleLogger("naz.SimpleRateLimiter")
 
     async def limit(self) -> None:
         self.logger.log(logging.INFO, {"event": "naz.SimpleRateLimiter.limit", "stage": "start"})

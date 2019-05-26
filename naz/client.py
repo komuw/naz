@@ -267,7 +267,7 @@ class Client:
         if rateLimiter is not None:
             self.rateLimiter = rateLimiter
         else:
-            self.rateLimiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
+            self.rateLimiter = ratelimiter.SimpleRateLimiter()
 
         if hook is not None:
             self.hook = hook
