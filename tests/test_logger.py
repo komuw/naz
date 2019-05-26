@@ -24,7 +24,7 @@ class TestLogger(TestCase):
         pass
 
     def test_can_bind(self):
-        self.logger.bind(loglevel="INFO", log_metadata={"customer_id": "34541"})
+        self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
 
     def test_can_log_string(self):
         self.logger.log(level=logging.WARN, log_data="can log string")
@@ -38,11 +38,11 @@ class TestLogger(TestCase):
         )
 
     def test_bind_and_log_string(self):
-        self.logger.bind(loglevel="INFO", log_metadata={"customer_id": "34541"})
+        self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
         self.logger.log(level=logging.WARN, log_data="can log string")
 
     def test_bind_and_log_dict(self):
-        self.logger.bind(loglevel="INFO", log_metadata={"customer_id": "34541"})
+        self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
         self.logger.log(level=logging.WARN, log_data={"name": "Magic Johnson"})
 
 
@@ -61,7 +61,7 @@ class KVlogger(naz.logger.BaseLogger):
             self.logger.addHandler(handler)
         self.logger.setLevel("DEBUG")
 
-    def bind(self, loglevel, log_metadata):
+    def bind(self, level, log_metadata):
         pass
 
     def log(self, level, log_data):
@@ -85,7 +85,7 @@ class TestCustomLogger(TestCase):
         pass
 
     def test_can_bind(self):
-        self.kvLog.bind(loglevel="INFO", log_metadata={"customer_id": "34541"})
+        self.kvLog.bind(level="INFO", log_metadata={"customer_id": "34541"})
 
     def test_can_log_dict(self):
         log_id = 234_255
