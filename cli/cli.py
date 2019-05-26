@@ -106,7 +106,7 @@ def main():
     """
     """
     _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
-    logger = naz.logger.SimpleBaseLogger("naz.cli")
+    logger = naz.logger.SimpleLogger("naz.cli")
     logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
 
     loop = asyncio.get_event_loop()

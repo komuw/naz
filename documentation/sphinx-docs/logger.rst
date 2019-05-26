@@ -2,6 +2,6 @@ logger
 ---------------
 
 .. automodule:: naz.logger
-    :members: BaseLogger, SimpleBaseLogger
+    :members: BaseLogger, SimpleLogger
     :show-inheritance:
 

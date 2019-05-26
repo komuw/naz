@@ -216,7 +216,7 @@ class Client:
         # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         self.logger = log_handler
         if not self.logger:
-            self.logger = logger.SimpleBaseLogger("naz.client")
+            self.logger = logger.SimpleLogger("naz.client")
         self.logger.bind(loglevel=self.loglevel, log_metadata=self.log_metadata)
         self._sanity_check_logger()
 

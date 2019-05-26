@@ -18,7 +18,7 @@ class TestLogger(TestCase):
     """
 
     def setUp(self):
-        self.logger = naz.logger.SimpleBaseLogger("myLogger")
+        self.logger = naz.logger.SimpleLogger("myLogger")
 
     def tearDown(self):
         pass
