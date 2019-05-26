@@ -1,6 +1,9 @@
 ## `naz` changelog:
 most recent version is listed first.
 
+## **version:** v0.6.1
+- all the changes in `v0.6.0-beta.1`
+- fix a number of logging issues: https://github.com/komuw/naz/pull/105
 
 ## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    
