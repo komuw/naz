@@ -420,6 +420,132 @@ class Client:
                     type(source_addr_npi)
                 )
             )
+        if not isinstance(dest_addr_ton, int):
+            raise ValueError(
+                "`dest_addr_ton` should be of type:: `int` You entered: {0}".format(
+                    type(dest_addr_ton)
+                )
+            )
+        if not isinstance(dest_addr_npi, int):
+            raise ValueError(
+                "`dest_addr_npi` should be of type:: `int` You entered: {0}".format(
+                    type(dest_addr_npi)
+                )
+            )
+        if not isinstance(esm_class, int):
+            raise ValueError(
+                "`esm_class` should be of type:: `int` You entered: {0}".format(type(esm_class))
+            )
+        if not isinstance(protocol_id, int):
+            raise ValueError(
+                "`protocol_id` should be of type:: `int` You entered: {0}".format(type(protocol_id))
+            )
+        if not isinstance(priority_flag, int):
+            raise ValueError(
+                "`priority_flag` should be of type:: `int` You entered: {0}".format(
+                    type(priority_flag)
+                )
+            )
+        if not isinstance(schedule_delivery_time, str):
+            raise ValueError(
+                "`schedule_delivery_time` should be of type:: `str` You entered: {0}".format(
+                    type(schedule_delivery_time)
+                )
+            )
+        if not isinstance(validity_period, str):
+            raise ValueError(
+                "`validity_period` should be of type:: `str` You entered: {0}".format(
+                    type(validity_period)
+                )
+            )
+        if not isinstance(registered_delivery, int):
+            raise ValueError(
+                "`registered_delivery` should be of type:: `int` You entered: {0}".format(
+                    type(registered_delivery)
+                )
+            )
+        if not isinstance(replace_if_present_flag, int):
+            raise ValueError(
+                "`replace_if_present_flag` should be of type:: `int` You entered: {0}".format(
+                    type(replace_if_present_flag)
+                )
+            )
+        if not isinstance(sm_default_msg_id, int):
+            raise ValueError(
+                "`sm_default_msg_id` should be of type:: `int` You entered: {0}".format(
+                    type(sm_default_msg_id)
+                )
+            )
+        if not isinstance(enquire_link_interval, int):
+            raise ValueError(
+                "`enquire_link_interval` should be of type:: `int` You entered: {0}".format(
+                    type(enquire_link_interval)
+                )
+            )
+        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+            raise ValueError(
+                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                    type(log_handler)
+                )
+            )
+        if not isinstance(loglevel, str):
+            raise ValueError(
+                "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+            )
+        if not isinstance(log_metadata, (type(None), dict)):
+            raise ValueError(
+                "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
+                    type(log_metadata)
+                )
+            )
+        if not isinstance(codec_class, (type(None), nazcodec.BaseNazCodec)):
+            raise ValueError(
+                "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
+                    type(codec_class)
+                )
+            )
+        if not isinstance(codec_errors_level, str):
+            raise ValueError(
+                "`codec_errors_level` should be of type:: `str` You entered: {0}".format(
+                    type(codec_errors_level)
+                )
+            )
+        if not isinstance(rateLimiter, (type(None), ratelimiter.BaseRateLimiter)):
+            raise ValueError(
+                "`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
+                    type(rateLimiter)
+                )
+            )
+        if not isinstance(hook, (type(None), hooks.BaseHook)):
+            raise ValueError(
+                "`hook` should be of type:: `None` or `naz.hooks.BaseHook` You entered: {0}".format(
+                    type(hook)
+                )
+            )
+        if not isinstance(sequence_generator, (type(None), sequence.BaseSequenceGenerator)):
+            raise ValueError(
+                "`sequence_generator` should be of type:: `None` or `naz.sequence.BaseSequenceGenerator` You entered: {0}".format(
+                    type(sequence_generator)
+                )
+            )
+        if not isinstance(throttle_handler, (type(None), throttle.BaseThrottleHandler)):
+            raise ValueError(
+                "`throttle_handler` should be of type:: `None` or `naz.throttle.BaseThrottleHandler` You entered: {0}".format(
+                    type(throttle_handler)
+                )
+            )
+        if not isinstance(correlation_handler, (type(None), correlater.BaseCorrelater)):
+            raise ValueError(
+                "`correlation_handler` should be of type:: `None` or `naz.correlater.BaseCorrelater` You entered: {0}".format(
+                    type(correlation_handler)
+                )
+            )
+        if not isinstance(drain_duration, int):
+            raise ValueError(
+                "`drain_duration` should be of type:: `int` You entered: {0}".format(
+                    type(drain_duration)
+                )
+            )
 
     def _sanity_check_logger(self):
         """
