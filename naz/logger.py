@@ -86,7 +86,8 @@ class SimpleLogger(BaseLogger):
         else:
             self.logger.log(level, log_data)
 
-    def _nameToLevel(self, level: typing.Union[str, int]) -> int:
+    @staticmethod
+    def _nameToLevel(level: typing.Union[str, int]) -> int:
         try:
             if isinstance(level, str):
                 # please mypy
