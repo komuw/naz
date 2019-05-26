@@ -31,7 +31,7 @@ async def _signal_handling(
 
 
 async def _handle_termination_signal(
-    logger: naz.logger.BaseLogger, _signal: int, client: naz.Client
+    logger: naz.logger.BaseLogger, _signal: signal.Signals, client: naz.Client
 ) -> None:
     logger.log(
         logging.INFO,
