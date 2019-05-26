@@ -173,20 +173,8 @@ class Client:
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
         )
-        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            raise ValueError(
-                """loglevel should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
-                    loglevel
-                )
-            )
-        elif not isinstance(log_metadata, (type(None), dict)):
-            raise ValueError(
-                """log_metadata should be of type:: None or dict. You entered {0}""".format(
-                    type(log_metadata)
-                )
-            )
-        self._PID = os.getpid()
 
+        self._PID = os.getpid()
         # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
         self.smsc_host = smsc_host
@@ -194,9 +182,12 @@ class Client:
         self.system_id = system_id
         self.password = password
         self.outboundqueue = outboundqueue
-        self.client_id = client_id
-        if not self.client_id:
+
+        if client_id is not None:
+            self.client_id = client_id
+        else:
             self.client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
+
         self.system_type = system_type
         self.interface_version = interface_version
         self.addr_ton = addr_ton
@@ -204,14 +195,17 @@ class Client:
         self.address_range = address_range
         self.encoding = encoding
 
-        self.sequence_generator = sequence_generator
-        if not self.sequence_generator:
+        if sequence_generator is not None:
+            self.sequence_generator = sequence_generator
+        else:
             self.sequence_generator = sequence.SimpleSequenceGenerator()
 
         self.max_sequence_number = 0x7FFFFFFF
         self.loglevel = loglevel.upper()
-        self.log_metadata = log_metadata
-        if not self.log_metadata:
+
+        if log_metadata is not None:
+            self.log_metadata = log_metadata
+        else:
             self.log_metadata = {}
         self.log_metadata.update(
             {
@@ -223,8 +217,9 @@ class Client:
         )
 
         self.codec_errors_level = codec_errors_level
-        self.codec_class = codec_class
-        if not self.codec_class:
+        if codec_class is not None:
+            self.codec_class = codec_class
+        else:
             self.codec_class = nazcodec.SimpleNazCodec()
 
         self.service_type = service_type
@@ -262,28 +257,33 @@ class Client:
         self.reader: typing.Any = None
         self.writer: typing.Any = None
 
-        self.logger = log_handler
-        if not self.logger:
+        if log_handler is not None:
+            self.logger = log_handler
+        else:
             self.logger = logger.SimpleLogger("naz.client")
         self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
         self._sanity_check_logger()
 
-        self.rateLimiter = rateLimiter
-        if not self.rateLimiter:
+        if rateLimiter is not None:
+            self.rateLimiter = rateLimiter
+        else:
             self.rateLimiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
 
-        self.hook = hook
-        if not self.hook:
+        if hook is not None:
+            self.hook = hook
+        else:
             self.hook = hooks.SimpleHook(logger=self.logger)
 
-        self.throttle_handler = throttle_handler
-        if not self.throttle_handler:
+        if throttle_handler is not None:
+            self.throttle_handler = throttle_handler
+        else:
             self.throttle_handler = throttle.SimpleThrottleHandler(logger=self.logger)
 
         # class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata
         # this will be used to track different pdu's and user generated log_id
-        self.correlation_handler = correlation_handler
-        if not self.correlation_handler:
+        if correlation_handler is not None:
+            self.correlation_handler = correlation_handler
+        else:
             self.correlation_handler = correlater.SimpleCorrelater()
 
         # the messages that are published to a queue by either naz
@@ -491,6 +491,12 @@ class Client:
         if not isinstance(loglevel, str):
             raise ValueError(
                 "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+            )
+        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            raise ValueError(
+                """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                    loglevel
+                )
             )
         if not isinstance(log_metadata, (type(None), dict)):
             raise ValueError(
