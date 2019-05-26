@@ -79,7 +79,7 @@ def make_parser():
         type=str,
         required=False,
         default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        choices=["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="The log level to output log messages at. \
         eg: --loglevel DEBUG",
     )
@@ -106,7 +106,7 @@ def main():
     """
     """
     _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
-    logger = naz.logger.SimpleBaseLogger("naz.cli")
+    logger = naz.logger.SimpleLogger("naz.cli")
     logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
 
     loop = asyncio.get_event_loop()
@@ -137,7 +137,7 @@ def main():
                 "client_id": client_id,
             }
         )
-        logger.bind(loglevel=loglevel, log_metadata=log_metadata)
+        logger.bind(level=loglevel, log_metadata=log_metadata)
 
         logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:

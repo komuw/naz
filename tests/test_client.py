@@ -543,7 +543,7 @@ class TestClient(TestCase):
         )
 
     def test_logger_called(self):
-        with mock.patch("naz.logger.SimpleBaseLogger.log") as mock_logger_log:
+        with mock.patch("naz.logger.SimpleLogger.log") as mock_logger_log:
             mock_logger_log.return_value = None
             self._run(
                 self.cli.parse_response_pdu(

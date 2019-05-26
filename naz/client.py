@@ -130,9 +130,9 @@ class Client:
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
         """
-        if loglevel.upper() not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
-                """loglevel should be one of; 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
+                """loglevel should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. not {0}""".format(
                     loglevel
                 )
             )
@@ -213,11 +213,10 @@ class Client:
         self.reader: typing.Any = None
         self.writer: typing.Any = None
 
-        # NB: currently, naz only uses to log levels; INFO and EXCEPTION
         self.logger = log_handler
         if not self.logger:
-            self.logger = logger.SimpleBaseLogger("naz.client")
-        self.logger.bind(loglevel=self.loglevel, log_metadata=self.log_metadata)
+            self.logger = logger.SimpleLogger("naz.client")
+        self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
         self._sanity_check_logger()
 
         self.rateLimiter = rateLimiter
@@ -427,7 +426,7 @@ class Client:
 
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self._log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "naz.Client.enquire_link",
                     "stage": "start",
@@ -490,7 +489,7 @@ class Client:
             # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
             await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
             self._log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "naz.Client.enquire_link",
                     "stage": "end",
@@ -512,7 +511,7 @@ class Client:
         smpp_command = SmppCommand.ENQUIRE_LINK_RESP
         log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.enquire_link_resp",
                 "stage": "start",
@@ -552,7 +551,7 @@ class Client:
                 },
             )
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.enquire_link_resp",
                 "stage": "end",
@@ -776,7 +775,7 @@ class Client:
         """
         smpp_command = SmppCommand.SUBMIT_SM
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.build_submit_sm_pdu",
                 "stage": "start",
@@ -872,7 +871,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.build_submit_sm_pdu",
                 "stage": "end",
