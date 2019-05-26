@@ -457,7 +457,7 @@ class Client:
                         "state": "client is shutdown",
                     },
                 )
-                return
+                return None
 
             # body
             body = b""
@@ -1048,7 +1048,7 @@ class Client:
                         "state": "cleanly shutting down client.",
                     },
                 )
-                return
+                return {"shutdown": "shutdown"}
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -1100,7 +1100,7 @@ class Client:
                         },
                     )
                     if self.SHOULD_SHUT_DOWN:
-                        return
+                        return {"shutdown": "shutdown"}
                     await asyncio.sleep(poll_queue_interval)
                     continue
                 # we didn't fail to dequeue a message
@@ -1200,7 +1200,7 @@ class Client:
                         "state": "cleanly shutting down client.",
                     },
                 )
-                return
+                return None
 
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
@@ -1219,7 +1219,7 @@ class Client:
                     },
                 )
                 if self.SHOULD_SHUT_DOWN:
-                    return
+                    return None
                 await asyncio.sleep(poll_read_interval)
                 continue
             else:
