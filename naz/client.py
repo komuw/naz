@@ -1632,10 +1632,9 @@ class Client:
         await self.unbind()
         self.writer.close()
 
-        # sleep so that client can finish:
-        # - consuming from queue
-        # - sending any SMSes it may have already picked from queue
+        # sleep so that client can:
+        # - stop consuming from queue
+        # - finish sending any SMSes it may have already picked from queue
         # - send unbind to SMSC
-        # we need to use asyncio.sleep so that we do not block eventloop.
-        await asyncio.sleep(self.drain_duration)
+        await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
         self.SUCCESFULLY_SHUT_DOWN = True
