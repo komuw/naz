@@ -79,7 +79,7 @@ def make_parser():
         type=str,
         required=False,
         default="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        choices=["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="The log level to output log messages at. \
         eg: --loglevel DEBUG",
     )
