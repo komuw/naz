@@ -6,7 +6,7 @@
     "outboundqueue": "examples.example_klasses.ExampleRedisQueueInstance",
     "encoding": "gsm0338",
     "sequence_generator": "examples.example_klasses.ExampleSeqGen",
-    "loglevel": "INFO",
+    "loglevel": "WARNING",
     "log_metadata": {
         "environment": "staging",
         "release": "canary"

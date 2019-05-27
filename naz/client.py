@@ -277,17 +277,17 @@ class Client:
         if rateLimiter is not None:
             self.rateLimiter = rateLimiter
         else:
-            self.rateLimiter = ratelimiter.SimpleRateLimiter()
+            self.rateLimiter = ratelimiter.SimpleRateLimiter(log_handler=self.logger)
 
         if hook is not None:
             self.hook = hook
         else:
-            self.hook = hooks.SimpleHook()
+            self.hook = hooks.SimpleHook(log_handler=self.logger)
 
         if throttle_handler is not None:
             self.throttle_handler = throttle_handler
         else:
-            self.throttle_handler = throttle.SimpleThrottleHandler()
+            self.throttle_handler = throttle.SimpleThrottleHandler(log_handler=self.logger)
 
         # class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata
         # this will be used to track different pdu's and user generated log_id
