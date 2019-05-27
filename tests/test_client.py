@@ -276,7 +276,7 @@ class TestClient(TestCase):
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            sample_size = 8
+            sample_size = 8.0
             throttle_handler = naz.throttle.SimpleThrottleHandler(
                 sampling_period=5.0, sample_size=sample_size, deny_request_at=0.4
             )
@@ -302,7 +302,7 @@ class TestClient(TestCase):
             }
             self._run(cli.connect())
             # mock SMSC throttling naz
-            for _ in range(0, sample_size * 2):
+            for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.send_forever(TESTING=True))
