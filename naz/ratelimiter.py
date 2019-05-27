@@ -41,7 +41,9 @@ class SimpleRateLimiter(BaseRateLimiter):
     """
 
     def __init__(
-        self, send_rate: float = 100_000, log_handler: typing.Union[None, logger.BaseLogger] = None
+        self,
+        send_rate: float = 100_000.00,
+        log_handler: typing.Union[None, logger.BaseLogger] = None,
     ) -> None:
         """
         Parameters:
@@ -65,7 +67,7 @@ class SimpleRateLimiter(BaseRateLimiter):
         self.updated_at: float = time.monotonic()
 
         self.messages_delivered: int = 0
-        self.effective_send_rate: float = 0
+        self.effective_send_rate: float = 0.00
         if log_handler is not None:
             self.logger = log_handler
         else:

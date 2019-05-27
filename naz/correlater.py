@@ -91,7 +91,7 @@ class SimpleCorrelater(BaseCorrelater):
         }
     """
 
-    def __init__(self, max_ttl: float = 60 * 60) -> None:
+    def __init__(self, max_ttl: float = 60 * 60.00) -> None:
         """
         Parameters:
             max_ttl: The time in seconds that an item is going to be stored.

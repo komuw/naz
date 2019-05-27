@@ -68,10 +68,10 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     def __init__(
         self,
-        sampling_period: float = 180,
-        sample_size: float = 50,
-        deny_request_at: float = 1,
-        throttle_wait: float = 3,
+        sampling_period: float = 180.00,
+        sample_size: float = 50.00,
+        deny_request_at: float = 1.00,
+        throttle_wait: float = 3.00,
         log_handler: typing.Union[None, logger.BaseLogger] = None,
     ) -> None:
         """
