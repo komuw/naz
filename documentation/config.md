@@ -49,7 +49,7 @@ sequence_generator | python class instance used to generate sequence_numbers| na
 outboundqueue | python class instance implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
 client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
 log_handler | python class instance to be used for logging | naz.logger.SimpleLogger        
-loglevel | the level at which to log | DEBUG
+loglevel | the level at which to log | INFO
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
 codec_class | python class instance to be used to encode/decode messages | naz.nazcodec.SimpleNazCodec
 codec_errors_level | same meaning as the `errors` argument to pythons' `encode` method as [defined here](https://docs.python.org/3/library/codecs.html#codecs.encode) | strict
@@ -58,6 +58,7 @@ rateLimiter | python class instance implementing rate limitation | naz.ratelimit
 hook | python class instance implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
 throttle_handler | python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
 correlation_handler | A python class instance that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
+drain_duration | duration in seconds that `naz` will wait for after receiving a termination signal. | 8
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   

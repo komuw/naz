@@ -1,3 +1,4 @@
+import os
 import struct
 import random
 import string
@@ -77,7 +78,7 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: int = 300,
         log_handler=None,
-        loglevel: str = "DEBUG",
+        loglevel: str = "INFO",
         log_metadata=None,
         codec_class=None,
         codec_errors_level: str = "strict",
@@ -86,6 +87,7 @@ class Client:
         sequence_generator=None,
         throttle_handler=None,
         correlation_handler=None,
+        drain_duration: int = 8,
     ) -> None:
         """
         Parameters:
@@ -129,6 +131,7 @@ class Client:
             throttle_handler: python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
+            drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
         """
         if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             raise ValueError(
@@ -142,6 +145,7 @@ class Client:
                     type(log_metadata)
                 )
             )
+        self._PID = os.getpid()
 
         # this allows people to pass in their own event loop eg uvloop.
         self.async_loop = async_loop
@@ -170,7 +174,12 @@ class Client:
         if not self.log_metadata:
             self.log_metadata = {}
         self.log_metadata.update(
-            {"smsc_host": self.smsc_host, "system_id": system_id, "client_id": self.client_id}
+            {
+                "smsc_host": self.smsc_host,
+                "system_id": system_id,
+                "client_id": self.client_id,
+                "process_id": self._PID,
+            }
         )
 
         self.codec_errors_level = codec_errors_level
@@ -246,6 +255,9 @@ class Client:
 
         self.current_session_state = SmppSessionState.CLOSED
 
+        self.drain_duration = drain_duration
+        self.SHOULD_SHUT_DOWN: bool = False
+
     def _sanity_check_logger(self):
         """
         called when instantiating the Client just to make sure the supplied
@@ -297,6 +309,7 @@ class Client:
         # 2. add jitter
         if current_retries < 0:
             current_retries = 0
+
         if current_retries >= 6:
             return 60 * 16  # 16 minutes
         else:
@@ -434,6 +447,17 @@ class Client:
                     "smpp_command": smpp_command,
                 },
             )
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.DEBUG,
+                    {
+                        "event": "naz.Client.enquire_link",
+                        "stage": "end",
+                        "state": "client is shutdown",
+                    },
+                )
+                return None
+
             # body
             body = b""
 
@@ -1014,6 +1038,16 @@ class Client:
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.send_forever", "stage": "start"})
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.send_forever",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return {"shutdown": "shutdown"}
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -1064,6 +1098,8 @@ class Client:
                             "error": str(e),
                         },
                     )
+                    if self.SHOULD_SHUT_DOWN:
+                        return {"shutdown": "shutdown"}
                     await asyncio.sleep(poll_queue_interval)
                     continue
                 # we didn't fail to dequeue a message
@@ -1154,6 +1190,17 @@ class Client:
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "start"})
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return None
+
             # todo: look at `pause_reading` and `resume_reading` methods
             command_length_header_data = await self.reader.read(4)
             if command_length_header_data == b"":
@@ -1170,6 +1217,8 @@ class Client:
                         "retry_count": retry_count,
                     },
                 )
+                if self.SHOULD_SHUT_DOWN:
+                    return None
                 await asyncio.sleep(poll_read_interval)
                 continue
             else:
@@ -1212,7 +1261,7 @@ class Client:
         Parameters:
             pdu: PDU in bytes, that have been read from network
         """
-        self._log(logging.INFO, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
+        self._log(logging.DEBUG, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
         body_data = pdu[16:]
@@ -1264,7 +1313,7 @@ class Client:
             hook_metadata=hook_metadata,
         )
         self._log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.Client.parse_response_pdu",
                 "stage": "end",
@@ -1590,3 +1639,24 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
+
+    async def shutdown(self) -> None:
+        """
+        Cleanly shutdown this client.
+        """
+        self._log(
+            logging.INFO,
+            {"event": "naz.Client.shutdown", "stage": "start", "state": "intiating shutdown"},
+        )
+        self.SHOULD_SHUT_DOWN = True
+
+        # we need to unbind first before closing writer
+        await self.unbind()
+        self.writer.close()
+
+        # sleep so that client can:
+        # - stop consuming from queue
+        # - finish sending any SMSes it may have already picked from queue
+        # - stop sending `enquire_link` requests
+        # - send unbind to SMSC
+        await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop

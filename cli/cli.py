@@ -10,6 +10,8 @@ import argparse
 
 import naz
 
+from .utils import sig
+
 os.environ["PYTHONASYNCIODEBUG"] = "1"
 
 
@@ -221,11 +223,10 @@ def main():
             cli.send_forever(TESTING=dry_run),
             cli.receive_data(TESTING=dry_run),
             cli.enquire_link(TESTING=dry_run),
+            sig._signal_handling(logger=logger, client=cli, loop=loop),
             loop=loop,
         )
         loop.run_until_complete(tasks)
-        loop.run_until_complete(cli.unbind())
-        cli.writer.close()
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
