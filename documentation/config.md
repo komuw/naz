@@ -94,12 +94,9 @@ drain_duration | duration in seconds that `naz` will wait for after receiving a 
 import asyncio
 import naz
 
-loop = asyncio.get_event_loop()
-
 class ExampleQueue(naz.q.BaseOutboundQueue):
     def __init__(self):
-        loop = asyncio.get_event_loop()
-        self.queue = asyncio.Queue(maxsize=1000, loop=loop)
+        self.queue = asyncio.Queue(maxsize=1000)
     async def enqueue(self, item):
         self.queue.put_nowait(item)
     async def dequeue(self):

@@ -29,7 +29,7 @@ class Client:
         import os
         import asyncio
         import naz
-        loop = asyncio.get_event_loop()
+
         outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
         client = naz.Client(
                 smsc_host="127.0.0.1",
@@ -38,6 +38,22 @@ class Client:
                 password=os.getenv("password", "password"),
                 outboundqueue=outboundqueue,
             )
+
+        loop = asyncio.get_event_loop()
+        # connect to the SMSC host
+        _, _ = loop.run_until_complete(client.connect())
+        # bind to SMSC as a tranceiver
+        loop.run_until_complete(client.tranceiver_bind())
+
+        # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+        tasks = asyncio.gather(
+            client.send_forever(),
+            client.receive_data(),
+            client.enquire_link(),
+            loop=loop,
+        )
+        loop.run_until_complete(tasks)
+
     """
 
     def __init__(

@@ -64,7 +64,6 @@ class TestClient(TestCase):
     """
 
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
         self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
