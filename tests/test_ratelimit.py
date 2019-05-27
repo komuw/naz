@@ -32,7 +32,7 @@ class TestRateLimit(TestCase):
     """
 
     def setUp(self):
-        self.send_rate = 1
+        self.send_rate = 1.0
         self.rateLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=self.send_rate)
 
     def tearDown(self):
@@ -57,7 +57,7 @@ class TestRateLimit(TestCase):
             self.assertEqual(mock_sleep.mock.call_args[0][0], self.rateLimiter.delay_for_tokens)
 
     def test_send_rate(self):
-        send_rate = 3
+        send_rate = 3.0
         rLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=send_rate)
         msgs_delivered = []
         now = time.monotonic()

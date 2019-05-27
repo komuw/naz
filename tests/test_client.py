@@ -123,7 +123,7 @@ class TestClient(TestCase):
         self.assertRaises(ValueError, mock_create_client)
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
-        self.assertIn("log_metadata should be of type", str(raised_exception.exception))
+        self.assertIn("`log_metadata` should be of type", str(raised_exception.exception))
 
     def test_can_connect(self):
         reader, writer = self._run(self.cli.connect())
@@ -278,7 +278,7 @@ class TestClient(TestCase):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             sample_size = 8
             throttle_handler = naz.throttle.SimpleThrottleHandler(
-                sampling_period=5, sample_size=sample_size, deny_request_at=0.4
+                sampling_period=5.0, sample_size=sample_size, deny_request_at=0.4
             )
             cli = naz.Client(
                 async_loop=self.loop,
