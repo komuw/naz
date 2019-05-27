@@ -60,6 +60,11 @@ class SimpleLogger(BaseLogger):
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
         """
+        if not isinstance(logger_name, str):
+            raise ValueError(
+                "`logger_name` should be of type:: `str` You entered: {0}".format(type(logger_name))
+            )
+
         self.logger_name = logger_name
         self.logger: typing.Any = None
 

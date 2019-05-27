@@ -81,6 +81,37 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             deny_request_at: the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.
             throttle_wait: the time in seconds to wait before calling allow_request after the last allow_request that returned False.
         """
+        if not isinstance(sampling_period, float):
+            raise ValueError(
+                "`sampling_period` should be of type:: `float` You entered: {0}".format(
+                    type(sampling_period)
+                )
+            )
+        if not isinstance(sample_size, float):
+            raise ValueError(
+                "`sample_size` should be of type:: `float` You entered: {0}".format(
+                    type(sample_size)
+                )
+            )
+        if not isinstance(deny_request_at, float):
+            raise ValueError(
+                "`deny_request_at` should be of type:: `float` You entered: {0}".format(
+                    type(deny_request_at)
+                )
+            )
+        if not isinstance(throttle_wait, float):
+            raise ValueError(
+                "`throttle_wait` should be of type:: `float` You entered: {0}".format(
+                    type(throttle_wait)
+                )
+            )
+        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+            raise ValueError(
+                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                    type(log_handler)
+                )
+            )
+
         self.NON_throttle_responses: int = 0
         self.throttle_responses: int = 0
         self.updated_at: float = time.monotonic()

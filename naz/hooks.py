@@ -53,6 +53,13 @@ class SimpleHook(BaseHook):
     """
 
     def __init__(self, log_handler: typing.Union[None, logger.BaseLogger] = None) -> None:
+        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+            raise ValueError(
+                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                    type(log_handler)
+                )
+            )
+
         if log_handler is not None:
             self.logger = log_handler
         else:

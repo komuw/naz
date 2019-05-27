@@ -47,6 +47,17 @@ class SimpleRateLimiter(BaseRateLimiter):
         Parameters:
             send_rate: the maximum rate, in messages/second, at which naz can send messages to SMSC.
         """
+        if not isinstance(send_rate, float):
+            raise ValueError(
+                "`send_rate` should be of type:: `float` You entered: {0}".format(type(send_rate))
+            )
+        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+            raise ValueError(
+                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                    type(log_handler)
+                )
+            )
+
         self.send_rate: float = send_rate
         self.max_tokens: float = self.send_rate
         self.tokens: float = self.max_tokens
