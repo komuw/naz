@@ -5,6 +5,7 @@ most recent version is listed first.
 - all the changes in `v0.6.0-beta.1`
 - fix a number of logging issues: https://github.com/komuw/naz/pull/105
 - cleanly handle termination signals like `SIGTERM`: https://github.com/komuw/naz/pull/106
+- validate `naz.Client` arguments: https://github.com/komuw/naz/pull/108
 
 ## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    
