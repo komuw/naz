@@ -22,7 +22,7 @@ class TestThrottle(TestCase):
 
     def setUp(self):
         self.throttle_handler = naz.throttle.SimpleThrottleHandler(
-            sampling_period=10, sample_size=12, deny_request_at=1
+            sampling_period=10.00, sample_size=12.00, deny_request_at=1.00
         )
 
     def tearDown(self):
