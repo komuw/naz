@@ -308,8 +308,8 @@ class Client:
         self.drain_duration = drain_duration
         self.SHOULD_SHUT_DOWN: bool = False
 
+    @staticmethod
     def _validate_client_args(
-        self,
         smsc_host: str,
         smsc_port: int,
         system_id: str,
