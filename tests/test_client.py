@@ -123,7 +123,7 @@ class TestClient(TestCase):
         self.assertRaises(ValueError, mock_create_client)
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
-        self.assertIn("log_metadata should be of type", str(raised_exception.exception))
+        self.assertIn("`log_metadata` should be of type", str(raised_exception.exception))
 
     def test_can_connect(self):
         reader, writer = self._run(self.cli.connect())
@@ -276,17 +276,9 @@ class TestClient(TestCase):
 
     def test_no_sending_if_throttler(self):
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            logger = logging.getLogger("naz.test")
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(message)s")
-            handler.setFormatter(formatter)
-            if not logger.handlers:
-                logger.addHandler(handler)
-            logger.setLevel("DEBUG")
-
-            sample_size = 8
+            sample_size = 8.0
             throttle_handler = naz.throttle.SimpleThrottleHandler(
-                logger=logger, sampling_period=5, sample_size=sample_size, deny_request_at=0.4
+                sampling_period=5.0, sample_size=sample_size, deny_request_at=0.4
             )
             cli = naz.Client(
                 async_loop=self.loop,
@@ -310,7 +302,7 @@ class TestClient(TestCase):
             }
             self._run(cli.connect())
             # mock SMSC throttling naz
-            for _ in range(0, sample_size * 2):
+            for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.send_forever(TESTING=True))

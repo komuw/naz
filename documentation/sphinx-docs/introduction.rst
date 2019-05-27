@@ -301,11 +301,9 @@ another example is if you want to update a database record whenever you get a de
 
 .. code-block:: python
 
-    import logging
     import naz
-    logger = logging.getLogger("naz.rateLimiter")
 
-    myLimiter = naz.ratelimiter.SimpleRateLimiter(logger=logger, send_rate=35)
+    myLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=35)
     cli = naz.Client(
         ...
         rateLimiter=myLimiter,

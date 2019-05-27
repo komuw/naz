@@ -21,16 +21,8 @@ class TestThrottle(TestCase):
     """
 
     def setUp(self):
-        self.logger = logging.getLogger("naz.test")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel("DEBUG")
-
         self.throttle_handler = naz.throttle.SimpleThrottleHandler(
-            logger=self.logger, sampling_period=10, sample_size=12, deny_request_at=1
+            sampling_period=10.00, sample_size=12.00, deny_request_at=1.00
         )
 
     def tearDown(self):
@@ -42,21 +34,21 @@ class TestThrottle(TestCase):
         return loop.run_until_complete(coro)
 
     def test_small_sample_size_allows_requests(self):
-        for _ in range(0, (self.throttle_handler.sample_size - 2)):
+        for _ in range(0, (int(self.throttle_handler.sample_size) - 2)):
             self._run(self.throttle_handler.throttled())
         allow_request = self._run(self.throttle_handler.allow_request())
         self.assertTrue(allow_request)
 
     def test_enough_sample_size_denies_requests(self):
-        for _ in range(0, (self.throttle_handler.sample_size * 2)):
+        for _ in range(0, (int(self.throttle_handler.sample_size) * 2)):
             self._run(self.throttle_handler.throttled())
         allow_request = self._run(self.throttle_handler.allow_request())
         self.assertFalse(allow_request)
 
     def test_enough_sample_size_and_successes_allows_requests(self):
-        for _ in range(0, self.throttle_handler.sample_size):
+        for _ in range(0, int(self.throttle_handler.sample_size)):
             self._run(self.throttle_handler.throttled())
-        for _ in range(0, (self.throttle_handler.sample_size * 100)):
+        for _ in range(0, (int(self.throttle_handler.sample_size) * 100)):
             self._run(self.throttle_handler.not_throttled())
         allow_request = self._run(self.throttle_handler.allow_request())
         self.assertTrue(allow_request)

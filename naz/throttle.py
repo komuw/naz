@@ -1,6 +1,9 @@
 import abc
 import time
+import typing
 import logging
+
+from . import logger
 
 
 class BaseThrottleHandler(abc.ABC):
@@ -65,11 +68,11 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     def __init__(
         self,
-        logger: logging.LoggerAdapter,
-        sampling_period: float = 180,
-        sample_size: float = 50,
-        deny_request_at: float = 1,
-        throttle_wait: float = 3,
+        sampling_period: float = 180.00,
+        sample_size: float = 50.00,
+        deny_request_at: float = 1.00,
+        throttle_wait: float = 3.00,
+        log_handler: typing.Union[None, logger.BaseLogger] = None,
     ) -> None:
         """
         Parameters:
@@ -78,15 +81,50 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             deny_request_at: the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.
             throttle_wait: the time in seconds to wait before calling allow_request after the last allow_request that returned False.
         """
+        if not isinstance(sampling_period, float):
+            raise ValueError(
+                "`sampling_period` should be of type:: `float` You entered: {0}".format(
+                    type(sampling_period)
+                )
+            )
+        if not isinstance(sample_size, float):
+            raise ValueError(
+                "`sample_size` should be of type:: `float` You entered: {0}".format(
+                    type(sample_size)
+                )
+            )
+        if not isinstance(deny_request_at, float):
+            raise ValueError(
+                "`deny_request_at` should be of type:: `float` You entered: {0}".format(
+                    type(deny_request_at)
+                )
+            )
+        if not isinstance(throttle_wait, float):
+            raise ValueError(
+                "`throttle_wait` should be of type:: `float` You entered: {0}".format(
+                    type(throttle_wait)
+                )
+            )
+        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+            raise ValueError(
+                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                    type(log_handler)
+                )
+            )
+
         self.NON_throttle_responses: int = 0
         self.throttle_responses: int = 0
         self.updated_at: float = time.monotonic()
 
-        self.logger = logger
         self.sampling_period: float = sampling_period
         self.sample_size: float = sample_size
         self.deny_request_at: float = deny_request_at
         self.throttle_wait: float = throttle_wait
+
+        if log_handler is not None:
+            self.logger = log_handler
+        else:
+            self.logger = logger.SimpleLogger("naz.SimpleThrottleHandler")
 
     @property
     def percent_throttles(self) -> float:

@@ -91,12 +91,16 @@ class SimpleCorrelater(BaseCorrelater):
         }
     """
 
-    def __init__(self, max_ttl: float = 60 * 60) -> None:
+    def __init__(self, max_ttl: float = 60 * 60.00) -> None:
         """
         Parameters:
             max_ttl: The time in seconds that an item is going to be stored.
                     After the expiration of max_ttl seconds, that item will be deleted.
         """
+        if not isinstance(max_ttl, float):
+            raise ValueError(
+                "`max_ttl` should be of type:: `float` You entered: {0}".format(type(max_ttl))
+            )
         self.store: dict = {}
         self.max_ttl: float = max_ttl
 

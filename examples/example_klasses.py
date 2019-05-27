@@ -9,7 +9,7 @@ import naz
 import redis
 
 
-class MySeqGen(object):
+class MySeqGen(naz.sequence.BaseSequenceGenerator):
     """
     """
 
