@@ -136,7 +136,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     async def allow_request(self) -> bool:
         self.logger.log(
-            logging.INFO, {"event": "naz.SimpleThrottleHandler.allow_request", "stage": "start"}
+            logging.DEBUG, {"event": "naz.SimpleThrottleHandler.allow_request", "stage": "start"}
         )
         # calculat percentage of throttles before resetting NON_throttle_responses and throttle_responses
         current_percent_throttles: float = self.percent_throttles
@@ -168,7 +168,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
             )
             return False
         self.logger.log(
-            logging.INFO,
+            logging.DEBUG,
             {
                 "event": "naz.SimpleThrottleHandler.allow_request",
                 "stage": "end",
