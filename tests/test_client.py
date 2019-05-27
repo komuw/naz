@@ -65,9 +65,8 @@ class TestClient(TestCase):
 
     def setUp(self):
         self.loop = asyncio.get_event_loop()
-        self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=self.loop)
+        self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
         self.cli = naz.Client(
-            async_loop=self.loop,
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
@@ -111,7 +110,6 @@ class TestClient(TestCase):
     def test_bad_instantiation(self):
         def mock_create_client():
             naz.Client(
-                async_loop=self.loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
@@ -281,7 +279,6 @@ class TestClient(TestCase):
                 sampling_period=5, sample_size=sample_size, deny_request_at=0.4
             )
             cli = naz.Client(
-                async_loop=self.loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
@@ -518,7 +515,6 @@ class TestClient(TestCase):
 
         def mock_create_client():
             naz.Client(
-                async_loop=self.loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",

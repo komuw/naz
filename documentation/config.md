@@ -108,7 +108,6 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
 
 outboundqueue = ExampleQueue()
 cli = naz.Client(
-    async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",

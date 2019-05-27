@@ -30,9 +30,8 @@ class Client:
         import asyncio
         import naz
         loop = asyncio.get_event_loop()
-        outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+        outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
         client = naz.Client(
-                async_loop=loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
@@ -43,7 +42,6 @@ class Client:
 
     def __init__(
         self,
-        async_loop: asyncio.events.AbstractEventLoop,
         smsc_host: str,
         smsc_port: int,
         system_id: str,
@@ -91,7 +89,6 @@ class Client:
     ) -> None:
         """
         Parameters:
-            async_loop: asyncio event loop.
             smsc_host:	the IP address(or domain name) of the SMSC gateway/server
             smsc_port:	the port at which SMSC is listening on
             system_id:	Identifies the ESME system requesting to bind as a transceiver with the SMSC.
@@ -134,7 +131,6 @@ class Client:
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
         """
         self._validate_client_args(
-            async_loop=async_loop,
             smsc_host=smsc_host,
             smsc_port=smsc_port,
             system_id=system_id,
@@ -175,8 +171,6 @@ class Client:
         )
 
         self._PID = os.getpid()
-        # this allows people to pass in their own event loop eg uvloop.
-        self.async_loop = async_loop
         self.smsc_host = smsc_host
         self.smsc_port = smsc_port
         self.system_id = system_id
@@ -300,7 +294,6 @@ class Client:
 
     def _validate_client_args(
         self,
-        async_loop: asyncio.events.AbstractEventLoop,
         smsc_host: str,
         smsc_port: int,
         system_id: str,
@@ -339,12 +332,6 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: int,
     ) -> None:
-        if not isinstance(async_loop, asyncio.events.AbstractEventLoop):
-            raise ValueError(
-                "`async_loop` should be of type:: `asyncio.events.AbstractEventLoop` You entered: {0}".format(
-                    type(async_loop)
-                )
-            )
         if not isinstance(smsc_host, str):
             raise ValueError(
                 "`smsc_host` should be of type:: `str` You entered: {0}".format(type(smsc_host))
@@ -616,9 +603,7 @@ class Client:
         make a network connection to SMSC server.
         """
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start"})
-        reader, writer = await asyncio.open_connection(
-            self.smsc_host, self.smsc_port, loop=self.async_loop
-        )
+        reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end"})

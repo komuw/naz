@@ -4,9 +4,8 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
 cli = naz.Client(
-    async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
