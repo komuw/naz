@@ -40,7 +40,7 @@ class SimpleOutboundQueue(BaseOutboundQueue):
     Note: It should only be used for tests and demo purposes.
     """
 
-    def __init__(self, maxsize: int) -> None:
+    def __init__(self, maxsize: int = 2500) -> None:
         """
         Parameters:
             maxsize: the maximum number of items(not size) that can be put in the queue.
