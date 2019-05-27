@@ -223,7 +223,7 @@ def main():
             cli.send_forever(TESTING=dry_run),
             cli.receive_data(TESTING=dry_run),
             cli.enquire_link(TESTING=dry_run),
-            sig._signal_handling(logger=logger, client=cli),
+            sig._signal_handling(logger=logger, client=cli, loop=loop),
             loop=loop,
         )
         loop.run_until_complete(tasks)
