@@ -1722,9 +1722,9 @@ class Client:
             # This field contains the SMSC message_id of the submitted message.
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
-            smsc_message_id = body_data.replace(chr(0).encode(), b"")
+            _message_id = body_data.replace(chr(0).encode(), b"")
             smsc_message_id = self.codec_class.decode(
-                smsc_message_id, self.encoding, self.codec_errors_level
+                _message_id, self.encoding, self.codec_errors_level
             )
             try:
                 await self.correlation_handler.put(
@@ -1795,14 +1795,16 @@ class Client:
                     # tag_value is of size 1 - 65
                     end_of_tag_value = end_of_target_tag_length + 65
                     tag_value = body_data[end_of_target_tag_length:end_of_tag_value]
-                    tag_value = tag_value.replace(chr(0).encode(), b"")
-                    tag_value = self.codec_class.decode(
-                        tag_value, self.encoding, self.codec_errors_level
+                    _tag_value = tag_value.replace(
+                        chr(0).encode(), b""
+                    )  # change variable names to make mypy happy
+                    t_value = self.codec_class.decode(
+                        _tag_value, self.encoding, self.codec_errors_level
                     )
                     log_id, hook_metadata = await self.correlation_handler.get(
                         smpp_command=smpp_command,
                         sequence_number=sequence_number,
-                        smsc_message_id=tag_value,
+                        smsc_message_id=t_value,
                     )
             except Exception as e:
                 log_id, hook_metadata = "", ""
