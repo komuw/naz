@@ -21,16 +21,8 @@ class TestThrottle(TestCase):
     """
 
     def setUp(self):
-        self.logger = logging.getLogger("naz.test")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel("DEBUG")
-
         self.throttle_handler = naz.throttle.SimpleThrottleHandler(
-            logger=self.logger, sampling_period=10, sample_size=12, deny_request_at=1
+            sampling_period=10, sample_size=12, deny_request_at=1
         )
 
     def tearDown(self):
