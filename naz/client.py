@@ -1209,31 +1209,43 @@ class Client:
         - it re-establishes a connection to SMSC
         - re-binds to SMSC
         """
-        self._log(
-            logging.INFO,
-            {
-                "event": "naz.Client.re_establish_conn_bind",
-                "stage": "start",
-                "smpp_command": smpp_command,
-                "log_id": log_id,
-                "connection_lost": self.writer.transport.is_closing(),
-            },
-        )
-        try:
-            await self.connect()
-            await self.tranceiver_bind()
-        except ConnectionError as e:
+        retry_count = 0
+        while True:
             self._log(
-                logging.ERROR,
+                logging.INFO,
                 {
                     "event": "naz.Client.re_establish_conn_bind",
-                    "stage": "end",
+                    "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": "unable to re-connect & re-bind to SMSC",
-                    "error": str(e),
+                    "connection_lost": self.writer.transport.is_closing(),
                 },
             )
+            try:
+                await self.connect()
+                await self.tranceiver_bind()
+                return None
+            except ConnectionError as e:
+                retry_count += 1
+                reconnect_interval = self._retry_after(retry_count)
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.re_establish_conn_bind",
+                        "stage": "end",
+                        "smpp_command": smpp_command,
+                        "log_id": log_id,
+                        "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
+                            reconnect_interval / 60
+                        ),
+                        "error": str(e),
+                        "retry_count": retry_count,
+                    },
+                )
+                if self.SHOULD_SHUT_DOWN:
+                    return None
+                await asyncio.sleep(reconnect_interval)
+                continue
 
     async def send_data(
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
@@ -1536,14 +1548,7 @@ class Client:
         """
         retry_count = 0
         while True:
-            self._log(
-                logging.INFO,
-                {
-                    "event": "naz.Client.receive_data",
-                    "stage": "start",
-                    "connection_lost": self.writer.transport.is_closing(),
-                },
-            )
+            self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
                 self._log(
                     logging.INFO,
