@@ -31,8 +31,8 @@ test:
 	@printf "\n removing pyc files::\n" && find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 	@printf "\n coverage erase::\n" && coverage erase
 	@printf "\n coverage run::\n" && coverage run --omit="*tests*,*cli/test_*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s .
-	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=84
-	@printf "\n coverage report html::\n" && coverage html --fail-under=84 --title=naz_coverage
+	@printf "\n coverage report::\n" && coverage report --show-missing --fail-under=83
+	@printf "\n coverage report html::\n" && coverage html --fail-under=83 --title=naz_coverage
 	@printf "\n run flake8::\n" && flake8 .
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C examples/ naz/ tests/ cli/ documentation/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
