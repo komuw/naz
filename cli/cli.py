@@ -218,15 +218,21 @@ def main():
         # bind to SMSC as a tranceiver
         loop.run_until_complete(cli.tranceiver_bind())
 
-        # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-        tasks = asyncio.gather(
-            cli.send_forever(TESTING=dry_run),
-            cli.receive_data(TESTING=dry_run),
-            cli.enquire_link(TESTING=dry_run),
-            sig._signal_handling(logger=logger, client=cli, loop=loop),
-            loop=loop,
-        )
-        loop.run_until_complete(tasks)
+        async def async_main():
+            # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+            tasks = asyncio.gather(
+                cli.send_forever(TESTING=dry_run),
+                cli.receive_data(TESTING=dry_run),
+                cli.enquire_link(TESTING=dry_run),
+                sig._signal_handling(logger=logger, client=cli, loop=loop),
+                return_exceptions=True,
+                loop=loop,
+            )
+            await tasks
+
+        loop.create_task(async_main())
+        loop.run_forever()
+        # loop.run_until_complete(tasks)
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)

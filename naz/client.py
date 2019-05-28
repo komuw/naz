@@ -1203,6 +1203,27 @@ class Client:
         )
         return full_pdu
 
+    async def re_establish_conn_bind(self, smpp_command: str, log_id: str) -> None:
+        """
+        called by naz when a connection is lost.
+        - it re-establishes a connection to SMSC
+        - re-binds to SMSC
+        """
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.re_establish_conn_bind",
+                "stage": "start",
+                "smpp_command": smpp_command,
+                "log_id": log_id,
+                "connection_lost": self.writer.transport.is_closing(),
+            },
+        )
+        self.reader=None
+        self.writer=None
+        await self.connect()
+        await self.tranceiver_bind()
+
     async def send_data(
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
     ) -> None:
@@ -1236,8 +1257,14 @@ class Client:
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "msg": log_msg,
+                "connection_lost": self.writer.transport.is_closing(),
             },
         )
+        if self.writer.transport.is_closing():
+            # connection was lost for some reason, try:
+            # 1. re-connect
+            # 2. re-bind
+            await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
         # check session state to see if we can send messages.
         # see section 2.3 of SMPP spec document v3.4
@@ -1303,13 +1330,27 @@ class Client:
                 },
             )
 
-        # We use writer.drain() which is a flow control method that interacts with the IO write buffer.
-        # When the size of the buffer reaches the high watermark,
-        # drain blocks until the size of the buffer is drained down to the low watermark and writing can be resumed.
-        # When there is nothing to wait for, the drain() returns immediately.
-        # ref: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.drain
-        self.writer.write(msg)
-        await self.writer.drain()
+        try:
+            # We use writer.drain() which is a flow control method that interacts with the IO write buffer.
+            # When the size of the buffer reaches the high watermark,
+            # drain blocks until the size of the buffer is drained down to the low watermark and writing can be resumed.
+            # When there is nothing to wait for, the drain() returns immediately.
+            # ref: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.drain
+            self.writer.write(msg)
+            await self.writer.drain()
+        except ConnectionError as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.send_data",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "unable to write to SMSC",
+                    "error": str(e),
+                },
+            )
+
         self._log(
             logging.INFO,
             {

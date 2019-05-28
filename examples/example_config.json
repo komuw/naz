@@ -4,14 +4,7 @@
     "system_id": "smppclient1",
     "password": "password",
     "outboundqueue": "examples.example_klasses.ExampleRedisQueueInstance",
-    "encoding": "gsm0338",
-    "sequence_generator": "examples.example_klasses.ExampleSeqGen",
     "loglevel": "INFO",
-    "log_metadata": {
-        "environment": "staging",
-        "release": "canary"
-    },
     "codec_errors_level": "ignore",
-    "enquire_link_interval": 70,
-    "rateLimiter": "examples.example_klasses.ExampleRateLimiter"
+    "enquire_link_interval": 70
 }
