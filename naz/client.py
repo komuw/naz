@@ -101,7 +101,7 @@ class Client:
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
-        drain_duration: int = 8,
+        drain_duration: float = 8.00,
     ) -> None:
         """
         Parameters:
@@ -346,7 +346,7 @@ class Client:
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
-        drain_duration: int,
+        drain_duration: float,
     ) -> None:
         if not isinstance(smsc_host, str):
             raise ValueError(
@@ -548,9 +548,9 @@ class Client:
                     type(correlation_handler)
                 )
             )
-        if not isinstance(drain_duration, int):
+        if not isinstance(drain_duration, float):
             raise ValueError(
-                "`drain_duration` should be of type:: `int` You entered: {0}".format(
+                "`drain_duration` should be of type:: `float` You entered: {0}".format(
                     type(drain_duration)
                 )
             )

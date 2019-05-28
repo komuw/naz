@@ -133,6 +133,7 @@ class TestCliSigHandling(TestCase):
             system_id="system_id",
             password=os.environ.get("password", "password"),
             outboundqueue=naz.q.SimpleOutboundQueue(),
+            drain_duration=0.001,
         )
         self.loop = asyncio.get_event_loop()
         self.logger = naz.logger.SimpleLogger("naz.TestCliSigHandling")
@@ -158,11 +159,16 @@ class TestCliSigHandling(TestCase):
             self.assertTrue(mock_naz_shutdown.mock.called)
 
     def test_termination_call_client_shutdown(self):
-        # connect so that session state can be `OPEN`
-        self._run(self.client.connect())
-        self._run(
-            cli.utils.sig._handle_termination_signal(
-                logger=self.logger, _signal=signal.SIGTERM, client=self.client
+        with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
+
+            class MockStreamWriter:
+                def close(self):
+                    return
+
+            self.client.writer = MockStreamWriter()
+            self._run(
+                cli.utils.sig._handle_termination_signal(
+                    logger=self.logger, _signal=signal.SIGTERM, client=self.client
+                )
             )
-        )
-        # self.assertTrue(mock_naz_shutdown.mock.called)
+            self.assertTrue(mock_naz_unbind.mock.called)
