@@ -90,7 +90,7 @@ class Client:
         registered_delivery: int = 0b00000001,  # see section 5.2.17
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
-        enquire_link_interval: int = 300,
+        enquire_link_interval: int = 55,
         log_handler: typing.Union[None, logger.BaseLogger] = None,
         loglevel: str = "INFO",
         log_metadata: typing.Union[None, dict] = None,
