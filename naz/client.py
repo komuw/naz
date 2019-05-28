@@ -1221,6 +1221,16 @@ class Client:
                     "connection_lost": self.writer.transport.is_closing(),
                 },
             )
+            if self.SHOULD_SHUT_DOWN:
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.re_establish_conn_bind",
+                        "stage": "end",
+                        "state": "cleanly shutting down client.",
+                    },
+                )
+                return None
             try:
                 await self.connect()
                 await self.tranceiver_bind()
@@ -1296,7 +1306,7 @@ class Client:
                 smpp_command, self.current_session_state
             )
             self._log(
-                logging.INFO,
+                logging.ERROR,
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
@@ -1330,7 +1340,10 @@ class Client:
                     "error": error_msg,
                 },
             )
-            raise ValueError(error_msg)
+            # wait for `current_session_state` to change to `BOUND_TRX`
+            # `re_establish_conn_bind` may not have completed yet.
+            await asyncio.sleep(self.enquire_link_interval)
+            # raise ValueError(error_msg)
 
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
