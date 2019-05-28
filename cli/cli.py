@@ -212,7 +212,7 @@ def main():
             return
 
         # call naz api
-        cli = naz.Client(async_loop=loop, **kwargs)
+        cli = naz.Client(**kwargs)
         # connect to the SMSC host
         _, _ = loop.run_until_complete(cli.connect())
         # bind to SMSC as a tranceiver

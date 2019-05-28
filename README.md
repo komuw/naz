@@ -52,9 +52,8 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
 cli = naz.Client(
-    async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
@@ -166,18 +165,14 @@ optional arguments:
 ## Features
 #### 1. async everywhere
 SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.               
-It thus makes sense to write your SMPP client in an async manner. We leverage python3's async/await to do so. And if you do not like python's inbuilt 
-event loop, you can bring your own. eg; to use [uvloop](https://github.com/MagicStack/uvloop);
+It thus makes sense to write your SMPP client in an async manner. We leverage python3's async/await to do so. 
 ```python
 import naz
 import asyncio
-import uvloop
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop)
+outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
 cli = naz.Client(
-    async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
@@ -324,10 +319,9 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-my_queue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=loop) # can hold upto 1000 items
+my_queue = naz.q.SimpleOutboundQueue(maxsize=1000,) # can hold upto 1000 items
 cli = naz.Client(
     ...
-    async_loop=loop,
     outboundqueue=my_queue,
 )
 # connect to the SMSC host
@@ -392,7 +386,6 @@ class RedisExampleQueue(naz.q.BaseOutboundQueue):
 loop = asyncio.get_event_loop()
 outboundqueue = RedisExampleQueue()
 cli = naz.Client(
-    async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",

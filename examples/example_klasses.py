@@ -69,8 +69,7 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
         """
         maxsize is the max number of items(not size) that can be put in the queue.
         """
-        loop: asyncio.events.AbstractEventLoop = asyncio.get_event_loop()
-        self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize, loop=loop)
+        self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize)
 
     async def enqueue(self, item: dict) -> None:
         self.queue.put_nowait(item)

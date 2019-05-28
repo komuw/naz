@@ -74,7 +74,7 @@ class SimpleRateLimiter(BaseRateLimiter):
             self.logger = logger.SimpleLogger("naz.SimpleRateLimiter")
 
     async def limit(self) -> None:
-        self.logger.log(logging.INFO, {"event": "naz.SimpleRateLimiter.limit", "stage": "start"})
+        self.logger.log(logging.DEBUG, {"event": "naz.SimpleRateLimiter.limit", "stage": "start"})
         while self.tokens < 1:
             self._add_new_tokens()
             # todo: sleep in an exponetial manner upto a maximum then wrap around.

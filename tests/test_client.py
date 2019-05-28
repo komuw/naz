@@ -64,10 +64,8 @@ class TestClient(TestCase):
     """
 
     def setUp(self):
-        self.loop = asyncio.get_event_loop()
-        self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000, loop=self.loop)
+        self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
         self.cli = naz.Client(
-            async_loop=self.loop,
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
@@ -111,7 +109,6 @@ class TestClient(TestCase):
     def test_bad_instantiation(self):
         def mock_create_client():
             naz.Client(
-                async_loop=self.loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
@@ -281,7 +278,6 @@ class TestClient(TestCase):
                 sampling_period=5.0, sample_size=sample_size, deny_request_at=0.4
             )
             cli = naz.Client(
-                async_loop=self.loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
@@ -448,6 +444,9 @@ class TestClient(TestCase):
         self.assertEqual(self.cli._retry_after(current_retries=5432) / 60, 16)
 
     def test_session_state(self):
+        """
+        try sending a `submit_sm` request when session state is `OPEN`
+        """
         with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
@@ -465,6 +464,28 @@ class TestClient(TestCase):
                 self._run(self.cli.send_forever(TESTING=True))
             self.assertIn(
                 "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: OPEN",
+                str(raised_exception.exception),
+            )
+
+    def test_submit_with_session_state_closed(self):
+        """
+        try sending a `submit_sm` request when session state is `CLOSED`
+        """
+        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+            }
+            with self.assertRaises(ValueError) as raised_exception:
+                self._run(self.cli.send_forever(TESTING=True))
+            self.assertIn(
+                "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: CLOSED",
                 str(raised_exception.exception),
             )
 
@@ -518,7 +539,6 @@ class TestClient(TestCase):
 
         def mock_create_client():
             naz.Client(
-                async_loop=self.loop,
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",

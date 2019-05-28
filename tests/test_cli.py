@@ -1,17 +1,33 @@
-import io
 import os
+import io
 import sys
 import copy
 import json
+import signal
+import asyncio
 import logging
 import argparse
-from unittest import TestCase
+from unittest import TestCase, mock
 
-import mock
+import cli
+import naz
 import docker
-from . import cli
 
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
+
+logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.WARNING)
+
+
+def AsyncMock(*args, **kwargs):
+    """
+    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
+    """
+    m = mock.MagicMock(*args, **kwargs)
+
+    async def mock_coro(*args, **kwargs):
+        return m(*args, **kwargs)
+
+    mock_coro.mock = m
+    return mock_coro
 
 
 class MockArgumentParser:
@@ -31,11 +47,11 @@ class TestCli(TestCase):
     run tests as:
         python -m unittest discover -v -s .
     run one testcase as:
-        python -m unittest -v cli.test_cli.TestCli.test_bad_args
+        python -m unittest -v tests.test_cli.TestCli.test_bad_args
     """
 
     def setUp(self):
-        self.parser = cli.make_parser()
+        self.parser = cli.cli.make_parser()
 
         self.docker_client = docker.from_env()
         smppSimulatorName = "nazTestSmppSimulator"
@@ -83,7 +99,7 @@ class TestCli(TestCase):
     def test_cli_success(self):
         with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
             mock_ArgumentParser.return_value = MockArgumentParser(naz_config=self.naz_config)
-            cli.main()
+            cli.cli.main()
 
     def test_cli_failure(self):
         with self.assertRaises(SystemExit):
@@ -91,7 +107,7 @@ class TestCli(TestCase):
             bad_config.pop("outboundqueue")
             with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
                 mock_ArgumentParser.return_value = MockArgumentParser(naz_config=bad_config)
-                cli.main()
+                cli.cli.main()
 
     def test_load_class_error(self):
         with self.assertRaises(SystemExit):
@@ -99,4 +115,60 @@ class TestCli(TestCase):
             bad_config.update({"outboundqueue": "BareClass"})
             with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
                 mock_ArgumentParser.return_value = MockArgumentParser(naz_config=bad_config)
-                cli.main()
+                cli.cli.main()
+
+
+class TestCliSigHandling(TestCase):
+    """
+    run tests as:
+        python -m unittest discover -v -s .
+    run one testcase as:
+        python -m unittest -v tests.test_cli.TestCliSigHandling.test_something
+    """
+
+    def setUp(self):
+        self.client = naz.Client(
+            smsc_host="smsc_host",
+            smsc_port=6767,
+            system_id="system_id",
+            password=os.environ.get("password", "password"),
+            outboundqueue=naz.q.SimpleOutboundQueue(),
+            drain_duration=0.001,
+        )
+        self.loop = asyncio.get_event_loop()
+        self.logger = naz.logger.SimpleLogger("naz.TestCliSigHandling")
+
+    def tearDown(self):
+        pass
+
+    def _run(self, coro):
+        return self.loop.run_until_complete(coro)
+
+    def test_success_signal_handling(self):
+        self._run(
+            cli.utils.sig._signal_handling(logger=self.logger, client=self.client, loop=self.loop)
+        )
+
+    def test_success_handle_termination_signal(self):
+        with mock.patch("naz.Client.shutdown", new=AsyncMock()) as mock_naz_shutdown:
+            self._run(
+                cli.utils.sig._handle_termination_signal(
+                    logger=self.logger, _signal=signal.SIGTERM, client=self.client
+                )
+            )
+            self.assertTrue(mock_naz_shutdown.mock.called)
+
+    def test_termination_call_client_shutdown(self):
+        with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
+
+            class MockStreamWriter:
+                def close(self):
+                    return
+
+            self.client.writer = MockStreamWriter()
+            self._run(
+                cli.utils.sig._handle_termination_signal(
+                    logger=self.logger, _signal=signal.SIGTERM, client=self.client
+                )
+            )
+            self.assertTrue(mock_naz_unbind.mock.called)

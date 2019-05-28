@@ -58,7 +58,7 @@ rateLimiter | python class instance implementing rate limitation | naz.ratelimit
 hook | python class instance implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
 throttle_handler | python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
 correlation_handler | A python class instance that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
-drain_duration | duration in seconds that `naz` will wait for after receiving a termination signal. | 8
+drain_duration | duration in seconds that `naz` will wait for after receiving a termination signal. | 8.00
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
@@ -94,12 +94,9 @@ drain_duration | duration in seconds that `naz` will wait for after receiving a 
 import asyncio
 import naz
 
-loop = asyncio.get_event_loop()
-
 class ExampleQueue(naz.q.BaseOutboundQueue):
     def __init__(self):
-        loop = asyncio.get_event_loop()
-        self.queue = asyncio.Queue(maxsize=1000, loop=loop)
+        self.queue = asyncio.Queue(maxsize=1000)
     async def enqueue(self, item):
         self.queue.put_nowait(item)
     async def dequeue(self):
@@ -108,7 +105,6 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
 
 outboundqueue = ExampleQueue()
 cli = naz.Client(
-    async_loop=loop,
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
