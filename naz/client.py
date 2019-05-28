@@ -1604,7 +1604,7 @@ class Client:
                 )
                 if self.SHOULD_SHUT_DOWN:
                     return None
-                await asyncio.sleep(8)
+                await asyncio.sleep(poll_read_interval)
                 continue
             else:
                 # we didn't fail to read from SMSC
