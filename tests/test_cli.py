@@ -156,3 +156,13 @@ class TestCliSigHandling(TestCase):
                 )
             )
             self.assertTrue(mock_naz_shutdown.mock.called)
+
+    def test_termination_call_client_shutdown(self):
+        # connect so that session state can be `OPEN`
+        self._run(self.client.connect())
+        self._run(
+            cli.utils.sig._handle_termination_signal(
+                logger=self.logger, _signal=signal.SIGTERM, client=self.client
+            )
+        )
+        # self.assertTrue(mock_naz_shutdown.mock.called)
