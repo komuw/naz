@@ -1536,7 +1536,14 @@ class Client:
         """
         retry_count = 0
         while True:
-            self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "start"})
+            self._log(
+                logging.INFO,
+                {
+                    "event": "naz.Client.receive_data",
+                    "stage": "start",
+                    "connection_lost": self.writer.transport.is_closing(),
+                },
+            )
             if self.SHOULD_SHUT_DOWN:
                 self._log(
                     logging.INFO,
@@ -1579,7 +1586,7 @@ class Client:
                 )
                 if self.SHOULD_SHUT_DOWN:
                     return None
-                await asyncio.sleep(poll_read_interval)
+                await asyncio.sleep(8)
                 continue
             else:
                 # we didn't fail to read from SMSC
