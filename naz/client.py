@@ -1219,10 +1219,21 @@ class Client:
                 "connection_lost": self.writer.transport.is_closing(),
             },
         )
-        self.reader=None
-        self.writer=None
-        await self.connect()
-        await self.tranceiver_bind()
+        try:
+            await self.connect()
+            await self.tranceiver_bind()
+        except ConnectionError as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.re_establish_conn_bind",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "unable to re-connect & re-bind to SMSC",
+                    "error": str(e),
+                },
+            )
 
     async def send_data(
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
@@ -1537,8 +1548,21 @@ class Client:
                 )
                 return None
 
-            # todo: look at `pause_reading` and `resume_reading` methods
-            command_length_header_data = await self.reader.read(4)
+            command_length_header_data = b""
+            try:
+                # todo: look at `pause_reading` and `resume_reading` methods
+                command_length_header_data = await self.reader.read(4)
+            except ConnectionError as e:
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "unable to read from SMSC",
+                        "error": str(e),
+                    },
+                )
+
             if command_length_header_data == b"":
                 retry_count += 1
                 poll_read_interval = self._retry_after(retry_count)
@@ -1567,7 +1591,19 @@ class Client:
             chunks = []
             bytes_recd = 0
             while bytes_recd < MSGLEN:
-                chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                chunk = b""
+                try:
+                    chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                except ConnectionError as e:
+                    self._log(
+                        logging.ERROR,
+                        {
+                            "event": "naz.Client.receive_data",
+                            "stage": "end",
+                            "state": "unable to read from SMSC",
+                            "error": str(e),
+                        },
+                    )
                 if chunk == b"":
                     err = RuntimeError("socket connection broken")
                     self._log(

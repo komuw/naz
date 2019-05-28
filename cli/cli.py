@@ -225,7 +225,7 @@ def main():
                 cli.receive_data(TESTING=dry_run),
                 cli.enquire_link(TESTING=dry_run),
                 sig._signal_handling(logger=logger, client=cli, loop=loop),
-                return_exceptions=True,
+                # return_exceptions=True,
                 loop=loop,
             )
             await tasks
