@@ -173,7 +173,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_naz_dequeue.mock.called)
 
@@ -301,7 +301,7 @@ class TestClient(TestCase):
             for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
-            self._run(cli.send_forever(TESTING=True))
+            self._run(cli.dequeue_messages(TESTING=True))
 
             self.assertFalse(mock_naz_dequeue.mock.called)
 
@@ -383,7 +383,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_hook_request.mock.called)
             self.assertEqual(
@@ -461,7 +461,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             with self.assertRaises(ValueError) as raised_exception:
-                self._run(self.cli.send_forever(TESTING=True))
+                self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertIn(
                 "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: OPEN",
                 str(raised_exception.exception),
@@ -483,7 +483,7 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             with self.assertRaises(ValueError) as raised_exception:
-                self._run(self.cli.send_forever(TESTING=True))
+                self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertIn(
                 "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: CLOSED",
                 str(raised_exception.exception),
@@ -512,7 +512,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_correlater_put.mock.called)
 
             self.assertEqual(mock_correlater_put.mock.call_args[1]["log_id"], log_id)
@@ -615,7 +615,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(self.cli.correlation_handler.store[mock_sequence_number])
             self.assertEqual(
                 self.cli.correlation_handler.store[mock_sequence_number]["log_id"], log_id

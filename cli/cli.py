@@ -221,7 +221,7 @@ def main():
         async def async_main():
             # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
             tasks = asyncio.gather(
-                cli.send_forever(TESTING=dry_run),
+                cli.dequeue_messages(TESTING=dry_run),
                 cli.receive_data(TESTING=dry_run),
                 cli.enquire_link(TESTING=dry_run),
                 sig._signal_handling(logger=logger, client=cli, loop=loop),

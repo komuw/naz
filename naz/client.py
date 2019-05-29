@@ -47,7 +47,7 @@ class Client:
 
         # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
         tasks = asyncio.gather(
-            client.send_forever(),
+            client.dequeue_messages(),
             client.receive_data(),
             client.enquire_link(),
             loop=loop,
@@ -1408,7 +1408,7 @@ class Client:
             },
         )
 
-    async def send_forever(
+    async def dequeue_messages(
         self, TESTING: bool = False
     ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
         """
@@ -1419,12 +1419,12 @@ class Client:
         """
         retry_count = 0
         while True:
-            self._log(logging.INFO, {"event": "naz.Client.send_forever", "stage": "start"})
+            self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
                 self._log(
                     logging.INFO,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "state": "cleanly shutting down client.",
                     },
@@ -1440,9 +1440,9 @@ class Client:
                 self._log(
                     logging.ERROR,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
-                        "state": "send_forever error",
+                        "state": "dequeue_messages error",
                         "error": str(e),
                     },
                 )
@@ -1455,9 +1455,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "dequeue_messages error",
                             "error": str(e),
                         },
                     )
@@ -1471,9 +1471,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error. sleeping for {0}minutes".format(
+                            "state": "dequeue_messages error. sleeping for {0}minutes".format(
                                 poll_queue_interval / 60
                             ),
                             "retry_count": retry_count,
@@ -1507,9 +1507,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "dequeue_messages error",
                             "error": str(e),
                         },
                     )
@@ -1524,7 +1524,7 @@ class Client:
                 self._log(
                     logging.INFO,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "log_id": log_id,
                         "smpp_command": smpp_command,
@@ -1539,7 +1539,7 @@ class Client:
                 self._log(
                     logging.INFO,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "send_request": send_request,
                     },
@@ -1550,9 +1550,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "dequeue_messages error",
                             "error": str(e),
                         },
                     )
