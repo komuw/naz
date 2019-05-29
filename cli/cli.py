@@ -7,6 +7,7 @@ import asyncio
 import logging
 import inspect
 import argparse
+import importlib
 
 import naz
 
@@ -43,6 +44,8 @@ def load_class(dotted_path):
     THE SOFTWARE.
     """
     try:
+
+        # importlib.import_module()
         path, klass = dotted_path.rsplit(".", 1)
         __import__(path)
         mod = sys.modules[path]
@@ -216,7 +219,7 @@ def main():
             asyncio_debug = True
         # call naz api
         client = naz.Client(**kwargs)
-        asyncio.run(async_main(client=client), debug=asyncio_debug)
+        asyncio.run(async_main(client=client, logger=logger, dry_run=dry_run), debug=asyncio_debug)
 
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
@@ -225,7 +228,7 @@ def main():
         logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "end"})
 
 
-async def async_main(client: naz.Client) -> None:
+async def async_main(client: naz.Client, logger: naz.logger.BaseLogger, dry_run: bool) -> None:
     # connect to the SMSC host
     await client.connect()
     # bind to SMSC as a tranceiver
@@ -233,13 +236,12 @@ async def async_main(client: naz.Client) -> None:
 
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
     tasks = asyncio.gather(
-        cli.send_forever(TESTING=dry_run),
-        cli.receive_data(TESTING=dry_run),
-        cli.enquire_link(TESTING=dry_run),
-        # cli.re_establish_conn_bind(TESTING=dry_run),
-        sig._signal_handling(logger=logger, client=cli, loop=loop),
+        client.send_forever(TESTING=dry_run),
+        client.receive_data(TESTING=dry_run),
+        client.enquire_link(TESTING=dry_run),
+        # client.re_establish_conn_bind(TESTING=dry_run),
+        sig._signal_handling(logger=logger, client=client),
         # return_exceptions=True,
-        loop=loop,
     )
     await tasks
 
