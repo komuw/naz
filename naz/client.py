@@ -1250,7 +1250,7 @@ class Client:
                 try:
                     await self.connect()
                     await self.tranceiver_bind()
-                except ConnectionError as e:
+                except (ConnectionError, asyncio.TimeoutError) as e:
                     self._log(
                         logging.ERROR,
                         {
