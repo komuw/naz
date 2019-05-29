@@ -1214,7 +1214,7 @@ class Client:
                 {
                     "event": "naz.Client.re_establish_conn_bind",
                     "stage": "start",
-                    "connection_lost": self.writer.transport.is_closing(),
+                    "connection_lost": self.writer.transport.is_closing() if self.writer else True,
                 },
             )
             if self.SHOULD_SHUT_DOWN:
@@ -1227,7 +1227,8 @@ class Client:
                     },
                 )
                 return None
-            if self.writer.transport.is_closing():
+
+            if (self.writer is None) or self.writer.transport.is_closing():
                 # connection was lost for some reason:
                 # 1. re-connect
                 # 2. re-bind
@@ -1283,7 +1284,7 @@ class Client:
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "msg": log_msg,
-                "connection_lost": self.writer.transport.is_closing(),
+                "connection_lost": self.writer.transport.is_closing() if self.writer else True,
             },
         )
 
