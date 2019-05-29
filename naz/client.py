@@ -313,12 +313,6 @@ class Client:
         # vumi uses a default value of 30secs:
         # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
 
-        # TODO: add it to args and validate
-        self.read_timeout: float = 3.0
-
-        # TODO: add it to args and validate
-        self.write_timeout: float = 3.0
-
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
     @staticmethod
@@ -1374,20 +1368,10 @@ class Client:
             # When there is nothing to wait for, the drain() returns immediately.
             # ref: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.drain
             self.writer.write(msg)
-
-            # await self.drain_lock.acquire()
-            # try:
-            #     await self.writer.drain()
-            # finally:
-            #     self.drain_lock.release()
-            # TODO: replace with
             async with self.drain_lock:
                 # see: https://github.com/komuw/naz/issues/114
                 # for reasons
                 await self.writer.drain()
-
-            # await asyncio.wait_for( self.writer.drain(), timeout=0.001)
-            # we cannot use asyncio.wait_for(self.writer.write, timeout) since `writer.write` is not a coroutine
         except ConnectionError as e:
             self._log(
                 logging.ERROR,
@@ -1590,9 +1574,9 @@ class Client:
             command_length_header_data = b""
             try:
                 # todo: look at `pause_reading` and `resume_reading` methods
-                command_length_header_data = await asyncio.wait_for(
-                    self.reader.read(4), timeout=self.read_timeout
-                )
+                # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
+                # https://github.com/komuw/naz/issues/116
+                command_length_header_data = await self.reader.read(4)
             except (ConnectionError, asyncio.TimeoutError) as e:
                 self._log(
                     logging.ERROR,
@@ -1634,9 +1618,7 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = b""
                 try:
-                    chunk = await asyncio.wait_for(
-                        self.reader.read(min(MSGLEN - bytes_recd, 2048)), timeout=self.read_timeout
-                    )
+                    chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 except (ConnectionError, asyncio.TimeoutError) as e:
                     self._log(
                         logging.ERROR,
