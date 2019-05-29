@@ -226,7 +226,7 @@ def main():
                 cli.enquire_link(TESTING=dry_run),
                 cli.re_establish_conn_bind(TESTING=dry_run),
                 sig._signal_handling(logger=logger, client=cli, loop=loop),
-                # return_exceptions=True,
+                return_exceptions=True,
                 loop=loop,
             )
             await tasks

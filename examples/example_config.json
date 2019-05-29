@@ -6,5 +6,5 @@
     "outboundqueue": "examples.example_klasses.ExampleRedisQueueInstance",
     "loglevel": "INFO",
     "codec_errors_level": "ignore",
-    "enquire_link_interval": 70
+    "enquire_link_interval": 15
 }

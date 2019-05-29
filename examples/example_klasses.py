@@ -151,3 +151,6 @@ if __name__ == "__main__":
             "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
         }
         loop.run_until_complete(ExampleRedisQueueInstance.enqueue(item_to_enqueue))
+        # import time
+
+        # time.sleep(3)
