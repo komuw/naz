@@ -728,10 +728,6 @@ class Client:
         """
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
-            if self.current_session_state != SmppSessionState.BOUND_TRX:
-                # you can only send enquire_link request when session state is BOUND_TRX
-                await asyncio.sleep(self.enquire_link_interval)
-
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self._log(
                 logging.DEBUG,
@@ -1203,21 +1199,21 @@ class Client:
         )
         return full_pdu
 
-    async def re_establish_conn_bind(self, smpp_command: str, log_id: str) -> None:
+    async def re_establish_conn_bind(self, TESTING: bool = False) -> None:
         """
-        called by naz when a connection is lost.
-        - it re-establishes a connection to SMSC
-        - re-binds to SMSC
+        In a loop; checks if connection is lost. If lost, reconnects & rebinds to SMSC.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
         """
-        retry_count = 0
+        retry_interval = self.enquire_link_interval / 3
         while True:
+            await asyncio.sleep(retry_interval)
             self._log(
                 logging.INFO,
                 {
                     "event": "naz.Client.re_establish_conn_bind",
                     "stage": "start",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
                     "connection_lost": self.writer.transport.is_closing(),
                 },
             )
@@ -1231,31 +1227,28 @@ class Client:
                     },
                 )
                 return None
-            try:
-                await self.connect()
-                await self.tranceiver_bind()
+            if self.writer.transport.is_closing():
+                # connection was lost for some reason:
+                # 1. re-connect
+                # 2. re-bind
+                try:
+                    await self.connect()
+                    await self.tranceiver_bind()
+                except ConnectionError as e:
+                    self._log(
+                        logging.ERROR,
+                        {
+                            "event": "naz.Client.re_establish_conn_bind",
+                            "stage": "end",
+                            "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
+                                retry_interval / 60
+                            ),
+                            "error": str(e),
+                        },
+                    )
+            if TESTING:
+                # offer escape hatch for tests to come out of endless loop
                 return None
-            except ConnectionError as e:
-                retry_count += 1
-                reconnect_interval = self._retry_after(retry_count)
-                self._log(
-                    logging.ERROR,
-                    {
-                        "event": "naz.Client.re_establish_conn_bind",
-                        "stage": "end",
-                        "smpp_command": smpp_command,
-                        "log_id": log_id,
-                        "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
-                            reconnect_interval / 60
-                        ),
-                        "error": str(e),
-                        "retry_count": retry_count,
-                    },
-                )
-                if self.SHOULD_SHUT_DOWN:
-                    return None
-                await asyncio.sleep(reconnect_interval)
-                continue
 
     async def send_data(
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
@@ -1293,11 +1286,6 @@ class Client:
                 "connection_lost": self.writer.transport.is_closing(),
             },
         )
-        if self.writer.transport.is_closing():
-            # connection was lost for some reason, try:
-            # 1. re-connect
-            # 2. re-bind
-            await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
         # check session state to see if we can send messages.
         # see section 2.3 of SMPP spec document v3.4
@@ -1329,7 +1317,7 @@ class Client:
                 smpp_command, self.current_session_state
             )
             self._log(
-                logging.INFO,
+                logging.ERROR,
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
@@ -1340,10 +1328,7 @@ class Client:
                     "error": error_msg,
                 },
             )
-            # wait for `current_session_state` to change to `BOUND_TRX`
-            # `re_establish_conn_bind` may not have completed yet.
-            await asyncio.sleep(self.enquire_link_interval)
-            # raise ValueError(error_msg)
+            raise ValueError(error_msg)
 
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
