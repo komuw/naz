@@ -735,6 +735,8 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
+        # sleep during startup so that `naz` can have had time to connect & bind
+        await asyncio.sleep(self.enquire_link_interval)
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
