@@ -1206,11 +1206,11 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        retry_interval = self.enquire_link_interval / 3
+        retry_interval = self.enquire_link_interval / 5
         while True:
             await asyncio.sleep(retry_interval)
             self._log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "naz.Client.re_establish_conn_bind",
                     "stage": "start",
@@ -1219,7 +1219,7 @@ class Client:
             )
             if self.SHOULD_SHUT_DOWN:
                 self._log(
-                    logging.INFO,
+                    logging.DEBUG,
                     {
                         "event": "naz.Client.re_establish_conn_bind",
                         "stage": "end",
