@@ -1211,21 +1211,22 @@ class Client:
         )
         return full_pdu
 
-    async def re_establish_conn_bind(self, TESTING: bool = False) -> None:
+    async def re_establish_conn_bind(
+        self, smpp_command: str, log_id: str, TESTING: bool = False
+    ) -> None:
         """
         In a loop; checks if connection is lost. If lost, reconnects & rebinds to SMSC.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        # retry_interval = self.enquire_link_interval / 5
-        # while True:
-        # await asyncio.sleep(retry_interval)
         self._log(
-            logging.DEBUG,
+            logging.INFO,
             {
                 "event": "naz.Client.re_establish_conn_bind",
                 "stage": "start",
+                "smpp_command": smpp_command,
+                "log_id": log_id,
                 "connection_lost": self.writer.transport.is_closing() if self.writer else True,
             },
         )
@@ -1235,16 +1236,16 @@ class Client:
                 {
                     "event": "naz.Client.re_establish_conn_bind",
                     "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
                     "state": "cleanly shutting down client.",
                 },
             )
             return None
 
-        # if (self.writer is None) or self.writer.transport.is_closing():
-        #     # connection was lost for some reason:
-        #     # 1. re-connect
-        #     # 2. re-bind
         try:
+            # 1. re-connect
+            # 2. re-bind
             await self.connect()
             await self.tranceiver_bind()
         except (ConnectionError, asyncio.TimeoutError) as e:
@@ -1253,6 +1254,8 @@ class Client:
                 {
                     "event": "naz.Client.re_establish_conn_bind",
                     "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
                     "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
                         retry_interval / 60
                     ),
@@ -1348,7 +1351,7 @@ class Client:
         ):
             # do not re-establish connection if session state is `OPEN`
             # ie we have not even connected the first time yet
-            await self.re_establish_conn_bind()
+            await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
