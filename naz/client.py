@@ -1215,50 +1215,58 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        retry_interval = self.enquire_link_interval / 5
-        while True:
-            await asyncio.sleep(retry_interval)
+        # retry_interval = self.enquire_link_interval / 5
+        # while True:
+        # await asyncio.sleep(retry_interval)
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.re_establish_conn_bind",
+                "stage": "start",
+                "connection_lost": self.writer.transport.is_closing() if self.writer else True,
+            },
+        )
+        if self.SHOULD_SHUT_DOWN:
             self._log(
                 logging.DEBUG,
                 {
                     "event": "naz.Client.re_establish_conn_bind",
-                    "stage": "start",
-                    "connection_lost": self.writer.transport.is_closing() if self.writer else True,
+                    "stage": "end",
+                    "state": "cleanly shutting down client.",
                 },
             )
-            if self.SHOULD_SHUT_DOWN:
-                self._log(
-                    logging.DEBUG,
-                    {
-                        "event": "naz.Client.re_establish_conn_bind",
-                        "stage": "end",
-                        "state": "cleanly shutting down client.",
-                    },
-                )
-                return None
+            return None
 
-            if (self.writer is None) or self.writer.transport.is_closing():
-                # connection was lost for some reason:
-                # 1. re-connect
-                # 2. re-bind
-                try:
-                    await self.connect()
-                    await self.tranceiver_bind()
-                except (ConnectionError, asyncio.TimeoutError) as e:
-                    self._log(
-                        logging.ERROR,
-                        {
-                            "event": "naz.Client.re_establish_conn_bind",
-                            "stage": "end",
-                            "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
-                                retry_interval / 60
-                            ),
-                            "error": str(e),
-                        },
-                    )
-            if TESTING:
-                # offer escape hatch for tests to come out of endless loop
-                return None
+        # if (self.writer is None) or self.writer.transport.is_closing():
+        # connection was lost for some reason:
+        # 1. re-connect
+        # 2. re-bind
+        try:
+            await self.connect()
+            await self.tranceiver_bind()
+        except (ConnectionError, asyncio.TimeoutError) as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.re_establish_conn_bind",
+                    "stage": "end",
+                    "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
+                        retry_interval / 60
+                    ),
+                    "error": str(e),
+                },
+            )
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.re_establish_conn_bind",
+                "stage": "end",
+                "connection_lost": self.writer.transport.is_closing() if self.writer else True,
+            },
+        )
+        if TESTING:
+            # offer escape hatch for tests to come out of endless loop
+            return None
 
     async def send_data(
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
@@ -1340,9 +1348,11 @@ class Client:
             )
             raise ValueError(error_msg)
 
+        if (self.writer is None) or self.writer.transport.is_closing():
+            await self.re_establish_conn_bind()
+
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
-
         # call user's hook for requests
         try:
             await self.hook.request(

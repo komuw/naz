@@ -211,34 +211,37 @@ def main():
         if dry_run:
             return
 
+        asyncio_debug = False
+        if os.environ.get("NAZ_DEBUG", None):
+            asyncio_debug = True
         # call naz api
-        cli = naz.Client(**kwargs)
-        # connect to the SMSC host
-        _, _ = loop.run_until_complete(cli.connect())
-        # bind to SMSC as a tranceiver
-        loop.run_until_complete(cli.tranceiver_bind())
+        client = naz.Client(**kwargs)
+        asyncio.run(async_main(client=client), debug=asyncio_debug)
 
-        async def async_main():
-            # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-            tasks = asyncio.gather(
-                cli.send_forever(TESTING=dry_run),
-                cli.receive_data(TESTING=dry_run),
-                cli.enquire_link(TESTING=dry_run),
-                cli.re_establish_conn_bind(TESTING=dry_run),
-                sig._signal_handling(logger=logger, client=cli, loop=loop),
-                return_exceptions=True,
-                loop=loop,
-            )
-            await tasks
-
-        loop.create_task(async_main())
-        loop.run_forever()
-        # loop.run_until_complete(tasks)
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
     finally:
         logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "end"})
+
+
+async def async_main(client: naz.Client) -> None:
+    # connect to the SMSC host
+    await client.connect()
+    # bind to SMSC as a tranceiver
+    await client.tranceiver_bind()
+
+    # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+    tasks = asyncio.gather(
+        cli.send_forever(TESTING=dry_run),
+        cli.receive_data(TESTING=dry_run),
+        cli.enquire_link(TESTING=dry_run),
+        # cli.re_establish_conn_bind(TESTING=dry_run),
+        sig._signal_handling(logger=logger, client=cli, loop=loop),
+        # return_exceptions=True,
+        loop=loop,
+    )
+    await tasks
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ python:
 env:
   global:
     - PYTHONASYNCIODEBUG='1'
+    - NAZ_DEBUG='1'
 
 before_install:
 - pwd
