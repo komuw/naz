@@ -96,15 +96,28 @@ class ExampleRedisQueue(naz.q.BaseOutboundQueue):
     """
 
     def __init__(self):
-        self.loop = asyncio.get_event_loop()
         self.redis_instance = redis.StrictRedis(host="localhost", port=6379, db=0)
         self.queue_name = "myqueue"
+        self._LOOP = None
+
+    def _get_pool(self):
+        if self._LOOP:
+            return self._LOOP
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.get_event_loop()
+        except Exception as e:
+            raise e
+
+        self._LOOP = loop
+        return self._LOOP
 
     async def enqueue(self, item):
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="naz-redis-thread-pool"
         ) as executor:
-            await self.loop.run_in_executor(
+            await self._get_pool().run_in_executor(
                 executor, functools.partial(self.blocking_enqueue, item=item)
             )
 
@@ -116,7 +129,7 @@ class ExampleRedisQueue(naz.q.BaseOutboundQueue):
             thread_name_prefix="naz-redis-thread-pool"
         ) as executor:
             while True:
-                item = await self.loop.run_in_executor(
+                item = await self._get_pool().run_in_executor(
                     executor, functools.partial(self.blocking_dequeue)
                 )
                 if item:

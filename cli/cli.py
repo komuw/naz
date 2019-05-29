@@ -241,7 +241,7 @@ async def async_main(client: naz.Client, logger: naz.logger.BaseLogger, dry_run:
         client.enquire_link(TESTING=dry_run),
         # client.re_establish_conn_bind(TESTING=dry_run),
         sig._signal_handling(logger=logger, client=client),
-        # return_exceptions=True,
+        return_exceptions=True,
     )
     await tasks
 
