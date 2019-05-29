@@ -1343,7 +1343,11 @@ class Client:
             )
             raise ValueError(error_msg)
 
-        if (self.writer is None) or self.writer.transport.is_closing():
+        if (self.current_session_state != SmppSessionState.OPEN) and (
+            (self.writer is None) or self.writer.transport.is_closing()
+        ):
+            # do not re-establish connection if session state is `OPEN`
+            # ie we have not even connected the first time yet
             await self.re_establish_conn_bind()
 
         if isinstance(msg, str):
