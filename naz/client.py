@@ -1256,9 +1256,7 @@ class Client:
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": "unable to re-connect & re-bind to SMSC. sleeping for {0}minutes".format(
-                        retry_interval / 60
-                    ),
+                    "state": "unable to re-connect & re-bind to SMSC",
                     "error": str(e),
                 },
             )
