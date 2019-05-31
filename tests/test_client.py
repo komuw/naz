@@ -124,6 +124,7 @@ class TestClient(TestCase):
             pass
 
         client_args = {
+            "loglevel": "SomeBadLogLevel",
             "smsc_host": DummyClientArg,
             "smsc_port": DummyClientArg,
             "system_id": DummyClientArg,
@@ -136,7 +137,6 @@ class TestClient(TestCase):
             "address_range": DummyClientArg,
             "encoding": DummyClientArg,
             "sequence_generator": DummyClientArg,
-            "loglevel": "SomeBadLogLevel",
             "log_metadata": DummyClientArg,
             "system_id": DummyClientArg,
             "codec_errors_level": DummyClientArg,
