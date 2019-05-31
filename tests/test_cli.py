@@ -157,19 +157,23 @@ class TestCliSigHandling(TestCase):
         with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
 
             class MockStreamWriterTransport:
-                def set_write_buffer_limits(self, value):
+                @staticmethod
+                def set_write_buffer_limits(value):
                     return
 
             class MockStreamWriter:
                 transport = MockStreamWriterTransport()
 
-                def close(self):
+                @staticmethod
+                def close():
                     return
 
-                def write(self, stuff):
+                @staticmethod
+                def write(stuff):
                     return
 
-                async def drain(self):
+                @staticmethod
+                async def drain():
                     return
 
             self.client.writer = MockStreamWriter()
