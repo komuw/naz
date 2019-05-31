@@ -128,7 +128,7 @@ cli = naz.Client(
     system_id="smppclient1",
     password=os.getenv("password", "password"),
     outboundqueue=outboundqueue,
-    enquire_link_interval=17,
+    enquire_link_interval=17.00,
 )
 
 item_to_enqueue = {

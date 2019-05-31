@@ -76,7 +76,7 @@ class TestCli(TestCase):
             "loglevel": "INFO",
             "log_metadata": {"environment": "production", "release": "canary"},
             "codec_errors_level": "ignore",
-            "enquire_link_interval": 30,
+            "enquire_link_interval": 30.00,
             "rateLimiter": "examples.example_klasses.ExampleRateLimiter",
         }
 

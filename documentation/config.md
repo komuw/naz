@@ -53,7 +53,7 @@ loglevel | the level at which to log | INFO
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
 codec_class | python class instance to be used to encode/decode messages | naz.nazcodec.SimpleNazCodec
 codec_errors_level | same meaning as the `errors` argument to pythons' `encode` method as [defined here](https://docs.python.org/3/library/codecs.html#codecs.encode) | strict
-enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 90
+enquire_link_interval | time in seconds to wait before sending an `enquire_link` request to SMSC to check on its status | 55.0
 rateLimiter | python class instance implementing rate limitation | naz.ratelimiter.SimpleRateLimiter
 hook | python class instance implemeting functionality/hooks to be called by `naz` just before sending request to SMSC and just after getting response from SMSC | naz.hooks.SimpleHook
 throttle_handler | python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
@@ -85,7 +85,7 @@ connect_timeout | duration that `naz` will try to connect to SMSC before timing 
     "release": "canary"
   },
   "codec_errors_level": "ignore",
-  "enquire_link_interval": 30,
+  "enquire_link_interval": 30.0,
   "rateLimiter": "dotted.path.to.CustomRateLimiter"
 }
 ```

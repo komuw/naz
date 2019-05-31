@@ -90,7 +90,7 @@ class Client:
         registered_delivery: int = 0b00000001,  # see section 5.2.17
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
-        enquire_link_interval: int = 55,
+        enquire_link_interval: float = 55.00,
         log_handler: typing.Union[None, logger.BaseLogger] = None,
         loglevel: str = "INFO",
         log_metadata: typing.Union[None, dict] = None,
@@ -341,7 +341,7 @@ class Client:
         registered_delivery: int,
         replace_if_present_flag: int,
         sm_default_msg_id: int,
-        enquire_link_interval: int,
+        enquire_link_interval: float,
         log_handler: typing.Union[None, logger.BaseLogger],
         loglevel: str,
         log_metadata: typing.Union[None, dict],
@@ -544,10 +544,10 @@ class Client:
                     )
                 )
             )
-        if not isinstance(enquire_link_interval, int):
+        if not isinstance(enquire_link_interval, float):
             errors.append(
                 ValueError(
-                    "`enquire_link_interval` should be of type:: `int` You entered: {0}".format(
+                    "`enquire_link_interval` should be of type:: `float` You entered: {0}".format(
                         type(enquire_link_interval)
                     )
                 )
