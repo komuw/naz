@@ -99,16 +99,19 @@ That docker-compose file also has a redis and rabbitMQ container if you would li
 
 #### 2. As a cli app
 naz also ships with a commandline interface app called `naz-cli`.            
-create a json config file, eg;            
-`/tmp/my_config.json`
-```
-{
-  "smsc_host": "127.0.0.1",
-  "smsc_port": 2775,
-  "system_id": "smppclient1",
-  "password": "password",
-  "outboundqueue": "myfile.ExampleQueue"
-}
+create a python config file, eg;            
+`/tmp/my_config.py`
+```python
+import naz
+from myfile import ExampleQueue
+
+client = naz.Client(
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=ExampleQueue()
+)
 ```
 and a python file, `myfile.py` (in the current working directory) with the contents:
 
@@ -127,7 +130,7 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
 ```
 then 
 run:                
-`naz-cli --config /tmp/my_config.json`
+`naz-cli --client tmp.my_config.client`
 ```shell
 	 Naz: the SMPP client.
 
@@ -143,19 +146,19 @@ run:
              
 **NB:**      
 (a) For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)             
-(b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples). As an example, start the SMSC simulator(`docker-compose up`) then in another terminal run, `naz-cli --config examples/example_config.json`
+(b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples). As an example, start the SMSC simulator(`docker-compose up`) then in another terminal run, `naz-cli --client examples.example_config.client`
 
 To see help:
 
 `naz-cli --help`   
 ```shell         
 naz is an async SMPP client.     
-example usage: naz-cli --config /path/to/my_config.json
+example usage: naz-cli --client path.to.my_config.client
 
 optional arguments:
   -h, --help            show this help message and exit
   --version             The currently installed naz version.
-  --config CONFIG       The config file to use. eg: --config /path/to/my_config.json
+  --client CLIENT       The config file to use. eg: --client path.to.my_config.client
 ```
 
 
