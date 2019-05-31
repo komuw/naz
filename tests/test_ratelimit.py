@@ -1,13 +1,8 @@
-import sys
 import time
 import asyncio
-import logging
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import naz
-import mock
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
 
 def AsyncMock(*args, **kwargs):

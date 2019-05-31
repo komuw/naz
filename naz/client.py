@@ -47,7 +47,7 @@ class Client:
 
         # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
         tasks = asyncio.gather(
-            client.send_forever(),
+            client.dequeue_messages(),
             client.receive_data(),
             client.enquire_link(),
             loop=loop,
@@ -90,7 +90,7 @@ class Client:
         registered_delivery: int = 0b00000001,  # see section 5.2.17
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
-        enquire_link_interval: int = 300,
+        enquire_link_interval: float = 55.00,
         log_handler: typing.Union[None, logger.BaseLogger] = None,
         loglevel: str = "INFO",
         log_metadata: typing.Union[None, dict] = None,
@@ -102,6 +102,9 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
+        # connect_timeout value inspired by vumi
+        # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
+        connect_timeout: float = 30.0,
     ) -> None:
         """
         Parameters:
@@ -184,6 +187,7 @@ class Client:
             throttle_handler=throttle_handler,
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
+            connect_timeout=connect_timeout,
         )
 
         self._PID = os.getpid()
@@ -222,7 +226,7 @@ class Client:
                 "smsc_host": self.smsc_host,
                 "system_id": system_id,
                 "client_id": self.client_id,
-                "process_id": self._PID,
+                "pid": self._PID,
             }
         )
 
@@ -264,8 +268,8 @@ class Client:
 
         self.data_coding = self._find_data_coding(self.encoding)
 
-        self.reader: typing.Any = None
-        self.writer: typing.Any = None
+        self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
+        self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
         if log_handler is not None:
             self.logger = log_handler
@@ -306,7 +310,9 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
         self.drain_duration = drain_duration
+        self.connect_timeout = connect_timeout
         self.SHOULD_SHUT_DOWN: bool = False
+        self.drain_lock: asyncio.Lock = asyncio.Lock()
 
     @staticmethod
     def _validate_client_args(
@@ -335,7 +341,7 @@ class Client:
         registered_delivery: int,
         replace_if_present_flag: int,
         sm_default_msg_id: int,
-        enquire_link_interval: int,
+        enquire_link_interval: float,
         log_handler: typing.Union[None, logger.BaseLogger],
         loglevel: str,
         log_metadata: typing.Union[None, dict],
@@ -347,213 +353,309 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
+        connect_timeout: float,
     ) -> None:
+        """
+        Checks that the arguments to `naz.Client` are okay.
+        It raises an Exception that comprises of a list of Exceptions
+        """
+        errors: typing.List[ValueError] = []
         if not isinstance(smsc_host, str):
-            raise ValueError(
-                "`smsc_host` should be of type:: `str` You entered: {0}".format(type(smsc_host))
+            errors.append(
+                ValueError(
+                    "`smsc_host` should be of type:: `str` You entered: {0}".format(type(smsc_host))
+                )
             )
         if not isinstance(smsc_port, int):
-            raise ValueError(
-                "`smsc_port` should be of type:: `int` You entered: {0}".format(type(smsc_port))
+            errors.append(
+                ValueError(
+                    "`smsc_port` should be of type:: `int` You entered: {0}".format(type(smsc_port))
+                )
             )
         if not isinstance(system_id, str):
-            raise ValueError(
-                "`system_id` should be of type:: `str` You entered: {0}".format(type(system_id))
+            errors.append(
+                ValueError(
+                    "`system_id` should be of type:: `str` You entered: {0}".format(type(system_id))
+                )
             )
         if not isinstance(password, str):
-            raise ValueError(
-                "`password` should be of type:: `str` You entered: {0}".format(type(password))
+            errors.append(
+                ValueError(
+                    "`password` should be of type:: `str` You entered: {0}".format(type(password))
+                )
             )
         if not isinstance(outboundqueue, q.BaseOutboundQueue):
-            raise ValueError(
-                "`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: {0}".format(
-                    type(outboundqueue)
+            errors.append(
+                ValueError(
+                    "`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: {0}".format(
+                        type(outboundqueue)
+                    )
                 )
             )
         if not isinstance(client_id, (type(None), str)):
-            raise ValueError(
-                "`client_id` should be of type:: `None` or `str` You entered: {0}".format(
-                    type(client_id)
+            errors.append(
+                ValueError(
+                    "`client_id` should be of type:: `None` or `str` You entered: {0}".format(
+                        type(client_id)
+                    )
                 )
             )
         if not isinstance(system_type, str):
-            raise ValueError(
-                "`system_type` should be of type:: `str` You entered: {0}".format(type(system_type))
+            errors.append(
+                ValueError(
+                    "`system_type` should be of type:: `str` You entered: {0}".format(
+                        type(system_type)
+                    )
+                )
             )
         if not isinstance(addr_ton, int):
-            raise ValueError(
-                "`addr_ton` should be of type:: `int` You entered: {0}".format(type(addr_ton))
+            errors.append(
+                ValueError(
+                    "`addr_ton` should be of type:: `int` You entered: {0}".format(type(addr_ton))
+                )
             )
         if not isinstance(addr_npi, int):
-            raise ValueError(
-                "`addr_npi` should be of type:: `int` You entered: {0}".format(type(addr_npi))
+            errors.append(
+                ValueError(
+                    "`addr_npi` should be of type:: `int` You entered: {0}".format(type(addr_npi))
+                )
             )
         if not isinstance(address_range, str):
-            raise ValueError(
-                "`address_range` should be of type:: `str` You entered: {0}".format(
-                    type(address_range)
+            errors.append(
+                ValueError(
+                    "`address_range` should be of type:: `str` You entered: {0}".format(
+                        type(address_range)
+                    )
                 )
             )
         if not isinstance(encoding, str):
-            raise ValueError(
-                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+            errors.append(
+                ValueError(
+                    "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+                )
             )
         if not isinstance(interface_version, int):
-            raise ValueError(
-                "`interface_version` should be of type:: `int` You entered: {0}".format(
-                    type(interface_version)
+            errors.append(
+                ValueError(
+                    "`interface_version` should be of type:: `int` You entered: {0}".format(
+                        type(interface_version)
+                    )
                 )
             )
         if not isinstance(service_type, str):
-            raise ValueError(
-                "`service_type` should be of type:: `str` You entered: {0}".format(
-                    type(service_type)
+            errors.append(
+                ValueError(
+                    "`service_type` should be of type:: `str` You entered: {0}".format(
+                        type(service_type)
+                    )
                 )
             )
         if not isinstance(source_addr_ton, int):
-            raise ValueError(
-                "`source_addr_ton` should be of type:: `int` You entered: {0}".format(
-                    type(source_addr_ton)
+            errors.append(
+                ValueError(
+                    "`source_addr_ton` should be of type:: `int` You entered: {0}".format(
+                        type(source_addr_ton)
+                    )
                 )
             )
         if not isinstance(source_addr_npi, int):
-            raise ValueError(
-                "`source_addr_npi` should be of type:: `int` You entered: {0}".format(
-                    type(source_addr_npi)
+            errors.append(
+                ValueError(
+                    "`source_addr_npi` should be of type:: `int` You entered: {0}".format(
+                        type(source_addr_npi)
+                    )
                 )
             )
         if not isinstance(dest_addr_ton, int):
-            raise ValueError(
-                "`dest_addr_ton` should be of type:: `int` You entered: {0}".format(
-                    type(dest_addr_ton)
+            errors.append(
+                ValueError(
+                    "`dest_addr_ton` should be of type:: `int` You entered: {0}".format(
+                        type(dest_addr_ton)
+                    )
                 )
             )
         if not isinstance(dest_addr_npi, int):
-            raise ValueError(
-                "`dest_addr_npi` should be of type:: `int` You entered: {0}".format(
-                    type(dest_addr_npi)
+            errors.append(
+                ValueError(
+                    "`dest_addr_npi` should be of type:: `int` You entered: {0}".format(
+                        type(dest_addr_npi)
+                    )
                 )
             )
         if not isinstance(esm_class, int):
-            raise ValueError(
-                "`esm_class` should be of type:: `int` You entered: {0}".format(type(esm_class))
+            errors.append(
+                ValueError(
+                    "`esm_class` should be of type:: `int` You entered: {0}".format(type(esm_class))
+                )
             )
         if not isinstance(protocol_id, int):
-            raise ValueError(
-                "`protocol_id` should be of type:: `int` You entered: {0}".format(type(protocol_id))
+            errors.append(
+                ValueError(
+                    "`protocol_id` should be of type:: `int` You entered: {0}".format(
+                        type(protocol_id)
+                    )
+                )
             )
         if not isinstance(priority_flag, int):
-            raise ValueError(
-                "`priority_flag` should be of type:: `int` You entered: {0}".format(
-                    type(priority_flag)
+            errors.append(
+                ValueError(
+                    "`priority_flag` should be of type:: `int` You entered: {0}".format(
+                        type(priority_flag)
+                    )
                 )
             )
         if not isinstance(schedule_delivery_time, str):
-            raise ValueError(
-                "`schedule_delivery_time` should be of type:: `str` You entered: {0}".format(
-                    type(schedule_delivery_time)
+            errors.append(
+                ValueError(
+                    "`schedule_delivery_time` should be of type:: `str` You entered: {0}".format(
+                        type(schedule_delivery_time)
+                    )
                 )
             )
         if not isinstance(validity_period, str):
-            raise ValueError(
-                "`validity_period` should be of type:: `str` You entered: {0}".format(
-                    type(validity_period)
+            errors.append(
+                ValueError(
+                    "`validity_period` should be of type:: `str` You entered: {0}".format(
+                        type(validity_period)
+                    )
                 )
             )
         if not isinstance(registered_delivery, int):
-            raise ValueError(
-                "`registered_delivery` should be of type:: `int` You entered: {0}".format(
-                    type(registered_delivery)
+            errors.append(
+                ValueError(
+                    "`registered_delivery` should be of type:: `int` You entered: {0}".format(
+                        type(registered_delivery)
+                    )
                 )
             )
         if not isinstance(replace_if_present_flag, int):
-            raise ValueError(
-                "`replace_if_present_flag` should be of type:: `int` You entered: {0}".format(
-                    type(replace_if_present_flag)
+            errors.append(
+                ValueError(
+                    "`replace_if_present_flag` should be of type:: `int` You entered: {0}".format(
+                        type(replace_if_present_flag)
+                    )
                 )
             )
         if not isinstance(sm_default_msg_id, int):
-            raise ValueError(
-                "`sm_default_msg_id` should be of type:: `int` You entered: {0}".format(
-                    type(sm_default_msg_id)
+            errors.append(
+                ValueError(
+                    "`sm_default_msg_id` should be of type:: `int` You entered: {0}".format(
+                        type(sm_default_msg_id)
+                    )
                 )
             )
-        if not isinstance(enquire_link_interval, int):
-            raise ValueError(
-                "`enquire_link_interval` should be of type:: `int` You entered: {0}".format(
-                    type(enquire_link_interval)
+        if not isinstance(enquire_link_interval, float):
+            errors.append(
+                ValueError(
+                    "`enquire_link_interval` should be of type:: `float` You entered: {0}".format(
+                        type(enquire_link_interval)
+                    )
                 )
             )
         if not isinstance(log_handler, (type(None), logger.BaseLogger)):
-            raise ValueError(
-                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
-                    type(log_handler)
+            errors.append(
+                ValueError(
+                    "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                        type(log_handler)
+                    )
                 )
             )
         if not isinstance(loglevel, str):
-            raise ValueError(
-                "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+            errors.append(
+                ValueError(
+                    "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+                )
             )
         if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            raise ValueError(
-                """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
-                    loglevel
+            errors.append(
+                ValueError(
+                    """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                        loglevel
+                    )
                 )
             )
         if not isinstance(log_metadata, (type(None), dict)):
-            raise ValueError(
-                "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
-                    type(log_metadata)
+            errors.append(
+                ValueError(
+                    "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
+                        type(log_metadata)
+                    )
                 )
             )
         if not isinstance(codec_class, (type(None), nazcodec.BaseNazCodec)):
-            raise ValueError(
-                "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
-                    type(codec_class)
+            errors.append(
+                ValueError(
+                    "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
+                        type(codec_class)
+                    )
                 )
             )
         if not isinstance(codec_errors_level, str):
-            raise ValueError(
-                "`codec_errors_level` should be of type:: `str` You entered: {0}".format(
-                    type(codec_errors_level)
+            errors.append(
+                ValueError(
+                    "`codec_errors_level` should be of type:: `str` You entered: {0}".format(
+                        type(codec_errors_level)
+                    )
                 )
             )
         if not isinstance(rateLimiter, (type(None), ratelimiter.BaseRateLimiter)):
-            raise ValueError(
-                "`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
-                    type(rateLimiter)
+            errors.append(
+                ValueError(
+                    "`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
+                        type(rateLimiter)
+                    )
                 )
             )
         if not isinstance(hook, (type(None), hooks.BaseHook)):
-            raise ValueError(
-                "`hook` should be of type:: `None` or `naz.hooks.BaseHook` You entered: {0}".format(
-                    type(hook)
+            errors.append(
+                ValueError(
+                    "`hook` should be of type:: `None` or `naz.hooks.BaseHook` You entered: {0}".format(
+                        type(hook)
+                    )
                 )
             )
         if not isinstance(sequence_generator, (type(None), sequence.BaseSequenceGenerator)):
-            raise ValueError(
-                "`sequence_generator` should be of type:: `None` or `naz.sequence.BaseSequenceGenerator` You entered: {0}".format(
-                    type(sequence_generator)
+            errors.append(
+                ValueError(
+                    "`sequence_generator` should be of type:: `None` or `naz.sequence.BaseSequenceGenerator` You entered: {0}".format(
+                        type(sequence_generator)
+                    )
                 )
             )
         if not isinstance(throttle_handler, (type(None), throttle.BaseThrottleHandler)):
-            raise ValueError(
-                "`throttle_handler` should be of type:: `None` or `naz.throttle.BaseThrottleHandler` You entered: {0}".format(
-                    type(throttle_handler)
+            errors.append(
+                ValueError(
+                    "`throttle_handler` should be of type:: `None` or `naz.throttle.BaseThrottleHandler` You entered: {0}".format(
+                        type(throttle_handler)
+                    )
                 )
             )
         if not isinstance(correlation_handler, (type(None), correlater.BaseCorrelater)):
-            raise ValueError(
-                "`correlation_handler` should be of type:: `None` or `naz.correlater.BaseCorrelater` You entered: {0}".format(
-                    type(correlation_handler)
+            errors.append(
+                ValueError(
+                    "`correlation_handler` should be of type:: `None` or `naz.correlater.BaseCorrelater` You entered: {0}".format(
+                        type(correlation_handler)
+                    )
                 )
             )
         if not isinstance(drain_duration, float):
-            raise ValueError(
-                "`drain_duration` should be of type:: `float` You entered: {0}".format(
-                    type(drain_duration)
+            errors.append(
+                ValueError(
+                    "`drain_duration` should be of type:: `float` You entered: {0}".format(
+                        type(drain_duration)
+                    )
                 )
             )
+        if not isinstance(connect_timeout, float):
+            errors.append(
+                ValueError(
+                    "`connect_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(connect_timeout)
+                    )
+                )
+            )
+        if len(errors):
+            raise NazClientError(errors)
 
     def _sanity_check_logger(self):
         """
@@ -619,7 +721,9 @@ class Client:
         make a network connection to SMSC server.
         """
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start"})
-        reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
+        reader, writer = await asyncio.wait_for(
+            asyncio.open_connection(self.smsc_host, self.smsc_port), timeout=self.connect_timeout
+        )
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end"})
@@ -726,12 +830,11 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
+        # sleep during startup so that `naz` can have had time to connect & bind
+        await asyncio.sleep(self.enquire_link_interval)
+
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
-            if self.current_session_state != SmppSessionState.BOUND_TRX:
-                # you can only send enquire_link request when session state is BOUND_TRX
-                await asyncio.sleep(self.enquire_link_interval)
-
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self._log(
                 logging.DEBUG,
@@ -1203,6 +1306,59 @@ class Client:
         )
         return full_pdu
 
+    async def re_establish_conn_bind(
+        self, smpp_command: str, log_id: str, TESTING: bool = False
+    ) -> None:
+        """
+        Called if connection is lost. It reconnects & rebinds to SMSC.
+
+        Parameters:
+            TESTING: indicates whether this method is been called while running tests.
+        """
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.re_establish_conn_bind",
+                "stage": "start",
+                "smpp_command": smpp_command,
+                "log_id": log_id,
+                "connection_lost": self.writer.transport.is_closing() if self.writer else True,
+            },
+        )
+        if self.SHOULD_SHUT_DOWN:
+            self._log(
+                logging.DEBUG,
+                {
+                    "event": "naz.Client.re_establish_conn_bind",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "cleanly shutting down client.",
+                },
+            )
+            return None
+
+        try:
+            # 1. re-connect
+            # 2. re-bind
+            await self.connect()
+            await self.tranceiver_bind()
+        except (ConnectionError, asyncio.TimeoutError) as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.re_establish_conn_bind",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "unable to re-connect & re-bind to SMSC",
+                    "error": str(e),
+                },
+            )
+        if TESTING:
+            # offer escape hatch for tests to come out of endless loop
+            return None
+
     async def send_data(
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
     ) -> None:
@@ -1220,6 +1376,8 @@ class Client:
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
 
+        if isinstance(msg, str):
+            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
         log_msg = ""
         try:
             log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
@@ -1236,17 +1394,18 @@ class Client:
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "msg": log_msg,
+                "connection_lost": self.writer.transport.is_closing() if self.writer else True,
             },
         )
 
         # check session state to see if we can send messages.
         # see section 2.3 of SMPP spec document v3.4
         if self.current_session_state == SmppSessionState.CLOSED:
-            error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+            error_msg = "smpp_command `{0}` cannot be sent to SMSC when the client session state is `{1}`".format(
                 smpp_command, self.current_session_state
             )
             self._log(
-                logging.INFO,
+                logging.ERROR,
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
@@ -1257,7 +1416,7 @@ class Client:
                     "error": error_msg,
                 },
             )
-            raise ValueError(error_msg)
+            return None
         elif self.current_session_state == SmppSessionState.OPEN and smpp_command not in [
             "bind_transmitter",
             "bind_receiver",
@@ -1265,11 +1424,11 @@ class Client:
         ]:
             # only the smpp_command's listed above are allowed by SMPP spec to be sent
             # if current_session_state == SmppSessionState.OPEN
-            error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+            error_msg = "smpp_command `{0}` cannot be sent to SMSC when the client session state is `{1}`".format(
                 smpp_command, self.current_session_state
             )
             self._log(
-                logging.INFO,
+                logging.ERROR,
                 {
                     "event": "naz.Client.send_data",
                     "stage": "end",
@@ -1280,13 +1439,18 @@ class Client:
                     "error": error_msg,
                 },
             )
-            raise ValueError(error_msg)
+            # do not raise, we do not want naz-cli to exit
+            return None
 
-        if isinstance(msg, str):
-            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
+        if (self.current_session_state != SmppSessionState.OPEN) and (
+            (self.writer is None) or self.writer.transport.is_closing()
+        ):
+            # do not re-establish connection if session state is `OPEN`
+            # ie we have not even connected the first time yet
+            await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
-        # call user's hook for requests
         try:
+            # call user's hook for requests
             await self.hook.request(
                 smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
             )
@@ -1303,13 +1467,33 @@ class Client:
                 },
             )
 
-        # We use writer.drain() which is a flow control method that interacts with the IO write buffer.
-        # When the size of the buffer reaches the high watermark,
-        # drain blocks until the size of the buffer is drained down to the low watermark and writing can be resumed.
-        # When there is nothing to wait for, the drain() returns immediately.
-        # ref: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.drain
-        self.writer.write(msg)
-        await self.writer.drain()
+        try:
+            if typing.TYPE_CHECKING:
+                # make mypy happy; https://github.com/python/mypy/issues/4805
+                assert isinstance(self.writer, asyncio.streams.StreamWriter)
+
+            # We use writer.drain() which is a flow control method that interacts with the IO write buffer.
+            # When the size of the buffer reaches the high watermark,
+            # drain blocks until the size of the buffer is drained down to the low watermark and writing can be resumed.
+            # When there is nothing to wait for, the drain() returns immediately.
+            # ref: https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter.drain
+            self.writer.write(msg)
+            async with self.drain_lock:
+                # see: https://github.com/komuw/naz/issues/114
+                await self.writer.drain()
+        except (ConnectionError, asyncio.TimeoutError) as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.send_data",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "unable to write to SMSC",
+                    "error": str(e),
+                },
+            )
+
         self._log(
             logging.INFO,
             {
@@ -1321,7 +1505,7 @@ class Client:
             },
         )
 
-    async def send_forever(
+    async def dequeue_messages(
         self, TESTING: bool = False
     ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
         """
@@ -1332,12 +1516,12 @@ class Client:
         """
         retry_count = 0
         while True:
-            self._log(logging.INFO, {"event": "naz.Client.send_forever", "stage": "start"})
+            self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
                 self._log(
                     logging.INFO,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "state": "cleanly shutting down client.",
                     },
@@ -1353,9 +1537,9 @@ class Client:
                 self._log(
                     logging.ERROR,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
-                        "state": "send_forever error",
+                        "state": "dequeue_messages error",
                         "error": str(e),
                     },
                 )
@@ -1368,9 +1552,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "dequeue_messages error",
                             "error": str(e),
                         },
                     )
@@ -1384,9 +1568,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error. sleeping for {0}minutes".format(
+                            "state": "dequeue_messages error. sleeping for {0}minutes".format(
                                 poll_queue_interval / 60
                             ),
                             "retry_count": retry_count,
@@ -1395,6 +1579,9 @@ class Client:
                     )
                     if self.SHOULD_SHUT_DOWN:
                         return {"shutdown": "shutdown"}
+                    if TESTING:
+                        # offer escape hatch for tests to come out of endless loop
+                        return {"broker_error": "broker_error"}
                     await asyncio.sleep(poll_queue_interval)
                     continue
                 # we didn't fail to dequeue a message
@@ -1420,9 +1607,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "dequeue_messages error",
                             "error": str(e),
                         },
                     )
@@ -1437,7 +1624,7 @@ class Client:
                 self._log(
                     logging.INFO,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "log_id": log_id,
                         "smpp_command": smpp_command,
@@ -1452,7 +1639,7 @@ class Client:
                 self._log(
                     logging.INFO,
                     {
-                        "event": "naz.Client.send_forever",
+                        "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "send_request": send_request,
                     },
@@ -1463,9 +1650,9 @@ class Client:
                     self._log(
                         logging.ERROR,
                         {
-                            "event": "naz.Client.send_forever",
+                            "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "send_forever error",
+                            "state": "dequeue_messages error",
                             "error": str(e),
                         },
                     )
@@ -1496,8 +1683,27 @@ class Client:
                 )
                 return None
 
-            # todo: look at `pause_reading` and `resume_reading` methods
-            command_length_header_data = await self.reader.read(4)
+            command_length_header_data = b""
+            try:
+                if typing.TYPE_CHECKING:
+                    # make mypy happy; https://github.com/python/mypy/issues/4805
+                    assert isinstance(self.reader, asyncio.streams.StreamReader)
+
+                # todo: look at `pause_reading` and `resume_reading` methods
+                # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
+                # https://github.com/komuw/naz/issues/116
+                command_length_header_data = await self.reader.read(4)
+            except (ConnectionError, asyncio.TimeoutError) as e:
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "unable to read from SMSC",
+                        "error": str(e),
+                    },
+                )
+
             if command_length_header_data == b"":
                 retry_count += 1
                 poll_read_interval = self._retry_after(retry_count)
@@ -1526,7 +1732,23 @@ class Client:
             chunks = []
             bytes_recd = 0
             while bytes_recd < MSGLEN:
-                chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                chunk = b""
+                try:
+                    if typing.TYPE_CHECKING:
+                        # make mypy happy; https://github.com/python/mypy/issues/4805
+                        assert isinstance(self.reader, asyncio.streams.StreamReader)
+
+                    chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                except (ConnectionError, asyncio.TimeoutError) as e:
+                    self._log(
+                        logging.ERROR,
+                        {
+                            "event": "naz.Client.receive_data",
+                            "stage": "end",
+                            "state": "unable to read from SMSC",
+                            "error": str(e),
+                        },
+                    )
                 if chunk == b"":
                     err = RuntimeError("socket connection broken")
                     self._log(
@@ -1949,6 +2171,15 @@ class Client:
 
         # we need to unbind first before closing writer
         await self.unbind()
+
+        if typing.TYPE_CHECKING:
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.writer, asyncio.streams.StreamWriter)
+            assert isinstance(self.writer.transport, asyncio.transports.Transport)
+
+        # see: https://github.com/komuw/naz/issues/117
+        self.writer.transport.set_write_buffer_limits(0)
+        await self.writer.drain()
         self.writer.close()
 
         # sleep so that client can:
@@ -1957,3 +2188,11 @@ class Client:
         # - stop sending `enquire_link` requests
         # - send unbind to SMSC
         await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
+
+
+class NazClientError(Exception):
+    """
+    Error raised when there's an error instanciating a naz Client.
+    """
+
+    pass

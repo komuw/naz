@@ -2,19 +2,13 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import os
-import sys
 import json
 import struct
 import asyncio
-import logging
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import naz
-import mock
 import docker
-
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
 
 def AsyncMock(*args, **kwargs):
@@ -117,10 +111,85 @@ class TestClient(TestCase):
                 outboundqueue=self.outboundqueue,
             )
 
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+            mock_create_client()
+        self.assertIsInstance(raised_exception.exception.args[0][0], ValueError)
+        self.assertIn(
+            "`log_metadata` should be of type", str(raised_exception.exception.args[0][0])
+        )
+
+    def test_all_bad_args(self):
+        class DummyClientArg:
+            pass
+
+        client_args = {
+            "loglevel": "SomeBadLogLevel",
+            "smsc_host": DummyClientArg,
+            "smsc_port": DummyClientArg,
+            "system_id": DummyClientArg,
+            "password": DummyClientArg,
+            "outboundqueue": DummyClientArg,
+            "system_type": DummyClientArg,
+            "interface_version": DummyClientArg,
+            "addr_ton": DummyClientArg,
+            "addr_npi": DummyClientArg,
+            "address_range": DummyClientArg,
+            "encoding": DummyClientArg,
+            "sequence_generator": DummyClientArg,
+            "log_metadata": DummyClientArg,
+            "codec_errors_level": DummyClientArg,
+            "codec_class": DummyClientArg,
+            "service_type": DummyClientArg,
+            "source_addr_ton": DummyClientArg,
+            "source_addr_npi": DummyClientArg,
+            "dest_addr_ton": DummyClientArg,
+            "dest_addr_npi": DummyClientArg,
+            "esm_class": DummyClientArg,
+            "protocol_id": DummyClientArg,
+            "priority_flag": DummyClientArg,
+            "schedule_delivery_time": DummyClientArg,
+            "validity_period": DummyClientArg,
+            "registered_delivery": DummyClientArg,
+            "replace_if_present_flag": DummyClientArg,
+            "sm_default_msg_id": DummyClientArg,
+            "enquire_link_interval": DummyClientArg,
+            "rateLimiter": DummyClientArg,
+            "hook": DummyClientArg,
+            "throttle_handler": DummyClientArg,
+            "correlation_handler": DummyClientArg,
+            "drain_duration": DummyClientArg,
+            "connect_timeout": DummyClientArg,
+        }
+
+        def mock_create_client():
+            naz.Client(**client_args)
+
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+            mock_create_client()
+        for exc in raised_exception.exception.args[0]:
+            self.assertIsInstance(exc, ValueError)
+
+    def test_instantiate_bad_encoding(self):
+        encoding = "unknownEncoding"
+
+        def mock_create_client():
+            naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                encoding=encoding,
+                outboundqueue=self.outboundqueue,
+            )
+
         self.assertRaises(ValueError, mock_create_client)
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
-        self.assertIn("`log_metadata` should be of type", str(raised_exception.exception))
+        self.assertIn(
+            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
+        )
 
     def test_can_connect(self):
         reader, writer = self._run(self.cli.connect())
@@ -173,7 +242,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_naz_dequeue.mock.called)
 
@@ -301,7 +370,7 @@ class TestClient(TestCase):
             for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
-            self._run(cli.send_forever(TESTING=True))
+            self._run(cli.dequeue_messages(TESTING=True))
 
             self.assertFalse(mock_naz_dequeue.mock.called)
 
@@ -383,7 +452,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_hook_request.mock.called)
             self.assertEqual(
@@ -443,11 +512,13 @@ class TestClient(TestCase):
         self.assertEqual(self.cli._retry_after(current_retries=7) / 60, 16)
         self.assertEqual(self.cli._retry_after(current_retries=5432) / 60, 16)
 
-    def test_session_state(self):
+    def test_session_state_ok(self):
         """
-        try sending a `submit_sm` request when session state is `OPEN`
+        send a `submit_sm` request when session state is `BOUND_TRX`
         """
-        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+        with mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -460,18 +531,31 @@ class TestClient(TestCase):
             }
 
             self._run(self.cli.connect())
-            with self.assertRaises(ValueError) as raised_exception:
-                self._run(self.cli.send_forever(TESTING=True))
-            self.assertIn(
-                "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: OPEN",
-                str(raised_exception.exception),
-            )
+            self._run(self.cli.tranceiver_bind())
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self._run(self.cli.dequeue_messages(TESTING=True))
 
-    def test_submit_with_session_state_closed(self):
+            self.assertTrue(mock_naz_writer.called)
+            self.assertEqual(mock_naz_writer.call_count, 2)
+            self.assertIn(short_message, mock_naz_writer.call_args[0][0].decode())
+
+    def test_broken_broker(self):
+        with mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+            mock_naz_dequeue.mock.side_effect = ValueError("This test broker has 99 Problems")
+            self._run(self.cli.connect())
+            res = self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertEqual(res, {"broker_error": "broker_error"})
+            self.assertFalse(mock_naz_writer.called)
+
+    def test_session_state(self):
         """
-        try sending a `submit_sm` request when session state is `CLOSED`
+        try sending a `submit_sm` request when session state is `OPEN`
         """
-        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+        with mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -482,12 +566,30 @@ class TestClient(TestCase):
                 "source_addr": "2547000000",
                 "destination_addr": "254711999999",
             }
-            with self.assertRaises(ValueError) as raised_exception:
-                self._run(self.cli.send_forever(TESTING=True))
-            self.assertIn(
-                "smpp_command: submit_sm cannot be sent to SMSC when the client session state is: CLOSED",
-                str(raised_exception.exception),
-            )
+
+            self._run(self.cli.connect())
+            self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertFalse(mock_naz_writer.called)
+
+    def test_submit_with_session_state_closed(self):
+        """
+        try sending a `submit_sm` request when session state is `CLOSED`
+        """
+        with mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+            log_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+            }
+            self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertFalse(mock_naz_writer.called)
 
     def test_correlater_put_called(self):
         with mock.patch(
@@ -512,7 +614,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_correlater_put.mock.called)
 
             self.assertEqual(mock_correlater_put.mock.call_args[1]["log_id"], log_id)
@@ -533,26 +635,6 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_correlater_get.mock.called)
             self.assertTrue(mock_correlater_get.mock.call_args[1]["sequence_number"])
-
-    def test_instantiate_bad_encoding(self):
-        encoding = "unknownEncoding"
-
-        def mock_create_client():
-            naz.Client(
-                smsc_host="127.0.0.1",
-                smsc_port=2775,
-                system_id="smppclient1",
-                password=os.getenv("password", "password"),
-                encoding=encoding,
-                outboundqueue=self.outboundqueue,
-            )
-
-        self.assertRaises(ValueError, mock_create_client)
-        with self.assertRaises(ValueError) as raised_exception:
-            mock_create_client()
-        self.assertIn(
-            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
-        )
 
     def test_logger_called(self):
         with mock.patch("naz.logger.SimpleLogger.log") as mock_logger_log:
@@ -615,7 +697,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
-            self._run(self.cli.send_forever(TESTING=True))
+            self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(self.cli.correlation_handler.store[mock_sequence_number])
             self.assertEqual(
                 self.cli.correlation_handler.store[mock_sequence_number]["log_id"], log_id
@@ -673,3 +755,50 @@ class TestClient(TestCase):
                 self.assertEqual(
                     mock_hook_response.mock.call_args[1]["hook_metadata"], hook_metadata
                 )
+
+    def test_re_establish_conn_bind(self):
+        """
+        test that `Client.re_establish_conn_bind` calls `Client.connect` & `Client.tranceiver_bind`
+        """
+        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect, mock.patch(
+            "naz.Client.tranceiver_bind", new=AsyncMock()
+        ) as mock_naz_tranceiver_bind:
+            self._run(
+                self.cli.re_establish_conn_bind(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="log_id", TESTING=True
+                )
+            )
+            self.assertTrue(mock_naz_connect.mock.called)
+            self.assertTrue(mock_naz_tranceiver_bind.mock.called)
+
+    def test_send_data_under_disconnection(self):
+        """
+        test that if sockect is disconnected, `naz` will try to re-connect & re-bind
+        """
+        with mock.patch("naz.Client.tranceiver_bind", new=AsyncMock()) as mock_naz_tranceiver_bind:
+            # do not connect or bind
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self._run(
+                self.cli.send_data(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, msg=b"someMessage", log_id="log_id"
+                )
+            )
+            self.assertTrue(mock_naz_tranceiver_bind.mock.called)
+
+    def test_issues_67(self):
+        """
+        test to prove we have fixed: https://github.com/komuw/naz/issues/67
+        1. start broker
+        2. start naz and run a naz operation like `Client..enquire_link`
+        3. kill broker
+        4. run a naz operation like `Client..enquire_link`
+        """
+        with mock.patch("naz.Client.tranceiver_bind", new=AsyncMock()) as mock_naz_tranceiver_bind:
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self.cli.writer = None  # simulate a connection loss
+            self._run(
+                self.cli.send_data(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, msg=b"someMessage", log_id="log_id"
+                )
+            )
+            self.assertTrue(mock_naz_tranceiver_bind.mock.called)

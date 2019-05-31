@@ -212,26 +212,36 @@ def main():
             return
 
         # call naz api
-        cli = naz.Client(**kwargs)
-        # connect to the SMSC host
-        _, _ = loop.run_until_complete(cli.connect())
-        # bind to SMSC as a tranceiver
-        loop.run_until_complete(cli.tranceiver_bind())
-
-        # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-        tasks = asyncio.gather(
-            cli.send_forever(TESTING=dry_run),
-            cli.receive_data(TESTING=dry_run),
-            cli.enquire_link(TESTING=dry_run),
-            sig._signal_handling(logger=logger, client=cli, loop=loop),
-            loop=loop,
+        client = naz.Client(**kwargs)
+        loop.run_until_complete(
+            async_main(client=client, logger=logger, loop=loop, dry_run=dry_run)
         )
-        loop.run_until_complete(tasks)
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
     finally:
         logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "end"})
+
+
+async def async_main(
+    client: naz.Client,
+    logger: naz.logger.SimpleLogger,
+    loop: asyncio.events.AbstractEventLoop,
+    dry_run: bool,
+):
+    # connect & bind to the SMSC host
+    await client.connect()
+    await client.tranceiver_bind()
+
+    # send any queued messages to SMSC, read any data from SMSC and continually check the state of the SMSC
+    tasks = asyncio.gather(
+        client.dequeue_messages(TESTING=dry_run),
+        client.receive_data(TESTING=dry_run),
+        client.enquire_link(TESTING=dry_run),
+        sig._signal_handling(logger=logger, client=client, loop=loop),
+        loop=loop,
+    )
+    await tasks
 
 
 if __name__ == "__main__":

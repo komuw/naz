@@ -128,7 +128,7 @@ cli = naz.Client(
     system_id="smppclient1",
     password=os.getenv("password", "password"),
     outboundqueue=outboundqueue,
-    enquire_link_interval=17,
+    enquire_link_interval=17.00,
 )
 
 item_to_enqueue = {
@@ -148,7 +148,7 @@ loop.run_until_complete(cli.tranceiver_bind())
 
 try:
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    tasks = asyncio.gather(cli.dequeue_messages(), cli.receive_data(), cli.enquire_link())
     loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:

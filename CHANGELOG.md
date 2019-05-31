@@ -7,6 +7,11 @@ most recent version is listed first.
 - cleanly handle termination signals like `SIGTERM`: https://github.com/komuw/naz/pull/106
 - validate `naz.Client` arguments: https://github.com/komuw/naz/pull/108
 - remove ability to bring your own eventloop: https://github.com/komuw/naz/pull/111
+- make `naz` more fault tolerant: https://github.com/komuw/naz/pull/113
+  - `naz` now has a configurable timeout when trying to connect to SMSC
+  - `naz` will now be able to detect when the connection to SMSC is disconnected and will attempt to re-connect & re-bind
+  - bugfix; `asyncio.streams.StreamWriter.drain` should not be called concurrently by multiple coroutines
+  - when shutting down, `naz` now tries to make sure that write buffers are properly flushed.
 
 ## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    

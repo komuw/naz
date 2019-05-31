@@ -1,20 +1,15 @@
 import os
 import io
-import sys
 import copy
 import json
 import signal
 import asyncio
-import logging
 import argparse
 from unittest import TestCase, mock
 
 import cli
 import naz
 import docker
-
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.WARNING)
 
 
 def AsyncMock(*args, **kwargs):
@@ -81,7 +76,7 @@ class TestCli(TestCase):
             "loglevel": "INFO",
             "log_metadata": {"environment": "production", "release": "canary"},
             "codec_errors_level": "ignore",
-            "enquire_link_interval": 30,
+            "enquire_link_interval": 30.00,
             "rateLimiter": "examples.example_klasses.ExampleRateLimiter",
         }
 
@@ -161,8 +156,24 @@ class TestCliSigHandling(TestCase):
     def test_termination_call_client_shutdown(self):
         with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
 
+            class MockStreamWriterTransport:
+                @staticmethod
+                def set_write_buffer_limits(value):
+                    return
+
             class MockStreamWriter:
-                def close(self):
+                transport = MockStreamWriterTransport()
+
+                @staticmethod
+                def close():
+                    return
+
+                @staticmethod
+                def write(stuff):
+                    return
+
+                @staticmethod
+                async def drain():
                     return
 
             self.client.writer = MockStreamWriter()

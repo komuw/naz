@@ -81,7 +81,7 @@ loop.run_until_complete(cli.tranceiver_bind())
 
 try:
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    tasks = asyncio.gather(cli.dequeue_messages(), cli.receive_data(), cli.enquire_link())
     loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:
@@ -138,7 +138,7 @@ run:
 {'event': 'naz.SimpleHook.request', 'stage': 'start', 'smpp_command': 'bind_transceiver', 'log_id': None, 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 {'event': 'naz.Client.send_data', 'stage': 'end', 'smpp_command': 'bind_transceiver', 'log_id': None, 'msg': 'hello', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 {'event': 'naz.Client.tranceiver_bind', 'stage': 'end', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
-{'event': 'naz.Client.send_forever', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
+{'event': 'naz.Client.dequeue_messages', 'stage': 'start', 'environment': 'production', 'release': 'canary', 'smsc_host': '127.0.0.1', 'system_id': 'smppclient1', 'client_id': '2VU55VT86KHWXTW7X'}
 ```              
              
 **NB:**      
@@ -331,7 +331,7 @@ loop.run_until_complete(cli.tranceiver_bind())
 
 try:
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    tasks = asyncio.gather(cli.dequeue_messages(), cli.receive_data(), cli.enquire_link())
     loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:
@@ -398,7 +398,7 @@ reader, writer = loop.run_until_complete(cli.connect())
 loop.run_until_complete(cli.tranceiver_bind())
 try:
     # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    tasks = asyncio.gather(cli.send_forever(), cli.receive_data(), cli.enquire_link())
+    tasks = asyncio.gather(cli.dequeue_messages(), cli.receive_data(), cli.enquire_link())
     loop.run_until_complete(tasks)
     loop.run_forever()
 except Exception as e:

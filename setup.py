@@ -92,12 +92,12 @@ setup(
             "pypandoc",
             "twine",
             "wheel",
-            "Sphinx==1.8.3",
+            "Sphinx==2.0.1",
             "sphinx-autodoc-typehints==1.6.0",
-            "redis==2.10.6",
-            "pika==0.12.0",
+            "redis==3.2.1",
+            "pika==1.0.1",
         ],
-        "test": ["flake8", "mock", "pylint", "black", "bandit", "docker==3.4.0", "mypy"],
+        "test": ["flake8", "pylint", "black", "bandit", "docker==4.0.1", "mypy"],
     },
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these

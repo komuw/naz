@@ -1,18 +1,12 @@
 # do not to pollute the global namespace.
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
-import sys
 import json
 import time
-import mock
 import asyncio
-import logging
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import naz
-
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
 
 def AsyncMock(*args, **kwargs):
@@ -37,14 +31,6 @@ class TestCorrelater(TestCase):
     """
 
     def setUp(self):
-        self.logger = logging.getLogger("naz.test")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel("DEBUG")
-
         self.max_ttl = 0.2  # sec
         self.correlater = naz.correlater.SimpleCorrelater(max_ttl=self.max_ttl)
 
@@ -235,14 +221,6 @@ class TestBenchmarkCorrelater(TestCase):
     """
 
     def setUp(self):
-        self.logger = logging.getLogger("naz.test")
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel("DEBUG")
-
         self.max_ttl = 0.2  # sec
         self.correlater = naz.correlater.SimpleCorrelater(max_ttl=self.max_ttl)
 
