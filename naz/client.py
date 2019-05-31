@@ -1480,6 +1480,9 @@ class Client:
                     )
                     if self.SHOULD_SHUT_DOWN:
                         return {"shutdown": "shutdown"}
+                    if TESTING:
+                        # offer escape hatch for tests to come out of endless loop
+                        return {"broker_error": "broker_error"}
                     await asyncio.sleep(poll_queue_interval)
                     continue
                 # we didn't fail to dequeue a message

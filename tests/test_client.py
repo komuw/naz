@@ -464,6 +464,16 @@ class TestClient(TestCase):
             self.assertEqual(mock_naz_writer.call_count, 2)
             self.assertIn(short_message, mock_naz_writer.call_args[0][0].decode())
 
+    def test_broken_broker(self):
+        with mock.patch(
+            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+            mock_naz_dequeue.mock.side_effect = ValueError("This test broker has 99 Problems")
+            self._run(self.cli.connect())
+            res = self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertEqual(res, {"broker_error": "broker_error"})
+            self.assertFalse(mock_naz_writer.called)
+
     def test_session_state(self):
         """
         try sending a `submit_sm` request when session state is `OPEN`
