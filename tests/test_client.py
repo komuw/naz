@@ -690,3 +690,29 @@ class TestClient(TestCase):
                 self.assertEqual(
                     mock_hook_response.mock.call_args[1]["hook_metadata"], hook_metadata
                 )
+
+    def test_re_establish_conn_bind(self):
+        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect, mock.patch(
+            "naz.Client.tranceiver_bind", new=AsyncMock()
+        ) as mock_naz_tranceiver_bind:
+            self._run(
+                self.cli.re_establish_conn_bind(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="log_id", TESTING=True
+                )
+            )
+            self.assertTrue(mock_naz_connect.mock.called)
+            self.assertTrue(mock_naz_tranceiver_bind.mock.called)
+
+    def test_send_data_under_disconnection(self):
+        """
+        test that if sockect is disconnected, `naz` will try to re-connect
+        """
+        with mock.patch("naz.Client.tranceiver_bind", new=AsyncMock()) as mock_naz_tranceiver_bind:
+            # do not connect or bind
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self._run(
+                self.cli.send_data(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, msg=b"someMessage", log_id="log_id"
+                )
+            )
+            self.assertTrue(mock_naz_tranceiver_bind.mock.called)
