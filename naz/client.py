@@ -1382,7 +1382,7 @@ class Client:
                 # see: https://github.com/komuw/naz/issues/114
                 # for reasons
                 await self.writer.drain()
-        except ConnectionError as e:
+        except (ConnectionError, asyncio.TimeoutError) as e:
             self._log(
                 logging.ERROR,
                 {
