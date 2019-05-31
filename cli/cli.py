@@ -4,7 +4,6 @@ import random
 import string
 import asyncio
 import logging
-import inspect
 import argparse
 
 import naz
