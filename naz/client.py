@@ -264,8 +264,8 @@ class Client:
 
         self.data_coding = self._find_data_coding(self.encoding)
 
-        self.reader: typing.Any = None
-        self.writer: typing.Any = None
+        self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
+        self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
         if log_handler is not None:
             self.logger = log_handler
