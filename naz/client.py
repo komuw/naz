@@ -1372,6 +1372,10 @@ class Client:
             )
 
         try:
+            if typing.TYPE_CHECKING:
+                # make mypy happy; https://github.com/python/mypy/issues/4805
+                assert isinstance(self.writer, asyncio.streams.StreamWriter)
+
             # We use writer.drain() which is a flow control method that interacts with the IO write buffer.
             # When the size of the buffer reaches the high watermark,
             # drain blocks until the size of the buffer is drained down to the low watermark and writing can be resumed.
@@ -1585,6 +1589,10 @@ class Client:
 
             command_length_header_data = b""
             try:
+                if typing.TYPE_CHECKING:
+                    # make mypy happy; https://github.com/python/mypy/issues/4805
+                    assert isinstance(self.reader, asyncio.streams.StreamReader)
+
                 # todo: look at `pause_reading` and `resume_reading` methods
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
@@ -1630,6 +1638,10 @@ class Client:
             while bytes_recd < MSGLEN:
                 chunk = b""
                 try:
+                    if typing.TYPE_CHECKING:
+                        # make mypy happy; https://github.com/python/mypy/issues/4805
+                        assert isinstance(self.reader, asyncio.streams.StreamReader)
+
                     chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
                 except (ConnectionError, asyncio.TimeoutError) as e:
                     self._log(
@@ -2063,6 +2075,11 @@ class Client:
 
         # we need to unbind first before closing writer
         await self.unbind()
+
+        if typing.TYPE_CHECKING:
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.writer, asyncio.streams.StreamWriter)
+            assert isinstance(self.writer.transport, asyncio.transports.Transport)
 
         # see: https://github.com/komuw/naz/issues/117
         self.writer.transport.set_write_buffer_limits(0)
