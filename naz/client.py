@@ -102,6 +102,9 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
+        # connect_timeout value inspired by vumi
+        # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
+        connect_timeout: float = 30.0,
     ) -> None:
         """
         Parameters:
@@ -184,6 +187,7 @@ class Client:
             throttle_handler=throttle_handler,
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
+            connect_timeout=connect_timeout,
         )
 
         self._PID = os.getpid()
@@ -306,12 +310,8 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
         self.drain_duration = drain_duration
+        self.connect_timeout = connect_timeout
         self.SHOULD_SHUT_DOWN: bool = False
-
-        # connect_timeout value inspired by vumi
-        # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
-        self.connect_timeout: float = 30.0
-
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
     @staticmethod
@@ -353,6 +353,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
+        connect_timeout: float,
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -642,6 +643,14 @@ class Client:
                 ValueError(
                     "`drain_duration` should be of type:: `float` You entered: {0}".format(
                         type(drain_duration)
+                    )
+                )
+            )
+        if not isinstance(connect_timeout, float):
+            errors.append(
+                ValueError(
+                    "`connect_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(connect_timeout)
                     )
                 )
             )
