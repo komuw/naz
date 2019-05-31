@@ -12,6 +12,7 @@ most recent version is listed first.
   - `naz` will now be able to detect when the connection to SMSC is disconnected and will attempt to re-connect & re-bind
   - bugfix; `asyncio.streams.StreamWriter.drain` should not be called concurrently by multiple coroutines
   - when shutting down, `naz` now tries to make sure that write buffers are properly flushed.
+- replace naz json config file with a python file: https://github.com/komuw/naz/pull/123
 
 ## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    
