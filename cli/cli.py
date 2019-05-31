@@ -66,7 +66,7 @@ def make_parser():
         description="""naz is an async SMPP client.
                 example usage:
                 naz-cli \
-                --client /path/to/my_app.json
+                --client dotted.path.to.naz.Client.instance
                 """,
     )
     parser.add_argument(

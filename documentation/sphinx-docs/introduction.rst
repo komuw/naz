@@ -86,17 +86,21 @@ NB:
 =====================
 ``naz`` also ships with a commandline interface app called ``naz-cli`` (it is also installed by default when you `pip install naz`).
 
-create a json config file, eg; `/tmp/my_app.json`
+create a python config file, eg; `/tmp/my_app.py`
 
-.. code-block:: bash
+.. code-block:: python
 
-    {
-    "smsc_host": "127.0.0.1",
-    "smsc_port": 2775,
-    "system_id": "smppclient1",
-    "password": "password",
-    "outboundqueue": "myfile.ExampleQueue"
-    }
+    import naz
+    from myfile import ExampleQueue
+
+    client = naz.Client(
+        smsc_host="127.0.0.1",
+        smsc_port=2775,
+        system_id="smppclient1",
+        password="password",
+        outboundqueue=ExampleQueue()
+    )
+
 
 and a python file, `myfile.py` (in the current working directory) with the contents:
 
@@ -115,14 +119,14 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 
 
 then run:
-``naz-cli --client /tmp/my_app.json``
+``naz-cli --client tmp.my_app.client``
 
 NB:
 
 * (a) For more information about the naz config file, consult the `documentation here <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
 * (b) More examples can be found `here <https://github.com/komuw/naz/tree/master/examples>`_ 
       As an example, start the SMSC simulator(``docker-compose up``) then in another terminal run, 
-      ``naz-cli --client examples/example_config.json``
+      ``naz-cli --client examples.example_config.client``
 
 
 3 Features
