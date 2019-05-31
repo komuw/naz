@@ -42,7 +42,7 @@ def load_class(dotted_path: str, logger: naz.logger.BaseLogger) -> naz.Client:
         cur_dir = os.getcwd()
         if cur_dir not in sys.path:
             sys.path.insert(0, cur_dir)
-            return load_class(dotted_path)
+            return load_class(dotted_path, logger)
         err_message = "Error importing {0}".format(dotted_path)
         logger.log(
             logging.ERROR,
