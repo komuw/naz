@@ -2062,7 +2062,6 @@ class Client:
         await self.unbind()
 
         # see: https://github.com/komuw/naz/issues/117
-        # for reasoning
         self.writer.transport.set_write_buffer_limits(0)
         await self.writer.drain()
         self.writer.close()
