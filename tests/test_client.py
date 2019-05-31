@@ -111,10 +111,33 @@ class TestClient(TestCase):
                 outboundqueue=self.outboundqueue,
             )
 
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+            mock_create_client()
+        self.assertIsInstance(raised_exception.exception.args[0][0], ValueError)
+        self.assertIn(
+            "`log_metadata` should be of type", str(raised_exception.exception.args[0][0])
+        )
+
+    def test_instantiate_bad_encoding(self):
+        encoding = "unknownEncoding"
+
+        def mock_create_client():
+            naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                encoding=encoding,
+                outboundqueue=self.outboundqueue,
+            )
+
         self.assertRaises(ValueError, mock_create_client)
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
-        self.assertIn("`log_metadata` should be of type", str(raised_exception.exception))
+        self.assertIn(
+            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
+        )
 
     def test_can_connect(self):
         reader, writer = self._run(self.cli.connect())
@@ -560,26 +583,6 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_correlater_get.mock.called)
             self.assertTrue(mock_correlater_get.mock.call_args[1]["sequence_number"])
-
-    def test_instantiate_bad_encoding(self):
-        encoding = "unknownEncoding"
-
-        def mock_create_client():
-            naz.Client(
-                smsc_host="127.0.0.1",
-                smsc_port=2775,
-                system_id="smppclient1",
-                password=os.getenv("password", "password"),
-                encoding=encoding,
-                outboundqueue=self.outboundqueue,
-            )
-
-        self.assertRaises(ValueError, mock_create_client)
-        with self.assertRaises(ValueError) as raised_exception:
-            mock_create_client()
-        self.assertIn(
-            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
-        )
 
     def test_logger_called(self):
         with mock.patch("naz.logger.SimpleLogger.log") as mock_logger_log:

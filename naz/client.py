@@ -354,212 +354,299 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
     ) -> None:
+        """
+        Checks that the arguments to `naz.Client` are okay.
+        It raises an Exception that comprises of a list of Exceptions
+        """
+        errors: typing.List[ValueError] = []
         if not isinstance(smsc_host, str):
-            raise ValueError(
-                "`smsc_host` should be of type:: `str` You entered: {0}".format(type(smsc_host))
+            errors.append(
+                ValueError(
+                    "`smsc_host` should be of type:: `str` You entered: {0}".format(type(smsc_host))
+                )
             )
         if not isinstance(smsc_port, int):
-            raise ValueError(
-                "`smsc_port` should be of type:: `int` You entered: {0}".format(type(smsc_port))
+            errors.append(
+                ValueError(
+                    "`smsc_port` should be of type:: `int` You entered: {0}".format(type(smsc_port))
+                )
             )
         if not isinstance(system_id, str):
-            raise ValueError(
-                "`system_id` should be of type:: `str` You entered: {0}".format(type(system_id))
+            errors.append(
+                ValueError(
+                    "`system_id` should be of type:: `str` You entered: {0}".format(type(system_id))
+                )
             )
         if not isinstance(password, str):
-            raise ValueError(
-                "`password` should be of type:: `str` You entered: {0}".format(type(password))
+            errors.append(
+                ValueError(
+                    "`password` should be of type:: `str` You entered: {0}".format(type(password))
+                )
             )
         if not isinstance(outboundqueue, q.BaseOutboundQueue):
-            raise ValueError(
-                "`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: {0}".format(
-                    type(outboundqueue)
+            errors.append(
+                ValueError(
+                    "`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: {0}".format(
+                        type(outboundqueue)
+                    )
                 )
             )
         if not isinstance(client_id, (type(None), str)):
-            raise ValueError(
-                "`client_id` should be of type:: `None` or `str` You entered: {0}".format(
-                    type(client_id)
+            errors.append(
+                ValueError(
+                    "`client_id` should be of type:: `None` or `str` You entered: {0}".format(
+                        type(client_id)
+                    )
                 )
             )
         if not isinstance(system_type, str):
-            raise ValueError(
-                "`system_type` should be of type:: `str` You entered: {0}".format(type(system_type))
+            errors.append(
+                ValueError(
+                    "`system_type` should be of type:: `str` You entered: {0}".format(
+                        type(system_type)
+                    )
+                )
             )
         if not isinstance(addr_ton, int):
-            raise ValueError(
-                "`addr_ton` should be of type:: `int` You entered: {0}".format(type(addr_ton))
+            errors.append(
+                ValueError(
+                    "`addr_ton` should be of type:: `int` You entered: {0}".format(type(addr_ton))
+                )
             )
         if not isinstance(addr_npi, int):
-            raise ValueError(
-                "`addr_npi` should be of type:: `int` You entered: {0}".format(type(addr_npi))
+            errors.append(
+                ValueError(
+                    "`addr_npi` should be of type:: `int` You entered: {0}".format(type(addr_npi))
+                )
             )
         if not isinstance(address_range, str):
-            raise ValueError(
-                "`address_range` should be of type:: `str` You entered: {0}".format(
-                    type(address_range)
+            errors.append(
+                ValueError(
+                    "`address_range` should be of type:: `str` You entered: {0}".format(
+                        type(address_range)
+                    )
                 )
             )
         if not isinstance(encoding, str):
-            raise ValueError(
-                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+            errors.append(
+                ValueError(
+                    "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+                )
             )
         if not isinstance(interface_version, int):
-            raise ValueError(
-                "`interface_version` should be of type:: `int` You entered: {0}".format(
-                    type(interface_version)
+            errors.append(
+                ValueError(
+                    "`interface_version` should be of type:: `int` You entered: {0}".format(
+                        type(interface_version)
+                    )
                 )
             )
         if not isinstance(service_type, str):
-            raise ValueError(
-                "`service_type` should be of type:: `str` You entered: {0}".format(
-                    type(service_type)
+            errors.append(
+                ValueError(
+                    "`service_type` should be of type:: `str` You entered: {0}".format(
+                        type(service_type)
+                    )
                 )
             )
         if not isinstance(source_addr_ton, int):
-            raise ValueError(
-                "`source_addr_ton` should be of type:: `int` You entered: {0}".format(
-                    type(source_addr_ton)
+            errors.append(
+                ValueError(
+                    "`source_addr_ton` should be of type:: `int` You entered: {0}".format(
+                        type(source_addr_ton)
+                    )
                 )
             )
         if not isinstance(source_addr_npi, int):
-            raise ValueError(
-                "`source_addr_npi` should be of type:: `int` You entered: {0}".format(
-                    type(source_addr_npi)
+            errors.append(
+                ValueError(
+                    "`source_addr_npi` should be of type:: `int` You entered: {0}".format(
+                        type(source_addr_npi)
+                    )
                 )
             )
         if not isinstance(dest_addr_ton, int):
-            raise ValueError(
-                "`dest_addr_ton` should be of type:: `int` You entered: {0}".format(
-                    type(dest_addr_ton)
+            errors.append(
+                ValueError(
+                    "`dest_addr_ton` should be of type:: `int` You entered: {0}".format(
+                        type(dest_addr_ton)
+                    )
                 )
             )
         if not isinstance(dest_addr_npi, int):
-            raise ValueError(
-                "`dest_addr_npi` should be of type:: `int` You entered: {0}".format(
-                    type(dest_addr_npi)
+            errors.append(
+                ValueError(
+                    "`dest_addr_npi` should be of type:: `int` You entered: {0}".format(
+                        type(dest_addr_npi)
+                    )
                 )
             )
         if not isinstance(esm_class, int):
-            raise ValueError(
-                "`esm_class` should be of type:: `int` You entered: {0}".format(type(esm_class))
+            errors.append(
+                ValueError(
+                    "`esm_class` should be of type:: `int` You entered: {0}".format(type(esm_class))
+                )
             )
         if not isinstance(protocol_id, int):
-            raise ValueError(
-                "`protocol_id` should be of type:: `int` You entered: {0}".format(type(protocol_id))
+            errors.append(
+                ValueError(
+                    "`protocol_id` should be of type:: `int` You entered: {0}".format(
+                        type(protocol_id)
+                    )
+                )
             )
         if not isinstance(priority_flag, int):
-            raise ValueError(
-                "`priority_flag` should be of type:: `int` You entered: {0}".format(
-                    type(priority_flag)
+            errors.append(
+                ValueError(
+                    "`priority_flag` should be of type:: `int` You entered: {0}".format(
+                        type(priority_flag)
+                    )
                 )
             )
         if not isinstance(schedule_delivery_time, str):
-            raise ValueError(
-                "`schedule_delivery_time` should be of type:: `str` You entered: {0}".format(
-                    type(schedule_delivery_time)
+            errors.append(
+                ValueError(
+                    "`schedule_delivery_time` should be of type:: `str` You entered: {0}".format(
+                        type(schedule_delivery_time)
+                    )
                 )
             )
         if not isinstance(validity_period, str):
-            raise ValueError(
-                "`validity_period` should be of type:: `str` You entered: {0}".format(
-                    type(validity_period)
+            errors.append(
+                ValueError(
+                    "`validity_period` should be of type:: `str` You entered: {0}".format(
+                        type(validity_period)
+                    )
                 )
             )
         if not isinstance(registered_delivery, int):
-            raise ValueError(
-                "`registered_delivery` should be of type:: `int` You entered: {0}".format(
-                    type(registered_delivery)
+            errors.append(
+                ValueError(
+                    "`registered_delivery` should be of type:: `int` You entered: {0}".format(
+                        type(registered_delivery)
+                    )
                 )
             )
         if not isinstance(replace_if_present_flag, int):
-            raise ValueError(
-                "`replace_if_present_flag` should be of type:: `int` You entered: {0}".format(
-                    type(replace_if_present_flag)
+            errors.append(
+                ValueError(
+                    "`replace_if_present_flag` should be of type:: `int` You entered: {0}".format(
+                        type(replace_if_present_flag)
+                    )
                 )
             )
         if not isinstance(sm_default_msg_id, int):
-            raise ValueError(
-                "`sm_default_msg_id` should be of type:: `int` You entered: {0}".format(
-                    type(sm_default_msg_id)
+            errors.append(
+                ValueError(
+                    "`sm_default_msg_id` should be of type:: `int` You entered: {0}".format(
+                        type(sm_default_msg_id)
+                    )
                 )
             )
         if not isinstance(enquire_link_interval, int):
-            raise ValueError(
-                "`enquire_link_interval` should be of type:: `int` You entered: {0}".format(
-                    type(enquire_link_interval)
+            errors.append(
+                ValueError(
+                    "`enquire_link_interval` should be of type:: `int` You entered: {0}".format(
+                        type(enquire_link_interval)
+                    )
                 )
             )
         if not isinstance(log_handler, (type(None), logger.BaseLogger)):
-            raise ValueError(
-                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
-                    type(log_handler)
+            errors.append(
+                ValueError(
+                    "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                        type(log_handler)
+                    )
                 )
             )
         if not isinstance(loglevel, str):
-            raise ValueError(
-                "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+            errors.append(
+                ValueError(
+                    "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+                )
             )
         if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            raise ValueError(
-                """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
-                    loglevel
+            errors.append(
+                ValueError(
+                    """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                        loglevel
+                    )
                 )
             )
         if not isinstance(log_metadata, (type(None), dict)):
-            raise ValueError(
-                "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
-                    type(log_metadata)
+            errors.append(
+                ValueError(
+                    "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
+                        type(log_metadata)
+                    )
                 )
             )
         if not isinstance(codec_class, (type(None), nazcodec.BaseNazCodec)):
-            raise ValueError(
-                "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
-                    type(codec_class)
+            errors.append(
+                ValueError(
+                    "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
+                        type(codec_class)
+                    )
                 )
             )
         if not isinstance(codec_errors_level, str):
-            raise ValueError(
-                "`codec_errors_level` should be of type:: `str` You entered: {0}".format(
-                    type(codec_errors_level)
+            errors.append(
+                ValueError(
+                    "`codec_errors_level` should be of type:: `str` You entered: {0}".format(
+                        type(codec_errors_level)
+                    )
                 )
             )
         if not isinstance(rateLimiter, (type(None), ratelimiter.BaseRateLimiter)):
-            raise ValueError(
-                "`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
-                    type(rateLimiter)
+            errors.append(
+                ValueError(
+                    "`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
+                        type(rateLimiter)
+                    )
                 )
             )
         if not isinstance(hook, (type(None), hooks.BaseHook)):
-            raise ValueError(
-                "`hook` should be of type:: `None` or `naz.hooks.BaseHook` You entered: {0}".format(
-                    type(hook)
+            errors.append(
+                ValueError(
+                    "`hook` should be of type:: `None` or `naz.hooks.BaseHook` You entered: {0}".format(
+                        type(hook)
+                    )
                 )
             )
         if not isinstance(sequence_generator, (type(None), sequence.BaseSequenceGenerator)):
-            raise ValueError(
-                "`sequence_generator` should be of type:: `None` or `naz.sequence.BaseSequenceGenerator` You entered: {0}".format(
-                    type(sequence_generator)
+            errors.append(
+                ValueError(
+                    "`sequence_generator` should be of type:: `None` or `naz.sequence.BaseSequenceGenerator` You entered: {0}".format(
+                        type(sequence_generator)
+                    )
                 )
             )
         if not isinstance(throttle_handler, (type(None), throttle.BaseThrottleHandler)):
-            raise ValueError(
-                "`throttle_handler` should be of type:: `None` or `naz.throttle.BaseThrottleHandler` You entered: {0}".format(
-                    type(throttle_handler)
+            errors.append(
+                ValueError(
+                    "`throttle_handler` should be of type:: `None` or `naz.throttle.BaseThrottleHandler` You entered: {0}".format(
+                        type(throttle_handler)
+                    )
                 )
             )
         if not isinstance(correlation_handler, (type(None), correlater.BaseCorrelater)):
-            raise ValueError(
-                "`correlation_handler` should be of type:: `None` or `naz.correlater.BaseCorrelater` You entered: {0}".format(
-                    type(correlation_handler)
+            errors.append(
+                ValueError(
+                    "`correlation_handler` should be of type:: `None` or `naz.correlater.BaseCorrelater` You entered: {0}".format(
+                        type(correlation_handler)
+                    )
                 )
             )
         if not isinstance(drain_duration, float):
-            raise ValueError(
-                "`drain_duration` should be of type:: `float` You entered: {0}".format(
-                    type(drain_duration)
+            errors.append(
+                ValueError(
+                    "`drain_duration` should be of type:: `float` You entered: {0}".format(
+                        type(drain_duration)
+                    )
                 )
             )
+        if len(errors):
+            raise NazClientError(errors)
 
     def _sanity_check_logger(self):
         """
@@ -2092,3 +2179,11 @@ class Client:
         # - stop sending `enquire_link` requests
         # - send unbind to SMSC
         await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
+
+
+class NazClientError(Exception):
+    """
+    Error raised when there's an error instanciating a naz Client.
+    """
+
+    pass
