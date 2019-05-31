@@ -705,7 +705,7 @@ class TestClient(TestCase):
 
     def test_send_data_under_disconnection(self):
         """
-        test that if sockect is disconnected, `naz` will try to re-connect
+        test that if sockect is disconnected, `naz` will try to re-connect & re-bind
         """
         with mock.patch("naz.Client.tranceiver_bind", new=AsyncMock()) as mock_naz_tranceiver_bind:
             # do not connect or bind
