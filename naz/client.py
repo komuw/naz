@@ -222,7 +222,7 @@ class Client:
                 "smsc_host": self.smsc_host,
                 "system_id": system_id,
                 "client_id": self.client_id,
-                "process_id": self._PID,
+                "pid": self._PID,
             }
         )
 
