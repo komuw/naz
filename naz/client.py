@@ -1304,7 +1304,7 @@ class Client:
         # check session state to see if we can send messages.
         # see section 2.3 of SMPP spec document v3.4
         if self.current_session_state == SmppSessionState.CLOSED:
-            error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+            error_msg = "smpp_command `{0}` cannot be sent to SMSC when the client session state is: {1}".format(
                 smpp_command, self.current_session_state
             )
             self._log(
@@ -1327,7 +1327,7 @@ class Client:
         ]:
             # only the smpp_command's listed above are allowed by SMPP spec to be sent
             # if current_session_state == SmppSessionState.OPEN
-            error_msg = "smpp_command: {0} cannot be sent to SMSC when the client session state is: {1}".format(
+            error_msg = "smpp_command `{0}` cannot be sent to SMSC when the client session state is: {1}".format(
                 smpp_command, self.current_session_state
             )
             self._log(
