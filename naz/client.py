@@ -1319,7 +1319,7 @@ class Client:
                     "error": error_msg,
                 },
             )
-            raise ValueError(error_msg)
+            return None
         elif self.current_session_state == SmppSessionState.OPEN and smpp_command not in [
             "bind_transmitter",
             "bind_receiver",
@@ -1342,7 +1342,8 @@ class Client:
                     "error": error_msg,
                 },
             )
-            raise ValueError(error_msg)
+            # do not raise, we do not naz-cli to exit
+            return None
 
         if (self.current_session_state != SmppSessionState.OPEN) and (
             (self.writer is None) or self.writer.transport.is_closing()
