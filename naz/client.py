@@ -309,7 +309,7 @@ class Client:
         self.SHOULD_SHUT_DOWN: bool = False
 
         # TODO: add it to args and validate
-        self.connect_timeout: float = 3.0
+        self.connect_timeout: float = 30.0
         # vumi uses a default value of 30secs:
         # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
 
