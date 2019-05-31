@@ -5,10 +5,9 @@ import os
 import json
 import struct
 import asyncio
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import naz
-import mock
 import docker
 
 

@@ -1,9 +1,8 @@
 import time
 import asyncio
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import naz
-import mock
 
 
 def AsyncMock(*args, **kwargs):

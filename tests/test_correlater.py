@@ -3,9 +3,8 @@
 
 import json
 import time
-import mock
 import asyncio
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import naz
 
