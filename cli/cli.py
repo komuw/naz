@@ -77,15 +77,6 @@ def make_parser():
         help="The currently installed naz version.",
     )
     parser.add_argument(
-        "--loglevel",
-        type=str,
-        required=False,
-        default="INFO",
-        choices=["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="The log level to output log messages at. \
-        eg: --loglevel DEBUG",
-    )
-    parser.add_argument(
         "--config",
         required=True,
         type=argparse.FileType(mode="r"),
@@ -121,10 +112,6 @@ def main():
         config_contents = config.read()
         # todo: validate that config_contents hold all the required params
         kwargs = json.loads(config_contents)
-
-        loglevel = (
-            kwargs.get("loglevel").upper() if kwargs.get("loglevel") else args.loglevel.upper()
-        )
         log_metadata = kwargs.get("log_metadata")
         if not log_metadata:
             log_metadata = {}
@@ -139,7 +126,8 @@ def main():
                 "client_id": client_id,
             }
         )
-        logger.bind(level=loglevel, log_metadata=log_metadata)
+        # TODO: fix this level hard-coding
+        logger.bind(level="INFO", log_metadata=log_metadata)
 
         logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
         if dry_run:
