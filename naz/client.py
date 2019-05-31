@@ -1281,6 +1281,8 @@ class Client:
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
 
+        if isinstance(msg, str):
+            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
         log_msg = ""
         try:
             log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
@@ -1352,8 +1354,6 @@ class Client:
             # ie we have not even connected the first time yet
             await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
-        if isinstance(msg, str):
-            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
         try:
             # call user's hook for requests
             await self.hook.request(
