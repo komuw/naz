@@ -1342,7 +1342,7 @@ class Client:
                     "error": error_msg,
                 },
             )
-            # do not raise, we do not naz-cli to exit
+            # do not raise, we do not want naz-cli to exit
             return None
 
         if (self.current_session_state != SmppSessionState.OPEN) and (
