@@ -115,14 +115,14 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 
 
 then run:
-``naz-cli --app /tmp/my_app.json``
+``naz-cli --client /tmp/my_app.json``
 
 NB:
 
 * (a) For more information about the naz config file, consult the `documentation here <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
 * (b) More examples can be found `here <https://github.com/komuw/naz/tree/master/examples>`_ 
       As an example, start the SMSC simulator(``docker-compose up``) then in another terminal run, 
-      ``naz-cli --app examples/example_config.json``
+      ``naz-cli --client examples/example_config.json``
 
 
 3 Features
