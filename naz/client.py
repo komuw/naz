@@ -831,7 +831,8 @@ class Client:
             TESTING: indicates whether this method is been called while running tests.
         """
         # sleep during startup so that `naz` can have had time to connect & bind
-        await asyncio.sleep(self.enquire_link_interval)
+        while self.current_session_state != SmppSessionState.BOUND_TRX:
+            await asyncio.sleep(self.connect_timeout / 10)
 
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
@@ -1514,6 +1515,10 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
+        # sleep during startup so that `naz` can have had time to connect & bind
+        while self.current_session_state != SmppSessionState.BOUND_TRX:
+            await asyncio.sleep(self.connect_timeout / 10)
+
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
