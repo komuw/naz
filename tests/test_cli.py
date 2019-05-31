@@ -34,7 +34,7 @@ class MockArgumentParser:
 
     def parse_args(self, args=None, namespace=None):
         naz_config_file = io.StringIO(json.dumps(self.naz_config))
-        return argparse.Namespace(config=naz_config_file, dry_run=True)
+        return argparse.Namespace(app=naz_config_file, dry_run=True)
 
 
 class TestCli(TestCase):
