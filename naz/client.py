@@ -308,10 +308,9 @@ class Client:
         self.drain_duration = drain_duration
         self.SHOULD_SHUT_DOWN: bool = False
 
-        # TODO: add it to args and validate
-        self.connect_timeout: float = 30.0
-        # vumi uses a default value of 30secs:
+        # connect_timeout value inspired by vumi
         # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
+        self.connect_timeout: float = 30.0
 
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
