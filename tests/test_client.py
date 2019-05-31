@@ -784,3 +784,21 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_naz_tranceiver_bind.mock.called)
+
+    def test_issues_67(self):
+        """
+        test to prove we have fixed: https://github.com/komuw/naz/issues/67
+        1. start broker
+        2. start naz and run a naz operation like `Client..enquire_link`
+        3. kill broker
+        4. run a naz operation like `Client..enquire_link`
+        """
+        with mock.patch("naz.Client.tranceiver_bind", new=AsyncMock()) as mock_naz_tranceiver_bind:
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self.cli.writer = None  # simulate a connection loss
+            self._run(
+                self.cli.send_data(
+                    smpp_command=naz.SmppCommand.SUBMIT_SM, msg=b"someMessage", log_id="log_id"
+                )
+            )
+            self.assertTrue(mock_naz_tranceiver_bind.mock.called)
