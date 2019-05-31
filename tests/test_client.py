@@ -138,7 +138,6 @@ class TestClient(TestCase):
             "encoding": DummyClientArg,
             "sequence_generator": DummyClientArg,
             "log_metadata": DummyClientArg,
-            "system_id": DummyClientArg,
             "codec_errors_level": DummyClientArg,
             "codec_class": DummyClientArg,
             "service_type": DummyClientArg,
