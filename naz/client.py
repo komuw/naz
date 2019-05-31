@@ -1215,7 +1215,7 @@ class Client:
         self, smpp_command: str, log_id: str, TESTING: bool = False
     ) -> None:
         """
-        In a loop; checks if connection is lost. If lost, reconnects & rebinds to SMSC.
+        Called if connection is lost. It reconnects & rebinds to SMSC.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
