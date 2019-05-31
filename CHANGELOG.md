@@ -7,6 +7,7 @@ most recent version is listed first.
 - cleanly handle termination signals like `SIGTERM`: https://github.com/komuw/naz/pull/106
 - validate `naz.Client` arguments: https://github.com/komuw/naz/pull/108
 - remove ability to bring your own eventloop: https://github.com/komuw/naz/pull/111
+- make `naz` more fault tolerant: https://github.com/komuw/naz/pull/113
 
 ## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    
