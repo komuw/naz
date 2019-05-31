@@ -240,7 +240,6 @@ async def async_main(
         client.enquire_link(TESTING=dry_run),
         sig._signal_handling(logger=logger, client=client, loop=loop),
         loop=loop,
-        # return_exceptions=True,
     )
     await tasks
 
