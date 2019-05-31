@@ -692,6 +692,9 @@ class TestClient(TestCase):
                 )
 
     def test_re_establish_conn_bind(self):
+        """
+        test that `Client.re_establish_conn_bind` calls `Client.connect` & `Client.tranceiver_bind`
+        """
         with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect, mock.patch(
             "naz.Client.tranceiver_bind", new=AsyncMock()
         ) as mock_naz_tranceiver_bind:
