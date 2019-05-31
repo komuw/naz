@@ -67,7 +67,7 @@ def make_parser():
         description="""naz is an async SMPP client.
                 example usage:
                 naz-cli \
-                --config /path/to/my_config.json
+                --app /path/to/my_app.json
                 """,
     )
     parser.add_argument(
@@ -77,11 +77,11 @@ def make_parser():
         help="The currently installed naz version.",
     )
     parser.add_argument(
-        "--config",
+        "--app",
         required=True,
         type=argparse.FileType(mode="r"),
         help="The config file to use. \
-        eg: --config /path/to/my_config.json",
+        eg: --app /path/to/my_app.json",
     )
     parser.add_argument(
         "--dry-run",
@@ -108,10 +108,10 @@ def main():
         args = parser.parse_args()
 
         dry_run = args.dry_run
-        config = args.config
-        config_contents = config.read()
+        app = args.app
+        app_contents = app.read()
         # todo: validate that config_contents hold all the required params
-        kwargs = json.loads(config_contents)
+        kwargs = json.loads(app_contents)
         log_metadata = kwargs.get("log_metadata")
         if not log_metadata:
             log_metadata = {}
