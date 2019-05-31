@@ -1,11 +1,12 @@
 import os
 import sys
+import logging
 import importlib
 
 import naz
 
 
-def load_class(dotted_path: str) -> naz.Client:
+def load_class(dotted_path: str, logger: naz.logger.BaseLogger) -> naz.Client:
     """
     taken from: https://github.com/coleifer/huey/blob/4138d454cc6fd4d252c9350dbd88d74dd3c67dcb/huey/utils.py#L44
     huey is released under MIT license a copy of which can be found at: https://github.com/coleifer/huey/blob/master/LICENSE
@@ -37,11 +38,14 @@ def load_class(dotted_path: str) -> naz.Client:
         mod = importlib.import_module(path)
         attttr = getattr(mod, klass)
         return attttr
-    except Exception:
+    except Exception as e:
         cur_dir = os.getcwd()
         if cur_dir not in sys.path:
             sys.path.insert(0, cur_dir)
             return load_class(dotted_path)
         err_message = "Error importing {0}".format(dotted_path)
-        sys.stderr.write("\033[91m{0}\033[0m\n".format(err_message))
-        raise
+        logger.log(
+            logging.ERROR,
+            {"event": "naz.cli.main", "stage": "end", "state": err_message, "error": str(e)},
+        )
+        raise e

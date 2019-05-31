@@ -107,7 +107,7 @@ def main():
         args = parser.parse_args()
         dry_run = args.dry_run
         client = args.client
-        client = load.load_class(client)
+        client = load.load_class(dotted_path=client, logger=logger)
         if dry_run:
             logger.log(
                 logging.WARN,
