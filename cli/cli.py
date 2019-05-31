@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 import random
 import string
 import asyncio
