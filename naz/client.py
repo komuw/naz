@@ -1354,8 +1354,8 @@ class Client:
 
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
-        # call user's hook for requests
         try:
+            # call user's hook for requests
             await self.hook.request(
                 smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
             )
