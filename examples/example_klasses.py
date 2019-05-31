@@ -133,13 +133,13 @@ class ExampleRedisQueue(naz.q.BaseOutboundQueue):
 
 
 ExampleSeqGen = MySeqGen()
-ExampleRateLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=2.0)  # MyRateLimiter()
+ExampleRateLimiter = MyRateLimiter()
 ExampleRedisQueueInstance = ExampleRedisQueue()
 
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    for i in range(0, 4_000_000):
+    for i in range(0, 4):
         print("submit_sm round:", i)
         item_to_enqueue = {
             "version": "1",
@@ -151,6 +151,3 @@ if __name__ == "__main__":
             "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
         }
         loop.run_until_complete(ExampleRedisQueueInstance.enqueue(item_to_enqueue))
-        # import time
-
-        # time.sleep(3)
