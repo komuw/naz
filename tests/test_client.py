@@ -2,19 +2,14 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import os
-import sys
 import json
 import struct
 import asyncio
-import logging
 from unittest import TestCase
 
 import naz
 import mock
 import docker
-
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
 
 def AsyncMock(*args, **kwargs):

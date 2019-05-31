@@ -1,20 +1,15 @@
 import os
 import io
-import sys
 import copy
 import json
 import signal
 import asyncio
-import logging
 import argparse
 from unittest import TestCase, mock
 
 import cli
 import naz
 import docker
-
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.WARNING)
 
 
 def AsyncMock(*args, **kwargs):

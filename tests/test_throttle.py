@@ -1,15 +1,10 @@
 # do not to pollute the global namespace.
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
-import sys
 import asyncio
-import logging
 from unittest import TestCase
 
 import naz
-
-
-logging.basicConfig(format="%(message)s", stream=sys.stdout, level=logging.DEBUG)
 
 
 class TestThrottle(TestCase):
