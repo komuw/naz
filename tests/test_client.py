@@ -119,6 +119,58 @@ class TestClient(TestCase):
             "`log_metadata` should be of type", str(raised_exception.exception.args[0][0])
         )
 
+    def test_all_bad_args(self):
+        class DummyClientArg:
+            pass
+
+        client_args = {
+            "smsc_host": DummyClientArg,
+            "smsc_port": DummyClientArg,
+            "system_id": DummyClientArg,
+            "password": DummyClientArg,
+            "outboundqueue": DummyClientArg,
+            "system_type": DummyClientArg,
+            "interface_version": DummyClientArg,
+            "addr_ton": DummyClientArg,
+            "addr_npi": DummyClientArg,
+            "address_range": DummyClientArg,
+            "encoding": DummyClientArg,
+            "sequence_generator": DummyClientArg,
+            "loglevel": "SomeBadLogLevel",
+            "log_metadata": DummyClientArg,
+            "system_id": DummyClientArg,
+            "codec_errors_level": DummyClientArg,
+            "codec_class": DummyClientArg,
+            "service_type": DummyClientArg,
+            "source_addr_ton": DummyClientArg,
+            "source_addr_npi": DummyClientArg,
+            "dest_addr_ton": DummyClientArg,
+            "dest_addr_npi": DummyClientArg,
+            "esm_class": DummyClientArg,
+            "protocol_id": DummyClientArg,
+            "priority_flag": DummyClientArg,
+            "schedule_delivery_time": DummyClientArg,
+            "validity_period": DummyClientArg,
+            "registered_delivery": DummyClientArg,
+            "replace_if_present_flag": DummyClientArg,
+            "sm_default_msg_id": DummyClientArg,
+            "enquire_link_interval": DummyClientArg,
+            "rateLimiter": DummyClientArg,
+            "hook": DummyClientArg,
+            "throttle_handler": DummyClientArg,
+            "correlation_handler": DummyClientArg,
+            "drain_duration": DummyClientArg,
+        }
+
+        def mock_create_client():
+            naz.Client(**client_args)
+
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+            mock_create_client()
+        for exc in raised_exception.exception.args[0]:
+            self.assertIsInstance(exc, ValueError)
+
     def test_instantiate_bad_encoding(self):
         encoding = "unknownEncoding"
 
