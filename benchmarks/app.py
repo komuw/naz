@@ -17,5 +17,5 @@ my_naz_client = naz.Client(
     outboundqueue=MyRedisQueue(),
     hook=BenchmarksHook(),
     connect_timeout=15.00,
-    enquire_link_interval=15.00,
+    enquire_link_interval=80.00,
 )
