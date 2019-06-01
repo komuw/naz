@@ -251,7 +251,7 @@ class TestClient(TestCase):
             "naz.Client.speficic_handlers", new=AsyncMock()
         ) as mock_naz_speficic_handlers:
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
@@ -419,7 +419,7 @@ class TestClient(TestCase):
     def test_response_hook_called(self):
         with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
                 )
             )
@@ -629,7 +629,7 @@ class TestClient(TestCase):
         ) as mock_correlater_get:
             mock_correlater_get.return_value = "log_id", "hook_metadata"
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
@@ -640,13 +640,13 @@ class TestClient(TestCase):
         with mock.patch("naz.logger.SimpleLogger.log") as mock_logger_log:
             mock_logger_log.return_value = None
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
             self.assertTrue(mock_logger_log.called)
             self.assertEqual(
-                mock_logger_log.call_args[0][1]["event"], "naz.Client.parse_response_pdu"
+                mock_logger_log.call_args[0][1]["event"], "naz.Client._parse_response_pdu"
             )
 
     def test_parse_deliver_sm(self):
@@ -661,7 +661,7 @@ class TestClient(TestCase):
                 b"\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00"
                 b"\x11id:123456 sub:SSS dlvrd:DDD blah blah"
             )
-            self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+            self._run(self.cli._parse_response_pdu(pdu=deliver_sm_pdu))
 
             self.assertTrue(mock_naz_speficic_handlers.mock.called)
             self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
@@ -718,7 +718,7 @@ class TestClient(TestCase):
                 ">IIII", command_length, command_id, command_status, mock_sequence_number
             )  # SUBMIT_SM_RESP should have same sequence_number as SUBMIT_SM
             submit_sm_resp_full_pdu = header + body
-            self._run(self.cli.parse_response_pdu(pdu=submit_sm_resp_full_pdu))
+            self._run(self.cli._parse_response_pdu(pdu=submit_sm_resp_full_pdu))
 
             # assert message_id  was stored
             self.assertTrue(self.cli.correlation_handler.store[submit_sm_resp_smsc_message_id])
@@ -745,7 +745,7 @@ class TestClient(TestCase):
                     b"\x00\x00\x03\x00\x11id:1618Z-0102G-2333M-25FJF sub:SSS dlvrd:DDD blah blah"
                 )
                 deliver_sm_pdu = deliver_sm_pdu + tag_n_len + value
-                self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+                self._run(self.cli._parse_response_pdu(pdu=deliver_sm_pdu))
 
                 self.assertTrue(mock_hook_response.mock.called)
                 self.assertEqual(

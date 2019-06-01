@@ -1669,7 +1669,7 @@ class Client:
 
     async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
-        In loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client.parse_response_pdu>`.
+        In loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
@@ -1769,13 +1769,13 @@ class Client:
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
-            await self.parse_response_pdu(full_pdu_data)
+            await self._parse_response_pdu(full_pdu_data)
             self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "end"})
             if TESTING:
                 # offer escape hatch for tests to come out of endless loop
                 return full_pdu_data
 
-    async def parse_response_pdu(self, pdu: bytes) -> None:
+    async def _parse_response_pdu(self, pdu: bytes) -> None:
         """
         Take the bytes that have been read from network and parse them into their corresponding PDU.
         The resulting PDU is then handed over to :func:`speficic_handlers <Client.speficic_handlers>`
@@ -1783,7 +1783,7 @@ class Client:
         Parameters:
             pdu: PDU in bytes, that have been read from network
         """
-        self._log(logging.DEBUG, {"event": "naz.Client.parse_response_pdu", "stage": "start"})
+        self._log(logging.DEBUG, {"event": "naz.Client._parse_response_pdu", "stage": "start"})
 
         header_data = pdu[:16]
         body_data = pdu[16:]
@@ -1800,7 +1800,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.parse_response_pdu",
+                    "event": "naz.Client._parse_response_pdu",
                     "stage": "end",
                     "log_id": "",
                     "state": "command_id:{0} is unknown.".format(command_id),
@@ -1818,7 +1818,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.parse_response_pdu",
+                    "event": "naz.Client._parse_response_pdu",
                     "stage": "start",
                     "log_id": log_id,
                     "state": "correlater get error",
@@ -1837,7 +1837,7 @@ class Client:
         self._log(
             logging.DEBUG,
             {
-                "event": "naz.Client.parse_response_pdu",
+                "event": "naz.Client._parse_response_pdu",
                 "stage": "end",
                 "smpp_command": smpp_command,
                 "log_id": log_id,
