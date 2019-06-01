@@ -629,7 +629,7 @@ class TestClient(TestCase):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.get", new=AsyncMock()
         ) as mock_correlater_get:
-            mock_correlater_get.return_value = "log_id", "hook_metadata"
+            mock_correlater_get.mock.return_value = "log_id", "hook_metadata"
             self._run(
                 self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
