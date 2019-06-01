@@ -333,6 +333,7 @@ class TestClient(TestCase):
 
     def test_enquire_link(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
@@ -451,7 +452,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_hook_request.mock.called)
@@ -614,7 +615,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_correlater_put.mock.called)
 
@@ -697,7 +698,7 @@ class TestClient(TestCase):
             # 1. SEND SUBMIT_SM
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(self.cli.correlation_handler.store[mock_sequence_number])
             self.assertEqual(
