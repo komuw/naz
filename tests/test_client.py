@@ -248,28 +248,28 @@ class TestClient(TestCase):
 
     def test_parse_response_pdu(self):
         with mock.patch(
-            "naz.Client.speficic_handlers", new=AsyncMock()
-        ) as mock_naz_speficic_handlers:
+            "naz.Client.command_handlers", new=AsyncMock()
+        ) as mock_naz_command_handlers:
             self._run(
                 self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
 
-            self.assertTrue(mock_naz_speficic_handlers.mock.called)
-            self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+            self.assertTrue(mock_naz_command_handlers.mock.called)
+            self.assertEqual(mock_naz_command_handlers.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
+                mock_naz_command_handlers.mock.call_args[1]["smpp_command"],
                 naz.SmppCommand.BIND_TRANSCEIVER_RESP,
             )
 
-    def test_speficic_handlers(self):
+    def test_command_handlers(self):
         with mock.patch(
             "naz.Client.enquire_link_resp", new=AsyncMock()
         ) as mock_naz_enquire_link_resp:
             sequence_number = 3
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -284,11 +284,11 @@ class TestClient(TestCase):
                 mock_naz_enquire_link_resp.mock.call_args[1]["sequence_number"], sequence_number
             )
 
-    def test_speficic_handlers_unbind(self):
+    def test_command_handlers_unbind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.UNBIND,
                     command_status_value=0,
@@ -303,11 +303,11 @@ class TestClient(TestCase):
                 mock_naz_send_data.mock.call_args[1]["smpp_command"], naz.SmppCommand.UNBIND_RESP
             )
 
-    def test_speficic_handlers_deliver_sm(self):
+    def test_command_handlers_deliver_sm(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -382,7 +382,7 @@ class TestClient(TestCase):
         ) as mock_throttled:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -403,7 +403,7 @@ class TestClient(TestCase):
         ) as mock_throttled:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0x00000058,
@@ -486,7 +486,7 @@ class TestClient(TestCase):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -651,8 +651,8 @@ class TestClient(TestCase):
 
     def test_parse_deliver_sm(self):
         with mock.patch(
-            "naz.Client.speficic_handlers", new=AsyncMock()
-        ) as mock_naz_speficic_handlers:
+            "naz.Client.command_handlers", new=AsyncMock()
+        ) as mock_naz_command_handlers:
             # see: https://github.com/mozes/smpp.pdu
             deliver_sm_pdu = (
                 b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00"
@@ -663,10 +663,10 @@ class TestClient(TestCase):
             )
             self._run(self.cli._parse_response_pdu(pdu=deliver_sm_pdu))
 
-            self.assertTrue(mock_naz_speficic_handlers.mock.called)
-            self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+            self.assertTrue(mock_naz_command_handlers.mock.called)
+            self.assertEqual(mock_naz_command_handlers.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
+                mock_naz_command_handlers.mock.call_args[1]["smpp_command"],
                 naz.SmppCommand.DELIVER_SM,
             )
 

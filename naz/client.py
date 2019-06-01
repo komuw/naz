@@ -1778,7 +1778,7 @@ class Client:
     async def _parse_response_pdu(self, pdu: bytes) -> None:
         """
         Take the bytes that have been read from network and parse them into their corresponding PDU.
-        The resulting PDU is then handed over to :func:`speficic_handlers <Client.speficic_handlers>`
+        The resulting PDU is then handed over to :func:`command_handlers <Client.command_handlers>`
 
         Parameters:
             pdu: PDU in bytes, that have been read from network
@@ -1826,7 +1826,7 @@ class Client:
                 },
             )
 
-        await self.speficic_handlers(
+        await self.command_handlers(
             body_data=body_data,
             smpp_command=smpp_command,
             command_status_value=command_status,
@@ -1845,7 +1845,7 @@ class Client:
             },
         )
 
-    async def speficic_handlers(
+    async def command_handlers(
         self,
         body_data: bytes,
         smpp_command: str,
@@ -1872,7 +1872,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.speficic_handlers",
+                    "event": "naz.Client.command_handlers",
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
@@ -1884,7 +1884,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.speficic_handlers",
+                    "event": "naz.Client.command_handlers",
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
@@ -1896,7 +1896,7 @@ class Client:
             self._log(
                 logging.INFO,
                 {
-                    "event": "naz.Client.speficic_handlers",
+                    "event": "naz.Client.command_handlers",
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
@@ -1915,7 +1915,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.speficic_handlers",
+                    "event": "naz.Client.command_handlers",
                     "stage": "end",
                     "error": str(e),
                     "smpp_command": smpp_command,
@@ -1966,7 +1966,7 @@ class Client:
                 self._log(
                     logging.ERROR,
                     {
-                        "event": "naz.Client.speficic_handlers",
+                        "event": "naz.Client.command_handlers",
                         "stage": "end",
                         "smpp_command": smpp_command,
                         "log_id": log_id,
@@ -2039,7 +2039,7 @@ class Client:
                 self._log(
                     logging.ERROR,
                     {
-                        "event": "naz.Client.speficic_handlers",
+                        "event": "naz.Client.command_handlers",
                         "stage": "start",
                         "log_id": log_id,
                         "state": "correlater get error",
@@ -2054,7 +2054,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.speficic_handlers",
+                    "event": "naz.Client.command_handlers",
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
@@ -2078,7 +2078,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.speficic_handlers",
+                    "event": "naz.Client.command_handlers",
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
