@@ -1545,7 +1545,7 @@ class Client:
             )
             await asyncio.sleep(retry_after)
             if TESTING:
-                return None
+                return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
 
         retry_count = 0
         while True:
