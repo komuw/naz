@@ -32,6 +32,7 @@ naz is in active development and it's API may change in backward incompatible wa
   + [monitoring-and-observability](#2-monitoring-and-observability)            
     + [logging](#21-logging)            
     + [hooks](#22-hooks)
+    + [integration with bug trackers(eg Sentry )](#23-integration-with-bug-trackers)
   + [Rate limiting](#3-rate-limiting)            
   + [Throttle handling](#4-throttle-handling)            
   + [Queuing](#5-queuing)            
@@ -254,6 +255,34 @@ cli = naz.Client(
     hook=stateHook,
 )
 ```
+
+
+#### 2.3 integration with bug trackers
+If you want to integrate `naz` with your bug/issue/bug tracker of choice, all you have to do is use their logging integrator.   
+As an example, to integrate `naz` with [sentry](https://sentry.io/), all you have to do is import and init the sentry sdk. A good place to do that would be in the naz config file, ie;  
+`/tmp/my_config.py`
+```python
+import naz
+from myfile import ExampleQueue
+
+import sentry_sdk # import sentry SDK
+sentry_sdk.init("https://<YOUR_SENTRY_PUBLIC_KEY>@sentry.io/<YOUR_SENTRY_PROJECT_ID>")
+
+my_naz_client = naz.Client(
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=ExampleQueue()
+)
+```
+
+then run the `naz-cli` as usaul:                
+`naz-cli --client tmp.my_config.my_naz_client`    
+And just like that you are good to go. This is what errors from `naz` will look like on sentry:   
+
+![naz integration with sentry](https://raw.githubusercontent.com/komuw/naz/master/documentation/sphinx-docs/naz-sentry.png "naz integration with sentry")
+
 
 
 #### 3. Rate limiting
