@@ -1521,6 +1521,13 @@ class Client:
             async with self.drain_lock:
                 # see: https://github.com/komuw/naz/issues/114
                 await self.writer.drain()
+            if smpp_command == SmppCommand.BIND_TRANSCEIVER:
+                # if we have successfully sent a bind_transceiver request, we can set session state to `BOUND_TRX`
+                # Ideally, you should only set state to `BOUND_TRX` once SMSC sends back a successful `BIND_TRANSCEIVER_RESP`
+                # However, an SMSC may fail to do so. This is especially true when sending `re_establish_conn_bind`
+                # hack!! bad!!
+                # TODO: fix this
+                self.current_session_state = SmppSessionState.BOUND_TRX
         except (ConnectionError, asyncio.TimeoutError) as e:
             self._log(
                 logging.ERROR,
