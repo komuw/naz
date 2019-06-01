@@ -46,7 +46,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
             smpp_command=smpp_command,
             state="request",
             response_code="",  # this is a request so there's no response_code
-        ).inc()  # Increment by 1
+        ).inc()
         self._publish()
 
     async def response(
@@ -73,6 +73,9 @@ class BenchmarksHook(naz.hooks.BaseHook):
         self._publish()
 
     def _publish(self):
+        """
+        push metrics out to a place where prometheus can scrape.
+        """
         prometheus_client.push_to_gateway(
             "push_to_gateway:9091", job="BenchmarksHook", registry=self.registry
         )
