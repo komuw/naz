@@ -5,7 +5,7 @@ import os
 import json
 import struct
 import asyncio
-from unittest import TestCase, mock
+from unittest import TestCase, mock, skip
 
 import naz
 import docker
@@ -65,6 +65,7 @@ class TestClient(TestCase):
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             outboundqueue=self.outboundqueue,
+            loglevel="DEBUG",  # run tests with debug so as to debug what is going on
         )
 
         self.docker_client = docker.from_env()
@@ -248,28 +249,28 @@ class TestClient(TestCase):
 
     def test_parse_response_pdu(self):
         with mock.patch(
-            "naz.Client.speficic_handlers", new=AsyncMock()
-        ) as mock_naz_speficic_handlers:
+            "naz.Client.command_handlers", new=AsyncMock()
+        ) as mock_naz_command_handlers:
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
 
-            self.assertTrue(mock_naz_speficic_handlers.mock.called)
-            self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+            self.assertTrue(mock_naz_command_handlers.mock.called)
+            self.assertEqual(mock_naz_command_handlers.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
+                mock_naz_command_handlers.mock.call_args[1]["smpp_command"],
                 naz.SmppCommand.BIND_TRANSCEIVER_RESP,
             )
 
-    def test_speficic_handlers(self):
+    def test_command_handlers(self):
         with mock.patch(
             "naz.Client.enquire_link_resp", new=AsyncMock()
         ) as mock_naz_enquire_link_resp:
             sequence_number = 3
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -284,11 +285,11 @@ class TestClient(TestCase):
                 mock_naz_enquire_link_resp.mock.call_args[1]["sequence_number"], sequence_number
             )
 
-    def test_speficic_handlers_unbind(self):
+    def test_command_handlers_unbind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.UNBIND,
                     command_status_value=0,
@@ -303,11 +304,11 @@ class TestClient(TestCase):
                 mock_naz_send_data.mock.call_args[1]["smpp_command"], naz.SmppCommand.UNBIND_RESP
             )
 
-    def test_speficic_handlers_deliver_sm(self):
+    def test_command_handlers_deliver_sm(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -333,6 +334,7 @@ class TestClient(TestCase):
 
     def test_enquire_link(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
@@ -353,6 +355,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 outboundqueue=self.outboundqueue,
                 throttle_handler=throttle_handler,
+                loglevel="DEBUG",
             )
 
             log_id = "12345"
@@ -366,12 +369,12 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             self._run(cli.connect())
+            cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             # mock SMSC throttling naz
             for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.dequeue_messages(TESTING=True))
-
             self.assertFalse(mock_naz_dequeue.mock.called)
 
     def test_okay_smsc_response(self):
@@ -382,7 +385,7 @@ class TestClient(TestCase):
         ) as mock_throttled:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -403,7 +406,7 @@ class TestClient(TestCase):
         ) as mock_throttled:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0x00000058,
@@ -419,7 +422,7 @@ class TestClient(TestCase):
     def test_response_hook_called(self):
         with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
                 )
             )
@@ -451,7 +454,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_hook_request.mock.called)
@@ -486,7 +489,7 @@ class TestClient(TestCase):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
-                self.cli.speficic_handlers(
+                self.cli.command_handlers(
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -501,7 +504,7 @@ class TestClient(TestCase):
                 naz.SmppCommand.ENQUIRE_LINK_RESP,
             )
 
-    def test__retry_after(self):
+    def test_retry_after(self):
         self.assertEqual(self.cli._retry_after(current_retries=-23) / 60, 1)
         self.assertEqual(self.cli._retry_after(current_retries=0) / 60, 1)
         self.assertEqual(self.cli._retry_after(current_retries=1) / 60, 2)
@@ -545,6 +548,7 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             mock_naz_dequeue.mock.side_effect = ValueError("This test broker has 99 Problems")
             self._run(self.cli.connect())
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             res = self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertEqual(res, {"broker_error": "broker_error"})
             self.assertFalse(mock_naz_writer.called)
@@ -568,6 +572,7 @@ class TestClient(TestCase):
             }
 
             self._run(self.cli.connect())
+            self.cli.current_session_state = naz.SmppSessionState.OPEN
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertFalse(mock_naz_writer.called)
 
@@ -577,7 +582,9 @@ class TestClient(TestCase):
         """
         with mock.patch(
             "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
-        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+        ) as mock_naz_dequeue, mock.patch(
+            "naz.client.asyncio.sleep", new=AsyncMock()
+        ) as mock_sleep:
             log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -589,7 +596,8 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             self._run(self.cli.dequeue_messages(TESTING=True))
-            self.assertFalse(mock_naz_writer.called)
+            self.assertTrue(mock_sleep.mock.called)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connect_timeout / 10)
 
     def test_correlater_put_called(self):
         with mock.patch(
@@ -613,7 +621,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_correlater_put.mock.called)
 
@@ -627,9 +635,9 @@ class TestClient(TestCase):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.get", new=AsyncMock()
         ) as mock_correlater_get:
-            mock_correlater_get.return_value = "log_id", "hook_metadata"
+            mock_correlater_get.mock.return_value = "log_id", "hook_metadata"
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
@@ -640,19 +648,19 @@ class TestClient(TestCase):
         with mock.patch("naz.logger.SimpleLogger.log") as mock_logger_log:
             mock_logger_log.return_value = None
             self._run(
-                self.cli.parse_response_pdu(
+                self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
                 )
             )
             self.assertTrue(mock_logger_log.called)
             self.assertEqual(
-                mock_logger_log.call_args[0][1]["event"], "naz.Client.parse_response_pdu"
+                mock_logger_log.call_args[0][1]["event"], "naz.Client._parse_response_pdu"
             )
 
     def test_parse_deliver_sm(self):
         with mock.patch(
-            "naz.Client.speficic_handlers", new=AsyncMock()
-        ) as mock_naz_speficic_handlers:
+            "naz.Client.command_handlers", new=AsyncMock()
+        ) as mock_naz_command_handlers:
             # see: https://github.com/mozes/smpp.pdu
             deliver_sm_pdu = (
                 b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00"
@@ -661,12 +669,12 @@ class TestClient(TestCase):
                 b"\x00\x00\x00\x00\x00\x00\x00\x00\x03\x00"
                 b"\x11id:123456 sub:SSS dlvrd:DDD blah blah"
             )
-            self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+            self._run(self.cli._parse_response_pdu(pdu=deliver_sm_pdu))
 
-            self.assertTrue(mock_naz_speficic_handlers.mock.called)
-            self.assertEqual(mock_naz_speficic_handlers.mock.call_count, 1)
+            self.assertTrue(mock_naz_command_handlers.mock.called)
+            self.assertEqual(mock_naz_command_handlers.mock.call_count, 1)
             self.assertEqual(
-                mock_naz_speficic_handlers.mock.call_args[1]["smpp_command"],
+                mock_naz_command_handlers.mock.call_args[1]["smpp_command"],
                 naz.SmppCommand.DELIVER_SM,
             )
 
@@ -696,7 +704,7 @@ class TestClient(TestCase):
             # 1. SEND SUBMIT_SM
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(self.cli.correlation_handler.store[mock_sequence_number])
             self.assertEqual(
@@ -718,7 +726,7 @@ class TestClient(TestCase):
                 ">IIII", command_length, command_id, command_status, mock_sequence_number
             )  # SUBMIT_SM_RESP should have same sequence_number as SUBMIT_SM
             submit_sm_resp_full_pdu = header + body
-            self._run(self.cli.parse_response_pdu(pdu=submit_sm_resp_full_pdu))
+            self._run(self.cli._parse_response_pdu(pdu=submit_sm_resp_full_pdu))
 
             # assert message_id  was stored
             self.assertTrue(self.cli.correlation_handler.store[submit_sm_resp_smsc_message_id])
@@ -745,7 +753,7 @@ class TestClient(TestCase):
                     b"\x00\x00\x03\x00\x11id:1618Z-0102G-2333M-25FJF sub:SSS dlvrd:DDD blah blah"
                 )
                 deliver_sm_pdu = deliver_sm_pdu + tag_n_len + value
-                self._run(self.cli.parse_response_pdu(pdu=deliver_sm_pdu))
+                self._run(self.cli._parse_response_pdu(pdu=deliver_sm_pdu))
 
                 self.assertTrue(mock_hook_response.mock.called)
                 self.assertEqual(
@@ -802,3 +810,20 @@ class TestClient(TestCase):
                 )
             )
             self.assertTrue(mock_naz_tranceiver_bind.mock.called)
+
+    @skip("TODO:fix this. It does not work.")
+    def test_issues_112(self):
+        """
+        test to prove we have fixed: https://github.com/komuw/naz/issues/112
+
+        Run `Client.enquire_link`. Check if `StreamWriter.write` was called twice(one for `tranceiver_bind` and another for `enquire_link`)
+        If `StreamWriter.write` was called, it means that our `enquire_link` call didnt get a:
+          enquire_link cannot be sent to SMSC when the client session state is: OPEN error.
+        """
+        with mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+            self._run(self.cli.connect())
+            self._run(self.cli.tranceiver_bind())
+            # self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self._run(self.cli.enquire_link(TESTING=True))
+            self.assertTrue(mock_naz_writer.called)
+            self.assertEqual(mock_naz_writer.call_count, 2)
