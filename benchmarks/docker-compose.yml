@@ -1,0 +1,71 @@
+version: '3'
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: NginxDockerfile
+    container_name: nginx
+    depends_on:
+      - prometheus
+    ports:
+      - 9000:80
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+  
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - redis
+      - message_producer
+      - naz_cli
+      - push_to_gateway
+
+  push_to_gateway:
+    image: prom/pushgateway
+    container_name: push_to_gateway
+
+  redis:
+    image: 'redis:5.0-alpine'
+    container_name: redis
+
+  message_producer:
+    build:
+      context: .
+    container_name: message_producer
+    volumes:
+      - ./:/usr/src/app
+    command: python /usr/src/app/message_producer.py
+    env_file:
+      - compose.env
+    labels:
+      - "app_name=message_producer"
+    depends_on:
+      - redis
+
+  naz_cli:
+    build:
+      context: .
+    container_name: naz_cli
+    volumes:
+      - ./:/usr/src/app
+    command: wiji-cli --app wiji_app.myApp
+    env_file:
+      - compose.env
+    labels:
+      - "app_name=naz_cli"
+    depends_on:
+      - redis
