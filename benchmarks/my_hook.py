@@ -14,7 +14,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
 
     def __init__(self) -> None:
         self.registry = prometheus_client.CollectorRegistry()
-        _labels = ["project", "smpp_command", "state"]
+        _labels = ["project", "smpp_command", "state", "response_code"]
         self.counter = prometheus_client.Counter(
             name="number_of_messages",
             documentation="number of messages processed by naz.",
@@ -42,7 +42,10 @@ class BenchmarksHook(naz.hooks.BaseHook):
             },
         )
         self.counter.labels(
-            project="naz_benchmarks", smpp_command=smpp_command, state="request"
+            project="naz_benchmarks",
+            smpp_command=smpp_command,
+            state="request",
+            response_code="",  # this is a request so there's no response_code
         ).inc()  # Increment by 1
         self._publish()
 
@@ -62,7 +65,10 @@ class BenchmarksHook(naz.hooks.BaseHook):
             },
         )
         self.counter.labels(
-            project="naz_benchmarks", smpp_command=smpp_command, state="request"
+            project="naz_benchmarks",
+            smpp_command=smpp_command,
+            state="response",
+            response_code=smsc_response.code,
         ).inc()  # Increment by 1
         self._publish()
 
