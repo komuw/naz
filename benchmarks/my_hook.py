@@ -1,4 +1,7 @@
+import asyncio
 import logging
+import functools
+import concurrent
 
 import naz
 
@@ -23,6 +26,8 @@ class BenchmarksHook(naz.hooks.BaseHook):
         )
 
         self.logger = naz.logger.SimpleLogger("naz_benchmarks.BenchmarksHook")
+        self.loop = asyncio.get_event_loop()
+        self.thread_name_prefix = "naz_benchmarks_hook_pool"
 
         # go to prometheus dashboard(http://localhost:9000/) & you can run queries like:
         # 1. container_memory_rss{name="naz_cli", container_label_com_docker_compose_service="naz_cli"}
@@ -47,7 +52,10 @@ class BenchmarksHook(naz.hooks.BaseHook):
             state="request",
             response_code="",  # this is a request so there's no response_code
         ).inc()
-        self._publish()
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix=self.thread_name_prefix
+        ) as executor:
+            await self.loop.run_in_executor(executor, functools.partial(self._publish))
 
     async def response(
         self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: naz.CommandStatus
@@ -70,7 +78,10 @@ class BenchmarksHook(naz.hooks.BaseHook):
             state="response",
             response_code=smsc_response.code,
         ).inc()  # Increment by 1
-        self._publish()
+        with concurrent.futures.ThreadPoolExecutor(
+            thread_name_prefix=self.thread_name_prefix
+        ) as executor:
+            await self.loop.run_in_executor(executor, functools.partial(self._publish))
 
     def _publish(self):
         """
