@@ -65,6 +65,7 @@ class TestClient(TestCase):
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             outboundqueue=self.outboundqueue,
+            loglevel="DEBUG",  # run tests with debug so as to debug what is going on
         )
 
         self.docker_client = docker.from_env()
@@ -333,6 +334,7 @@ class TestClient(TestCase):
 
     def test_enquire_link(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_send_data.mock.called)
             self.assertEqual(mock_naz_send_data.mock.call_count, 1)
@@ -353,6 +355,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 outboundqueue=self.outboundqueue,
                 throttle_handler=throttle_handler,
+                loglevel="DEBUG",
             )
 
             log_id = "12345"
@@ -366,12 +369,12 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             self._run(cli.connect())
+            cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             # mock SMSC throttling naz
             for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.dequeue_messages(TESTING=True))
-
             self.assertFalse(mock_naz_dequeue.mock.called)
 
     def test_okay_smsc_response(self):
@@ -451,7 +454,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
 
             self.assertTrue(mock_hook_request.mock.called)
@@ -501,7 +504,7 @@ class TestClient(TestCase):
                 naz.SmppCommand.ENQUIRE_LINK_RESP,
             )
 
-    def test__retry_after(self):
+    def test_retry_after(self):
         self.assertEqual(self.cli._retry_after(current_retries=-23) / 60, 1)
         self.assertEqual(self.cli._retry_after(current_retries=0) / 60, 1)
         self.assertEqual(self.cli._retry_after(current_retries=1) / 60, 2)
@@ -569,6 +572,7 @@ class TestClient(TestCase):
             }
 
             self._run(self.cli.connect())
+            self.cli.current_session_state = naz.SmppSessionState.OPEN
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertFalse(mock_naz_writer.called)
 
@@ -578,7 +582,9 @@ class TestClient(TestCase):
         """
         with mock.patch(
             "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
-        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+        ) as mock_naz_dequeue, mock.patch(
+            "naz.client.asyncio.sleep", new=AsyncMock()
+        ) as mock_sleep:
             log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -590,7 +596,8 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             self._run(self.cli.dequeue_messages(TESTING=True))
-            self.assertFalse(mock_naz_writer.called)
+            self.assertTrue(mock_sleep.mock.called)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connect_timeout / 10)
 
     def test_correlater_put_called(self):
         with mock.patch(
@@ -614,7 +621,7 @@ class TestClient(TestCase):
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_correlater_put.mock.called)
 
@@ -628,7 +635,7 @@ class TestClient(TestCase):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.get", new=AsyncMock()
         ) as mock_correlater_get:
-            mock_correlater_get.return_value = "log_id", "hook_metadata"
+            mock_correlater_get.mock.return_value = "log_id", "hook_metadata"
             self._run(
                 self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00"
@@ -697,7 +704,7 @@ class TestClient(TestCase):
             # 1. SEND SUBMIT_SM
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
-            self.cli.current_session_state = "BOUND_TRX"
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(self.cli.correlation_handler.store[mock_sequence_number])
             self.assertEqual(
