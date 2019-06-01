@@ -502,7 +502,7 @@ class TestClient(TestCase):
                 naz.SmppCommand.ENQUIRE_LINK_RESP,
             )
 
-    def test__retry_after(self):
+    def test_retry_after(self):
         self.assertEqual(self.cli._retry_after(current_retries=-23) / 60, 1)
         self.assertEqual(self.cli._retry_after(current_retries=0) / 60, 1)
         self.assertEqual(self.cli._retry_after(current_retries=1) / 60, 2)
