@@ -582,7 +582,9 @@ class TestClient(TestCase):
         """
         with mock.patch(
             "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
-        ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
+        ) as mock_naz_dequeue, mock.patch(
+            "naz.client.asyncio.sleep", new=AsyncMock()
+        ) as mock_sleep:
             log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -594,7 +596,8 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             self._run(self.cli.dequeue_messages(TESTING=True))
-            self.assertFalse(mock_naz_writer.called)
+            self.assertTrue(mock_sleep.mock.called)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connect_timeout / 10)
 
     def test_correlater_put_called(self):
         with mock.patch(

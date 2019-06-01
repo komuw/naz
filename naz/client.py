@@ -845,6 +845,8 @@ class Client:
                 },
             )
             await asyncio.sleep(retry_after)
+            if TESTING:
+                return None
 
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
@@ -1542,6 +1544,8 @@ class Client:
                 },
             )
             await asyncio.sleep(retry_after)
+            if TESTING:
+                return None
 
         retry_count = 0
         while True:
