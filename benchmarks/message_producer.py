@@ -6,7 +6,7 @@ import logging
 
 import naz
 
-from app import my_naz_client
+from app import my_naz_client, country_code
 
 DURATION_BETWEEN_MSGS = 0.05
 MAX_NUM_OF_MESSAGES = 100_001
@@ -20,7 +20,6 @@ async def send_messages():
     """
     logger = naz.logger.SimpleLogger("naz_benchmarks.message_producer")
 
-    country_code = "254"
     source_addr = "NazBenchmarksInc"
 
     for i in range(0, MAX_NUM_OF_MESSAGES):
