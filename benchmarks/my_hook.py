@@ -27,8 +27,8 @@ class BenchmarksHook(naz.hooks.BaseHook):
         # go to prometheus dashboard(http://localhost:9000/) & you can run queries like:
         # 1. container_memory_rss{name="naz_cli", container_label_com_docker_compose_service="naz_cli"}
         # 2. container_memory_rss{name=~"naz_cli|message_producer"}
-        # 3. number_of_tasks_total{state=~"EXECUTED|QUEUED"}
-        # 4. rate(number_of_tasks_total{task_name="MemTask"}[30s]) # task execution/queueing rate over the past 30seconds
+        # 3. number_of_messages_total{project="naz_benchmarks"}
+        # 4. rate(number_of_messages_total{smpp_command="submit_sm",state="request"}[30s])  # msg sending over the past 30seconds
 
     async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
         self.logger.log(
