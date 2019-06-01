@@ -9,6 +9,7 @@ import naz
 from app import my_naz_client
 
 DURATION_BETWEEN_MSGS = 0.05
+MAX_NUM_OF_MESSAGES = 100_001
 
 
 async def send_messages():
@@ -22,8 +23,8 @@ async def send_messages():
     country_code = "254"
     source_addr = "NazBenchmarksInc"
 
-    while True:
-        log_id = "".join(random.choices(string.ascii_lowercase, k=9))
+    for i in range(0, MAX_NUM_OF_MESSAGES):
+        log_id = "{}-".format(i) + "".join(random.choices(string.ascii_lowercase, k=7))
         destination_addr = country_code + str(random.randint(100_000_000, 900_000_000))
         msg_size = random.randint(1, 200)  # an smpp msg should be between 0-254 octets(bytes)
         msg = "".join(random.choices(string.ascii_uppercase + string.digits, k=msg_size))
@@ -96,7 +97,7 @@ async def send_messages():
                 "msg": msg,
             },
         )
-        await asyncio.sleep(DURATION_BETWEEN_MSGS)
+        # await asyncio.sleep(DURATION_BETWEEN_MSGS)
 
 
 if __name__ == "__main__":
