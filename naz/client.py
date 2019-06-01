@@ -836,7 +836,7 @@ class Client:
         # sleep during startup so that `naz` can have had time to connect & bind
         # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connect_timeout / 10
+            retry_after = self.connect_timeout / 5
             self._log(
                 logging.DEBUG,
                 {
@@ -1572,7 +1572,7 @@ class Client:
                 # If the connection to SMSC is broken, there's no need to try and send messages
                 # sleep and wait for `Client.re_establish_conn_bind` to do its thing.
                 # this same thing cannot be done for `enquire_link` since we rely on it to kick on `re_establish_conn_bind`
-                retry_after = self.connect_timeout / 10
+                retry_after = self.connect_timeout
                 self._log(
                     logging.INFO,
                     {
