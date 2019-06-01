@@ -23,8 +23,7 @@ async def send_messages():
     source_addr = "NazBenchmarksInc"
 
     while True:
-        # for i in range(0, 3):
-        log_id = "log_id"
+        log_id = "".join(random.choices(string.ascii_lowercase, k=9))
         destination_addr = country_code + str(random.randint(100_000_000, 900_000_000))
         msg_size = random.randint(1, 200)  # an smpp msg should be between 0-254 octets(bytes)
         msg = "".join(random.choices(string.ascii_uppercase + string.digits, k=msg_size))
