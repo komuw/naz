@@ -8,7 +8,7 @@ import naz
 
 from app import my_naz_client
 
-DURATION_BETWEEN_MSGS = 10
+DURATION_BETWEEN_MSGS = 0.05
 
 
 async def send_messages():

@@ -715,27 +715,30 @@ class Client:
             return 60 * (1 * (2 ** current_retries))
 
     async def connect(
-        self
+        self, log_id: str = ""
     ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
         """
         make a network connection to SMSC server.
         """
-        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start"})
+        if log_id == "":
+            log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id})
         reader, writer = await asyncio.wait_for(
             asyncio.open_connection(self.smsc_host, self.smsc_port), timeout=self.connect_timeout
         )
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
-        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end"})
+        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
 
-    async def tranceiver_bind(self) -> None:
+    async def tranceiver_bind(self, log_id: str = "") -> None:
         """
         send a BIND_RECEIVER pdu to SMSC.
         """
         smpp_command = SmppCommand.BIND_TRANSCEIVER
-        log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+        if log_id == "":
+            log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(
             logging.INFO,
             {
@@ -1357,8 +1360,8 @@ class Client:
         try:
             # 1. re-connect
             # 2. re-bind
-            await self.connect()
-            await self.tranceiver_bind()
+            await self.connect(log_id=log_id)
+            await self.tranceiver_bind(log_id=log_id)
         except (ConnectionError, asyncio.TimeoutError) as e:
             self._log(
                 logging.ERROR,
