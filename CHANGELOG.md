@@ -13,6 +13,8 @@ most recent version is listed first.
   - bugfix; `asyncio.streams.StreamWriter.drain` should not be called concurrently by multiple coroutines
   - when shutting down, `naz` now tries to make sure that write buffers are properly flushed.
 - replace naz json config file with a python file: https://github.com/komuw/naz/pull/123
+- bugfix: `naz` would attempt to send messages(`submit_sm`) out before it had even connected to SMSC: https://github.com/komuw/naz/pull/124  
+
 
 ## **version:** v0.6.0-beta.1
 - Bug fix: https://github.com/komuw/naz/pull/98    
