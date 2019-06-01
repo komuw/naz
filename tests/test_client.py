@@ -545,6 +545,7 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             mock_naz_dequeue.mock.side_effect = ValueError("This test broker has 99 Problems")
             self._run(self.cli.connect())
+            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             res = self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertEqual(res, {"broker_error": "broker_error"})
             self.assertFalse(mock_naz_writer.called)
