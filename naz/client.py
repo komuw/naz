@@ -1491,8 +1491,11 @@ class Client:
 
         try:
             # call user's hook for requests
-            await self.hook.request(
-                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
+            await asyncio.wait_for(
+                self.hook.request(
+                    smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
+                ),
+                timeout=0.00001,
             )
         except Exception as e:
             self._log(
@@ -2130,11 +2133,14 @@ class Client:
 
         # call user's hook for responses
         try:
-            await self.hook.response(
-                smpp_command=smpp_command,
-                log_id=log_id,
-                hook_metadata=hook_metadata,
-                smsc_response=commandStatus,
+            await asyncio.wait_for(
+                self.hook.response(
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    hook_metadata=hook_metadata,
+                    smsc_response=commandStatus,
+                ),
+                timeout=0.00001,
             )
         except Exception as e:
             self._log(
