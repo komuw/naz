@@ -572,7 +572,7 @@ class TestClient(TestCase):
             }
 
             self._run(self.cli.connect())
-            self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            self.cli.current_session_state = naz.SmppSessionState.OPEN
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertFalse(mock_naz_writer.called)
 
