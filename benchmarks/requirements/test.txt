@@ -1,7 +1,0 @@
--r base.txt
-# test requirements
-black
-pylint
-flake8
-mypy
-bandit

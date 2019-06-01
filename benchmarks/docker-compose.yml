@@ -33,6 +33,7 @@ services:
       - message_producer
       - naz_cli
       - push_to_gateway
+      - smsc_server
 
   push_to_gateway:
     image: prom/pushgateway
@@ -41,6 +42,13 @@ services:
   redis:
     image: 'redis:5.0-alpine'
     container_name: redis
+
+  smsc_server:
+    image: komuw/smpp_server:v0.2
+    container_name: smsc_server
+    ports:
+    - 2775:2775
+    - 8884:8884
 
   message_producer:
     build:
@@ -62,10 +70,11 @@ services:
     container_name: naz_cli
     volumes:
       - ./:/usr/src/app
-    command: wiji-cli --app wiji_app.myApp
+    command: naz-cli --client app.my_naz_client
     env_file:
       - compose.env
     labels:
       - "app_name=naz_cli"
     depends_on:
       - redis
+      - smsc_server
