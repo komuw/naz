@@ -831,6 +831,7 @@ class Client:
             TESTING: indicates whether this method is been called while running tests.
         """
         # sleep during startup so that `naz` can have had time to connect & bind
+        # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
             retry_after = self.connect_timeout / 10
             self._log(
@@ -1432,10 +1433,35 @@ class Client:
                 },
             )
             return None
+        elif (
+            self.current_session_state == SmppSessionState.OPEN
+            and smpp_command == SmppCommand.ENQUIRE_LINK
+        ):
+            # If the connection to  SMSC is broken, we need to call `Client.re_establish_conn_bind`.
+            # That method is only called by `Client.send_data`. Thus someone has to call `Client.send_data` even
+            # when the connection is broken in order for it to call `re_establish_conn_bind` and restore connection
+            # That someone is `enquire_link`. This is why in this block we have `enquire_link` and logging it at DEBUG level
+            # and we do not return
+            error_msg = "smpp_command `{0}` cannot be sent to SMSC when the client session state is `{1}`".format(
+                smpp_command, self.current_session_state
+            )
+            self._log(
+                logging.DEBUG,
+                {
+                    "event": "naz.Client.send_data",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "msg": log_msg,
+                    "current_session_state": self.current_session_state,
+                    "error": error_msg,
+                },
+            )
+            # do not raise or return
         elif self.current_session_state == SmppSessionState.OPEN and smpp_command not in [
-            "bind_transmitter",
-            "bind_receiver",
-            "bind_transceiver",
+            SmppCommand.BIND_TRANSMITTER,
+            SmppCommand.BIND_RECEIVER,
+            SmppCommand.BIND_TRANSCEIVER,
         ]:
             # only the smpp_command's listed above are allowed by SMPP spec to be sent
             # if current_session_state == SmppSessionState.OPEN
@@ -1457,11 +1483,7 @@ class Client:
             # do not raise, we do not want naz-cli to exit
             return None
 
-        if (self.current_session_state != SmppSessionState.OPEN) and (
-            (self.writer is None) or self.writer.transport.is_closing()
-        ):
-            # do not re-establish connection if session state is `OPEN`
-            # ie we have not even connected the first time yet
+        if (self.writer is None) or self.writer.transport.is_closing():
             await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
         try:
@@ -1529,24 +1551,6 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        # sleep during startup so that `naz` can have had time to connect & bind
-        while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connect_timeout / 10
-            self._log(
-                logging.DEBUG,
-                {
-                    "event": "naz.Client.dequeue_messages",
-                    "stage": "start",
-                    "current_session_state": self.current_session_state,
-                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
-                        retry_after / 60
-                    ),
-                },
-            )
-            await asyncio.sleep(retry_after)
-            if TESTING:
-                return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
-
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
@@ -1560,6 +1564,26 @@ class Client:
                     },
                 )
                 return {"shutdown": "shutdown"}
+
+            while self.current_session_state != SmppSessionState.BOUND_TRX:
+                # If the connection to SMSC is broken, there's no need to try and send messages
+                # sleep and wait for `Client.re_establish_conn_bind` to do its thing.
+                # this same thing cannot be done for `enquire_link` since we rely on it to kick on `re_establish_conn_bind`
+                retry_after = self.connect_timeout / 10
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.dequeue_messages",
+                        "stage": "start",
+                        "current_session_state": self.current_session_state,
+                        "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
+                            retry_after / 60
+                        ),
+                    },
+                )
+                await asyncio.sleep(retry_after)
+                if TESTING:
+                    return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.

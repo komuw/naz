@@ -26,6 +26,8 @@ class SmppCommand:
     # see section 4 of SMPP spec document v3.4
     BIND_TRANSCEIVER: str = "bind_transceiver"
     BIND_TRANSCEIVER_RESP: str = "bind_transceiver_resp"
+    BIND_TRANSMITTER: str = "bind_transmitter"
+    BIND_RECEIVER: str = "bind_receiver"
     UNBIND: str = "unbind"
     UNBIND_RESP: str = "unbind_resp"
     SUBMIT_SM: str = "submit_sm"
