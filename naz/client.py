@@ -1987,7 +1987,10 @@ class Client:
             # call throttling handler
             if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
                 await self.throttle_handler.not_throttled()
-            elif commandStatus.value == SmppCommandStatus.ESME_RTHROTTLED.value:
+            elif commandStatus.value in [
+                SmppCommandStatus.ESME_RTHROTTLED.value,
+                SmppCommandStatus.ESME_RMSGQFUL.value,
+            ]:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self._log(
