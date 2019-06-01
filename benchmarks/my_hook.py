@@ -72,4 +72,3 @@ class BenchmarksHook(naz.hooks.BaseHook):
         prometheus_client.push_to_gateway(
             "push_to_gateway:9091", job="BenchmarksHook", registry=self.registry
         )
-

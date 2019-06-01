@@ -2,14 +2,17 @@ import sys
 import time
 import random
 import string
+import asyncio
 import logging
 
 import naz
 
 from app import my_naz_client
 
+DURATION_BETWEEN_MSGS = 10
 
-def send_messages():
+
+async def send_messages():
     """
     - generate a random message of between 1-254 bytes.
     - generate a random msisdn
@@ -20,11 +23,23 @@ def send_messages():
     country_code = "254"
 
     while True:
+        # for i in range(0, 3):
         log_id = "log_id"
         destination_phone_number = country_code + str(random.randint(100_000_000, 900_000_000))
-        msg_size = random.randint(1, 200)  # an smpp msg should be between 0-254 octets(bytes)
+        msg_size = random.randint(1, 150)  # an smpp msg should be between 0-254 octets(bytes)
         msg = "".join(random.choices(string.ascii_uppercase + string.digits, k=msg_size))
-        if sys.getsizeof(msg) > 254:
+        if sys.getsizeof(msg) > 250:
+            logger.log(
+                logging.ERROR,
+                {
+                    "event": "message_producer.send",
+                    "stage": "start",
+                    "destination_phone_number": destination_phone_number,
+                    "log_id": log_id,
+                    "msg": msg[:10],
+                    "error": "message size too big",
+                },
+            )
             continue
 
         logger.log(
@@ -37,7 +52,7 @@ def send_messages():
                 "msg": msg,
             },
         )
-        my_naz_client.submit_sm(
+        await my_naz_client.submit_sm(
             short_message=msg,
             log_id=log_id,
             source_addr="Naz Benchmarks Corporation",
@@ -53,9 +68,9 @@ def send_messages():
                 "msg": msg,
             },
         )
-        time.sleep(1)
+        await asyncio.sleep(DURATION_BETWEEN_MSGS)
 
 
 if __name__ == "__main__":
-    send_messages()
-
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(send_messages())

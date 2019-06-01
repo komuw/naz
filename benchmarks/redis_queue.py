@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import logging
 import functools
 import concurrent
 
@@ -47,19 +48,23 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
         self.loop = asyncio.get_event_loop()
         self.queue_name = "naz_benchmarks_queue"
         self.thread_name_prefix = "naz_benchmarks_redis_thread_pool"
+        self.logger = naz.logger.SimpleLogger("naz_benchmarks.MyRedisQueue")
 
     async def enqueue(self, item):
+        self.logger.log(logging.INFO, {"event": "MyRedisQueue.enqueue", "stage": "start"})
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
             await self.loop.run_in_executor(
                 executor, functools.partial(self.blocking_enqueue, item=item)
             )
+        self.logger.log(logging.INFO, {"event": "MyRedisQueue.enqueue", "stage": "end"})
 
     def blocking_enqueue(self, item):
         self.redis_instance.lpush(self.queue_name, json.dumps(item))
 
     async def dequeue(self):
+        self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "start"})
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
@@ -70,7 +75,12 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
                 if item:
                     return item
                 else:
+                    self.logger.log(
+                        logging.INFO,
+                        {"event": "MyRedisQueue.dequeue", "stage": "end", "state": "sleeping"},
+                    )
                     await asyncio.sleep(5)
+        self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "end"})
 
     def blocking_dequeue(self):
         x = self.redis_instance.brpop(self.queue_name, timeout=3)
