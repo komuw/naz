@@ -105,6 +105,7 @@ class Client:
         # connect_timeout value inspired by vumi
         # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
         connect_timeout: float = 30.0,
+        byo_timeout: float = 3.00,
     ) -> None:
         """
         Parameters:
@@ -148,6 +149,7 @@ class Client:
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
+            byo_timeout: duration in seconds that `naz` will wait for when making requests to user supplied instances like hooks and queues.
         """
         self._validate_client_args(
             smsc_host=smsc_host,
@@ -188,6 +190,7 @@ class Client:
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
             connect_timeout=connect_timeout,
+            byo_timeout=byo_timeout,
         )
 
         self._PID = os.getpid()
@@ -311,6 +314,7 @@ class Client:
 
         self.drain_duration = drain_duration
         self.connect_timeout = connect_timeout
+        self.byo_timeout = byo_timeout
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
@@ -354,6 +358,7 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
         connect_timeout: float,
+        byo_timeout: float,
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -651,6 +656,14 @@ class Client:
                 ValueError(
                     "`connect_timeout` should be of type:: `float` You entered: {0}".format(
                         type(connect_timeout)
+                    )
+                )
+            )
+        if not isinstance(byo_timeout, float):
+            errors.append(
+                ValueError(
+                    "`byo_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(byo_timeout)
                     )
                 )
             )
@@ -1495,7 +1508,7 @@ class Client:
                 self.hook.request(
                     smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
                 ),
-                timeout=0.00001,
+                timeout=self.byo_timeout,
             )
         except Exception as e:
             self._log(
@@ -2140,7 +2153,7 @@ class Client:
                     hook_metadata=hook_metadata,
                     smsc_response=commandStatus,
                 ),
-                timeout=0.00001,
+                timeout=self.byo_timeout,
             )
         except Exception as e:
             self._log(
