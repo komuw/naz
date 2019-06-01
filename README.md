@@ -279,7 +279,7 @@ my_naz_client = naz.Client(
 
 then run the `naz-cli` as usaul:                
 `naz-cli --client tmp.my_config.my_naz_client`    
-And just like that you are good to go. This is what errors from `naz` will look like on sentry:   
+And just like that you are good to go. This is what errors from `naz` will look like on sentry(sans the emojis, ofcourse):   
 
 ![naz integration with sentry](https://raw.githubusercontent.com/komuw/naz/master/documentation/sphinx-docs/naz-sentry.png "naz integration with sentry")
 
