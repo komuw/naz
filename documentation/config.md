@@ -1,5 +1,6 @@
 ## 1. naz Config file (naz client) parameters
-`naz-cli` accepts a json config file. The parameters that can be put in that file, what they mean and their default values(if any) are documented here.                     
+`naz-cli` accepts a config file. The config file is a python file that has a `naz.Client` instance.   
+The parameters that can be put in that file, what they mean and their default values(if any) are documented here.                     
 Note that these are also the parameters that [`naz.Client`](https://github.com/komuw/naz/blob/master/naz/client.py) takes.               
         
 The parameters are divided into two categories,                    
@@ -69,25 +70,27 @@ connect_timeout | duration that `naz` will try to connect to SMSC before timing 
 #### Example
 1. An example config file is shown below.         
 
-`/tmp/my_config.json` 
-```bash        
-{
-  "smsc_host": "127.0.0.1",
-  "smsc_port": 2775,
-  "system_id": "smppclient1",
-  "password": "password",
-  "outboundqueue": "dotted.path.to.Myqueue",
-  "encoding": "gsm0338",
-  "sequence_generator": "my.dotted.path.to.RedisSequencer",
-  "loglevel": "INFO",
-  "log_metadata": {
-    "environment": "production",
-    "release": "canary"
-  },
-  "codec_errors_level": "ignore",
-  "enquire_link_interval": 30.0,
-  "rateLimiter": "dotted.path.to.CustomRateLimiter"
-}
+`/tmp/my_config.py` 
+```python        
+import naz
+from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
+
+# run as:
+#  naz-cli --client examples.example_config.client
+client = naz.Client(
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=ExampleRedisQueue(),
+    encoding="gsm0338",
+    sequence_generator=MySeqGen(),
+    loglevel="INFO",
+    log_metadata={"environment": "staging", "release": "canary"},
+    codec_errors_level="ignore",
+    enquire_link_interval=70.00,
+    rateLimiter=MyRateLimiter(),
+)
 ```
 
 2. An example `naz.Client` declaration              

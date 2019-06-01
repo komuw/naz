@@ -1,7 +1,4 @@
 import os
-import io
-import copy
-import json
 import signal
 import asyncio
 import argparse
@@ -10,6 +7,8 @@ from unittest import TestCase, mock
 import cli
 import naz
 import docker
+
+from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
 
 
 def AsyncMock(*args, **kwargs):
@@ -33,8 +32,25 @@ class MockArgumentParser:
         pass
 
     def parse_args(self, args=None, namespace=None):
-        naz_config_file = io.StringIO(json.dumps(self.naz_config))
-        return argparse.Namespace(config=naz_config_file, dry_run=True, loglevel="DEBUG")
+        return argparse.Namespace(client=self.naz_config, dry_run=True)
+
+
+NAZ_CLIENT = naz.Client(
+    smsc_host="127.0.0.1",
+    smsc_port=2775,
+    system_id="smppclient1",
+    password="password",
+    outboundqueue=ExampleRedisQueue(),
+    encoding="gsm0338",
+    sequence_generator=MySeqGen(),
+    loglevel="INFO",
+    log_metadata={"environment": "production", "release": "canary"},
+    codec_errors_level="ignore",
+    enquire_link_interval=30.00,
+    rateLimiter=MyRateLimiter(),
+)
+
+BAD_NAZ_CLIENT = MySeqGen()
 
 
 class TestCli(TestCase):
@@ -64,21 +80,8 @@ class TestCli(TestCase):
             stdout=True,
             stderr=True,
         )
-
-        self.naz_config = {
-            "smsc_host": "127.0.0.1",
-            "smsc_port": 2775,
-            "system_id": "smppclient1",
-            "password": "password",
-            "outboundqueue": "examples.example_klasses.ExampleRedisQueueInstance",
-            "encoding": "gsm0338",
-            "sequence_generator": "examples.example_klasses.ExampleSeqGen",
-            "loglevel": "INFO",
-            "log_metadata": {"environment": "production", "release": "canary"},
-            "codec_errors_level": "ignore",
-            "enquire_link_interval": 30.00,
-            "rateLimiter": "examples.example_klasses.ExampleRateLimiter",
-        }
+        self.naz_config = "tests.test_cli.NAZ_CLIENT"
+        self.bad_naz_config = "tests.test_cli.BAD_NAZ_CLIENT"
 
     def tearDown(self):
         if os.environ.get("CI_ENVIRONMENT"):
@@ -98,18 +101,16 @@ class TestCli(TestCase):
 
     def test_cli_failure(self):
         with self.assertRaises(SystemExit):
-            bad_config = copy.deepcopy(self.naz_config)
-            bad_config.pop("outboundqueue")
             with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
-                mock_ArgumentParser.return_value = MockArgumentParser(naz_config=bad_config)
+                mock_ArgumentParser.return_value = MockArgumentParser(
+                    naz_config=self.bad_naz_config
+                )
                 cli.cli.main()
 
     def test_load_class_error(self):
         with self.assertRaises(SystemExit):
-            bad_config = copy.deepcopy(self.naz_config)
-            bad_config.update({"outboundqueue": "BareClass"})
             with mock.patch("argparse.ArgumentParser") as mock_ArgumentParser:
-                mock_ArgumentParser.return_value = MockArgumentParser(naz_config=bad_config)
+                mock_ArgumentParser.return_value = MockArgumentParser(naz_config="nonExistent.Path")
                 cli.cli.main()
 
 

@@ -1,16 +1,14 @@
 import os
 import sys
-import json
 import random
 import string
 import asyncio
 import logging
-import inspect
 import argparse
 
 import naz
 
-from .utils import sig
+from .utils import sig, load
 
 os.environ["PYTHONASYNCIODEBUG"] = "1"
 
@@ -67,7 +65,7 @@ def make_parser():
         description="""naz is an async SMPP client.
                 example usage:
                 naz-cli \
-                --config /path/to/my_config.json
+                --client dotted.path.to.naz.Client.instance
                 """,
     )
     parser.add_argument(
@@ -77,20 +75,10 @@ def make_parser():
         help="The currently installed naz version.",
     )
     parser.add_argument(
-        "--loglevel",
-        type=str,
-        required=False,
-        default="INFO",
-        choices=["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="The log level to output log messages at. \
-        eg: --loglevel DEBUG",
-    )
-    parser.add_argument(
-        "--config",
+        "--client",
         required=True,
-        type=argparse.FileType(mode="r"),
-        help="The config file to use. \
-        eg: --config /path/to/my_config.json",
+        help="The dotted path to a python file conatining a `naz.Client` instance. \
+        eg: --client dotted.path.to.a.naz.Client.class.instance",
     )
     parser.add_argument(
         "--dry-run",
@@ -109,39 +97,16 @@ def main():
     """
     _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
     logger = naz.logger.SimpleLogger("naz.cli")
+    logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
     logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
 
     loop = asyncio.get_event_loop()
     try:
         parser = make_parser()
         args = parser.parse_args()
-
         dry_run = args.dry_run
-        config = args.config
-        config_contents = config.read()
-        # todo: validate that config_contents hold all the required params
-        kwargs = json.loads(config_contents)
-
-        loglevel = (
-            kwargs.get("loglevel").upper() if kwargs.get("loglevel") else args.loglevel.upper()
-        )
-        log_metadata = kwargs.get("log_metadata")
-        if not log_metadata:
-            log_metadata = {}
-        client_id = kwargs.get("client_id")
-        if not client_id:
-            client_id = _client_id
-            kwargs["client_id"] = client_id
-        log_metadata.update(
-            {
-                "smsc_host": kwargs.get("smsc_host"),
-                "system_id": kwargs.get("system_id"),
-                "client_id": client_id,
-            }
-        )
-        logger.bind(level=loglevel, log_metadata=log_metadata)
-
-        logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
+        client = args.client
+        client = load.load_class(dotted_path=client, logger=logger)
         if dry_run:
             logger.log(
                 logging.WARN,
@@ -150,69 +115,18 @@ def main():
                 ),
             )
 
-        # Load custom classes
-        # Users can ONLY pass in:
-        # 1. python class instances
-        # if the thing that the user passed in is a python class, we need to exit with an error
-        # we'll use `inspect.isclass` to do that
-        # todo: test the h** out of this logic
-
-        outboundqueue = load_class(kwargs["outboundqueue"])  # this is a mandatory param
-        kwargs["outboundqueue"] = outboundqueue
-        if inspect.isclass(outboundqueue):
-            # DO NOT instantiate class instance, fail with appropriate error instead.
-            msg = "outboundqueue should be a class instance."
-            logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
+        if not isinstance(client, naz.Client):
+            err = ValueError(
+                """`client` should be of type:: `naz.Client` You entered: {0}""".format(
+                    type(client)
+                )
+            )
+            logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(err)})
             sys.exit(77)
-
-        sequence_generator = kwargs.get("sequence_generator")
-        if sequence_generator:
-            sequence_generator = load_class(sequence_generator)
-            # kwargs should contain the actual loaded class instances
-            kwargs["sequence_generator"] = sequence_generator
-            if inspect.isclass(sequence_generator):
-                msg = "sequence_generator should be a class instance."
-                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
-                sys.exit(77)
-
-        codec_class = kwargs.get("codec_class")
-        if codec_class:
-            codec_class = load_class(codec_class)
-            kwargs["codec_class"] = codec_class
-            if inspect.isclass(codec_class):
-                msg = "codec_class should be a class instance."
-                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
-                sys.exit(77)
-        rateLimiter = kwargs.get("rateLimiter")
-        if rateLimiter:
-            rateLimiter = load_class(rateLimiter)
-            kwargs["rateLimiter"] = rateLimiter
-            if inspect.isclass(rateLimiter):
-                msg = "rateLimiter should be a class instance."
-                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
-                sys.exit(77)
-        hook = kwargs.get("hook")
-        if hook:
-            hook = load_class(hook)
-            kwargs["hook"] = hook
-            if inspect.isclass(hook):
-                msg = "hook should be a class instance."
-                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
-                sys.exit(77)
-        throttle_handler = kwargs.get("throttle_handler")
-        if throttle_handler:
-            throttle_handler = load_class(throttle_handler)
-            kwargs["throttle_handler"] = throttle_handler
-            if inspect.isclass(throttle_handler):
-                msg = "throttle_handler should be a class instance."
-                logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": msg})
-                sys.exit(77)
 
         if dry_run:
             return
-
         # call naz api
-        client = naz.Client(**kwargs)
         loop.run_until_complete(
             async_main(client=client, logger=logger, loop=loop, dry_run=dry_run)
         )
