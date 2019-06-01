@@ -65,6 +65,7 @@ class TestClient(TestCase):
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             outboundqueue=self.outboundqueue,
+            loglevel="DEBUG",  # run tests with debug so as to debug what is going on
         )
 
         self.docker_client = docker.from_env()
@@ -354,6 +355,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 outboundqueue=self.outboundqueue,
                 throttle_handler=throttle_handler,
+                loglevel="DEBUG",
             )
 
             log_id = "12345"
@@ -367,12 +369,12 @@ class TestClient(TestCase):
                 "destination_addr": "254711999999",
             }
             self._run(cli.connect())
+            cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             # mock SMSC throttling naz
             for _ in range(0, int(sample_size) * 2):
                 self._run(cli.throttle_handler.throttled())
 
             self._run(cli.dequeue_messages(TESTING=True))
-
             self.assertFalse(mock_naz_dequeue.mock.called)
 
     def test_okay_smsc_response(self):

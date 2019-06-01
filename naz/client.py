@@ -832,7 +832,19 @@ class Client:
         """
         # sleep during startup so that `naz` can have had time to connect & bind
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            await asyncio.sleep(self.connect_timeout / 10)
+            retry_after = self.connect_timeout / 10
+            self._log(
+                logging.DEBUG,
+                {
+                    "event": "naz.Client.enquire_link",
+                    "stage": "start",
+                    "current_session_state": self.current_session_state,
+                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
+                        retry_after / 60
+                    ),
+                },
+            )
+            await asyncio.sleep(retry_after)
 
         smpp_command = SmppCommand.ENQUIRE_LINK
         while True:
@@ -1517,7 +1529,19 @@ class Client:
         """
         # sleep during startup so that `naz` can have had time to connect & bind
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            await asyncio.sleep(self.connect_timeout / 10)
+            retry_after = self.connect_timeout / 10
+            self._log(
+                logging.DEBUG,
+                {
+                    "event": "naz.Client.dequeue_messages",
+                    "stage": "start",
+                    "current_session_state": self.current_session_state,
+                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
+                        retry_after / 60
+                    ),
+                },
+            )
+            await asyncio.sleep(retry_after)
 
         retry_count = 0
         while True:
