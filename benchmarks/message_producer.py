@@ -17,7 +17,7 @@ async def send_messages():
     """
     source_addr = "NazBenchmarksInc"
     DURATION_BETWEEN_MSGS = 0.05
-    MAX_NUM_OF_MESSAGES = 10  # 100_001
+    MAX_NUM_OF_MESSAGES = 100_001
     MSGS_SENT = 0
 
     logger = naz.logger.SimpleLogger("naz_benchmarks.message_producer")

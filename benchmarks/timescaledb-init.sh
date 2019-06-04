@@ -40,7 +40,7 @@ create_table() {
     log_id      TEXT              NOT NULL,
     error       TEXT              NOT NULL,
 
-    PRIMARY KEY(time, log_id)
+    PRIMARY KEY(timestamp, log_id)
     );"
 
     printf "\n\n create_table END \n\n"    
@@ -66,7 +66,7 @@ create_table_indices() {
     # 4. https://info.crunchydata.com/blog/postgresql-brin-indexes-big-data-performance-with-minimal-storage
     #  ^-- Use BRIN indexes for performance and reduce index size
 
-    psql -U "${POSTGRES_USER}" "${POSTGRES_DB}" -c "CREATE INDEX ON logs (event, log_id, time DESC NULLS LAST) WHERE event IS NOT NULL AND log_id IS NOT NULL;"
+    psql -U "${POSTGRES_USER}" "${POSTGRES_DB}" -c "CREATE INDEX ON logs (event, log_id, timestamp DESC NULLS LAST) WHERE event IS NOT NULL AND log_id IS NOT NULL;"
 
     printf "\n\n create_table_indices END \n\n"   
 }
@@ -80,7 +80,7 @@ create_hypertable() {
     # see:
     # 1. https://docs.timescale.com/v1.0/getting-started/creating-hypertables
     # 2. https://docs.timescale.com/v1.0/using-timescaledb/hypertables#best-practices
-    psql -U "${POSTGRES_USER}" "${POSTGRES_DB}" -c "SELECT create_hypertable('logs', 'time');"
+    psql -U "${POSTGRES_USER}" "${POSTGRES_DB}" -c "SELECT create_hypertable('logs', 'timestamp');"
 
     printf "\n\n create_hypertable END \n\n" 
 
