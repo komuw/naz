@@ -79,13 +79,14 @@ async def collect_logs():
                     # 'got Future attached to a different loop' errors
                     async with bufferedLogs.lock:
                         bufferedLogs.buf.append(log)
+                await asyncio.sleep(0.07)
             except OSError as e:
                 if e.errno == 6:
                     pass
                 else:
                     logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
-
                     pass
+                await asyncio.sleep(0.07)
 
 
 async def handle_logs(log_event):
