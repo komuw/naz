@@ -74,6 +74,7 @@ services:
     container_name: message_producer
     volumes:
       - ./:/usr/src/app
+      - named-pipe-volume:/tmp/namedPipes
     command: python /usr/src/app/message_producer.py
     env_file:
       - compose.env

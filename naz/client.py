@@ -1833,17 +1833,16 @@ class Client:
                         },
                     )
                 if chunk == b"":
-                    err = RuntimeError("socket connection broken")
+                    e = RuntimeError("socket connection broken")
                     self._log(
                         logging.ERROR,
                         {
                             "event": "naz.Client.receive_data",
                             "stage": "end",
                             "state": "socket connection broken",
-                            "error": str(err),
+                            "error": str(e),
                         },
                     )
-                    raise err
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
             full_pdu_data = command_length_header_data + b"".join(chunks)
