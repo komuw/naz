@@ -114,9 +114,9 @@ async def send_log_to_remote_storage(logs):
 
         all_logs = []
         for i in logs:
-            timestamp = datetime.datetime.strptime(i["timestamp"], "%Y-%m-%d %H:%M:%S.%f%z")
+            timestamp = datetime.datetime.strptime(i["timestamp"], "%Y-%m-%d %H:%M:%S,%f")
             event = i["event"]
-            stage = i["stage"]
+            stage = i.get("stage", "")
             client_id = i["client_id"]
             log_id = i.get("log_id", "")
             error = i.get("error", "")
