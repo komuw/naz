@@ -44,7 +44,7 @@ services:
     container_name: redis
 
   smsc_server:
-    image: komuw/smpp_server:v0.2
+    image: komuw/smpp_server:v0.3
     container_name: smsc_server
     ports:
     - 2775:2775
