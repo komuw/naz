@@ -1,4 +1,5 @@
 import os
+import json
 import typing
 import logging
 
@@ -10,6 +11,26 @@ from redis_queue import MyRedisQueue
 
 # run as:
 #   naz-cli --client benchmarks.app.my_naz_client
+
+
+class MyLogAdapter(naz.logger.NazLoggingAdapter):
+    def process(self, msg, kwargs):
+        timestamp = self.formatTime()
+        if isinstance(msg, str):
+            merged_msg = "{0} {1} {2}".format(timestamp, msg, self.extra)
+            if self.extra == {}:
+                merged_msg = "{0} {1}".format(timestamp, msg)
+            return self._dumps(merged_msg), kwargs
+        else:
+            _timestamp = {"timestamp": timestamp}
+            merged_msg = {**_timestamp, **msg, **self.extra}
+            return self._dumps(merged_msg), kwargs
+
+    def _dumps(self, merged_msg):
+        try:
+            return json.dumps(merged_msg)
+        except Exception as e:
+            return self._dumps(str(e))
 
 
 class MyLogger(naz.logger.SimpleLogger):
@@ -29,9 +50,7 @@ class MyLogger(naz.logger.SimpleLogger):
         self._logger.addHandler(handler2)
 
         self._logger.setLevel(level)
-        self.logger: logging.LoggerAdapter = naz.logger.NazLoggingAdapter(
-            self._logger, log_metadata
-        )
+        self.logger: logging.LoggerAdapter = MyLogAdapter(self._logger, log_metadata)
 
 
 country_code = "254"
