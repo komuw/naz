@@ -16,7 +16,7 @@ async def send_messages():
     - send the message
     """
     source_addr = "NazBenchmarksInc"
-    DURATION_BETWEEN_MSGS = 0.05
+    # DURATION_BETWEEN_MSGS = 0.05
     MAX_NUM_OF_MESSAGES = 100_001
     MSGS_SENT = 0
 
