@@ -95,6 +95,23 @@ services:
     depends_on:
       - timescale_db
       - log_collector
+      - smsc_server
+
+  # TODO: remove this
+  smsc_server:
+    image: komuw/smpp_server:v0.3
+    container_name: smsc_server
+    ports:
+    - 2775:2775
+    - 8884:8884
+
+  # TODO: remove this
+  redis:
+    image: 'redis:3.0-alpine'
+    container_name: redis
+    ports:
+      - "6379:6379"
+
 
 volumes:
   named-pipe-volume:

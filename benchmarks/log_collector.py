@@ -29,7 +29,7 @@ bufferedLogs = Buffer()
 
 
 class PIPE:
-    def __init__(self, mode, fifo_file_name="/tmp/namedPipes/komusNamedPipe"):
+    def __init__(self, mode, fifo_file_name="/tmp/namedPipes/naz_log_named_pipe"):
         self.mode = mode
         # NB: collector should not try to create named pipe
         # instead it should use the named pipe that was attached
