@@ -40,7 +40,7 @@ create_table() {
     log_id      TEXT              NOT NULL,
     error       TEXT              NOT NULL,
 
-    PRIMARY KEY(timestamp, log_id)
+    PRIMARY KEY(timestamp)
     );"
 
     printf "\n\n create_table END \n\n"    
