@@ -10,7 +10,7 @@ from redis_queue import MyRedisQueue
 country_code = "254"
 
 my_naz_client = naz.Client(
-    smsc_host="smsc_server",
+    smsc_host=os.getenv("smsc_server", "smsc_server"),
     smsc_port=2775,
     system_id="smppclient1",
     password=os.getenv("password", "password"),

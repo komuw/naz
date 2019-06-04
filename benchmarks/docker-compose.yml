@@ -32,6 +32,7 @@ services:
       - message_producer
       - naz_cli
       - push_to_gateway
+      - timescale_db
 
   push_to_gateway:
     image: prom/pushgateway
@@ -60,3 +61,23 @@ services:
       - compose.env
     labels:
       - "app_name=naz_cli"
+    depends_on:
+      - timescale_db
+
+  # for log storage
+  timescale_db:
+    container_name: timescale_db
+    build:
+      context: .
+      dockerfile: timescale_dockerfile
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: hey_NSA
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    volumes:
+      - ./:/usr/src/app
