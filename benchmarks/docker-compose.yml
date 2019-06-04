@@ -45,10 +45,8 @@ services:
     build:
       context: .
       dockerfile: timescale_dockerfile
-    environment:
-      POSTGRES_DB: mydb
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: hey_NSA
+    env_file:
+      - compose.env
     ulimits:
       nproc: 65535
       nofile:
@@ -65,8 +63,10 @@ services:
       - named-pipe-volume:/tmp/namedPipes
       - ./:/usr/src/app
     command: python /usr/src/app/log_collector.py
-    links:
-      - timescale_db:timescale_db
+    env_file:
+      - compose.env
+    depends_on:
+      - timescale_db
 
   message_producer:
     build:
