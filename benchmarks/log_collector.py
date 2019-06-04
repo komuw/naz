@@ -123,7 +123,6 @@ async def send_log_to_remote_storage(logs):
             client_id = i["client_id"]
             log_id = i.get("log_id", "")
             error = i.get("error", "")
-
             all_logs.append((timestamp, event, stage, client_id, log_id, error))
 
         # batch insert
