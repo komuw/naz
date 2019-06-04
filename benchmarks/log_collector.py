@@ -71,6 +71,7 @@ async def collect_logs():
 
                 logger.log(logging.INFO, {"event": "log_collector.data", "data": data})
                 log = await handle_logs(log_event=data)
+                logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
 
                 # do not buffer if there are no logs
                 if log:
@@ -113,37 +114,20 @@ async def send_log_to_remote_storage(logs):
 
         all_logs = []
         for i in logs:
-            time = datetime.datetime.strptime(i["time"], "%Y-%m-%d %H:%M:%S.%f%z")
-            application_name = i["application_name"]
-            application_version = i["application_version"]
-            environment_name = i["environment_name"]
-            log_event = i["log_event"]
-            trace_id = i["trace_id"]
-            file_path = i["file_path"]
-            host_ip = i["host_ip"]
-            data = i.get("data")
-            if data:
-                data = json.dumps(data)
+            timestamp = datetime.datetime.strptime(i["timestamp"], "%Y-%m-%d %H:%M:%S.%f%z")
+            event = i["event"]
+            stage = i["stage"]
+            client_id = i["client_id"]
+            log_id = i.get("log_id", "")
+            error = i.get("error", "")
 
-            all_logs.append(
-                (
-                    time,
-                    application_name,
-                    application_version,
-                    environment_name,
-                    log_event,
-                    trace_id,
-                    file_path,
-                    host_ip,
-                    data,
-                )
-            )
+            all_logs.append((timestamp, event, stage, client_id, log_id, error))
 
         # batch insert
         await conn.executemany(
             """
-            INSERT INTO logs(time, application_name, application_version, environment_name, log_event, trace_id, file_path, host_ip, data)
-                      VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO logs(timestamp, event, stage, client_id, log_id, error)
+                      VALUES($1, $2, $3, $4, $5, $6)
             """,
             all_logs,
             timeout=8.0,

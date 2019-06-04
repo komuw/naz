@@ -33,20 +33,19 @@ create_table() {
     #############\n\n"
 
     psql -U "${POSTGRES_USER}" "${POSTGRES_DB}" -c "CREATE TABLE logs (
-    time                   TIMESTAMPTZ       NOT NULL,
-    application_name       TEXT              NOT NULL,
-    application_version    TEXT              NOT NULL,
-    environment_name       TEXT              NOT NULL,
-    log_event              TEXT              NOT NULL,
-    trace_id               TEXT              NOT NULL,
-    file_path              TEXT              NOT NULL,
-    host_ip                TEXT              NOT NULL,
-    data                   JSONB             NULL,
-    PRIMARY KEY(time, trace_id)
+    timestamp   TIMESTAMPTZ       NOT NULL,
+    event       TEXT              NOT NULL,
+    stage       TEXT              NOT NULL,
+    client_id   TEXT              NOT NULL,
+    log_id      TEXT              NOT NULL,
+    error       TEXT              NOT NULL,
+
+    PRIMARY KEY(time, log_id)
     );"
 
     printf "\n\n create_table END \n\n"    
 }
+
 
 create_table_indices() {
      printf "\n\n ###########\n
