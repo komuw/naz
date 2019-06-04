@@ -7,3 +7,6 @@ redis==3.2.0
 
 # required to collect metrics and graph them
 prometheus_client==0.6.0
+
+# logs
+asyncpg==0.18.3
