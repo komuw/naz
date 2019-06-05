@@ -35,8 +35,8 @@ class Server:
         self.logger = naz.logger.SimpleLogger("naz_benchmarks.{0}".format(self.container_name))
         self.logger.bind(level="INFO", log_metadata={"container_name": self.container_name})
 
-        self.container_max_run_duration = 12  # mins
-        self.container_min_run_duration = 7  # mins
+        self.container_max_run_duration = 23  # mins
+        self.container_min_run_duration = 15  # mins
 
         self.container_max_stop_duration = 3  # mins
         self.container_min_stop_duration = 1  # mins
