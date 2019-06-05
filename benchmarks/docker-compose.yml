@@ -32,10 +32,41 @@ services:
       - message_producer
       - naz_cli
       - push_to_gateway
+      - timescale_db
+      - log_collector
 
   push_to_gateway:
     image: prom/pushgateway
     container_name: push_to_gateway
+
+  # for log storage
+  timescale_db:
+    container_name: timescale_db
+    build:
+      context: .
+      dockerfile: timescale_dockerfile
+    env_file:
+      - compose.env
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    volumes:
+      - ./:/usr/src/app
+
+  # connect the log_emitter container's /tmp/nazLog dir
+  log_collector:
+    build:
+      context: .
+    volumes:
+      - log-file-volume:/tmp/nazLog
+      - ./:/usr/src/app
+    command: python /usr/src/app/log_collector.py
+    env_file:
+      - compose.env
+    depends_on:
+      - timescale_db
 
   message_producer:
     build:
@@ -43,6 +74,7 @@ services:
     container_name: message_producer
     volumes:
       - ./:/usr/src/app
+      - log-file-volume:/tmp/nazLog
     command: python /usr/src/app/message_producer.py
     env_file:
       - compose.env
@@ -55,8 +87,32 @@ services:
     container_name: naz_cli
     volumes:
       - ./:/usr/src/app
+      - log-file-volume:/tmp/nazLog
     command: naz-cli --client app.my_naz_client
     env_file:
       - compose.env
     labels:
       - "app_name=naz_cli"
+    depends_on:
+      - timescale_db
+      - log_collector
+      - smsc_server
+
+  # TODO: remove this
+  smsc_server:
+    image: komuw/smpp_server:v0.3
+    container_name: smsc_server
+    ports:
+    - 2775:2775
+    - 8884:8884
+
+  # TODO: remove this
+  redis:
+    image: 'redis:3.0-alpine'
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+
+volumes:
+  log-file-volume:

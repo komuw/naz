@@ -1,0 +1,4 @@
+FROM timescale/timescaledb:latest-pg11-oss
+
+# inspiration from https://github.com/timescale/timescaledb-docker
+COPY timescaledb-init.sh /docker-entrypoint-initdb.d/

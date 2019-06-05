@@ -90,7 +90,7 @@ class Server:
                 )
                 time.sleep(to_stop * 60)  # keep container in a stopped state for this long secs
             except Exception as e:
-                logger.log(
+                self.logger.log(
                     logging.ERROR, {"event": "Server.runner", "stage": "end", "error": str(e)}
                 )
                 raise e
