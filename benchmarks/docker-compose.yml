@@ -55,7 +55,7 @@ services:
     volumes:
       - ./:/usr/src/app
 
-  # connect the log_emitter container's /tmp/nazLog dir
+  # connect the naz_cli container's /tmp/nazLog dir
   log_collector:
     build:
       context: .
