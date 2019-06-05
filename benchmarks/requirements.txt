@@ -4,6 +4,7 @@ git+https://github.com/komuw/naz.git@49c571b2d4c5b8a485817cbb45affcf75c74c454
 
 # secondary requirements
 redis==3.2.0
+docker==4.0.1
 
 # required to collect metrics and graph them
 prometheus_client==0.6.0
