@@ -28,65 +28,33 @@ class Buffer:
 bufferedLogs = Buffer()
 
 
-class LFILE:
-    def __init__(self, mode, log_file_name="/tmp/nazLog/naz_log_file"):
-        self.mode = mode
-        # NB: log_collector should not try to create the logfile
-        # instead it should use the logfile that was attached
-        # to it by naz_cli container
-        self.log_file_name = log_file_name
-        self.log_file = None
-
-    def __enter__(self):
-        self.log_file = open(self.log_file_name, mode=self.mode)
-        os.set_blocking(self.log_file.fileno(), False)
-
-        return self.log_file
-
-    def __exit__(self, type, value, traceback):
-        if self.log_file:
-            self.log_file.close()
-
-    async def __aenter__(self):
-        self.log_file = open(self.log_file_name, mode=self.mode)
-        os.set_blocking(self.log_file.fileno(), False)
-
-        return await asyncio.sleep(-1, result=self.log_file)
-
-    async def __aexit__(self, exc_type, exc, tb):
-        if self.log_file:
-            await asyncio.sleep(-1, result=self.log_file.close())
-
-
 async def collect_logs():
-    async with LFILE(mode="r") as f:
-        while True:
-            try:
-                logger.log(logging.INFO, {"event": "log_collector.read"})
-                data = f.readline()
-                if len(data) == 0:
-                    # End of the file
-                    await asyncio.sleep(1)
-                    continue
+    while True:
+        try:
+            logger.log(logging.INFO, {"event": "log_collector.read"})
+            with open("/tmp/nazLog/naz_log_file", "r+") as log_file:
+                for line in log_file:
+                    logger.log(logging.INFO, {"event": "log_collector.data", "line": line})
+                    log = await handle_logs(log_event=line)
+                    logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
 
-                logger.log(logging.INFO, {"event": "log_collector.data", "data": data})
-                log = await handle_logs(log_event=data)
-                logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
+                    # do not buffer if there are no logs
+                    if log:
+                        # TODO: disable locks/batched log sending if we get
+                        # 'got Future attached to a different loop' errors
+                        async with bufferedLogs.lock:
+                            bufferedLogs.buf.append(log)
 
-                # do not buffer if there are no logs
-                if log:
-                    # TODO: disable locks/batched log sending if we get
-                    # 'got Future attached to a different loop' errors
-                    async with bufferedLogs.lock:
-                        bufferedLogs.buf.append(log)
-                await asyncio.sleep(0.07)
-            except OSError as e:
-                if e.errno == 6:
-                    pass
-                else:
-                    logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
-                    pass
-                await asyncio.sleep(0.02)
+                # clear file
+                log_file.truncate(0)
+                await asyncio.sleep(7)
+        except OSError as e:
+            if e.errno == 6:
+                pass
+            else:
+                logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
+                pass
+            await asyncio.sleep(7)
 
 
 async def handle_logs(log_event):

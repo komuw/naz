@@ -34,9 +34,6 @@ def makelog(log_directory="/tmp/nazLog", log_file="naz_log_file"):
 
 log_file = makelog()
 
-print("\n\t log_file: ", log_file)
-print()
-
 
 class MyLogAdapter(naz.logger.NazLoggingAdapter):
     def process(self, msg, kwargs):
@@ -66,7 +63,7 @@ class BenchmarksLogger(naz.logger.SimpleLogger):
 
         handler1 = logging.FileHandler(filename=log_file)
         handler1.setFormatter(formatter)
-        handler1.setLevel(self._nameToLevel(level="INFO"))
+        handler1.setLevel(logging.DEBUG)
         self._logger.addHandler(handler1)
 
         handler2 = logging.StreamHandler()
