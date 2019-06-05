@@ -34,6 +34,10 @@ cd naz/benchmarks
 pip3 install -r requirements.txt
 export REDIS_PASSWORD=hey_NSA && python3 smpp_n_queue_servers.py
 
-# edit `compose.env`(if neccesary)
 
-screen -dm docker-compose up
+# A. NAZ-CLI
+# 1. start screen
+# 2. edit `compose.env`(if neccesary)
+docker-compose up
+
+# screen -dm docker-compose up
