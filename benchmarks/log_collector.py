@@ -67,6 +67,23 @@ async def handle_logs(log_event):
 
 
 async def send_log_to_remote_storage(logs):
+    """
+    send the log data to postgres/timescaleDB so that it can be analysed later.
+
+    A log record looks like:
+      {
+        "timestamp": "2019-06-05 09:13:58,720",
+        "event": "naz.SimpleRateLimiter.limit",
+        "stage": "start",
+        "project": "naz_benchmarks",
+        "smsc_host": "smsc_server",
+        "system_id": "smppclient1",
+        "client_id": "R3H5CSO5Y2DTZFOKB",
+        "pid": 1,
+        }
+    we extract(by popping) the main items from it like, timestamp, event, log_id, error etc so that they can be saved as individual fields in a db.
+    The remaining dict is saved as JSONB field in the deb.
+    """
     try:
         host = "localhost"
         if os.environ.get("IN_DOCKER"):
@@ -86,18 +103,25 @@ async def send_log_to_remote_storage(logs):
             timestamp = datetime.datetime.now(
                 tz=datetime.timezone.utc
             )  # ignore the log timestamp for now
-            event = i["event"]
-            stage = i.get("stage", "")
-            client_id = i["client_id"]
-            log_id = i.get("log_id", "")
-            error = i.get("error", "")
-            all_logs.append((timestamp, event, stage, client_id, log_id, error))
+            event = i.pop("event", "")
+            stage = i.pop("stage", "")
+            client_id = i.pop("client_id", "")
+            log_id = i.pop("log_id", "")
+            error = i.pop("error", "")
+
+            metadata = json.dumps({})
+            try:
+                metadata = json.dumps(i)
+            except Exception:
+                pass
+
+            all_logs.append((timestamp, event, stage, client_id, log_id, error, metadata))
 
         # batch insert
         await conn.executemany(
             """
-            INSERT INTO logs(timestamp, event, stage, client_id, log_id, error)
-                      VALUES($1, $2, $3, $4, $5, $6)
+            INSERT INTO logs(timestamp, event, stage, client_id, log_id, error, metadata)
+                      VALUES($1, $2, $3, $4, $5, $6, $7)
             """,
             all_logs,
             timeout=8.0,
