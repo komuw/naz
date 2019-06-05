@@ -11,7 +11,10 @@ import docker
 
 class Server:
     """
-    TODO: add doc
+    This is a container scheduler; or you can call it a poor man's kubernetes.
+
+    It laucnhes SMSC server and redis servers.
+    It keeps them running & stops them randomly so as to simulate fault; you can call it a poor man's chaos monkey.
     """
 
     def __init__(
