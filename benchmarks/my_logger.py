@@ -1,8 +1,41 @@
+import os
+import errno
 import json
 import typing
 import logging
 
 import naz
+
+
+def makelog(log_directory="/tmp/nazLog", log_file="naz_log_file"):
+    log_file = os.path.join(log_directory, log_file)
+    if os.path.exists(log_file):
+        # we want a new file at start-up
+        os.remove(log_file)
+
+    try:
+        os.mkdir(log_directory, mode=0o777)
+    except OSError as e:
+        if e.errno == 17:
+            # File exists
+            pass
+        else:
+            raise e
+
+    try:
+        f = open(log_file, "a")
+        f.close()
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
+
+    return log_file
+
+
+log_file = makelog()
+
+print("\n\t log_file: ", log_file)
+print()
 
 
 class MyLogAdapter(naz.logger.NazLoggingAdapter):
@@ -31,9 +64,9 @@ class BenchmarksLogger(naz.logger.SimpleLogger):
         self._logger = logging.getLogger(self.logger_name)
         formatter = logging.Formatter("%(message)s")
 
-        handler1 = logging.FileHandler(filename="/tmp/namedPipes/naz_log_named_pipe")
+        handler1 = logging.FileHandler(filename=log_file)
         handler1.setFormatter(formatter)
-        handler1.setLevel(level)
+        handler1.setLevel(self._nameToLevel(level="INFO"))
         self._logger.addHandler(handler1)
 
         handler2 = logging.StreamHandler()

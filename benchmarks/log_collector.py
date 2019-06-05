@@ -28,38 +28,38 @@ class Buffer:
 bufferedLogs = Buffer()
 
 
-class PIPE:
-    def __init__(self, mode, fifo_file_name="/tmp/namedPipes/naz_log_named_pipe"):
+class LFILE:
+    def __init__(self, mode, log_file_name="/tmp/nazLog/naz_log_file"):
         self.mode = mode
-        # NB: collector should not try to create named pipe
-        # instead it should use the named pipe that was attached
-        # to it by the log_emitter container
-        self.fifo_file_name = fifo_file_name
-        self.fifo_file = None
+        # NB: log_collector should not try to create the logfile
+        # instead it should use the logfile that was attached
+        # to it by naz_cli container
+        self.log_file_name = log_file_name
+        self.log_file = None
 
     def __enter__(self):
-        self.fifo_file = open(self.fifo_file_name, mode=self.mode)
-        os.set_blocking(self.fifo_file.fileno(), False)
+        self.log_file = open(self.log_file_name, mode=self.mode)
+        os.set_blocking(self.log_file.fileno(), False)
 
-        return self.fifo_file
+        return self.log_file
 
     def __exit__(self, type, value, traceback):
-        if self.fifo_file:
-            self.fifo_file.close()
+        if self.log_file:
+            self.log_file.close()
 
     async def __aenter__(self):
-        self.fifo_file = open(self.fifo_file_name, mode=self.mode)
-        os.set_blocking(self.fifo_file.fileno(), False)
+        self.log_file = open(self.log_file_name, mode=self.mode)
+        os.set_blocking(self.log_file.fileno(), False)
 
-        return await asyncio.sleep(-1, result=self.fifo_file)
+        return await asyncio.sleep(-1, result=self.log_file)
 
     async def __aexit__(self, exc_type, exc, tb):
-        if self.fifo_file:
-            await asyncio.sleep(-1, result=self.fifo_file.close())
+        if self.log_file:
+            await asyncio.sleep(-1, result=self.log_file.close())
 
 
 async def collect_logs():
-    async with PIPE(mode="r") as f:
+    async with LFILE(mode="r") as f:
         while True:
             try:
                 logger.log(logging.INFO, {"event": "log_collector.read"})
@@ -86,7 +86,7 @@ async def collect_logs():
                 else:
                     logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
                     pass
-                await asyncio.sleep(0.07)
+                await asyncio.sleep(0.02)
 
 
 async def handle_logs(log_event):
@@ -136,7 +136,7 @@ async def send_log_to_remote_storage(logs):
         )
 
         await conn.close()
-        logger.log(logging.INFO, {"event": "log_sender_insert.end"})
+        logger.log(logging.INFO, {"event": "log_sender_insert.end", "GOT_ERROR": error})
 
     except Exception as e:
         logger.log(logging.ERROR, {"event": "log_sender_insert.error", "error": str(e)})

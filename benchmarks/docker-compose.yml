@@ -55,12 +55,12 @@ services:
     volumes:
       - ./:/usr/src/app
 
-  # connect the log_emitter container's /tmp/namedPipes dir
+  # connect the log_emitter container's /tmp/nazLog dir
   log_collector:
     build:
       context: .
     volumes:
-      - named-pipe-volume:/tmp/namedPipes
+      - log-file-volume:/tmp/nazLog
       - ./:/usr/src/app
     command: python /usr/src/app/log_collector.py
     env_file:
@@ -74,7 +74,7 @@ services:
     container_name: message_producer
     volumes:
       - ./:/usr/src/app
-      - named-pipe-volume:/tmp/namedPipes
+      - log-file-volume:/tmp/nazLog
     command: python /usr/src/app/message_producer.py
     env_file:
       - compose.env
@@ -87,7 +87,7 @@ services:
     container_name: naz_cli
     volumes:
       - ./:/usr/src/app
-      - named-pipe-volume:/tmp/namedPipes
+      - log-file-volume:/tmp/nazLog
     command: naz-cli --client app.my_naz_client
     env_file:
       - compose.env
@@ -115,4 +115,4 @@ services:
 
 
 volumes:
-  named-pipe-volume:
+  log-file-volume:
