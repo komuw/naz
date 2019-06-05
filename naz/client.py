@@ -741,6 +741,9 @@ class Client:
         )
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
+        sock = self.writer.get_extra_info("socket")
+        sock.settimeout(self.connect_timeout)
+
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
