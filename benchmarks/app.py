@@ -12,10 +12,10 @@ from my_logger import BenchmarksLogger
 country_code = "254"
 
 my_naz_client = naz.Client(
-    smsc_host=os.getenv("smsc_server", "smsc_server"),
+    smsc_host=os.environ["SMSC_HOST"],
     smsc_port=2775,
     system_id="smppclient1",
-    password=os.getenv("password", "password"),
+    password=os.environ["SMSC_PASSWORD"],
     loglevel="DEBUG",
     log_metadata={"project": "naz_benchmarks"},
     outboundqueue=MyRedisQueue(),
