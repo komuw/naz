@@ -1,5 +1,5 @@
 # core requirements
-git+https://github.com/komuw/naz.git@e9b56c3af3e070fec982f284ec408ec7a202dc14
+git+https://github.com/komuw/naz.git@63eef0e138cfb869642e0fe5865e6e808c1f37e9
 # naz==5.3.0
 
 # secondary requirements
