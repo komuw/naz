@@ -61,7 +61,7 @@ throttle_handler | python class instance implementing functionality of what todo
 correlation_handler | A python class instance that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
 drain_duration | duration in seconds that `naz` will wait for after receiving a termination signal. | 8.00   
 connect_timeout | duration that `naz` will try to connect to SMSC before timing out | 30.00  
-byo_timeout | duration in seconds that `naz` will wait for when making requests to user supplied instances like hooks and queues | 3.00  
+byo_timeout | duration in seconds that `naz` will wait for when making requests to user supplied instances like hooks and queues | 30.00  
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
