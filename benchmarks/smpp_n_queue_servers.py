@@ -1,5 +1,7 @@
+import os
 import time
 import random
+import typing
 import logging
 import threading
 
@@ -12,11 +14,19 @@ class Server:
     TODO: add doc
     """
 
-    def __init__(self, image_name: str, container_name: str, labels: dict, ports: dict) -> None:
+    def __init__(
+        self,
+        image_name: str,
+        container_name: str,
+        labels: dict,
+        ports: dict,
+        command: typing.Union[None, str] = None,
+    ) -> None:
         self.image_name = image_name
         self.container_name = container_name
         self.labels = labels
         self.ports = ports
+        self.command = command
 
         self.docker_client = docker.from_env()
         self.logger = naz.logger.SimpleLogger("naz_benchmarks.{0}".format(self.container_name))
@@ -32,6 +42,7 @@ class Server:
         self.stop()
         self.docker_client.containers.run(
             self.image_name,
+            command=self.command,
             name=self.container_name,
             detach=True,
             auto_remove=True,
@@ -102,6 +113,7 @@ if __name__ == "__main__":
         container_name="naz_benchmarks_RedisServer",
         labels={"name": "redis_server", "use": "running_naz_benchmarks"},
         ports={"6379/tcp": 6379},
+        command="redis-server --requirepass {0}".format(os.environ["REDIS_PASSWORD"]),
     )
     redis_thread = threading.Thread(
         target=RedisServer.runner, name="Thread-<redis_naz_benchmarks_server>", daemon=True

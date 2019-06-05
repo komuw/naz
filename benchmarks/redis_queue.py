@@ -35,7 +35,7 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
         if os.environ.get("IN_DOCKER"):
             host = os.environ["REDIS_HOST"]
             port = os.environ["REDIS_PORT"]
-            password = os.environ.get("REDIS_PASSWORD", None)
+            password = os.environ["REDIS_PASSWORD"]
         port = int(port)
         self.redis_instance = redis.StrictRedis(
             host=host,

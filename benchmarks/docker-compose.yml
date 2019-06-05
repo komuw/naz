@@ -106,13 +106,15 @@ services:
     - 2775:2775
     - 8884:8884
 
-  # TODO: remove this
+  TODO: remove this
   redis:
-    image: 'redis:3.0-alpine'
+    image: 'redis:5.0-alpine'
     container_name: redis
+    env_file:
+      - compose.env
     ports:
       - "6379:6379"
 
 
 volumes:
-  log-file-volume:
+  log-file-volume: 

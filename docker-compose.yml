@@ -7,7 +7,7 @@ services:
     - 8884:8884
 
   redis:
-    image: 'redis:3.0-alpine'
+    image: 'redis:5.0-alpine'
     ports:
       - "6379:6379"
 
