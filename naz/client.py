@@ -807,11 +807,14 @@ class Client:
         # associate sequence_number with log_id.
         # this will enable us to also associate responses and thus enhancing traceability of all workflows
         try:
-            await self.correlation_handler.put(
-                smpp_command=smpp_command,
-                sequence_number=sequence_number,
-                log_id=log_id,
-                hook_metadata="",
+            await asyncio.wait_for(
+                self.correlation_handler.put(
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    log_id=log_id,
+                    hook_metadata="",
+                ),
+                timeout=self.byo_timeout,
             )
         except Exception as e:
             self._log(
@@ -917,11 +920,14 @@ class Client:
                 )
 
             try:
-                await self.correlation_handler.put(
-                    smpp_command=smpp_command,
-                    sequence_number=sequence_number,
-                    log_id=log_id,
-                    hook_metadata="",
+                await asyncio.wait_for(
+                    self.correlation_handler.put(
+                        smpp_command=smpp_command,
+                        sequence_number=sequence_number,
+                        log_id=log_id,
+                        hook_metadata="",
+                    ),
+                    timeout=self.byo_timeout,
                 )
             except Exception as e:
                 self._log(
@@ -992,7 +998,9 @@ class Client:
             "smpp_command": smpp_command,
         }
         try:
-            await self.outboundqueue.enqueue(item_to_enqueue)
+            await asyncio.wait_for(
+                self.outboundqueue.enqueue(item_to_enqueue), timeout=self.byo_timeout
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1098,7 +1106,9 @@ class Client:
             "smpp_command": smpp_command,
         }
         try:
-            await self.outboundqueue.enqueue(item_to_enqueue)
+            await asyncio.wait_for(
+                self.outboundqueue.enqueue(item_to_enqueue), timeout=self.byo_timeout
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1189,7 +1199,9 @@ class Client:
             "destination_addr": destination_addr,
         }
         try:
-            await self.outboundqueue.enqueue(item_to_enqueue)
+            await asyncio.wait_for(
+                self.outboundqueue.enqueue(item_to_enqueue), timeout=self.byo_timeout
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1303,11 +1315,14 @@ class Client:
             )
 
         try:
-            await self.correlation_handler.put(
-                smpp_command=smpp_command,
-                sequence_number=sequence_number,
-                log_id=log_id,
-                hook_metadata=hook_metadata,
+            await asyncio.wait_for(
+                self.correlation_handler.put(
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    log_id=log_id,
+                    hook_metadata=hook_metadata,
+                ),
+                timeout=self.byo_timeout,
             )
         except Exception as e:
             self._log(
@@ -1615,7 +1630,9 @@ class Client:
             # do something about that.
             try:
                 # check with throttle handler
-                send_request = await self.throttle_handler.allow_request()
+                send_request = await asyncio.wait_for(
+                    self.throttle_handler.allow_request(), timeout=self.byo_timeout
+                )
             except Exception as e:
                 self._log(
                     logging.ERROR,
@@ -1630,7 +1647,7 @@ class Client:
             if send_request:
                 try:
                     # rate limit ourselves
-                    await self.rateLimiter.limit()
+                    await asyncio.wait_for(self.rateLimiter.limit(), timeout=self.byo_timeout)
                 except Exception as e:
                     self._log(
                         logging.ERROR,
@@ -1644,7 +1661,9 @@ class Client:
                     continue
 
                 try:
-                    item_to_dequeue = await self.outboundqueue.dequeue()
+                    item_to_dequeue = await asyncio.wait_for(
+                        self.outboundqueue.dequeue(), timeout=self.byo_timeout
+                    )
                 except Exception as e:
                     retry_count += 1
                     poll_queue_interval = self._retry_after(retry_count)
@@ -1728,7 +1747,10 @@ class Client:
                     },
                 )
                 try:
-                    await asyncio.sleep(await self.throttle_handler.throttle_delay())
+                    throttle_delay = await asyncio.wait_for(
+                        self.throttle_handler.throttle_delay(), timeout=self.byo_timeout
+                    )
+                    await asyncio.sleep(throttle_delay)
                 except Exception as e:
                     self._log(
                         logging.ERROR,
@@ -1880,8 +1902,11 @@ class Client:
 
         # get associated user supplied log_id if any
         try:
-            log_id, hook_metadata = await self.correlation_handler.get(
-                smpp_command=smpp_command, sequence_number=sequence_number
+            log_id, hook_metadata = await asyncio.wait_for(
+                self.correlation_handler.get(
+                    smpp_command=smpp_command, sequence_number=sequence_number
+                ),
+                timeout=self.byo_timeout,
             )
         except Exception as e:
             log_id, hook_metadata = "", ""
@@ -1978,12 +2003,14 @@ class Client:
         try:
             # call throttling handler
             if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
-                await self.throttle_handler.not_throttled()
+                await asyncio.wait_for(
+                    self.throttle_handler.not_throttled(), timeout=self.byo_timeout
+                )
             elif commandStatus.value in [
                 SmppCommandStatus.ESME_RTHROTTLED.value,
                 SmppCommandStatus.ESME_RMSGQFUL.value,
             ]:
-                await self.throttle_handler.throttled()
+                await asyncio.wait_for(self.throttle_handler.throttled(), timeout=self.byo_timeout)
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -2028,12 +2055,15 @@ class Client:
                 _message_id, self.encoding, self.codec_errors_level
             )
             try:
-                await self.correlation_handler.put(
-                    smpp_command=smpp_command,
-                    sequence_number=sequence_number,
-                    smsc_message_id=smsc_message_id,
-                    log_id=log_id,
-                    hook_metadata=hook_metadata,
+                await asyncio.wait_for(
+                    self.correlation_handler.put(
+                        smpp_command=smpp_command,
+                        sequence_number=sequence_number,
+                        smsc_message_id=smsc_message_id,
+                        log_id=log_id,
+                        hook_metadata=hook_metadata,
+                    ),
+                    timeout=self.byo_timeout,
                 )
             except Exception as e:
                 self._log(
@@ -2102,10 +2132,13 @@ class Client:
                     t_value = self.codec_class.decode(
                         _tag_value, self.encoding, self.codec_errors_level
                     )
-                    log_id, hook_metadata = await self.correlation_handler.get(
-                        smpp_command=smpp_command,
-                        sequence_number=sequence_number,
-                        smsc_message_id=t_value,
+                    log_id, hook_metadata = await asyncio.wait_for(
+                        self.correlation_handler.get(
+                            smpp_command=smpp_command,
+                            sequence_number=sequence_number,
+                            smsc_message_id=t_value,
+                        ),
+                        timeout=self.byo_timeout,
                     )
             except Exception as e:
                 log_id, hook_metadata = "", ""
@@ -2207,11 +2240,14 @@ class Client:
             )
 
         try:
-            await self.correlation_handler.put(
-                smpp_command=smpp_command,
-                sequence_number=sequence_number,
-                log_id=log_id,
-                hook_metadata="",
+            await asyncio.wait_for(
+                self.correlation_handler.put(
+                    smpp_command=smpp_command,
+                    sequence_number=sequence_number,
+                    log_id=log_id,
+                    hook_metadata="",
+                ),
+                timeout=self.byo_timeout,
             )
         except Exception as e:
             self._log(
