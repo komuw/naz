@@ -1822,6 +1822,10 @@ class Client:
                         assert isinstance(self.reader, asyncio.streams.StreamReader)
 
                     chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                    if chunk == b"":
+                        # TODO: maybe we also need todo; `self.writer=None`
+                        # so that the `re_establish_conn_bind` mechanism can kick in.
+                        raise ConnectionError("socket connection broken")
                 except (ConnectionError, asyncio.TimeoutError) as e:
                     self._log(
                         logging.ERROR,
@@ -1829,17 +1833,6 @@ class Client:
                             "event": "naz.Client.receive_data",
                             "stage": "end",
                             "state": "unable to read from SMSC",
-                            "error": str(e),
-                        },
-                    )
-                if chunk == b"":
-                    e = RuntimeError("socket connection broken")
-                    self._log(
-                        logging.ERROR,
-                        {
-                            "event": "naz.Client.receive_data",
-                            "stage": "end",
-                            "state": "socket connection broken",
                             "error": str(e),
                         },
                     )
