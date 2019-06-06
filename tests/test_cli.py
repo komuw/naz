@@ -21,7 +21,7 @@ def AsyncMock(*args, **kwargs):
         return m(*args, **kwargs)
 
     mock_coro.mock = m
-    return mock_coro
+    return mock_coro.mock
 
 
 class MockArgumentParser:
@@ -152,7 +152,7 @@ class TestCliSigHandling(TestCase):
                     logger=self.logger, _signal=signal.SIGTERM, client=self.client
                 )
             )
-            self.assertTrue(mock_naz_shutdown.mock.called)
+            self.assertTrue(mock_naz_shutdown.called)
 
     def test_termination_call_client_shutdown(self):
         with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
@@ -183,4 +183,4 @@ class TestCliSigHandling(TestCase):
                     logger=self.logger, _signal=signal.SIGTERM, client=self.client
                 )
             )
-            self.assertTrue(mock_naz_unbind.mock.called)
+            self.assertTrue(mock_naz_unbind.called)

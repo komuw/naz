@@ -19,7 +19,7 @@ def AsyncMock(*args, **kwargs):
         return m(*args, **kwargs)
 
     mock_coro.mock = m
-    return mock_coro
+    return mock_coro.mock
 
 
 class TestCorrelater(TestCase):
@@ -109,7 +109,7 @@ class TestCorrelater(TestCase):
                     smpp_command=naz.SmppCommand.SUBMIT_SM, sequence_number="sequence_number"
                 )
             )
-            self.assertTrue(mock_correlater_delete_after_ttl.mock.called)
+            self.assertTrue(mock_correlater_delete_after_ttl.called)
 
     def test_put_calls_delete(self):
         with mock.patch(
@@ -123,7 +123,7 @@ class TestCorrelater(TestCase):
                     hook_metadata="MyHookMetadata",
                 )
             )
-            self.assertTrue(mock_correlater_delete_after_ttl.mock.called)
+            self.assertTrue(mock_correlater_delete_after_ttl.called)
 
     def test_submit_sm_deliver_sm_workflow(self):
         """

@@ -15,7 +15,7 @@ def AsyncMock(*args, **kwargs):
         return m(*args, **kwargs)
 
     mock_coro.mock = m
-    return mock_coro
+    return mock_coro.mock
 
 
 class TestRateLimit(TestCase):
@@ -42,14 +42,14 @@ class TestRateLimit(TestCase):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
             for _ in range(0, int(self.send_rate)):
                 self._run(self.rateLimiter.limit())
-            self.assertFalse(mock_sleep.mock.called)
+            self.assertFalse(mock_sleep.called)
 
     def test_token_exhaustion_causes_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
             for _ in range(0, int(self.send_rate) * 2):
                 self._run(self.rateLimiter.limit())
-            self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.rateLimiter.delay_for_tokens)
+            self.assertTrue(mock_sleep.called)
+            self.assertEqual(mock_sleep.call_args[0][0], self.rateLimiter.delay_for_tokens)
 
     def test_send_rate(self):
         send_rate = 3.0
