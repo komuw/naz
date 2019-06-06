@@ -24,16 +24,20 @@ class Server:
         labels: dict,
         ports: dict,
         command: typing.Union[None, str] = None,
+        chaos: bool = True,
     ) -> None:
         self.image_name = image_name
         self.container_name = container_name
         self.labels = labels
         self.ports = ports
         self.command = command
+        self.chaos = chaos
 
         self.docker_client = docker.from_env()
         self.logger = naz.logger.SimpleLogger("naz_benchmarks.{0}".format(self.container_name))
-        self.logger.bind(level="INFO", log_metadata={"container_name": self.container_name})
+        self.logger.bind(
+            level="INFO", log_metadata={"container_name": self.container_name, "chaos": self.chaos}
+        )
 
         self.container_max_run_duration = 23  # mins
         self.container_min_run_duration = 15  # mins
@@ -90,19 +94,20 @@ class Server:
                 )
                 time.sleep(to_run * 60)  # keep container running for this long secs
 
-                self.stop()
-                to_stop = random.randint(
-                    self.container_min_stop_duration, self.container_max_stop_duration
-                )
-                self.logger.log(
-                    logging.INFO,
-                    {
-                        "event": "Server.runner",
-                        "stage": "start",
-                        "state": "container to stop for {0} minutes".format(to_stop),
-                    },
-                )
-                time.sleep(to_stop * 60)  # keep container in a stopped state for this long secs
+                if self.chaos:
+                    self.stop()
+                    to_stop = random.randint(
+                        self.container_min_stop_duration, self.container_max_stop_duration
+                    )
+                    self.logger.log(
+                        logging.INFO,
+                        {
+                            "event": "Server.runner",
+                            "stage": "start",
+                            "state": "container to stop for {0} minutes".format(to_stop),
+                        },
+                    )
+                    time.sleep(to_stop * 60)  # keep container in a stopped state for this long secs
             except Exception as e:
                 self.logger.log(
                     logging.ERROR, {"event": "Server.runner", "stage": "end", "error": str(e)}
@@ -117,6 +122,7 @@ if __name__ == "__main__":
         labels={"name": "redis_server", "use": "running_naz_benchmarks"},
         ports={"6379/tcp": 6379},
         command="redis-server --requirepass {0}".format(os.environ["REDIS_PASSWORD"]),
+        chaos=False,
     )
     redis_thread = threading.Thread(
         target=RedisServer.runner, name="Thread-<redis_naz_benchmarks_server>", daemon=True
