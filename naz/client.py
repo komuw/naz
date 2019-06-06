@@ -102,9 +102,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
-        # connect_timeout value inspired by vumi
-        # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
-        connect_timeout: float = 30.0,
+        connection_timeout: float = 30.0,
         byo_timeout: float = 30.00,
     ) -> None:
         """
@@ -149,6 +147,7 @@ class Client:
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
+            connection_timeout: duration that `naz` will wait, for connection related activities with SMSC, before timing out
             byo_timeout: duration in seconds that `naz` will wait for when making requests to user supplied instances like hooks and queues.
         """
         self._validate_client_args(
@@ -189,7 +188,7 @@ class Client:
             throttle_handler=throttle_handler,
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
-            connect_timeout=connect_timeout,
+            connection_timeout=connection_timeout,
             byo_timeout=byo_timeout,
         )
 
@@ -313,7 +312,7 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
         self.drain_duration = drain_duration
-        self.connect_timeout = connect_timeout
+        self.connection_timeout = connection_timeout
         self.byo_timeout = byo_timeout
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
@@ -357,7 +356,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
-        connect_timeout: float,
+        connection_timeout: float,
         byo_timeout: float,
     ) -> None:
         """
@@ -651,11 +650,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(connect_timeout, float):
+        if not isinstance(connection_timeout, float):
             errors.append(
                 ValueError(
-                    "`connect_timeout` should be of type:: `float` You entered: {0}".format(
-                        type(connect_timeout)
+                    "`connection_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(connection_timeout)
                     )
                 )
             )
@@ -737,12 +736,12 @@ class Client:
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id})
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(self.smsc_host, self.smsc_port), timeout=self.connect_timeout
+            asyncio.open_connection(self.smsc_host, self.smsc_port), timeout=self.connection_timeout
         )
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
         sock = self.writer.get_extra_info("socket")
-        sock.settimeout(self.connect_timeout)
+        sock.settimeout(self.connection_timeout)
 
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
         self.current_session_state = SmppSessionState.OPEN
@@ -855,7 +854,7 @@ class Client:
         # sleep during startup so that `naz` can have had time to connect & bind
         # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connect_timeout / 5
+            retry_after = self.connection_timeout / 5
             self._log(
                 logging.DEBUG,
                 {
@@ -1613,7 +1612,7 @@ class Client:
                 # If the connection to SMSC is broken, there's no need to try and send messages
                 # sleep and wait for `Client.re_establish_conn_bind` to do its thing.
                 # this same thing cannot be done for `enquire_link` since we rely on it to kick on `re_establish_conn_bind`
-                retry_after = self.connect_timeout
+                retry_after = self.connection_timeout
                 self._log(
                     logging.INFO,
                     {
