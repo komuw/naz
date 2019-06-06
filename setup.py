@@ -95,7 +95,7 @@ setup(
             "wheel",
             "Sphinx==2.0.1",
             "sphinx-autodoc-typehints==1.6.0",
-            "redis==3.2.1",
+            "aioredis==1.2.0",
             "pika==1.0.1",
         ],
         "test": ["flake8", "pylint", "black", "bandit", "docker==4.0.1", "mypy"],

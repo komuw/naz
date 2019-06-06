@@ -15,7 +15,7 @@ client = naz.Client(
     loglevel="INFO",
     log_metadata={"environment": "staging", "release": "canary"},
     codec_errors_level="ignore",
-    enquire_link_interval=70.00,
+    enquire_link_interval=15.00,
     rateLimiter=MyRateLimiter(),
     address_range="^254",  # any msisdns beginning with 254. See Appendix A of SMPP spec doc
 )
