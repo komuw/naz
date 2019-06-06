@@ -40,7 +40,7 @@ class Server:
         )
 
         self.container_max_run_duration = 23  # mins
-        self.container_min_run_duration = 15  # mins
+        self.container_min_run_duration = 16  # mins
 
         self.container_max_stop_duration = 3  # mins
         self.container_min_stop_duration = 1  # mins
@@ -137,7 +137,6 @@ if __name__ == "__main__":
         labels={"name": "redis_server", "use": "running_naz_benchmarks"},
         ports={"6379/tcp": 6379},
         command="redis-server --requirepass {0}".format(os.environ["REDIS_PASSWORD"]),
-        chaos=False,
     )
     redis_thread = threading.Thread(
         target=RedisServer.runner, name="Thread-<redis_naz_benchmarks_server>", daemon=True
