@@ -742,6 +742,9 @@ class Client:
         self.writer: asyncio.streams.StreamWriter = writer
         sock = self.writer.get_extra_info("socket")
         sock.settimeout(self.connection_timeout)
+        # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
+        # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
+        # https://docs.python.org/3.6/library/socket.html#notes-on-socket-timeouts
 
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
         self.current_session_state = SmppSessionState.OPEN
