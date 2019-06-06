@@ -80,34 +80,49 @@ class Server:
     def runner(self):
         while True:
             try:
-                self.start()
-                to_run = random.randint(
-                    self.container_min_run_duration, self.container_max_run_duration
-                )
-                self.logger.log(
-                    logging.INFO,
-                    {
-                        "event": "Server.runner",
-                        "stage": "start",
-                        "state": "container to run for {0} minutes".format(to_run),
-                    },
-                )
-                time.sleep(to_run * 60)  # keep container running for this long secs
-
                 if self.chaos:
-                    self.stop()
-                    to_stop = random.randint(
-                        self.container_min_stop_duration, self.container_max_stop_duration
+                    self.start()
+                    to_run = random.randint(
+                        self.container_min_run_duration, self.container_max_run_duration
                     )
+                    to_run = to_run * 60
                     self.logger.log(
                         logging.INFO,
                         {
                             "event": "Server.runner",
                             "stage": "start",
-                            "state": "container to stop for {0} minutes".format(to_stop),
+                            "state": "container to run for {0} minutes".format(to_run / 60),
                         },
                     )
-                    time.sleep(to_stop * 60)  # keep container in a stopped state for this long secs
+                    time.sleep(to_run)  # keep container running for this long secs
+
+                    self.stop()
+                    to_stop = random.randint(
+                        self.container_min_stop_duration, self.container_max_stop_duration
+                    )
+                    to_stop = to_stop * 60
+                    self.logger.log(
+                        logging.INFO,
+                        {
+                            "event": "Server.runner",
+                            "stage": "start",
+                            "state": "container to stop for {0} minutes".format(to_stop / 60),
+                        },
+                    )
+                    time.sleep(to_stop)  # keep container in a stopped state for this long secs
+                else:
+                    # run forever
+                    self.start()
+                    to_run = 72 * 60 * 60  # 72hrs
+                    self.logger.log(
+                        logging.INFO,
+                        {
+                            "event": "Server.runner",
+                            "stage": "start",
+                            "state": "container to run for {0} minutes".format(to_run / 60),
+                        },
+                    )
+                    time.sleep(to_run)  # keep container running for this long secs
             except Exception as e:
                 self.logger.log(
                     logging.ERROR, {"event": "Server.runner", "stage": "end", "error": str(e)}
