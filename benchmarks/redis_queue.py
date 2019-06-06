@@ -6,7 +6,7 @@ import functools
 import concurrent
 
 import naz
-import redis
+import aioredis
 
 
 class MyRedisQueue(naz.q.BaseOutboundQueue):

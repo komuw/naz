@@ -3,7 +3,7 @@ git+https://github.com/komuw/naz.git@06006d5218c31360856cb109f6a04fae31383dfe
 # naz==5.3.0
 
 # secondary requirements
-redis==3.2.0
+aioredis==1.2.0
 docker==4.0.1
 
 # required to collect metrics and graph them
