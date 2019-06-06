@@ -1,6 +1,5 @@
 import os
 import json
-import random
 import asyncio
 import datetime
 import logging
@@ -13,23 +12,9 @@ logger = naz.logger.SimpleLogger("naz_benchmarks.log_collector")
 logger.log(logging.INFO, {"event": "log_collector.start"})
 
 
-class Buffer:
-    def __init__(self, interval=12):
-        self.interval = interval
-
-        self.lock = asyncio.Semaphore(value=1)  # asyncio.Lock()
-        self.buf = []
-
-    def send_logs_every(self):
-        jitter = random.randint(1, 9) * 0.1
-        return self.interval + jitter
-
-
-bufferedLogs = Buffer()
-
-
 async def collect_logs():
     while True:
+        logs_list = []
         try:
             logger.log(logging.INFO, {"event": "log_collector.read"})
             with open("/tmp/nazLog/naz_log_file", "r+") as log_file:
@@ -40,13 +25,13 @@ async def collect_logs():
 
                     # do not buffer if there are no logs
                     if log:
-                        # TODO: disable locks/batched log sending if we get
-                        # 'got Future attached to a different loop' errors
-                        async with bufferedLogs.lock:
-                            bufferedLogs.buf.append(log)
+                        logs_list.append(log)
 
                 # clear file
                 log_file.truncate(0)
+                if len(logs_list) > 0:
+                    await send_log_to_remote_storage(logs=logs_list)
+                    logs_list = []
                 await asyncio.sleep(7)
         except OSError as e:
             if e.errno == 6:
@@ -134,20 +119,9 @@ async def send_log_to_remote_storage(logs):
         logger.log(logging.ERROR, {"event": "log_sender_insert.error", "error": str(e)})
 
 
-async def schedule_log_sending():
-    while True:
-        async with bufferedLogs.lock:
-            buf = bufferedLogs.buf
-            if len(buf) > 0:
-                await send_log_to_remote_storage(logs=buf)
-                bufferedLogs.buf = []
-
-        await asyncio.sleep(bufferedLogs.send_logs_every())
-
-
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    tasks = asyncio.gather(collect_logs(), schedule_log_sending(), loop=loop)
+    tasks = asyncio.gather(collect_logs(), loop=loop)
     loop.run_until_complete(tasks)
 
     loop.close()
