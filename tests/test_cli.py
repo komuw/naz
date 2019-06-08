@@ -71,7 +71,7 @@ class TestCli(TestCase):
             container.stop()
 
         self.smpp_simulator = self.docker_client.containers.run(
-            "komuw/smpp_server:v0.2",
+            "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
             detach=True,
             auto_remove=True,
