@@ -98,7 +98,12 @@ setup(
             "pika==1.0.1",
         ],
         "test": ["flake8", "pylint", "black", "bandit", "docker==4.0.1", "mypy"],
-        "benchmarks": ["asyncpg==0.18.3", "docker==4.0.1", "prometheus_client==0.6.0"],
+        "benchmarks": [
+            "asyncpg==0.18.3",
+            "docker==4.0.1",
+            "prometheus_client==0.6.0",
+            "aioredis==1.2.0",
+        ],
     },
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
