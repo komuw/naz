@@ -60,6 +60,8 @@ services:
   log_collector:
     build:
       context: .
+      args:
+        - NAZ_BRANCH=timeout
     volumes:
       - log-file-volume:/tmp/nazLog
       - ./:/usr/src/app
@@ -72,6 +74,8 @@ services:
   message_producer:
     build:
       context: .
+      args:
+        - NAZ_BRANCH=timeout
     container_name: message_producer
     volumes:
       - ./:/usr/src/app
@@ -85,6 +89,8 @@ services:
   naz_cli:
     build:
       context: .
+      args:
+        - NAZ_BRANCH=timeout
     container_name: naz_cli
     volumes:
       - ./:/usr/src/app

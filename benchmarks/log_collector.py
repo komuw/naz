@@ -12,45 +12,6 @@ logger = naz.logger.SimpleLogger("naz_benchmarks.log_collector")
 logger.log(logging.INFO, {"event": "log_collector.start"})
 
 
-async def collect_logs():
-    while True:
-        logs_list = []
-        try:
-            logger.log(logging.INFO, {"event": "log_collector.read"})
-            with open("/tmp/nazLog/naz_log_file", "r+") as log_file:
-                for line in log_file:
-                    logger.log(logging.INFO, {"event": "log_collector.data", "line": line})
-                    log = await handle_logs(log_event=line)
-                    logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
-
-                    # do not buffer if there are no logs
-                    if log:
-                        logs_list.append(log)
-
-                # clear file
-                log_file.truncate(0)
-                if len(logs_list) > 0:
-                    await send_log_to_remote_storage(logs=logs_list)
-                    logs_list = []
-                await asyncio.sleep(7)
-        except OSError as e:
-            if e.errno == 6:
-                pass
-            else:
-                logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
-                pass
-            await asyncio.sleep(7)
-
-
-async def handle_logs(log_event):
-    log = None
-    try:
-        log = json.loads(log_event)
-    except json.decoder.JSONDecodeError:
-        pass
-    return log
-
-
 async def send_log_to_remote_storage(logs):
     """
     send the log data to postgres/timescaleDB so that it can be analysed later.
@@ -117,6 +78,40 @@ async def send_log_to_remote_storage(logs):
 
     except Exception as e:
         logger.log(logging.ERROR, {"event": "log_sender_insert.error", "error": str(e)})
+
+
+async def collect_logs():
+    while True:
+        logs_list = []
+        try:
+            logger.log(logging.INFO, {"event": "log_collector.read"})
+            with open("/tmp/nazLog/naz_log_file", "r+") as log_file:
+                for line in log_file:
+                    logger.log(logging.INFO, {"event": "log_collector.data", "line": line})
+
+                    log = None
+                    try:
+                        log = json.loads(line)
+                    except json.decoder.JSONDecodeError:
+                        pass
+                    logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
+                    if log:
+                        # do not buffer if there are no logs
+                        logs_list.append(log)
+
+                # clear file
+                log_file.truncate(0)
+                if len(logs_list) > 0:
+                    await send_log_to_remote_storage(logs=logs_list)
+                    logs_list = []
+                await asyncio.sleep(7)
+        except OSError as e:
+            if e.errno == 6:
+                pass
+            else:
+                logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
+                pass
+            await asyncio.sleep(7)
 
 
 if __name__ == "__main__":
