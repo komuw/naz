@@ -717,7 +717,7 @@ class Client:
                     return val.value
         raise ValueError("That encoding:{0} is not recognised.".format(encoding))
 
-    def _search_by_command_id_code(self, command_id_code):
+    def _search_by_command_id_code(self, command_id_code: int):
         for key, val in self.command_ids.items():
             if isinstance(val, list):
                 __range = range(val[0], val[1] + 1)
@@ -729,10 +729,14 @@ class Client:
         return None
 
     @staticmethod
-    def _search_by_command_status_value(command_status_value):
+    def _search_by_command_status_value(command_status_value: int):
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
+                if isinstance(val.value, list):
+                    __range = range(val.value[0], val.value[1] + 1)
+                    if command_status_value in __range:
+                        return val
                 if command_status_value == val.value:
                     return val
         return None
@@ -2002,7 +2006,7 @@ class Client:
                     "stage": "start",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "error": "command_status:{0} is unknown.".format(command_status_value),
+                    "error": "command_status: `{0}` is unknown.".format(command_status_value),
                 },
             )
         elif commandStatus.value != SmppCommandStatus.ESME_ROK.value:

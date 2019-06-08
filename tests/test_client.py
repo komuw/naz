@@ -901,3 +901,25 @@ class TestClient(TestCase):
             self.assertTrue(mock_hook_response.mock.called)
             self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
             self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+    def test_SmppCommandStatus(self):
+        """
+        tests of bugs gotten via benchmarks
+        """
+        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            sequence_number = 1
+            bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
+            command_status = 411041792
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=bind_transceiver,
+                    command_status_value=command_status,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
