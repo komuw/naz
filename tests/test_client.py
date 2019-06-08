@@ -849,7 +849,7 @@ class TestClient(TestCase):
         """
         with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
             sequence_number = 3
-            alert_notification = 0x00000102
+            alert_notification = naz.SmppCommand.ALERT_NOTIFICATION
             self._run(
                 self.cli.command_handlers(
                     body_data=b"body_data",
@@ -868,7 +868,7 @@ class TestClient(TestCase):
 
             # reserved command_id's
             sequence_number = 4
-            reserved_for_smpp_extension_a = 0x00000104
+            reserved_for_smpp_extension_a = naz.SmppCommand.RESERVED_FOR_SMPP_EXTENSION_A
             self._run(
                 self.cli.command_handlers(
                     body_data=b"body_data",
@@ -887,7 +887,7 @@ class TestClient(TestCase):
 
             # known command_id
             sequence_number = 5
-            bind_transceiver = 0x00000009
+            bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
             self._run(
                 self.cli.command_handlers(
                     body_data=b"body_data",

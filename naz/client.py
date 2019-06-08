@@ -2186,11 +2186,10 @@ class Client:
                     "event": "naz.Client.command_handlers",
                     "stage": "end",
                     "smpp_command": smpp_command,
-                    "command_name": self._search_by_command_id_code(smpp_command),
                     "log_id": log_id,
                     "command_status": commandStatus.code,
                     "state": commandStatus.description,
-                    "error": "the smpp_command:{0} has not been implemented in naz. please create a github issue".format(
+                    "error": "the smpp_command: `{0}` has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
                 },
