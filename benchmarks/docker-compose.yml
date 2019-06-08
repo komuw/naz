@@ -56,7 +56,7 @@ services:
     volumes:
       - ./:/usr/src/app
 
-  # connect the naz_cli container's /tmp/nazLog dir
+  # connect the naz_cli container's /usr/src/nazLog dir
   log_collector:
     build:
       context: .
@@ -64,7 +64,7 @@ services:
         - NAZ_BRANCH=timeout
     container_name: log_collector
     volumes:
-      - log-file-volume:/tmp/nazLog
+      - log-file-volume:/usr/src/nazLog
       - ./:/usr/src/app
     command: python /usr/src/app/log_collector.py
     env_file:
@@ -80,7 +80,7 @@ services:
     container_name: message_producer
     volumes:
       - ./:/usr/src/app
-      - log-file-volume:/tmp/nazLog
+      - log-file-volume:/usr/src/nazLog
     command: python /usr/src/app/message_producer.py
     env_file:
       - compose.env
@@ -95,7 +95,7 @@ services:
     container_name: naz_cli
     volumes:
       - ./:/usr/src/app
-      - log-file-volume:/tmp/nazLog
+      - log-file-volume:/usr/src/nazLog
     command: naz-cli --client app.my_naz_client
     env_file:
       - compose.env
