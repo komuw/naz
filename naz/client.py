@@ -102,9 +102,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
-        # connect_timeout value inspired by vumi
-        # https://github.com/praekeltfoundation/vumi/blob/02518583774bcb4db5472aead02df617e1725997/vumi/transports/smpp/config.py#L124
-        connect_timeout: float = 30.0,
+        connection_timeout: float = 30.0,
     ) -> None:
         """
         Parameters:
@@ -148,6 +146,7 @@ class Client:
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
+            connection_timeout: duration that `naz` will wait, for connection related activities with SMSC, before timing out
         """
         self._validate_client_args(
             smsc_host=smsc_host,
@@ -187,7 +186,7 @@ class Client:
             throttle_handler=throttle_handler,
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
-            connect_timeout=connect_timeout,
+            connection_timeout=connection_timeout,
         )
 
         self._PID = os.getpid()
@@ -310,7 +309,7 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
         self.drain_duration = drain_duration
-        self.connect_timeout = connect_timeout
+        self.connection_timeout = connection_timeout
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
@@ -353,7 +352,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
-        connect_timeout: float,
+        connection_timeout: float,
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -646,11 +645,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(connect_timeout, float):
+        if not isinstance(connection_timeout, float):
             errors.append(
                 ValueError(
-                    "`connect_timeout` should be of type:: `float` You entered: {0}".format(
-                        type(connect_timeout)
+                    "`connection_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(connection_timeout)
                     )
                 )
             )
@@ -715,27 +714,34 @@ class Client:
             return 60 * (1 * (2 ** current_retries))
 
     async def connect(
-        self
+        self, log_id: str = ""
     ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
         """
         make a network connection to SMSC server.
         """
-        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start"})
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(self.smsc_host, self.smsc_port), timeout=self.connect_timeout
-        )
+        if log_id == "":
+            log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id})
+        reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
-        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end"})
+        sock = self.writer.get_extra_info("socket")
+        sock.settimeout(self.connection_timeout)
+        # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
+        # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
+        # https://docs.python.org/3.6/library/socket.html#notes-on-socket-timeouts
+
+        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
         self.current_session_state = SmppSessionState.OPEN
         return reader, writer
 
-    async def tranceiver_bind(self) -> None:
+    async def tranceiver_bind(self, log_id: str = "") -> None:
         """
         send a BIND_RECEIVER pdu to SMSC.
         """
         smpp_command = SmppCommand.BIND_TRANSCEIVER
-        log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+        if log_id == "":
+            log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(
             logging.INFO,
             {
@@ -796,7 +802,7 @@ class Client:
                 sequence_number=sequence_number,
                 log_id=log_id,
                 hook_metadata="",
-            )
+            ),
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -831,8 +837,9 @@ class Client:
             TESTING: indicates whether this method is been called while running tests.
         """
         # sleep during startup so that `naz` can have had time to connect & bind
+        # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connect_timeout / 10
+            retry_after = self.connection_timeout / 5
             self._log(
                 logging.DEBUG,
                 {
@@ -1356,8 +1363,8 @@ class Client:
         try:
             # 1. re-connect
             # 2. re-bind
-            await self.connect()
-            await self.tranceiver_bind()
+            await self.connect(log_id=log_id)
+            await self.tranceiver_bind(log_id=log_id)
         except (ConnectionError, asyncio.TimeoutError) as e:
             self._log(
                 logging.ERROR,
@@ -1432,10 +1439,35 @@ class Client:
                 },
             )
             return None
+        elif (
+            self.current_session_state == SmppSessionState.OPEN
+            and smpp_command == SmppCommand.ENQUIRE_LINK
+        ):
+            # If the connection to  SMSC is broken, we need to call `Client.re_establish_conn_bind`.
+            # That method is only called by `Client.send_data`. Thus someone has to call `Client.send_data` even
+            # when the connection is broken in order for it to call `re_establish_conn_bind` and restore connection
+            # That someone is `enquire_link`. This is why in this block we have `enquire_link` and logging it at DEBUG level
+            # and we do not return
+            error_msg = "smpp_command `{0}` cannot be sent to SMSC when the client session state is `{1}`".format(
+                smpp_command, self.current_session_state
+            )
+            self._log(
+                logging.DEBUG,
+                {
+                    "event": "naz.Client.send_data",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "msg": log_msg,
+                    "current_session_state": self.current_session_state,
+                    "error": error_msg,
+                },
+            )
+            # do not raise or return
         elif self.current_session_state == SmppSessionState.OPEN and smpp_command not in [
-            "bind_transmitter",
-            "bind_receiver",
-            "bind_transceiver",
+            SmppCommand.BIND_TRANSMITTER,
+            SmppCommand.BIND_RECEIVER,
+            SmppCommand.BIND_TRANSCEIVER,
         ]:
             # only the smpp_command's listed above are allowed by SMPP spec to be sent
             # if current_session_state == SmppSessionState.OPEN
@@ -1457,11 +1489,7 @@ class Client:
             # do not raise, we do not want naz-cli to exit
             return None
 
-        if (self.current_session_state != SmppSessionState.OPEN) and (
-            (self.writer is None) or self.writer.transport.is_closing()
-        ):
-            # do not re-establish connection if session state is `OPEN`
-            # ie we have not even connected the first time yet
+        if (self.writer is None) or self.writer.transport.is_closing():
             await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
 
         try:
@@ -1496,6 +1524,13 @@ class Client:
             async with self.drain_lock:
                 # see: https://github.com/komuw/naz/issues/114
                 await self.writer.drain()
+            if smpp_command == SmppCommand.BIND_TRANSCEIVER:
+                # if we have successfully sent a bind_transceiver request, we can set session state to `BOUND_TRX`
+                # Ideally, you should only set state to `BOUND_TRX` once SMSC sends back a successful `BIND_TRANSCEIVER_RESP`
+                # However, an SMSC may fail to do so. This is especially true when sending `re_establish_conn_bind`
+                # hack!! bad!!
+                # TODO: fix this
+                self.current_session_state = SmppSessionState.BOUND_TRX
         except (ConnectionError, asyncio.TimeoutError) as e:
             self._log(
                 logging.ERROR,
@@ -1529,24 +1564,6 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        # sleep during startup so that `naz` can have had time to connect & bind
-        while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connect_timeout / 10
-            self._log(
-                logging.DEBUG,
-                {
-                    "event": "naz.Client.dequeue_messages",
-                    "stage": "start",
-                    "current_session_state": self.current_session_state,
-                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
-                        retry_after / 60
-                    ),
-                },
-            )
-            await asyncio.sleep(retry_after)
-            if TESTING:
-                return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
-
         retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
@@ -1560,6 +1577,26 @@ class Client:
                     },
                 )
                 return {"shutdown": "shutdown"}
+
+            while self.current_session_state != SmppSessionState.BOUND_TRX:
+                # If the connection to SMSC is broken, there's no need to try and send messages
+                # sleep and wait for `Client.re_establish_conn_bind` to do its thing.
+                # this same thing cannot be done for `enquire_link` since we rely on it to kick on `re_establish_conn_bind`
+                retry_after = self.connection_timeout
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.dequeue_messages",
+                        "stage": "start",
+                        "current_session_state": self.current_session_state,
+                        "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
+                            retry_after / 60
+                        ),
+                    },
+                )
+                await asyncio.sleep(retry_after)
+                if TESTING:
+                    return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -1591,7 +1628,6 @@ class Client:
                             "error": str(e),
                         },
                     )
-                    continue
 
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
@@ -1617,6 +1653,7 @@ class Client:
                         return {"broker_error": "broker_error"}
                     await asyncio.sleep(poll_queue_interval)
                     continue
+
                 # we didn't fail to dequeue a message
                 retry_count = 0
                 try:
@@ -1760,7 +1797,6 @@ class Client:
                 retry_count = 0
 
             total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
-
             MSGLEN = total_pdu_length - 4
             chunks = []
             bytes_recd = 0
@@ -1772,6 +1808,10 @@ class Client:
                         assert isinstance(self.reader, asyncio.streams.StreamReader)
 
                     chunk = await self.reader.read(min(MSGLEN - bytes_recd, 2048))
+                    if chunk == b"":
+                        # TODO: maybe we also need todo; `self.writer=None`
+                        # so that the `re_establish_conn_bind` mechanism can kick in.
+                        raise ConnectionError("socket connection broken")
                 except (ConnectionError, asyncio.TimeoutError) as e:
                     self._log(
                         logging.ERROR,
@@ -1782,21 +1822,36 @@ class Client:
                             "error": str(e),
                         },
                     )
-                if chunk == b"":
-                    err = RuntimeError("socket connection broken")
+                    if self.SHOULD_SHUT_DOWN:
+                        return None
+
+                    _interval_ = 10.00
                     self._log(
-                        logging.ERROR,
+                        logging.DEBUG,
                         {
                             "event": "naz.Client.receive_data",
                             "stage": "end",
-                            "state": "socket connection broken",
-                            "error": str(err),
+                            "state": "unable to read from SMSC. sleeping for {0} minutes".format(
+                                _interval_ / 60
+                            ),
+                            "error": str(e),
                         },
                     )
-                    raise err
+                    await asyncio.sleep(_interval_)
+                    continue  # important so that we do not hit the bug: issues/135
+                    # break  # important otherwise we will stay in this read while loop forever
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
+
             full_pdu_data = command_length_header_data + b"".join(chunks)
+            self._log(
+                logging.DEBUG,
+                {
+                    "event": "naz.Client.receive_data",
+                    "stage": "end",
+                    "full_pdu_data": full_pdu_data,
+                },
+            )
             await self._parse_response_pdu(full_pdu_data)
             self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "end"})
             if TESTING:
@@ -1937,7 +1992,10 @@ class Client:
             # call throttling handler
             if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
                 await self.throttle_handler.not_throttled()
-            elif commandStatus.value == SmppCommandStatus.ESME_RTHROTTLED.value:
+            elif commandStatus.value in [
+                SmppCommandStatus.ESME_RTHROTTLED.value,
+                SmppCommandStatus.ESME_RMSGQFUL.value,
+            ]:
                 await self.throttle_handler.throttled()
         except Exception as e:
             self._log(
