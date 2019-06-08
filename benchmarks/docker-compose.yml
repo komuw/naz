@@ -62,6 +62,7 @@ services:
       context: .
       args:
         - NAZ_BRANCH=timeout
+    container_name: log_collector
     volumes:
       - log-file-volume:/tmp/nazLog
       - ./:/usr/src/app
