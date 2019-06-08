@@ -16,3 +16,5 @@ RUN printf "\n\n\t Installing using branch: ${NAZ_BRANCH} \n\n" && \
     rm -rf naz-${NAZ_BRANCH} && \
     rm -rf ${NAZ_BRANCH}.zip && \
     find . -name '*.pyc' -delete;find . -name '__pycache__' -delete;find . -name '*.pid' -delete
+
+RUN pip install git+https://github.com/komuw/naz.git@${NAZ_BRANCH}
