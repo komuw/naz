@@ -1934,7 +1934,6 @@ class Client:
 
         smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
-            # log error, `command_handlers` will know what to do
             e = ValueError("command_id:{0} is unknown.".format(command_id))
             self._log(
                 logging.ERROR,
@@ -1946,6 +1945,7 @@ class Client:
                     "error": str(e),
                 },
             )
+            return None
 
         # get associated user supplied log_id if any
         try:
@@ -2018,6 +2018,7 @@ class Client:
                     "error": "command_status: `{0}` is unknown.".format(command_status_value),
                 },
             )
+            return None
         elif commandStatus.value != SmppCommandStatus.ESME_ROK.value:
             # we got an error from SMSC
             self._log(
