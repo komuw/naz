@@ -902,6 +902,31 @@ class TestClient(TestCase):
             self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
             self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
 
+    def test_command_status_lookup(self):
+        command_status = 411041792
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "Reserved")
+
+        command_status = 0x00000000
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "ESME_ROK")
+
+        command_status = 0x00000014
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "ESME_RMSGQFUL")
+
+        command_status = 0x00000400
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "Reserved")
+
     def test_SmppCommandStatus(self):
         """
         tests of bugs gotten via benchmarks

@@ -15,7 +15,14 @@ from . import throttle
 from . import correlater
 from . import ratelimiter
 
-from .state import SmppSessionState, SmppCommand, SmppCommandStatus, SmppDataCoding, SmppOptionalTag
+from .state import (
+    SmppSessionState,
+    SmppCommand,
+    CommandStatus,
+    SmppCommandStatus,
+    SmppDataCoding,
+    SmppOptionalTag,
+)
 
 
 class Client:
@@ -717,7 +724,7 @@ class Client:
                     return val.value
         raise ValueError("That encoding:{0} is not recognised.".format(encoding))
 
-    def _search_by_command_id_code(self, command_id_code: int):
+    def _search_by_command_id_code(self, command_id_code: int) -> typing.Union[None, str]:
         for key, val in self.command_ids.items():
             if isinstance(val, list):
                 __range = range(val[0], val[1] + 1)
@@ -729,7 +736,9 @@ class Client:
         return None
 
     @staticmethod
-    def _search_by_command_status_value(command_status_value: int):
+    def _search_by_command_status_value(
+        command_status_value: int
+    ) -> typing.Union[None, CommandStatus]:
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():
             if not key.startswith("__"):
