@@ -11,7 +11,7 @@ RUN printf "\n\n\t Installing using branch: ${NAZ_BRANCH} \n\n" && \
     wget -nc https://github.com/komuw/naz/archive/${NAZ_BRANCH}.zip && \
     unzip *.zip && \
     cd naz-* && \
-    pip install -e ..[benchmarks] && \
+    pip install -e .[benchmarks] && \
     cd .. && \
     rm -rf naz-* && \
     rm -rf *.zip && \
