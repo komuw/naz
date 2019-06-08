@@ -827,3 +827,77 @@ class TestClient(TestCase):
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_writer.called)
             self.assertEqual(mock_naz_writer.call_count, 2)
+
+    def test_command_id_lookup(self):
+        command_id = self.cli._search_by_command_id_code(
+            command_id_code=self.cli.command_ids[naz.SmppCommand.BIND_TRANSCEIVER]
+        )
+        self.assertEqual(command_id, "bind_transceiver")
+
+        command_id = self.cli._search_by_command_id_code(command_id_code=0x00000102)
+        self.assertEqual(command_id, "alert_notification")
+
+        command_id = self.cli._search_by_command_id_code(command_id_code=0x00000016)
+        self.assertEqual(command_id, "reserved_list_c")
+
+        command_id = self.cli._search_by_command_id_code(command_id_code=0x00000104)
+        self.assertEqual(command_id, "reserved_for_smpp_extension_a")
+
+    def test_command_handlers_unkown_command_ids(self):
+        """
+        test that `Client.command_handlers` behaves okay for unkown command_ids
+        """
+        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            sequence_number = 3
+            alert_notification = 0x00000102
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=alert_notification,
+                    command_status_value=0,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(
+                mock_hook_response.mock.call_args[1]["smpp_command"], alert_notification
+            )
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+            # reserved command_id's
+            sequence_number = 4
+            reserved_for_smpp_extension_a = 0x00000104
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=reserved_for_smpp_extension_a,
+                    command_status_value=0,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(
+                mock_hook_response.mock.call_args[1]["smpp_command"], reserved_for_smpp_extension_a
+            )
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+            # known command_id
+            sequence_number = 5
+            bind_transceiver = 0x00000009
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=bind_transceiver,
+                    command_status_value=0,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")

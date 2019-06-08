@@ -263,6 +263,42 @@ class Client:
             SmppCommand.ENQUIRE_LINK: 0x00000015,
             SmppCommand.ENQUIRE_LINK_RESP: 0x80000015,
             SmppCommand.GENERIC_NACK: 0x80000000,
+            # naz currently does not handle the following smpp commands.
+            # open a github issue if you use naz and require support of a command in this list
+            SmppCommand.BIND_RECEIVER_RESP: 0x80000001,
+            SmppCommand.BIND_TRANSMITTER_RESP: 0x80000002,
+            SmppCommand.QUERY_SM: 0x00000003,
+            SmppCommand.QUERY_SM_RESP: 0x80000003,
+            SmppCommand.REPLACE_SM: 0x00000007,
+            SmppCommand.REPLACE_SM_RESP: 0x80000007,
+            SmppCommand.CANCEL_SM: 0x00000008,
+            SmppCommand.CANCEL_SM_RESP: 0x80000008,
+            SmppCommand.SUBMIT_MULTI: 0x00000021,
+            SmppCommand.SUBMIT_MULTI_RESP: 0x80000021,
+            SmppCommand.OUTBIND: 0x0000000B,
+            SmppCommand.ALERT_NOTIFICATION: 0x00000102,
+            SmppCommand.DATA_SM: 0x00000103,
+            SmppCommand.DATA_SM_RESP: 0x80000103,
+            SmppCommand.RESERVED_A: 0x0000000A,
+            SmppCommand.RESERVED_B: 0x8000000A,
+            SmppCommand.RESERVED_C: 0x00000100,
+            SmppCommand.RESERVED_D: 0x80000100,
+            SmppCommand.RESERVED_E: 0x00000101,
+            SmppCommand.RESERVED_F: 0x80000101,
+            SmppCommand.RESERVED_G: 0x80000102,
+            SmppCommand.RESERVED_LIST_A: [0x0000000C, 0x00000014],
+            SmppCommand.RESERVED_LIST_B: [0x8000000B, 0x80000014],
+            SmppCommand.RESERVED_LIST_C: [0x00000016, 0x00000020],
+            SmppCommand.RESERVED_LIST_D: [0x80000016, 0x80000020],
+            SmppCommand.RESERVED_LIST_E: [0x00000022, 0x000000FF],
+            SmppCommand.RESERVED_LIST_F: [0x80000022, 0x800000FF],
+            SmppCommand.RESERVED_LIST_G: [0x00010300, 0xFFFFFFFF],
+            SmppCommand.RESERVED_LIST_H: [0x00010000, 0x000101FF],
+            SmppCommand.RESERVED_LIST_I: [0x80010000, 0x800101FF],
+            SmppCommand.RESERVED_FOR_SMPP_EXTENSION_A: [0x00000104, 0x0000FFFF],
+            SmppCommand.RESERVED_FOR_SMPP_EXTENSION_B: [0x80000104, 0x8000FFFF],
+            SmppCommand.RESERVED_FOR_SMSC_VENDOR_A: [0x00010200, 0x000102FF],
+            SmppCommand.RESERVED_FOR_SMSC_VENDOR_B: [0x80010200, 0x800102FF],
         }
 
         self.data_coding = self._find_data_coding(self.encoding)
@@ -683,8 +719,13 @@ class Client:
 
     def _search_by_command_id_code(self, command_id_code):
         for key, val in self.command_ids.items():
-            if val == command_id_code:
-                return key
+            if isinstance(val, list):
+                __range = range(val[0], val[1] + 1)
+                if command_id_code in __range:
+                    return key
+            else:
+                if val == command_id_code:
+                    return key
         return None
 
     @staticmethod
@@ -1880,6 +1921,8 @@ class Client:
 
         smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
+            # log error, `command_handlers` will know what to do
+            e = ValueError("command_id:{0} is unknown.".format(command_id))
             self._log(
                 logging.ERROR,
                 {
@@ -1887,9 +1930,9 @@ class Client:
                     "stage": "end",
                     "log_id": "",
                     "state": "command_id:{0} is unknown.".format(command_id),
+                    "error": str(e),
                 },
             )
-            raise ValueError("command_id:{0} is unknown.".format(command_id))
 
         # get associated user supplied log_id if any
         try:
@@ -2143,6 +2186,7 @@ class Client:
                     "event": "naz.Client.command_handlers",
                     "stage": "end",
                     "smpp_command": smpp_command,
+                    "command_name": self._search_by_command_id_code(smpp_command),
                     "log_id": log_id,
                     "command_status": commandStatus.code,
                     "state": commandStatus.description,
