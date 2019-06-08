@@ -597,7 +597,7 @@ class TestClient(TestCase):
             }
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connect_timeout / 10)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connection_timeout)
 
     def test_correlater_put_called(self):
         with mock.patch(

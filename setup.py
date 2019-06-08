@@ -69,6 +69,7 @@ setup(
             "documentation",
             "*tests*",
             "examples",
+            "benchmarks",
             ".github",
             "documentation/sphinx-docs",
             "sphinx-build",

@@ -11,6 +11,8 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
     """
     use redis as our queue.
 
+    DO NOT USE THIS IN PRODUCTION. It is untested.
+
     This implements a basic FIFO queue using redis.
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
     https://redis.io/commands/lpush
