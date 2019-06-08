@@ -30,6 +30,7 @@ async def send_log_to_remote_storage(logs):
     we extract(by popping) the main items from it like, timestamp, event, log_id, error etc so that they can be saved as individual fields in a db.
     The remaining dict is saved as JSONB field in the deb.
     """
+    timeout = 12.0
     try:
         host = "localhost"
         if os.environ.get("IN_DOCKER"):
@@ -40,8 +41,8 @@ async def send_log_to_remote_storage(logs):
             user="myuser",
             password="hey_NSA",
             database="mydb",
-            timeout=6.0,
-            command_timeout=8.0,
+            timeout=timeout,
+            command_timeout=timeout,
         )
 
         all_logs = []
@@ -70,7 +71,7 @@ async def send_log_to_remote_storage(logs):
                       VALUES($1, $2, $3, $4, $5, $6, $7)
             """,
             all_logs,
-            timeout=8.0,
+            timeout=timeout,
         )
 
         await conn.close()
@@ -104,6 +105,8 @@ async def collect_logs():
                 if len(logs_list) > 0:
                     await send_log_to_remote_storage(logs=logs_list)
                     logs_list = []
+
+                del logs_list
                 await asyncio.sleep(7)
         except OSError as e:
             if e.errno == 6:
