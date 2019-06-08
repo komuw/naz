@@ -99,15 +99,14 @@ async def collect_logs():
                     if log:
                         # do not buffer if there are no logs
                         logs_list.append(log)
-
                 # clear file
                 log_file.truncate(0)
-                if len(logs_list) > 0:
-                    await send_log_to_remote_storage(logs=logs_list)
-                    logs_list = []
 
-                del logs_list
-                await asyncio.sleep(7)
+            if len(logs_list) > 0:
+                await send_log_to_remote_storage(logs=logs_list)
+                logs_list = []
+            del logs_list
+            await asyncio.sleep(7)
         except OSError as e:
             if e.errno == 6:
                 pass
