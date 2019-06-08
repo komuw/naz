@@ -82,7 +82,6 @@ async def send_log_to_remote_storage(logs):
 
 
 async def read_log_file():
-    logs_list = []
     with open("/usr/src/nazLog/naz_log_file", "r+") as log_file:
         for line in log_file:
             logger.log(logging.INFO, {"event": "log_collector.data", "line": line})
@@ -94,22 +93,17 @@ async def read_log_file():
                 pass
             logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
             if log:
-                # do not buffer if there are no logs
-                logs_list.append(log)
+                await send_log_to_remote_storage(logs=[log])
+
         # clear file
         log_file.truncate(0)
-    return logs_list
 
 
 async def collect_logs():
     while True:
         try:
             logger.log(logging.INFO, {"event": "log_collector.read"})
-            logs_list = await read_log_file()
-
-            if len(logs_list) > 0:
-                await send_log_to_remote_storage(logs=logs_list)
-            del logs_list
+            await read_log_file()
             await asyncio.sleep(7)
         except OSError as e:
             if e.errno == 6:
