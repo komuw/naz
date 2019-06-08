@@ -16,7 +16,7 @@ derivative works of any Contribution, under the MIT License.
 - sudo apt-get install pandoc
 - install pre-requiste software:             
 ```shell
-apt-get -y install pandoc && pip install -e .[dev,test]
+apt-get -y install pandoc && pip install -e .[dev,test,benchmarks]
 ```                   
 - make the changes you want on your fork.
 - your changes should have backward compatibility in mind unless it is impossible to do so.
