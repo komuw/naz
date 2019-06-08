@@ -74,7 +74,7 @@ class TestClient(TestCase):
         for container in running_containers:
             container.stop()
 
-        self.smpp_simulator = self.docker_client.containers.run(
+        self.smpp_server = self.docker_client.containers.run(
             "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
             detach=True,
@@ -88,7 +88,7 @@ class TestClient(TestCase):
     def tearDown(self):
         if os.environ.get("CI_ENVIRONMENT"):
             print("\n\nrunning in CI env.\n")
-            self.smpp_simulator.remove(force=True)
+            self.smpp_server.remove(force=True)
         else:
             pass
 
