@@ -160,7 +160,7 @@ class TestClient(TestCase):
             "throttle_handler": DummyClientArg,
             "correlation_handler": DummyClientArg,
             "drain_duration": DummyClientArg,
-            "connect_timeout": DummyClientArg,
+            "connection_timeout": DummyClientArg,
         }
 
         def mock_create_client():
