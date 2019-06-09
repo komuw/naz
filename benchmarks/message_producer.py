@@ -17,7 +17,7 @@ async def send_messages():
     """
     source_addr = "NazBenchmarksInc"
     # DURATION_BETWEEN_MSGS = 0.05
-    MAX_NUM_OF_MESSAGES = 300_001
+    MAX_NUM_OF_MESSAGES = 500_004
     MSGS_SENT = 0
 
     logger = naz.logger.SimpleLogger("naz_benchmarks.message_producer")
@@ -105,6 +105,15 @@ async def send_messages():
             )
             MSGS_SENT = MSGS_SENT + 1
             if MSGS_SENT == MAX_NUM_OF_MESSAGES:
+                logger.log(
+                    logging.INFO,
+                    {
+                        "event": "message_producer.send",
+                        "stage": "end",
+                        "state": "ALL MESSAGES SENT SUCCESSFULLY",
+                        "MSGS_SENT": MSGS_SENT,
+                    },
+                )
                 sys.exit(0)
             # await asyncio.sleep(DURATION_BETWEEN_MSGS)
         except Exception as e:
