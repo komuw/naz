@@ -1879,6 +1879,7 @@ class Client:
                     if self.SHOULD_SHUT_DOWN:
                         return None
 
+                    # TODO:fix this, use `_retry_after`
                     _interval_ = 10.00
                     self._log(
                         logging.DEBUG,
