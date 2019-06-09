@@ -38,6 +38,5 @@ export REDIS_PASSWORD=hey_NSA && python3 smpp_n_queue_servers.py
 # A. NAZ-CLI
 # 1. start screen
 # 2. edit `compose.env`(if neccesary)
-docker-compose up
-
-# screen -dm docker-compose up
+docker-compose up --build &>/dev/null &
+disown
