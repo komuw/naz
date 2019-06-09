@@ -113,7 +113,7 @@ class Server:
                 else:
                     # run forever
                     self.start()
-                    to_run = 72 * 60 * 60  # 72hrs
+                    to_run = 168 * 60 * 60  # 7days
                     self.logger.log(
                         logging.INFO,
                         {

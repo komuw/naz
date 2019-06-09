@@ -96,7 +96,7 @@ services:
     volumes:
       - ./:/usr/src/app
       - log-file-volume:/usr/src/nazLog
-    command: naz-cli --client app.my_naz_client
+    command: bash -c "./runner.sh"
     env_file:
       - compose.env
     labels:
