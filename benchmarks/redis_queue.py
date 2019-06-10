@@ -66,7 +66,7 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
             item = await _redis.brpop(self.queue_name, timeout=self.timeout)
             if item:
                 dequed_item = json.loads(item[1].decode())
-                self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "end"})
+                # self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "end"})
                 return dequed_item
             else:
                 # self.logger.log(
