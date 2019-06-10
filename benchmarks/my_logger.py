@@ -66,10 +66,12 @@ class BenchmarksLogger(naz.logger.SimpleLogger):
         handler1.setLevel(logging.DEBUG)
         self._logger.addHandler(handler1)
 
-        handler2 = logging.StreamHandler()
-        handler2.setFormatter(formatter)
-        handler2.setLevel(level)
-        self._logger.addHandler(handler2)
+        # this may have been causing the issue mentioned at:
+        #  - https://github.com/komuw/naz/issues/103#issuecomment-500208481
+        # handler2 = logging.StreamHandler()
+        # handler2.setFormatter(formatter)
+        # handler2.setLevel(level)
+        # self._logger.addHandler(handler2)
 
         self._logger.setLevel(level)
         self.logger: logging.LoggerAdapter = MyLogAdapter(self._logger, log_metadata)
