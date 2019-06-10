@@ -1900,20 +1900,19 @@ class Client:
                     if self.SHOULD_SHUT_DOWN:
                         return None
 
-                    # TODO:fix this, use `_retry_after`
-                    _interval_ = 10.00
+                    _read_smsc_interval = 62.00
                     self._log(
                         logging.DEBUG,
                         {
                             "event": "naz.Client.receive_data",
                             "stage": "end",
                             "state": "unable to read from SMSC. sleeping for {0:.2f} seconds".format(
-                                _interval_
+                                _read_smsc_interval
                             ),
                             "error": str(e),
                         },
                     )
-                    await asyncio.sleep(_interval_)
+                    await asyncio.sleep(_read_smsc_interval)
                     continue  # important so that we do not hit the bug: issues/135
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
