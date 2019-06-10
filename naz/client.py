@@ -354,7 +354,6 @@ class Client:
         self.drain_duration = drain_duration
         self.connection_timeout = connection_timeout
         self.SHOULD_SHUT_DOWN: bool = False
-        self._SMSC_IS_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
     @staticmethod
@@ -1586,9 +1585,7 @@ class Client:
                 # hack!! bad!!
                 # TODO: fix this
                 self.current_session_state = SmppSessionState.BOUND_TRX
-            self._SMSC_IS_DOWN = False
         except (ConnectionError, asyncio.TimeoutError) as e:
-            self._SMSC_IS_DOWN = True
             self._log(
                 logging.ERROR,
                 {
@@ -1654,24 +1651,6 @@ class Client:
                 await asyncio.sleep(retry_after)
                 if TESTING:
                     return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
-
-            if self._SMSC_IS_DOWN:
-                _interval: float = 65.00
-                self._log(
-                    logging.INFO,
-                    {
-                        "event": "naz.Client.dequeue_messages",
-                        "stage": "start",
-                        "SMSC_IS_DOWN": self._SMSC_IS_DOWN,
-                        "state": "awaiting SMSC to come back up. sleeping for {0:.2f} seconds".format(
-                            _interval
-                        ),
-                    },
-                )
-                await asyncio.sleep(_interval)
-                if TESTING:
-                    return {"state": "awaiting SMSC to come back up"}
-                continue  # continue to outer while loop
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
