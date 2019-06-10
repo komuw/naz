@@ -354,7 +354,7 @@ class Client:
         self.drain_duration = drain_duration
         self.connection_timeout = connection_timeout
         self.SHOULD_SHUT_DOWN: bool = False
-        self.SMSC_IS_DOWN: bool = False
+        self._SMSC_IS_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
     @staticmethod
@@ -901,8 +901,8 @@ class Client:
                     "event": "naz.Client.enquire_link",
                     "stage": "start",
                     "current_session_state": self.current_session_state,
-                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
-                        retry_after / 60
+                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0:.2f} seconds".format(
+                        retry_after
                     ),
                 },
             )
@@ -1586,9 +1586,9 @@ class Client:
                 # hack!! bad!!
                 # TODO: fix this
                 self.current_session_state = SmppSessionState.BOUND_TRX
-            self.SMSC_IS_DOWN = False
+            self._SMSC_IS_DOWN = False
         except (ConnectionError, asyncio.TimeoutError) as e:
-            self.SMSC_IS_DOWN = True
+            self._SMSC_IS_DOWN = True
             self._log(
                 logging.ERROR,
                 {
@@ -1646,8 +1646,8 @@ class Client:
                         "event": "naz.Client.dequeue_messages",
                         "stage": "start",
                         "current_session_state": self.current_session_state,
-                        "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
-                            retry_after / 60
+                        "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0:.2f} seconds".format(
+                            retry_after
                         ),
                     },
                 )
@@ -1655,16 +1655,16 @@ class Client:
                 if TESTING:
                     return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
 
-            if self.SMSC_IS_DOWN:
+            if self._SMSC_IS_DOWN:
                 _interval: float = 65.00
                 self._log(
                     logging.INFO,
                     {
                         "event": "naz.Client.dequeue_messages",
                         "stage": "start",
-                        "SMSC_IS_DOWN": self.SMSC_IS_DOWN,
-                        "state": "awaiting SMSC to come back up. sleeping for {0}minutes".format(
-                            _interval / 60
+                        "SMSC_IS_DOWN": self._SMSC_IS_DOWN,
+                        "state": "awaiting SMSC to come back up. sleeping for {0:.2f} seconds".format(
+                            _interval
                         ),
                     },
                 )
@@ -1714,8 +1714,8 @@ class Client:
                         {
                             "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "dequeue_messages error. sleeping for {0}minutes".format(
-                                poll_queue_interval / 60
+                            "state": "dequeue_messages error. sleeping for {0:.2f} seconds".format(
+                                poll_queue_interval
                             ),
                             "dequeue_retry_count": dequeue_retry_count,
                             "error": str(e),
@@ -1857,8 +1857,8 @@ class Client:
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "start",
-                        "state": "no data received from SMSC. sleeping for {0}minutes".format(
-                            poll_read_interval / 60
+                        "state": "no data received from SMSC. sleeping for {0:.2f} seconds".format(
+                            poll_read_interval
                         ),
                         "retry_count": retry_count,
                     },
@@ -1907,8 +1907,8 @@ class Client:
                         {
                             "event": "naz.Client.receive_data",
                             "stage": "end",
-                            "state": "unable to read from SMSC. sleeping for {0} minutes".format(
-                                _interval_ / 60
+                            "state": "unable to read from SMSC. sleeping for {0:.2f} seconds".format(
+                                _interval_
                             ),
                             "error": str(e),
                         },
