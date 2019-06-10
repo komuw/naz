@@ -973,7 +973,7 @@ class TestClient(TestCase):
             self.assertEqual(res.get("state"), "awaiting SMSC to come back up")
             self.assertFalse(mock_naz_dequeue.mock.called)
 
-    def test_enquire_link_chnages_SMSC_IS_DOWN(self):
+    def test_enquire_link_changes_SMSC_IS_DOWN(self):
         """
         test that if SMSC is down, `enquire_link` is still allowed to be sent and that
         it's success changes `Client._SMSC_IS_DOWN` to False
