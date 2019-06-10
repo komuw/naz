@@ -948,3 +948,39 @@ class TestClient(TestCase):
             self.assertTrue(mock_hook_response.mock.called)
             self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
             self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+    def test_smsc_down_no_consumption(self):
+        """
+        tests that if smsc is down, then `naz` does not consume from queue.
+        """
+        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = {
+                "version": "1",
+                "log_id": log_id,
+                "short_message": short_message,
+                "smpp_command": naz.SmppCommand.SUBMIT_SM,
+                "source_addr": "2547000000",
+                "destination_addr": "254711999999",
+            }
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self.cli._SMSC_IS_DOWN = True
+            res = self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertEqual(res.get("state"), "awaiting SMSC to come back up")
+            self.assertFalse(mock_naz_dequeue.mock.called)
+
+    def test_enquire_link_chnages_SMSC_IS_DOWN(self):
+        """
+        test that if SMSC is down, `enquire_link` is still allowed to be sent and that
+        it's success changes `Client._SMSC_IS_DOWN` to False
+        """
+        self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+        self.cli._SMSC_IS_DOWN = True
+        self._run(self.cli.enquire_link(TESTING=True))
+
+        self.assertFalse(self.cli._SMSC_IS_DOWN)
+        self.assertEqual(self.cli._SMSC_IS_DOWN, False)
