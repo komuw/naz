@@ -36,16 +36,16 @@ class BenchmarksHook(naz.hooks.BaseHook):
         # 4. rate(number_of_messages_total{smpp_command="submit_sm",state="request"}[30s])  # msg sending over the past 30seconds
 
     async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
-        self.logger.log(
-            logging.INFO,
-            {
-                "event": "BenchmarksHook.request",
-                "stage": "start",
-                "smpp_command": smpp_command,
-                "log_id": log_id,
-                "hook_metadata": hook_metadata,
-            },
-        )
+        # self.logger.log(
+        #     logging.INFO,
+        #     {
+        #         "event": "BenchmarksHook.request",
+        #         "stage": "start",
+        #         "smpp_command": smpp_command,
+        #         "log_id": log_id,
+        #         "hook_metadata": hook_metadata,
+        #     },
+        # )
         self.counter.labels(
             project="naz_benchmarks",
             smpp_command=smpp_command,
@@ -60,18 +60,18 @@ class BenchmarksHook(naz.hooks.BaseHook):
     async def response(
         self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: naz.CommandStatus
     ) -> None:
-        self.logger.log(
-            logging.INFO,
-            {
-                "event": "BenchmarksHook.response",
-                "stage": "start",
-                "smpp_command": smpp_command,
-                "log_id": log_id,
-                "hook_metadata": hook_metadata,
-                "smsc_response_description": smsc_response.description,
-                "smsc_response_code": smsc_response.code,
-            },
-        )
+        # self.logger.log(
+        #     logging.INFO,
+        #     {
+        #         "event": "BenchmarksHook.response",
+        #         "stage": "start",
+        #         "smpp_command": smpp_command,
+        #         "log_id": log_id,
+        #         "hook_metadata": hook_metadata,
+        #         "smsc_response_description": smsc_response.description,
+        #         "smsc_response_code": smsc_response.code,
+        #     },
+        # )
         self.counter.labels(
             project="naz_benchmarks",
             smpp_command=smpp_command,

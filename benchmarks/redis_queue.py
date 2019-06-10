@@ -54,13 +54,13 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
         return self._redis
 
     async def enqueue(self, item):
-        self.logger.log(logging.INFO, {"event": "MyRedisQueue.enqueue", "stage": "start"})
+        # self.logger.log(logging.INFO, {"event": "MyRedisQueue.enqueue", "stage": "start"})
         _redis = await self._get_redis()
         await _redis.lpush(self.queue_name, json.dumps(item))
-        self.logger.log(logging.INFO, {"event": "MyRedisQueue.enqueue", "stage": "end"})
+        # self.logger.log(logging.INFO, {"event": "MyRedisQueue.enqueue", "stage": "end"})
 
     async def dequeue(self):
-        self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "start"})
+        # self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "start"})
         _redis = await self._get_redis()
         while True:
             item = await _redis.brpop(self.queue_name, timeout=self.timeout)
@@ -69,8 +69,8 @@ class MyRedisQueue(naz.q.BaseOutboundQueue):
                 self.logger.log(logging.INFO, {"event": "MyRedisQueue.dequeue", "stage": "end"})
                 return dequed_item
             else:
-                self.logger.log(
-                    logging.INFO,
-                    {"event": "MyRedisQueue.dequeue", "stage": "end", "state": "sleeping"},
-                )
+                # self.logger.log(
+                #     logging.INFO,
+                #     {"event": "MyRedisQueue.dequeue", "stage": "end", "state": "sleeping"},
+                # )
                 await asyncio.sleep(5)
