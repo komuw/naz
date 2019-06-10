@@ -900,8 +900,8 @@ class Client:
                     "event": "naz.Client.enquire_link",
                     "stage": "start",
                     "current_session_state": self.current_session_state,
-                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
-                        retry_after / 60
+                    "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0:.2f} seconds".format(
+                        retry_after
                     ),
                 },
             )
@@ -1618,7 +1618,7 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        retry_count = 0
+        dequeue_retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
@@ -1643,8 +1643,8 @@ class Client:
                         "event": "naz.Client.dequeue_messages",
                         "stage": "start",
                         "current_session_state": self.current_session_state,
-                        "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0}minutes".format(
-                            retry_after / 60
+                        "state": "awaiting naz to change session state to `BOUND_TRX`. sleeping for {0:.2f} seconds".format(
+                            retry_after
                         ),
                     },
                 )
@@ -1686,17 +1686,17 @@ class Client:
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
-                    retry_count += 1
-                    poll_queue_interval = self._retry_after(retry_count)
+                    dequeue_retry_count += 1
+                    poll_queue_interval = self._retry_after(dequeue_retry_count)
                     self._log(
                         logging.ERROR,
                         {
                             "event": "naz.Client.dequeue_messages",
                             "stage": "end",
-                            "state": "dequeue_messages error. sleeping for {0}minutes".format(
-                                poll_queue_interval / 60
+                            "state": "dequeue_messages error. sleeping for {0:.2f} seconds".format(
+                                poll_queue_interval
                             ),
-                            "retry_count": retry_count,
+                            "dequeue_retry_count": dequeue_retry_count,
                             "error": str(e),
                         },
                     )
@@ -1709,7 +1709,7 @@ class Client:
                     continue
 
                 # we didn't fail to dequeue a message
-                retry_count = 0
+                dequeue_retry_count = 0
                 try:
                     log_id = item_to_dequeue["log_id"]
                     item_to_dequeue["version"]  # version is a required field
@@ -1836,8 +1836,8 @@ class Client:
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "start",
-                        "state": "no data received from SMSC. sleeping for {0}minutes".format(
-                            poll_read_interval / 60
+                        "state": "no data received from SMSC. sleeping for {0:.2f} seconds".format(
+                            poll_read_interval
                         ),
                         "retry_count": retry_count,
                     },
@@ -1879,22 +1879,20 @@ class Client:
                     if self.SHOULD_SHUT_DOWN:
                         return None
 
-                    # TODO:fix this, use `_retry_after`
-                    _interval_ = 10.00
+                    _read_smsc_interval = 62.00
                     self._log(
                         logging.DEBUG,
                         {
                             "event": "naz.Client.receive_data",
                             "stage": "end",
-                            "state": "unable to read from SMSC. sleeping for {0} minutes".format(
-                                _interval_ / 60
+                            "state": "unable to read from SMSC. sleeping for {0:.2f} seconds".format(
+                                _read_smsc_interval
                             ),
                             "error": str(e),
                         },
                     )
-                    await asyncio.sleep(_interval_)
+                    await asyncio.sleep(_read_smsc_interval)
                     continue  # important so that we do not hit the bug: issues/135
-                    # break  # important otherwise we will stay in this read while loop forever
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
 
