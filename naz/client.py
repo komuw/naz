@@ -354,6 +354,7 @@ class Client:
         self.drain_duration = drain_duration
         self.connection_timeout = connection_timeout
         self.SHOULD_SHUT_DOWN: bool = False
+        self.SMSC_IS_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
     @staticmethod
@@ -1585,7 +1586,9 @@ class Client:
                 # hack!! bad!!
                 # TODO: fix this
                 self.current_session_state = SmppSessionState.BOUND_TRX
+            self.SMSC_IS_DOWN = False
         except (ConnectionError, asyncio.TimeoutError) as e:
+            self.SMSC_IS_DOWN = True
             self._log(
                 logging.ERROR,
                 {
@@ -1618,7 +1621,7 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        retry_count = 0
+        dequeue_retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.dequeue_messages", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
@@ -1651,6 +1654,24 @@ class Client:
                 await asyncio.sleep(retry_after)
                 if TESTING:
                     return {"state": "awaiting naz to change session state to `BOUND_TRX`"}
+
+            if self.SMSC_IS_DOWN:
+                _interval: float = 65.00
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.dequeue_messages",
+                        "stage": "start",
+                        "SMSC_IS_DOWN": self.SMSC_IS_DOWN,
+                        "state": "awaiting SMSC to come back up. sleeping for {0}minutes".format(
+                            _interval / 60
+                        ),
+                    },
+                )
+                await asyncio.sleep(_interval)
+                if TESTING:
+                    return {"state": "awaiting SMSC to come back up"}
+                continue  # continue to outer while loop
 
             # TODO: there are so many try-except classes in this func.
             # do something about that.
@@ -1686,8 +1707,8 @@ class Client:
                 try:
                     item_to_dequeue = await self.outboundqueue.dequeue()
                 except Exception as e:
-                    retry_count += 1
-                    poll_queue_interval = self._retry_after(retry_count)
+                    dequeue_retry_count += 1
+                    poll_queue_interval = self._retry_after(dequeue_retry_count)
                     self._log(
                         logging.ERROR,
                         {
@@ -1696,7 +1717,7 @@ class Client:
                             "state": "dequeue_messages error. sleeping for {0}minutes".format(
                                 poll_queue_interval / 60
                             ),
-                            "retry_count": retry_count,
+                            "dequeue_retry_count": dequeue_retry_count,
                             "error": str(e),
                         },
                     )
@@ -1709,7 +1730,7 @@ class Client:
                     continue
 
                 # we didn't fail to dequeue a message
-                retry_count = 0
+                dequeue_retry_count = 0
                 try:
                     log_id = item_to_dequeue["log_id"]
                     item_to_dequeue["version"]  # version is a required field
@@ -1894,7 +1915,6 @@ class Client:
                     )
                     await asyncio.sleep(_interval_)
                     continue  # important so that we do not hit the bug: issues/135
-                    # break  # important otherwise we will stay in this read while loop forever
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
 
