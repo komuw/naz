@@ -32,8 +32,8 @@ cd naz/benchmarks
 # A. SMSC SERVER
 # 1. start screen
 pip3 install -e ..[benchmarks]
-export REDIS_PASSWORD=hey_NSA && python3 smpp_n_queue_servers.py
-
+export REDIS_PASSWORD=hey_NSA && python3 smpp_n_queue_servers.py &>/dev/null &
+disown
 
 # A. NAZ-CLI
 # 1. start screen
