@@ -31,6 +31,7 @@ SELECT event,log_id,error FROM logs WHERE length(logs.error) > 0 ORDER BY timest
 The benchmark was run this way:
 - `naz-cli` was deployed on a $5/month digitalocean server with 1GB of RAM and 1 cpu in the San Francisco region.       
 - A mock SMSC server was also deployed on a $5/month digitalocean server with 1GB of RAM and 1 cpu in the Amsterdam region.     
+- A redis server was also deployed the same $5/month digitalocean server in the Amsterdam region.   
 - The ping latency between the `naz` server in Sanfrancisco and the SMSC server in Amsterdam was about `154 ms`    
 
 - 
