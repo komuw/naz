@@ -73,12 +73,12 @@ def main():
             )
 
         if not isinstance(client, naz.Client):
-            err = ValueError(
+            e = ValueError(
                 """`client` should be of type:: `naz.Client` You entered: {0}""".format(
                     type(client)
                 )
             )
-            logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(err)})
+            logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
             sys.exit(77)
 
         if dry_run:
