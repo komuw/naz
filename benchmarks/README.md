@@ -36,6 +36,8 @@ SELECT * FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC;
 
 ```sql
 SELECT event,log_id,error FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC;
+Copy (SELECT * FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC) To '/tmp/errors.csv' With CSV DELIMITER ',';
+cp /tmp/errors.csv /usr/src/app/
 ```
 
 ```sh
