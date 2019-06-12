@@ -279,7 +279,7 @@ my_naz_client = naz.Client(
 
 then run the `naz-cli` as usaul:                
 `naz-cli --client tmp.my_config.my_naz_client`    
-And just like that you are good to go. This is what errors from `naz` will look like on sentry:   
+And just like that you are good to go. This is what errors from `naz` will look like on sentry(sans the emojis, ofcourse):   
 
 ![naz integration with sentry](https://raw.githubusercontent.com/komuw/naz/master/documentation/sphinx-docs/naz-sentry.png "naz integration with sentry")
 
@@ -391,7 +391,7 @@ Here is another example, but where we now use redis for our queue;
 import json
 import asyncio
 import naz
-import redis
+import aioredis
 
 class RedisExampleQueue(naz.q.BaseOutboundQueue):
     """
@@ -400,16 +400,16 @@ class RedisExampleQueue(naz.q.BaseOutboundQueue):
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
     https://redis.io/commands/lpush
     https://redis.io/commands/brpop
-    Note that in practice, you would probaly want to use a non-blocking redis
-    client eg https://github.com/aio-libs/aioredis
+    You should use a non-blocking redis client eg https://github.com/aio-libs/aioredis
     """
     def __init__(self):
-        self.redis_instance = redis.StrictRedis(host="localhost", port=6379, db=0)
         self.queue_name = "myqueue"
     async def enqueue(self, item):
-        self.redis_instance.lpush(self.queue_name, json.dumps(item))
+        _redis = await aioredis.create_redis_pool(address=("localhost", 6379))
+        await _redis.lpush(self.queue_name, json.dumps(item))
     async def dequeue(self):
-        x = self.redis_instance.brpop(self.queue_name)
+        _redis = await aioredis.create_redis_pool(address=("localhost", 6379))
+        x = await _redis.brpop(self.queue_name)
         dequed_item = json.loads(x[1].decode())
         return dequed_item
 

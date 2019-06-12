@@ -26,6 +26,8 @@ class SmppCommand:
     # see section 4 of SMPP spec document v3.4
     BIND_TRANSCEIVER: str = "bind_transceiver"
     BIND_TRANSCEIVER_RESP: str = "bind_transceiver_resp"
+    BIND_TRANSMITTER: str = "bind_transmitter"
+    BIND_RECEIVER: str = "bind_receiver"
     UNBIND: str = "unbind"
     UNBIND_RESP: str = "unbind_resp"
     SUBMIT_SM: str = "submit_sm"
@@ -36,6 +38,43 @@ class SmppCommand:
     ENQUIRE_LINK_RESP: str = "enquire_link_resp"
     GENERIC_NACK: str = "generic_nack"
 
+    # naz currently does not handle the following smpp commands.
+    # open a github issue if you use naz and require support of a command in this list
+    BIND_RECEIVER_RESP: str = "bind_receiver_resp"
+    BIND_TRANSMITTER_RESP: str = "bind_transmitter_resp"
+    QUERY_SM: str = "query_sm"
+    QUERY_SM_RESP: str = "query_sm_resp"
+    REPLACE_SM: str = "replace_sm"
+    REPLACE_SM_RESP: str = "replace_sm_resp"
+    CANCEL_SM: str = "cancel_sm"
+    CANCEL_SM_RESP: str = "cancel_sm_resp"
+    SUBMIT_MULTI: str = "submit_multi"
+    SUBMIT_MULTI_RESP: str = "submit_multi_resp"
+    OUTBIND: str = "outbind"
+    ALERT_NOTIFICATION: str = "alert_notification"
+    DATA_SM: str = "data_sm"
+    DATA_SM_RESP: str = "data_sm_resp"
+    RESERVED_A: str = "reserved_a"
+    RESERVED_B: str = "reserved_b"
+    RESERVED_C: str = "reserved_c"
+    RESERVED_D: str = "reserved_d"
+    RESERVED_E: str = "reserved_e"
+    RESERVED_F: str = "reserved_f"
+    RESERVED_G: str = "reserved_g"
+    RESERVED_LIST_A: str = "reserved_list_a"
+    RESERVED_LIST_B: str = "reserved_list_b"
+    RESERVED_LIST_C: str = "reserved_list_c"
+    RESERVED_LIST_D: str = "reserved_list_d"
+    RESERVED_LIST_E: str = "reserved_list_e"
+    RESERVED_LIST_F: str = "reserved_list_f"
+    RESERVED_LIST_G: str = "reserved_list_g"
+    RESERVED_LIST_H: str = "reserved_list_h"
+    RESERVED_LIST_I: str = "reserved_list_i"
+    RESERVED_FOR_SMPP_EXTENSION_A: str = "reserved_for_smpp_extension_a"
+    RESERVED_FOR_SMPP_EXTENSION_B: str = "reserved_for_smpp_extension_b"
+    RESERVED_FOR_SMSC_VENDOR_A: str = "reserved_for_smsc_vendor_a"
+    RESERVED_FOR_SMSC_VENDOR_B: str = "reserved_for_smsc_vendor_b"
+
 
 class CommandStatus(typing.NamedTuple):
     """
@@ -43,7 +82,7 @@ class CommandStatus(typing.NamedTuple):
     """
 
     code: str
-    value: int
+    value: typing.Union[int, typing.List[int]]
     description: str
 
 
@@ -83,7 +122,6 @@ class SmppCommandStatus:
     ESME_RSYSERR: CommandStatus = CommandStatus(
         code="ESME_RSYSERR", value=0x00000008, description="System Error"
     )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000009,description= "Reserved")
     ESME_RINVSRCADR: CommandStatus = CommandStatus(
         code="ESME_RINVSRCADR", value=0x0000000A, description="Invalid Source Address"
     )
@@ -102,11 +140,9 @@ class SmppCommandStatus:
     ESME_RINVSYSID: CommandStatus = CommandStatus(
         code="ESME_RINVSYSID", value=0x0000000F, description="Invalid System ID"
     )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000010,description= "Reserved")
     ESME_RCANCELFAIL: CommandStatus = CommandStatus(
         code="ESME_RCANCELFAIL", value=0x00000011, description="Cancel SM Failed"
     )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000012,description= "Reserved")
     ESME_RREPLACEFAIL: CommandStatus = CommandStatus(
         code="ESME_RREPLACEFAIL", value=0x00000013, description="Replace SM Failed"
     )
@@ -116,20 +152,17 @@ class SmppCommandStatus:
     ESME_RINVSERTYP: CommandStatus = CommandStatus(
         code="ESME_RINVSERTYP", value=0x00000015, description="Invalid Service Type"
     )
-    # Reserved 0x00000016 - 0x00000032 Reserved
     ESME_RINVNUMDESTS: CommandStatus = CommandStatus(
         code="ESME_RINVNUMDESTS", value=0x00000033, description="Invalid number of destinations"
     )
     ESME_RINVDLNAME: CommandStatus = CommandStatus(
         code="ESME_RINVNUMDESTS", value=0x00000034, description="Invalid Distribution List name"
     )
-    # Reserved 0x00000035 - 0x0000003F Reserved
     ESME_RINVDESTFLAG: CommandStatus = CommandStatus(
         code="ESME_RINVDESTFLAG",
         value=0x00000040,
         description="Destination flag is invalid (submit_multi)",
     )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000041,description= "Reserved")
     ESME_RINVSUBREP: CommandStatus = CommandStatus(
         code="ESME_RINVSUBREP",
         value=0x00000042,
@@ -144,7 +177,6 @@ class SmppCommandStatus:
     ESME_RSUBMITFAIL: CommandStatus = CommandStatus(
         code="ESME_RSUBMITFAIL", value=0x00000045, description="Submit_sm or submit_multi failed"
     )
-    # Reserved 0x00000046 - 0x00000047 Reserved
     ESME_RINVSRCTON: CommandStatus = CommandStatus(
         code="ESME_RINVSRCTON", value=0x00000048, description="Invalid Source address TON"
     )
@@ -157,7 +189,6 @@ class SmppCommandStatus:
     ESME_RINVDSTNPI: CommandStatus = CommandStatus(
         code="ESME_RINVDSTNPI", value=0x00000051, description="Invalid Destination address NPI"
     )
-    # Reserved =  CommandStatus(code="Reserved", value=0x00000052,description= "Reserved")
     ESME_RINVSYSTYP: CommandStatus = CommandStatus(
         code="ESME_RINVSYSTYP", value=0x00000053, description="Invalid system_type field"
     )
@@ -167,13 +198,11 @@ class SmppCommandStatus:
     ESME_RINVNUMMSGS: CommandStatus = CommandStatus(
         code="ESME_RINVNUMMSGS", value=0x00000055, description="Invalid number of messages"
     )
-    # Reserved 0x00000056 - 0x00000057 Reserved
     ESME_RTHROTTLED: CommandStatus = CommandStatus(
         code="ESME_RTHROTTLED",
         value=0x00000058,
         description="Throttling error (ESME has exceeded allowed message limits)",
     )
-    # Reserved 0x00000059 - 0x00000060 Reserved
     ESME_RINVSCHED: CommandStatus = CommandStatus(
         code="ESME_RINVSCHED", value=0x00000061, description="Invalid Scheduled Delivery Time"
     )
@@ -205,7 +234,6 @@ class SmppCommandStatus:
     ESME_RQUERYFAIL: CommandStatus = CommandStatus(
         code="ESME_RQUERYFAIL", value=0x00000067, description="query_sm request failed"
     )
-    # Reserved 0x00000068 - 0x000000BF Reserved
     ESME_RINVOPTPARSTREAM: CommandStatus = CommandStatus(
         code="ESME_RINVOPTPARSTREAM",
         value=0x000000C0,
@@ -227,7 +255,7 @@ class SmppCommandStatus:
         value=0x000000C4,
         description="Invalid Optional Parameter Value",
     )
-    # Reserved 0x000000C5 - 0x000000FD Reserved
+
     ESME_RDELIVERYFAILURE: CommandStatus = CommandStatus(
         code="ESME_RDELIVERYFAILURE",
         value=0x000000FE,
@@ -236,9 +264,53 @@ class SmppCommandStatus:
     ESME_RUNKNOWNERR: CommandStatus = CommandStatus(
         code="ESME_RUNKNOWNERR", value=0x000000FF, description="Unknown Error"
     )
-    # Reserved for SMPP extension 0x00000100 - 0x000003FF Reserved for SMPP extension
-    # Reserved for SMSC vendor specific errors 0x00000400 - 0x000004FF Reserved for SMSC vendor specific errors
-    # Reserved 0x00000500 - 0xFFFFFFFF Reserved
+    RESERVED_A: CommandStatus = CommandStatus(
+        code="Reserved", value=0x00000009, description="Reserved"
+    )
+    RESERVED_B: CommandStatus = CommandStatus(
+        code="Reserved", value=0x00000010, description="Reserved"
+    )
+    RESERVED_C: CommandStatus = CommandStatus(
+        code="Reserved", value=0x00000012, description="Reserved"
+    )
+    RESERVED_D: CommandStatus = CommandStatus(
+        code="Reserved", value=0x00000041, description="Reserved"
+    )
+    RESERVED_E: CommandStatus = CommandStatus(
+        code="Reserved", value=0x00000052, description="Reserved"
+    )
+    RESERVED_LIST_A: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000016, 0x00000032], description="Reserved"
+    )
+    RESERVED_LIST_B: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000035, 0x0000003F], description="Reserved"
+    )
+    RESERVED_LIST_C: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000046, 0x00000047], description="Reserved"
+    )
+    RESERVED_LIST_D: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000056, 0x00000057], description="Reserved"
+    )
+    RESERVED_LIST_E: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000059, 0x00000060], description="Reserved"
+    )
+    RESERVED_LIST_F: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000068, 0x000000BF], description="Reserved"
+    )
+    RESERVED_LIST_G: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x000000C5, 0x000000FD], description="Reserved"
+    )
+    RESERVED_LIST_H: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000100, 0x000003FF], description="Reserved for SMPP extension"
+    )
+    RESERVED_LIST_I: CommandStatus = CommandStatus(
+        code="Reserved",
+        value=[0x00000400, 0x000004FF],
+        description="Reserved for SMSC vendor specific errors",
+    )
+    RESERVED_LIST_J: CommandStatus = CommandStatus(
+        code="Reserved", value=[0x00000500, 0xFFFFFFFF], description="Reserved"
+    )
 
 
 class DataCoding(typing.NamedTuple):

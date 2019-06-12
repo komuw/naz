@@ -74,8 +74,8 @@ class TestClient(TestCase):
         for container in running_containers:
             container.stop()
 
-        self.smpp_simulator = self.docker_client.containers.run(
-            "komuw/smpp_server:v0.2",
+        self.smpp_server = self.docker_client.containers.run(
+            "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
             detach=True,
             auto_remove=True,
@@ -88,7 +88,7 @@ class TestClient(TestCase):
     def tearDown(self):
         if os.environ.get("CI_ENVIRONMENT"):
             print("\n\nrunning in CI env.\n")
-            self.smpp_simulator.remove(force=True)
+            self.smpp_server.remove(force=True)
         else:
             pass
 
@@ -160,7 +160,7 @@ class TestClient(TestCase):
             "throttle_handler": DummyClientArg,
             "correlation_handler": DummyClientArg,
             "drain_duration": DummyClientArg,
-            "connect_timeout": DummyClientArg,
+            "connection_timeout": DummyClientArg,
         }
 
         def mock_create_client():
@@ -597,7 +597,7 @@ class TestClient(TestCase):
             }
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connect_timeout / 10)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connection_timeout)
 
     def test_correlater_put_called(self):
         with mock.patch(
@@ -827,3 +827,124 @@ class TestClient(TestCase):
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_writer.called)
             self.assertEqual(mock_naz_writer.call_count, 2)
+
+    def test_command_id_lookup(self):
+        command_id = self.cli._search_by_command_id_code(
+            command_id_code=self.cli.command_ids[naz.SmppCommand.BIND_TRANSCEIVER]
+        )
+        self.assertEqual(command_id, "bind_transceiver")
+
+        command_id = self.cli._search_by_command_id_code(command_id_code=0x00000102)
+        self.assertEqual(command_id, "alert_notification")
+
+        command_id = self.cli._search_by_command_id_code(command_id_code=0x00000016)
+        self.assertEqual(command_id, "reserved_list_c")
+
+        command_id = self.cli._search_by_command_id_code(command_id_code=0x00000104)
+        self.assertEqual(command_id, "reserved_for_smpp_extension_a")
+
+    def test_command_handlers_unkown_command_ids(self):
+        """
+        test that `Client.command_handlers` behaves okay for unkown command_ids
+        """
+        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            sequence_number = 3
+            alert_notification = naz.SmppCommand.ALERT_NOTIFICATION
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=alert_notification,
+                    command_status_value=0,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(
+                mock_hook_response.mock.call_args[1]["smpp_command"], alert_notification
+            )
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+            # reserved command_id's
+            sequence_number = 4
+            reserved_for_smpp_extension_a = naz.SmppCommand.RESERVED_FOR_SMPP_EXTENSION_A
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=reserved_for_smpp_extension_a,
+                    command_status_value=0,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(
+                mock_hook_response.mock.call_args[1]["smpp_command"], reserved_for_smpp_extension_a
+            )
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+            # known command_id
+            sequence_number = 5
+            bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=bind_transceiver,
+                    command_status_value=0,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+    def test_command_status_lookup(self):
+        command_status = 411041792
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "Reserved")
+
+        command_status = 0x00000000
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "ESME_ROK")
+
+        command_status = 0x00000014
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "ESME_RMSGQFUL")
+
+        command_status = 0x00000400
+        command_status = self.cli._search_by_command_status_value(
+            command_status_value=command_status
+        )
+        self.assertEqual(command_status.code, "Reserved")
+
+    def test_SmppCommandStatus(self):
+        """
+        tests of bugs gotten via benchmarks
+        """
+        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            sequence_number = 1
+            bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
+            command_status = 411041792
+            self._run(
+                self.cli.command_handlers(
+                    body_data=b"body_data",
+                    smpp_command=bind_transceiver,
+                    command_status_value=command_status,
+                    sequence_number=sequence_number,
+                    log_id="log_id",
+                    hook_metadata="hook_metadata",
+                )
+            )
+            self.assertTrue(mock_hook_response.mock.called)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
+            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")

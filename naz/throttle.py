@@ -18,6 +18,8 @@ class BaseThrottleHandler(abc.ABC):
     The SMSC may decide to start throtlling requests from that particular client.
     When it does so, it replies to the client with a throttling status. Under such conditions, it is important for the client to start
     rate limiting itself. The way naz implements this self imposed self-regulation is via Throttle Handlers.
+
+    The methods in this class are also called when the SMSC is under load and is responding with `ESME_RMSGQFUL`(message queue full) responses
     """
 
     @abc.abstractmethod
@@ -58,7 +60,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
 
     It works by:
 
-    - calculating the percentage of responses from the SMSC that are THROTTLING responses.
+    - calculating the percentage of responses from the SMSC that are THROTTLING(or ESME_RMSGQFUL) responses.
     - if that percentage goes above :attr:`deny_request_at <SimpleThrottleHandler.deny_request_at>` percent AND \
     total number of responses from SMSC is greater than :attr:`sample_size <SimpleThrottleHandler.sample_size>` over \
     :attr:`sampling_period <SimpleThrottleHandler.sampling_period>` seconds

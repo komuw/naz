@@ -1,0 +1,109 @@
+version: '3'
+services:
+
+  nginx:
+    build:
+      context: .
+      dockerfile: NginxDockerfile
+    container_name: nginx
+    depends_on:
+      - prometheus
+    ports:
+      - 9000:80
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - cadvisor
+  
+  cadvisor:
+    image: google/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    depends_on:
+      - message_producer
+      - naz_cli
+      - push_to_gateway
+      - timescale_db
+      - log_collector
+
+  push_to_gateway:
+    image: prom/pushgateway
+    container_name: push_to_gateway
+
+  # for log storage
+  timescale_db:
+    container_name: timescale_db
+    build:
+      context: .
+      dockerfile: timescale_dockerfile
+    env_file:
+      - compose.env
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    volumes:
+      - ./:/usr/src/app
+
+  # connect the naz_cli container's /usr/src/nazLog dir
+  log_collector:
+    build:
+      context: .
+      args:
+        - NAZ_BRANCH=master
+    container_name: log_collector
+    volumes:
+      - log-file-volume:/usr/src/nazLog
+      - ./:/usr/src/app
+    command: python /usr/src/app/log_collector.py
+    env_file:
+      - compose.env
+    depends_on:
+      - timescale_db
+
+  message_producer:
+    build:
+      context: .
+      args:
+        - NAZ_BRANCH=master
+    container_name: message_producer
+    volumes:
+      - ./:/usr/src/app
+      - log-file-volume:/usr/src/nazLog
+    command: python /usr/src/app/message_producer.py
+    env_file:
+      - compose.env
+    labels:
+      - "app_name=message_producer"
+
+  naz_cli:
+    build:
+      context: .
+      args:
+        - NAZ_BRANCH=master
+    container_name: naz_cli
+    volumes:
+      - ./:/usr/src/app
+      - log-file-volume:/usr/src/nazLog
+    command: naz-cli --client app.my_naz_client
+    env_file:
+      - compose.env
+    labels:
+      - "app_name=naz_cli"
+    depends_on:
+      - timescale_db
+      - log_collector
+
+volumes:
+  log-file-volume:

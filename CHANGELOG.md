@@ -13,7 +13,12 @@ most recent version is listed first.
   - bugfix; `asyncio.streams.StreamWriter.drain` should not be called concurrently by multiple coroutines
   - when shutting down, `naz` now tries to make sure that write buffers are properly flushed.
 - replace naz json config file with a python file: https://github.com/komuw/naz/pull/123
-- bugfix: `naz` would attempt to send messages(`submit_sm`) out before it had even connected to SMSC: https://github.com/komuw/naz/pull/124  
+- bugfix: `naz` would attempt to send messages(`submit_sm`) out before it had even connected to SMSC: https://github.com/komuw/naz/pull/124    
+- added `naz` benchmarks and related fixes that came from the benchmark runs: https://github.com/komuw/naz/pull/127
+  - when smsc returns `ESME_RMSGQFUL`(message queue is full), `naz` will now call the `throttling` handler.  
+  - fixed a potential memory leak bug in `naz.correlater.SimpleCorrelater`
+  - added a configurable `connection_timeout` which is the duration that `naz` will wait, for connection related activities with SMSC, before timing out.
+  - `naz` is now able to re-establish connection and re-bind if the connection between it and SMSC is disconnected.  
 
 
 ## **version:** v0.6.0-beta.1

@@ -69,6 +69,7 @@ setup(
             "documentation",
             "*tests*",
             "examples",
+            "benchmarks",
             ".github",
             "documentation/sphinx-docs",
             "sphinx-build",
@@ -85,7 +86,7 @@ setup(
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
-    # $ pip install -e .[dev,test]
+    # $ pip install -e .[dev,test,benchmarks]
     extras_require={
         "dev": [
             "coverage",
@@ -98,6 +99,12 @@ setup(
             "pika==1.0.1",
         ],
         "test": ["flake8", "pylint", "black", "bandit", "docker==4.0.1", "mypy"],
+        "benchmarks": [
+            "asyncpg==0.18.3",
+            "docker==4.0.1",
+            "prometheus_client==0.6.0",
+            "aioredis==1.2.0",
+        ],
     },
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
@@ -133,4 +140,4 @@ setup(
 # g) pip install -i https://testpypi.python.org/pypi <package name>
 # h) twine upload dist/*   # prod pypi
 # i) pip install <package name>
-# pip install -e .[dev,test]
+# pip install -e .[dev,test,benchmarks]

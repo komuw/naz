@@ -12,14 +12,14 @@ before_install:
 
 install:
   - pwd; ls -lsha
-  - pip install -e .[dev,test]
+  - pip install -e .[dev,test,benchmarks]
 
 # run static analyzers, tests etc
 script:
   - find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
   - black --line-length=100 --check . ||  { printf "\\n\\t please use black to format your code."; exit 77; }
   - flake8 .
-  - pylint --enable=E --disable=W,R,C examples/ naz/ tests/ cli/ documentation/
+  - pylint --enable=E --disable=W,R,C naz/ tests/ cli/ documentation/ examples/ benchmarks/
   - bandit -r --exclude .venv -ll .
   # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
   # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
