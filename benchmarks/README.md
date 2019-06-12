@@ -10,7 +10,8 @@ The benchmark was run this way:
 - In a loop; the `SMSC` would run for a duration of between 13-16 minutes stop for a duration of 1-3 minutes then continue etc.
 - In a loop; the `redis server` would run for a duration of between 13-16 minutes stop for a duration of 1-3 minutes then continue etc.
 - All this while, `naz-cli` is still accessing the redis server and SMSC, re-establishing connections when neccessary.
-
+- All logs from `naz` were been sent to a timescaleDB container for later analysis.   
+- Container/host and custom metrics were also been sent to a prometheus container for later analysis.  
 
 
 ### Results:
