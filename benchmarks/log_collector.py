@@ -39,7 +39,7 @@ async def send_log_to_remote_storage(logs):
             host=host,
             port=5432,
             user="myuser",
-            password="hey_NSA",
+            password=os.environ["POSTGRES_PASSWORD"],
             database="mydb",
             timeout=timeout,
             command_timeout=timeout,
@@ -59,7 +59,7 @@ async def send_log_to_remote_storage(logs):
             metadata = json.dumps({})
             try:
                 metadata = json.dumps(i)
-            except Exception:
+            except (json.decoder.JSONDecodeError, TypeError):
                 pass
 
             all_logs.append((timestamp, event, stage, client_id, log_id, error, metadata))
@@ -89,7 +89,7 @@ async def read_log_file():
             log = None
             try:
                 log = json.loads(line)
-            except json.decoder.JSONDecodeError:
+            except (json.decoder.JSONDecodeError, TypeError):
                 pass
             logger.log(logging.INFO, {"event": "log_collector.log", "log": log})
             if log:
@@ -110,7 +110,6 @@ async def collect_logs():
                 pass
             else:
                 logger.log(logging.ERROR, {"event": "log_collector.error", "error": str(e)})
-                pass
             await asyncio.sleep(7)
 
 

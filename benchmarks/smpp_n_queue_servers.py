@@ -65,8 +65,10 @@ class Server:
             for container in running_containers:
                 if container.name == self.container_name:
                     container.stop()
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.log(
+                logging.DEBUG, {"event": "Server.stop", "stage": "end", "error": str(e)}
+            )
 
     def remove(self):
         try:
@@ -74,15 +76,17 @@ class Server:
             for container in running_containers:
                 if container.name == self.container_name:
                     container.remove(force=True)
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.log(
+                logging.DEBUG, {"event": "Server.remove", "stage": "end", "error": str(e)}
+            )
 
     def runner(self):
         while True:
             try:
                 if self.chaos:
                     self.start()
-                    to_run = random.randint(
+                    to_run = random.randint(  # nosec
                         self.container_min_run_duration, self.container_max_run_duration
                     )
                     to_run = to_run * 60
@@ -97,7 +101,7 @@ class Server:
                     time.sleep(to_run)  # keep container running for this long secs
 
                     self.stop()
-                    to_stop = random.randint(
+                    to_stop = random.randint(  # nosec
                         self.container_min_stop_duration, self.container_max_stop_duration
                     )
                     to_stop = to_stop * 60
