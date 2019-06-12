@@ -1,6 +1,8 @@
 
 ### Methodology
 The benchmark was run this way:
+
+#### A.
 - `naz-cli` was deployed on a $5/month digitalocean server with 1GB of RAM and 1 cpu in the San Francisco region.       
 - A mock SMSC server was deployed on a $5/month digitalocean server with 1GB of RAM and 1 cpu in the Amsterdam region.     
 - A redis server was also deployed to the same $5/month digitalocean server in the Amsterdam region.   
@@ -13,6 +15,8 @@ The benchmark was run this way:
 - All logs from `naz` were been sent to a timescaleDB container for later analysis.   
 - Container/host and custom metrics were also been sent to a prometheus container for later analysis.  
 
+#### B.
+- The experiment was repeated as above, however this time around; the SMSC and redis server were let to have near 100% uptime.
 
 ### Results:
 - TODO
