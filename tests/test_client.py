@@ -160,7 +160,7 @@ class TestClient(TestCase):
             "throttle_handler": DummyClientArg,
             "correlation_handler": DummyClientArg,
             "drain_duration": DummyClientArg,
-            "connection_timeout": DummyClientArg,
+            "socket_timeout": DummyClientArg,
         }
 
         def mock_create_client():
@@ -597,7 +597,7 @@ class TestClient(TestCase):
             }
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.connection_timeout)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.socket_timeout)
 
     def test_correlater_put_called(self):
         with mock.patch(

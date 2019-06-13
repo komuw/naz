@@ -110,7 +110,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
-        connection_timeout: float = 30.0,
+        socket_timeout: float = 30.0,
     ) -> None:
         """
         Parameters:
@@ -154,7 +154,7 @@ class Client:
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
-            connection_timeout: duration that `naz` will wait, for connection related activities with SMSC, before timing out
+            socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out
         """
         self._validate_client_args(
             smsc_host=smsc_host,
@@ -194,7 +194,7 @@ class Client:
             throttle_handler=throttle_handler,
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
-            connection_timeout=connection_timeout,
+            socket_timeout=socket_timeout,
         )
 
         self._PID = os.getpid()
@@ -353,7 +353,7 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
         self.drain_duration = drain_duration
-        self.connection_timeout = connection_timeout
+        self.socket_timeout = socket_timeout
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
@@ -396,7 +396,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
-        connection_timeout: float,
+        socket_timeout: float,
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -689,11 +689,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(connection_timeout, float):
+        if not isinstance(socket_timeout, float):
             errors.append(
                 ValueError(
-                    "`connection_timeout` should be of type:: `float` You entered: {0}".format(
-                        type(connection_timeout)
+                    "`socket_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(socket_timeout)
                     )
                 )
             )
@@ -781,7 +781,7 @@ class Client:
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
         sock = self.writer.get_extra_info("socket")
-        sock.settimeout(self.connection_timeout)
+        sock.settimeout(self.socket_timeout)
         # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
         # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
         # https://docs.python.org/3.6/library/socket.html#notes-on-socket-timeouts
@@ -894,7 +894,7 @@ class Client:
         # sleep during startup so that `naz` can have had time to connect & bind
         # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connection_timeout / 5
+            retry_after = self.socket_timeout / 5
             self._log(
                 logging.DEBUG,
                 {
@@ -1654,7 +1654,7 @@ class Client:
                 # If the connection to SMSC is broken, there's no need to try and send messages
                 # sleep and wait for `Client.re_establish_conn_bind` to do its thing.
                 # this same thing cannot be done for `enquire_link` since we rely on it to kick on `re_establish_conn_bind`
-                retry_after = self.connection_timeout
+                retry_after = self.socket_timeout
                 self._log(
                     logging.INFO,
                     {
