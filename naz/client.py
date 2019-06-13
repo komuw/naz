@@ -1,6 +1,7 @@
 import os
 import struct
 import random
+import socket
 import string
 import typing
 import asyncio
