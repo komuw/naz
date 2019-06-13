@@ -1585,7 +1585,15 @@ class Client:
                 # hack!! bad!!
                 # TODO: fix this
                 self.current_session_state = SmppSessionState.BOUND_TRX
-        except (ConnectionError, asyncio.TimeoutError) as e:
+        except (
+            ConnectionError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
+            # https://docs.python.org/3.6/library/socket.html#exceptions
             self._log(
                 logging.ERROR,
                 {
@@ -1817,7 +1825,14 @@ class Client:
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
                 command_length_header_data = await self.reader.read(4)
-            except (ConnectionError, asyncio.TimeoutError) as e:
+            except (
+                ConnectionError,
+                asyncio.TimeoutError,
+                socket.error,
+                socket.herror,
+                socket.gaierror,
+                socket.timeout,
+            ) as e:
                 self._log(
                     logging.ERROR,
                     {
@@ -1866,7 +1881,14 @@ class Client:
                         # TODO: maybe we also need todo; `self.writer=None`
                         # so that the `re_establish_conn_bind` mechanism can kick in.
                         raise ConnectionError("socket connection broken")
-                except (ConnectionError, asyncio.TimeoutError) as e:
+                except (
+                    ConnectionError,
+                    asyncio.TimeoutError,
+                    socket.error,
+                    socket.herror,
+                    socket.gaierror,
+                    socket.timeout,
+                ) as e:
                     self._log(
                         logging.ERROR,
                         {
@@ -2324,10 +2346,28 @@ class Client:
             assert isinstance(self.writer, asyncio.streams.StreamWriter)
             assert isinstance(self.writer.transport, asyncio.transports.Transport)
 
-        # see: https://github.com/komuw/naz/issues/117
-        self.writer.transport.set_write_buffer_limits(0)
-        await self.writer.drain()
-        self.writer.close()
+        try:
+            # see: https://github.com/komuw/naz/issues/117
+            self.writer.transport.set_write_buffer_limits(0)
+            await self.writer.drain()
+            self.writer.close()
+        except (
+            ConnectionError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.shutdown",
+                    "stage": "end",
+                    "state": "unable to write to SMSC",
+                    "error": str(e),
+                },
+            )
 
         # sleep so that client can:
         # - stop consuming from queue
