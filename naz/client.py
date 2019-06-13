@@ -1420,7 +1420,14 @@ class Client:
             # 2. re-bind
             await self.connect(log_id=log_id)
             await self.tranceiver_bind(log_id=log_id)
-        except (ConnectionError, asyncio.TimeoutError) as e:
+        except (
+            ConnectionError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
             self._log(
                 logging.ERROR,
                 {
@@ -1735,7 +1742,7 @@ class Client:
                         full_pdu = item_to_dequeue["pdu"]
                 except KeyError as e:
                     e = KeyError(
-                        "enqueued message/object is missing required field:{}".format(str(e))
+                        "enqueued message/object is missing required field: {}".format(str(e))
                     )
                     self._log(
                         logging.ERROR,
