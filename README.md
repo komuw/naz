@@ -65,15 +65,14 @@ cli = naz.Client(
 # queue messages to send
 for i in range(0, 4):
     print("submit_sm round:", i)
-    item_to_enqueue = {
-        "version": "1",
-        "smpp_command": naz.SmppCommand.SUBMIT_SM,
-        "short_message": "Hello World-{0}".format(str(i)),
-        "log_id": "myid12345",
-        "source_addr": "254722111111",
-        "destination_addr": "254722999999",
-    }
-    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+    loop.run_until_complete(
+        cli.submit_sm(
+            short_message="Hello World-{0}".format(str(i)),
+            log_id="myid12345",
+            source_addr="254722111111",
+            destination_addr="254722999999",
+        )
+    )
 
 # connect to the SMSC host
 reader, writer = loop.run_until_complete(cli.connect())
@@ -374,15 +373,14 @@ then in your application, queue items to the queue;
 ```python
 # queue messages to send
 for i in range(0, 4):
-    item_to_enqueue = {
-        "version": "1",
-        "smpp_command": naz.SmppCommand.SUBMIT_SM,
-        "short_message": "Hello World-{0}".format(str(i)),
-        "log_id": "myid12345",
-        "source_addr": "254722111111",
-        "destination_addr": "254722999999",
-    }
-    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+    loop.run_until_complete(
+        cli.submit_sm(
+            short_message="Hello World-{0}".format(str(i)),
+            log_id="myid12345",
+            source_addr="254722111111",
+            destination_addr="254722999999",
+        )
+    )
 ```                   
                          
                          
@@ -442,15 +440,14 @@ then queue on your application side;
 # queue messages to send
 for i in range(0, 5):
     print("submit_sm round:", i)
-    item_to_enqueue = {
-        "version": "1",
-        "smpp_command": naz.SmppCommand.SUBMIT_SM,
-        "short_message": "Hello World-{0}".format(str(i)),
-        "log_id": "myid12345",
-        "source_addr": "254722111111",
-        "destination_addr": "254722999999",
-    }
-    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+    loop.run_until_complete(
+        cli.submit_sm(
+            short_message="Hello World-{0}".format(str(i)),
+            log_id="myid12345",
+            source_addr="254722111111",
+            destination_addr="254722999999",
+        )
+    )
 ```
 
 
