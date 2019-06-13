@@ -1422,6 +1422,7 @@ class Client:
             await self.tranceiver_bind(log_id=log_id)
         except (
             ConnectionError,
+            TimeoutError,
             asyncio.TimeoutError,
             socket.error,
             socket.herror,
@@ -1595,6 +1596,7 @@ class Client:
                 self.current_session_state = SmppSessionState.BOUND_TRX
         except (
             ConnectionError,
+            TimeoutError,
             asyncio.TimeoutError,
             socket.error,
             socket.herror,
@@ -1835,6 +1837,7 @@ class Client:
                 command_length_header_data = await self.reader.read(4)
             except (
                 ConnectionError,
+                TimeoutError,
                 asyncio.TimeoutError,
                 socket.error,
                 socket.herror,
@@ -1891,6 +1894,7 @@ class Client:
                         raise ConnectionError("socket connection broken")
                 except (
                     ConnectionError,
+                    TimeoutError,
                     asyncio.TimeoutError,
                     socket.error,
                     socket.herror,
@@ -2361,6 +2365,7 @@ class Client:
             self.writer.close()
         except (
             ConnectionError,
+            TimeoutError,
             asyncio.TimeoutError,
             socket.error,
             socket.herror,
