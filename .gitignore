@@ -48,3 +48,5 @@ coverage.xml
 
 # sphinx
 sphinx-build
+docs/.buildinfo
+docs/.doctrees/
