@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>state &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="logger" href="logger.html" />
+    <link rel="prev" title="throttle" href="throttle.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.state">
+<span id="state"></span><h1>state<a class="headerlink" href="#module-naz.state" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.state.CommandStatus">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">CommandStatus</code><a class="reference internal" href="_modules/naz/state.html#CommandStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.CommandStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>An SMPP command status</p>
+<dl class="method">
+<dt id="naz.state.CommandStatus.code">
+<em class="property">property </em><code class="sig-name descname">code</code><a class="headerlink" href="#naz.state.CommandStatus.code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.CommandStatus.description">
+<em class="property">property </em><code class="sig-name descname">description</code><a class="headerlink" href="#naz.state.CommandStatus.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.CommandStatus.value">
+<em class="property">property </em><code class="sig-name descname">value</code><a class="headerlink" href="#naz.state.CommandStatus.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.state.DataCoding">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">DataCoding</code><a class="reference internal" href="_modules/naz/state.html#DataCoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.DataCoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></p>
+<p>An SMPP data encoding.</p>
+<dl class="method">
+<dt id="naz.state.DataCoding.code">
+<em class="property">property </em><code class="sig-name descname">code</code><a class="headerlink" href="#naz.state.DataCoding.code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.DataCoding.description">
+<em class="property">property </em><code class="sig-name descname">description</code><a class="headerlink" href="#naz.state.DataCoding.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.DataCoding.value">
+<em class="property">property </em><code class="sig-name descname">value</code><a class="headerlink" href="#naz.state.DataCoding.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.state.SmppCommand">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppCommand</code><a class="reference internal" href="_modules/naz/state.html#SmppCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represensts the various SMPP commands.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.state.SmppCommandStatus">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppCommandStatus</code><a class="reference internal" href="_modules/naz/state.html#SmppCommandStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppCommandStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represensts the various SMPP commands statuses.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.state.SmppDataCoding">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppDataCoding</code><a class="reference internal" href="_modules/naz/state.html#SmppDataCoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppDataCoding" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represensts the various SMPP data encodings.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.state.SmppOptionalTag">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppOptionalTag</code><a class="reference internal" href="_modules/naz/state.html#SmppOptionalTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppOptionalTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represensts the various SMPP Optional Parameter Tags.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.state.SmppSessionState">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppSessionState</code><a class="reference internal" href="_modules/naz/state.html#SmppSessionState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppSessionState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represensts the states in which an SMPP session can be in.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="throttle.html" title="previous chapter">throttle</a></li>
+      <li>Next: <a href="logger.html" title="next chapter">logger</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/state.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

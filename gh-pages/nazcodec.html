@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>nazcodec &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="queue" href="queue.html" />
+    <link rel="prev" title="hooks" href="hooks.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.nazcodec">
+<span id="nazcodec"></span><h1>nazcodec<a class="headerlink" href="#module-naz.nazcodec" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.nazcodec.BaseNazCodec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.nazcodec.</code><code class="sig-name descname">BaseNazCodec</code><a class="reference internal" href="_modules/naz/nazcodec.html#BaseNazCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.BaseNazCodec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>This is the interface that must be implemented to satisfy naz’s encoding/decoding.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.nazcodec.BaseNazCodec.encode" title="naz.nazcodec.BaseNazCodec.encode"><code class="xref py py-func docutils literal notranslate"><span class="pre">encode</span></code></a> and <a class="reference internal" href="#naz.nazcodec.BaseNazCodec.decode" title="naz.nazcodec.BaseNazCodec.decode"><code class="xref py py-func docutils literal notranslate"><span class="pre">decode</span></code></a> methods with the type signatures shown.</p>
+<p>naz calls an implementation of this class to encode/decode messages.</p>
+<dl class="method">
+<dt id="naz.nazcodec.BaseNazCodec.decode">
+<em class="property">abstract </em><code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">byte_string</em>, <em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#BaseNazCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.BaseNazCodec.decode" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>return a string decoded from the given bytes.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>byte_string</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p></li>
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – encoding scheme. eg utf-8, gsm0338 etc</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.decode">same as defined in pythons codec.decode</a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.nazcodec.BaseNazCodec.encode">
+<em class="property">abstract </em><code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">string_to_encode</em>, <em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#BaseNazCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.BaseNazCodec.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an encoded version of the string as a bytes object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string_to_encode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p></li>
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – encoding scheme. eg utf-8, gsm0338 etc</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">same as defined in pythons codec.encode</a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>encoded version of input string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.nazcodec.SimpleNazCodec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.nazcodec.</code><code class="sig-name descname">SimpleNazCodec</code><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleNazCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleNazCodec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.nazcodec.BaseNazCodec" title="naz.nazcodec.BaseNazCodec"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.nazcodec.BaseNazCodec</span></code></a></p>
+<p>This is an implementation of BaseNazCodec.</p>
+<p>SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
+This class can also be used with the usual <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">python standard encodings</a></p>
+<p>example usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncodec</span> <span class="o">=</span> <span class="n">SimpleNazCodec</span><span class="p">()</span>
+
+<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">,</span> <span class="s2">&quot;utf-16be&quot;</span><span class="p">)</span>
+<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">,</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;HÜLK&quot;</span><span class="p">,</span> <span class="s1">&#39;gsm0338&#39;</span><span class="p">)</span>
+
+<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">,</span> <span class="s1">&#39;gsm0338&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">,</span> <span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="naz.nazcodec.SimpleNazCodec.decode">
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">byte_string</em>, <em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleNazCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleNazCodec.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a string decoded from the given bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>byte_string</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p></li>
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – encoding scheme. eg utf-8, gsm0338 etc</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p><a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.decode">same as defined in pythons codec.decode</a></p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.nazcodec.SimpleNazCodec.encode">
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">string_to_encode</em>, <em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleNazCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleNazCodec.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an encoded version of the string as a bytes object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>string_to_encode</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p></li>
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – encoding scheme. eg utf-8, gsm0338 etc</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p><a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">same as defined in pythons codec.encode</a></p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>encoded version of input string</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="hooks.html" title="previous chapter">hooks</a></li>
+      <li>Next: <a href="queue.html" title="next chapter">queue</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/nazcodec.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

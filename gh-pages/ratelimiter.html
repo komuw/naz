@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>ratelimiter &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="sequence" href="sequence.html" />
+    <link rel="prev" title="queue" href="queue.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.ratelimiter">
+<span id="ratelimiter"></span><h1>ratelimiter<a class="headerlink" href="#module-naz.ratelimiter" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.ratelimiter.BaseRateLimiter">
+<em class="property">class </em><code class="sig-prename descclassname">naz.ratelimiter.</code><code class="sig-name descname">BaseRateLimiter</code><a class="reference internal" href="_modules/naz/ratelimiter.html#BaseRateLimiter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.BaseRateLimiter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>This is the interface that must be implemented to satisfy naz’s rate limiting.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.ratelimiter.BaseRateLimiter.limit" title="naz.ratelimiter.BaseRateLimiter.limit"><code class="xref py py-func docutils literal notranslate"><span class="pre">limit</span></code></a> methods with the type signatures shown.</p>
+<p>It may be important to control the rate at which the client(naz) sends requests to an SMSC/server.
+naz lets you do this, by allowing you to specify a custom rate limiter.</p>
+<dl class="method">
+<dt id="naz.ratelimiter.BaseRateLimiter.limit">
+<em class="property">abstract async </em><code class="sig-name descname">limit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#BaseRateLimiter.limit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.BaseRateLimiter.limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>rate limit sending of messages to SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.ratelimiter.SimpleRateLimiter">
+<em class="property">class </em><code class="sig-prename descclassname">naz.ratelimiter.</code><code class="sig-name descname">SimpleRateLimiter</code><span class="sig-paren">(</span><em class="sig-param">send_rate=100000.0</em>, <em class="sig-param">log_handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.ratelimiter.BaseRateLimiter" title="naz.ratelimiter.BaseRateLimiter"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.ratelimiter.BaseRateLimiter</span></code></a></p>
+<p>This is an implementation of BaseRateLimiter.</p>
+<p>It does rate limiting using a <a class="reference external" href="https://en.wikipedia.org/wiki/Token_bucket">token bucket rate limiting algorithm</a></p>
+<p>example usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">send_rate</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">await</span> <span class="n">rateLimiter</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
+<span class="n">send_messsages</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="naz.ratelimiter.SimpleRateLimiter.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">send_rate=100000.0</em>, <em class="sig-param">log_handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>send_rate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – the maximum rate, in messages/second, at which naz can send messages to SMSC.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.ratelimiter.SimpleRateLimiter.limit">
+<em class="property">async </em><code class="sig-name descname">limit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter.limit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter.limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>rate limit sending of messages to SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="queue.html" title="previous chapter">queue</a></li>
+      <li>Next: <a href="sequence.html" title="next chapter">sequence</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/ratelimiter.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

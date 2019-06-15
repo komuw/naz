@@ -1,0 +1,297 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>correlater &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="hooks" href="hooks.html" />
+    <link rel="prev" title="Client" href="client.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.correlater">
+<span id="correlater"></span><h1>correlater<a class="headerlink" href="#module-naz.correlater" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.correlater.BaseCorrelater">
+<em class="property">class </em><code class="sig-prename descclassname">naz.correlater.</code><code class="sig-name descname">BaseCorrelater</code><a class="reference internal" href="_modules/naz/correlater.html#BaseCorrelater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.BaseCorrelater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Interface that must be implemented to satisfy naz’s Correlater.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.correlater.BaseCorrelater.get" title="naz.correlater.BaseCorrelater.get"><code class="xref py py-func docutils literal notranslate"><span class="pre">get</span></code></a> and <a class="reference internal" href="#naz.correlater.BaseCorrelater.put" title="naz.correlater.BaseCorrelater.put"><code class="xref py py-func docutils literal notranslate"><span class="pre">put</span></code></a> methods with the type signatures shown.</p>
+<p>A Correlater is class that naz uses to store relations between SMPP sequence numbers
+and user applications’ log_id’s and/or hook_metadata.</p>
+<div class="line-block">
+<div class="line">Note: This correlation is on a BEST effort basis; it is not guaranteed to be reliable.</div>
+<div class="line">One reason, among others, is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.</div>
+<div class="line">Another reason is that we use receipted_message_id tag from deliver_sm to correlate a delivery notification
+with a submit_sm_resp. However receipted_message_id is an optional parameter that SMSC may omit.</div>
+</div>
+<dl class="method">
+<dt id="naz.correlater.BaseCorrelater.get">
+<em class="property">abstract async </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">smsc_message_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#BaseCorrelater.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.BaseCorrelater.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
+<li><p><strong>smsc_message_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique identifier of a particular message on the SMSC. It comes from SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>log_id and hook_metadata</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.correlater.BaseCorrelater.put">
+<em class="property">abstract async </em><code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">smsc_message_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#BaseCorrelater.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.BaseCorrelater.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>smsc_message_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique identifier of a particular message on the SMSC. It comes from SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.correlater.SimpleCorrelater">
+<em class="property">class </em><code class="sig-prename descclassname">naz.correlater.</code><code class="sig-name descname">SimpleCorrelater</code><span class="sig-paren">(</span><em class="sig-param">max_ttl=15.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#SimpleCorrelater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.SimpleCorrelater" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.correlater.BaseCorrelater" title="naz.correlater.BaseCorrelater"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.correlater.BaseCorrelater</span></code></a></p>
+<p>A simple implementation of BaseCorrelater.
+It stores the correlation/relation between a given SMPP sequence_number(and/or smsc_message_id) and a user supplied log_id and/or hook_metadata.</p>
+<p>SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.</p>
+<blockquote>
+<div><p>The storage is done in memory using a python dictionary. The storage looks like:</p>
+</div></blockquote>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+     <span class="s2">&quot;sequence_number1&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="s2">&quot;log_id1&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;hook_metadata&quot;</span><span class="p">:</span> <span class="s2">&quot;hook_metadata1&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;stored_at&quot;</span><span class="p">:</span> <span class="mf">681.109023565</span>
+     <span class="p">},</span>
+     <span class="s2">&quot;smsc_message_id1&quot;</span><span class="p">:</span> <span class="p">{</span>
+         <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="s2">&quot;log_id1&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;hook_metadata&quot;</span><span class="p">:</span> <span class="s2">&quot;hook_metadata1&quot;</span><span class="p">,</span>
+         <span class="s2">&quot;stored_at&quot;</span><span class="p">:</span> <span class="mf">681.109023565</span>
+     <span class="p">},</span>
+    <span class="s2">&quot;sequence_number1&quot;</span><span class="p">:</span> <span class="p">{</span>
+     <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="s2">&quot;log_id2&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;hook_metadata&quot;</span><span class="p">:</span> <span class="s2">&quot;hook_metadata2&quot;</span><span class="p">,</span>
+     <span class="s2">&quot;stored_at&quot;</span><span class="p">:</span> <span class="mf">682.109023565</span>
+    <span class="p">}</span>
+    <span class="o">...</span>
+ <span class="p">}</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="naz.correlater.SimpleCorrelater.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">max_ttl=15.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#SimpleCorrelater.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.SimpleCorrelater.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>max_ttl</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The time in seconds that an item is going to be stored.
+After the expiration of max_ttl seconds, that item will be deleted.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.correlater.SimpleCorrelater.delete_after_ttl">
+<em class="property">async </em><code class="sig-name descname">delete_after_ttl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#SimpleCorrelater.delete_after_ttl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.SimpleCorrelater.delete_after_ttl" title="Permalink to this definition">¶</a></dt>
+<dd><p>iterate over all stored items and delete any that are
+older than self.max_ttl seconds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.correlater.SimpleCorrelater.get">
+<em class="property">async </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">smsc_message_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#SimpleCorrelater.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.SimpleCorrelater.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>called by naz to get the correlation of a given SMPP sequence number to log_id and/or hook_metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
+<li><p><strong>smsc_message_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique identifier of a particular message on the SMSC. It comes from SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>log_id and hook_metadata</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.correlater.SimpleCorrelater.put">
+<em class="property">async </em><code class="sig-name descname">put</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">smsc_message_id=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/correlater.html#SimpleCorrelater.put"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.SimpleCorrelater.put" title="Permalink to this definition">¶</a></dt>
+<dd><p>called by naz to put/store the correlation of a given SMPP sequence number to log_id and/or hook_metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>smsc_message_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique identifier of a particular message on the SMSC. It comes from SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="client.html" title="previous chapter">Client</a></li>
+      <li>Next: <a href="hooks.html" title="next chapter">hooks</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/correlater.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

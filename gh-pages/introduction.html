@@ -1,0 +1,596 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Introduction to naz &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Client" href="client.html" />
+    <link rel="prev" title="naz - naz is an async SMPP client." href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction-to-naz">
+<h1>Introduction to naz<a class="headerlink" href="#introduction-to-naz" title="Permalink to this headline">¶</a></h1>
+<p>naz is an async SMPP client.
+It’s name is derived from Kenyan hip hop artiste, Nazizi.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SMPP</span> <span class="pre">is</span> <span class="pre">a</span> <span class="pre">protocol</span> <span class="pre">designed</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">transfer</span> <span class="pre">of</span> <span class="pre">short</span> <span class="pre">message</span> <span class="pre">data</span> <span class="pre">between</span> <span class="pre">External</span> <span class="pre">Short</span> <span class="pre">Messaging</span> <span class="pre">Entities(ESMEs),</span> <span class="pre">Routing</span> <span class="pre">Entities(REs)</span> <span class="pre">and</span> <span class="pre">Short</span> <span class="pre">Message</span> <span class="pre">Service</span> <span class="pre">Center(SMSC).</span></code> - <a class="reference external" href="https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer">Wikipedia</a></p>
+<div class="line-block">
+<div class="line">naz currently only supports SMPP version 3.4.</div>
+<div class="line">naz has no third-party dependencies and it requires python version 3.6+</div>
+</div>
+<p>naz is in active development and it’s API may change in backward incompatible ways.</p>
+<p><strong>Table of Contents</strong></p>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#installation" id="id3">1 Installation</a></p></li>
+<li><p><a class="reference internal" href="#usage" id="id4">2 Usage</a></p></li>
+<li><p><a class="reference internal" href="#as-a-library" id="id5">2.1 As a library</a></p></li>
+<li><p><a class="reference internal" href="#as-a-cli-app" id="id6">2.2 As a cli app</a></p></li>
+<li><p><a class="reference internal" href="#features" id="id7">3 Features</a></p></li>
+<li><p><a class="reference internal" href="#async-everywhere" id="id8">3.1 async everywhere</a></p></li>
+<li><p><a class="reference internal" href="#monitoring-and-observability" id="id9">3.2 monitoring and observability</a></p></li>
+<li><p><a class="reference internal" href="#logging" id="id10">3.2.1 logging</a></p></li>
+<li><p><a class="reference internal" href="#hooks" id="id11">3.2.2 hooks</a></p></li>
+<li><p><a class="reference internal" href="#integration-with-bug-trackers" id="id12">3.2.3 integration with bug trackers</a></p></li>
+<li><p><a class="reference internal" href="#rate-limiting" id="id13">3.3 Rate limiting</a></p></li>
+<li><p><a class="reference internal" href="#throttle-handling" id="id14">3.4 Throttle handling</a></p></li>
+<li><p><a class="reference internal" href="#queuing" id="id15">3.5 Queuing</a></p></li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h2><a class="toc-backref" href="#id3">1 Installation</a><a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">naz</span></code></p>
+</div>
+<div class="section" id="usage">
+<h2><a class="toc-backref" href="#id4">2 Usage</a><a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="as-a-library">
+<h2><a class="toc-backref" href="#id5">2.1 As a library</a><a class="headerlink" href="#as-a-library" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">outboundqueue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+    <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
+    <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># queue messages to send</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;submit_sm round:&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
+        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># connect to the SMSC host</span>
+<span class="n">reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">connect</span><span class="p">())</span>
+<span class="c1"># bind to SMSC as a tranceiver</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">())</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">dequeue_messages</span><span class="p">(),</span> <span class="n">cli</span><span class="o">.</span><span class="n">receive_data</span><span class="p">(),</span> <span class="n">cli</span><span class="o">.</span><span class="n">enquire_link</span><span class="p">())</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">unbind</span><span class="p">())</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>NB:</p>
+<ul class="simple">
+<li><ol class="loweralpha simple">
+<li><p>For more information about all the parameters that <cite>naz.Client</cite> can take, consult the <a class="reference external" href="https://github.com/komuw/naz/blob/master/documentation/config.md">documentation here</a></p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="2">
+<li><p>More examples can be found <a class="reference external" href="https://github.com/komuw/naz/tree/master/examples">here</a></p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="3">
+<li><p>if you need an SMSC server/gateway to test with, you can use the <a class="reference external" href="https://github.com/komuw/naz/blob/master/docker-compose.yml">docker-compose</a> file in the <code class="docutils literal notranslate"><span class="pre">naz</span></code> repo to bring up an SMSC simulator.
+That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your <cite>naz.q.BaseOutboundQueue</cite>.</p></li>
+</ol>
+</li>
+</ul>
+</div>
+<div class="section" id="as-a-cli-app">
+<h2><a class="toc-backref" href="#id6">2.2 As a cli app</a><a class="headerlink" href="#as-a-cli-app" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">naz</span></code> also ships with a commandline interface app called <code class="docutils literal notranslate"><span class="pre">naz-cli</span></code> (it is also installed by default when you <cite>pip install naz</cite>).</p>
+<p>create a python config file, eg; <cite>/tmp/my_app.py</cite></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">from</span> <span class="nn">myfile</span> <span class="kn">import</span> <span class="n">ExampleQueue</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+    <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
+    <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">ExampleQueue</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>and a python file, <cite>myfile.py</cite> (in the current working directory) with the contents:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">naz</span>
+<span class="k">class</span> <span class="nc">ExampleQueue</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">BaseOutboundQueue</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>then run:
+<code class="docutils literal notranslate"><span class="pre">naz-cli</span> <span class="pre">--client</span> <span class="pre">tmp.my_app.client</span></code></p>
+<p>NB:</p>
+<ul class="simple">
+<li><ol class="loweralpha simple">
+<li><p>For more information about the naz config file, consult the <a class="reference external" href="https://github.com/komuw/naz/blob/master/documentation/config.md">documentation here</a></p></li>
+</ol>
+</li>
+<li><ol class="loweralpha simple" start="2">
+<li><p>More examples can be found <a class="reference external" href="https://github.com/komuw/naz/tree/master/examples">here</a>
+As an example, start the SMSC simulator(<code class="docutils literal notranslate"><span class="pre">docker-compose</span> <span class="pre">up</span></code>) then in another terminal run,
+<code class="docutils literal notranslate"><span class="pre">naz-cli</span> <span class="pre">--client</span> <span class="pre">examples.example_config.client</span></code></p></li>
+</ol>
+</li>
+</ul>
+</div>
+<div class="section" id="features">
+<h2><a class="toc-backref" href="#id7">3 Features</a><a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="async-everywhere">
+<h2><a class="toc-backref" href="#id8">3.1 async everywhere</a><a class="headerlink" href="#async-everywhere" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.</div>
+<div class="line">It thus makes sense to write your SMPP client in an async manner. We leverage python3’s async/await to do so.</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">outboundqueue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+    <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
+    <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="monitoring-and-observability">
+<h2><a class="toc-backref" href="#id9">3.2 monitoring and observability</a><a class="headerlink" href="#monitoring-and-observability" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="logging">
+<h2><a class="toc-backref" href="#id10">3.2.1 logging</a><a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">In <code class="docutils literal notranslate"><span class="pre">naz</span></code> you have the ability to annotate all the log events that naz will generate with anything you want.</div>
+<div class="line">So, for example if you wanted to annotate all log-events with a release version and your app’s running environment.</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span> <span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="s2">&quot;canary&quot;</span><span class="p">},</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">and then these will show up in all log events.</div>
+<div class="line">by default, naz annotates all log events with smsc_host, system_id and client_id</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">naz</span></code> also gives you the ability to supply your own logger.
+For example if you wanted <code class="docutils literal notranslate"><span class="pre">naz</span></code> to use key=value style of logging, then just create a logger that does just that:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="k">class</span> <span class="nc">KVlogger</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;myKVlogger&quot;</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loglevel</span><span class="p">,</span> <span class="n">log_metadata</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="c1"># implementation of key=value log renderer</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">log_data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+<span class="n">kvLog</span> <span class="o">=</span> <span class="n">KVlogger</span><span class="p">()</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">log_handler</span><span class="o">=</span><span class="n">kvLog</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">naz</span></code> also gives you the ability to supply your own logger.
+For example if you wanted <code class="docutils literal notranslate"><span class="pre">naz</span></code> to use key=value style of logging, then just create a logger that does just that:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="k">class</span> <span class="nc">KVlogger</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;myKVlogger&quot;</span><span class="p">)</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loglevel</span><span class="p">,</span> <span class="n">log_metadata</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="c1"># implementation of key=value log renderer</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">log_data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+
+<span class="n">kvLog</span> <span class="o">=</span> <span class="n">KVlogger</span><span class="p">()</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">log_handler</span><span class="o">=</span><span class="n">kvLog</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hooks">
+<h2><a class="toc-backref" href="#id11">3.2.2 hooks</a><a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">A hook is a class with two methods <cite>request</cite> and <cite>response</cite>, ie it implements naz’s <code class="docutils literal notranslate"><span class="pre">naz.hooks.BaseHook</span></code> interface.</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> will call the <cite>request</cite> method just before sending request to SMSC and also call the <cite>response</cite> method just after getting response from SMSC.</div>
+<div class="line">The default hook that naz uses is <code class="docutils literal notranslate"><span class="pre">naz.hooks.SimpleHook</span></code> which just logs the request and response.</div>
+<div class="line">If you wanted, for example to keep metrics of all requests and responses to SMSC in your prometheus setup;</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="k">class</span> <span class="nc">MyPrometheusHook</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">):</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;my_requests&#39;</span><span class="p">,</span> <span class="s1">&#39;Description of counter&#39;</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span> <span class="c1"># Increment by 1</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="n">smpp_command</span><span class="p">,</span>
+                    <span class="n">log_id</span><span class="p">,</span>
+                    <span class="n">hook_metadata</span><span class="p">,</span>
+                    <span class="n">smsc_response</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;my_responses&#39;</span><span class="p">,</span> <span class="s1">&#39;Description of counter&#39;</span><span class="p">)</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span> <span class="c1"># Increment by 1</span>
+
+<span class="n">myHook</span> <span class="o">=</span> <span class="n">MyPrometheusHook</span><span class="p">()</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">hook</span><span class="o">=</span><span class="n">myHook</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>another example is if you want to update a database record whenever you get a delivery notification event;</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="k">class</span> <span class="nc">SetMessageStateHook</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">):</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                    <span class="n">smpp_command</span><span class="p">,</span>
+                    <span class="n">log_id</span><span class="p">,</span>
+                    <span class="n">hook_metadata</span><span class="p">,</span>
+                    <span class="n">smsc_response</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">smpp_command</span> <span class="o">==</span> <span class="n">naz</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM</span><span class="p">:</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;mySmsDB.db&#39;</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="n">conn</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">log_id</span><span class="p">,)</span>
+            <span class="c1"># watch out for SQL injections!!</span>
+            <span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;UPDATE SmsTable SET State=&#39;delivered&#39; WHERE CorrelatinID=?&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">stateHook</span> <span class="o">=</span> <span class="n">SetMessageStateHook</span><span class="p">()</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">hook</span><span class="o">=</span><span class="n">stateHook</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="integration-with-bug-trackers">
+<h2><a class="toc-backref" href="#id12">3.2.3 integration with bug trackers</a><a class="headerlink" href="#integration-with-bug-trackers" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">If you want to integrate <cite>naz</cite> with your bug/issue/bug tracker of choice, all you have to do is use their logging integrator.</div>
+<div class="line">As an example, to integrate <code class="docutils literal notranslate"><span class="pre">naz</span></code> with <a class="reference external" href="https://sentry.io/">sentry</a>, all you have to do is import and init the sentry sdk. A good place to do that would be in the naz config file, ie;</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">/tmp/my_config.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">from</span> <span class="nn">myfile</span> <span class="kn">import</span> <span class="n">ExampleQueue</span>
+
+<span class="kn">import</span> <span class="nn">sentry_sdk</span> <span class="c1"># import sentry SDK</span>
+<span class="n">sentry_sdk</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="s2">&quot;https://&lt;YOUR_SENTRY_PUBLIC_KEY&gt;@sentry.io/&lt;YOUR_SENTRY_PROJECT_ID&gt;&quot;</span><span class="p">)</span>
+
+<span class="n">my_naz_client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+    <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
+    <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">ExampleQueue</span><span class="p">()</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">then run the <cite>naz-cli</cite> as usaul:</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz-cli</span> <span class="pre">--client</span> <span class="pre">tmp.my_config.my_naz_client</span></code></div>
+<div class="line">And just like that you are good to go. This is what errors from <cite>naz</cite> will look like on sentry(sans the emojis, ofcourse):</div>
+</div>
+<a class="reference internal image-reference" href="_images/naz-sentry.png"><img alt="photo of naz integration with sentry" src="_images/naz-sentry.png" style="width: 400px;" /></a>
+</div>
+<div class="section" id="rate-limiting">
+<h2><a class="toc-backref" href="#id13">3.3 Rate limiting</a><a class="headerlink" href="#rate-limiting" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Sometimes you want to control the rate at which the client sends requests to an SMSC/server. <code class="docutils literal notranslate"><span class="pre">naz</span></code> lets you do this, by allowing you to specify a custom rate limiter.</div>
+<div class="line">By default, naz uses a simple token bucket rate limiting algorithm implemented in <code class="docutils literal notranslate"><span class="pre">naz.ratelimiter.SimpleRateLimiter</span></code></div>
+<div class="line">You can customize naz’s ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the <code class="docutils literal notranslate"><span class="pre">naz.ratelimiter.BaseRateLimiter</span></code> interface)</div>
+<div class="line">To customize the default ratelimiter, for example to send at a rate of 35 requests per second.</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="n">myLimiter</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">ratelimiter</span><span class="o">.</span><span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">send_rate</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">rateLimiter</span><span class="o">=</span><span class="n">myLimiter</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="throttle-handling">
+<h2><a class="toc-backref" href="#id14">3.4 Throttle handling</a><a class="headerlink" href="#throttle-handling" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">Sometimes, when a client sends requests to an SMSC/server, the SMSC may reply with an ESME_RTHROTTLED status.</div>
+<div class="line">This can happen, say if the client has surpassed the rate at which it is supposed to send requests at, or the SMSC is under load or for whatever reason ¯_(ツ)_/¯</div>
+</div>
+<p>The way naz handles throtlling is via Throttle handlers.
+A throttle handler is a class that implements the <code class="docutils literal notranslate"><span class="pre">naz.BaseThrottleHandler</span></code></p>
+<p>By default naz uses <code class="docutils literal notranslate"><span class="pre">naz.throttle.SimpleThrottleHandler</span></code> to handle throttling.
+As an example if you want to deny outgoing requests if the percentage of throttles is above 1.2% over a period of 180 seconds and the total number of responses from SMSC is greater than 45, then;</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">naz.throttle</span> <span class="kn">import</span> <span class="n">SimpleThrottleHandler</span>
+<span class="n">throttler</span> <span class="o">=</span> <span class="n">SimpleThrottleHandler</span><span class="p">(</span><span class="n">sampling_period</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span>
+                                <span class="n">sample_size</span><span class="o">=</span><span class="mi">45</span><span class="p">,</span>
+                                <span class="n">deny_request_at</span><span class="o">=</span><span class="mf">1.2</span><span class="p">)</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">throttle_handler</span><span class="o">=</span><span class="n">throttler</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="queuing">
+<h2><a class="toc-backref" href="#id15">3.5 Queuing</a><a class="headerlink" href="#queuing" title="Permalink to this headline">¶</a></h2>
+<p><cite>How does your application and naz talk with each other?</cite></p>
+<p>It’s via a queuing interface. Your application queues messages to a queue, <code class="docutils literal notranslate"><span class="pre">naz</span></code> consumes from that queue and then naz sends those messages to SMSC/server.</p>
+<p>You can implement the queuing mechanism any way you like, so long as it satisfies the <code class="docutils literal notranslate"><span class="pre">naz.q.BaseOutboundQueue</span></code></p>
+<div class="line-block">
+<div class="line">Your application should call that class’s enqueue method to enqueue messages.</div>
+<div class="line">Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>
+    <span class="s2">&quot;version&quot;</span>: <span class="s2">&quot;1&quot;</span>,
+    <span class="s2">&quot;smpp_command&quot;</span>: naz.SmppCommand.SUBMIT_SM,
+    <span class="s2">&quot;short_message&quot;</span>: string,
+    <span class="s2">&quot;log_id&quot;</span>: string,
+    <span class="s2">&quot;source_addr&quot;</span>: string,
+    <span class="s2">&quot;destination_addr&quot;</span>: string
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>For more information about all the parameters that are needed in the enqueued json object, consult the <a class="reference external" href="https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol">documentation</a></p>
+<div class="line-block">
+<div class="line">naz ships with a simple queue implementation called <code class="docutils literal notranslate"><span class="pre">naz.q.SimpleOutboundQueue</span></code></div>
+<div class="line"><strong>NB:</strong> <code class="docutils literal notranslate"><span class="pre">naz.q.SimpleOutboundQueue</span></code> should only be used for demo/test purposes.</div>
+</div>
+<p>An example of using that queue;</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">my_queue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="c1"># can hold upto 1000 items</span>
+<span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="o">...</span>
+    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">my_queue</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># connect to the SMSC host</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">connect</span><span class="p">())</span>
+<span class="c1"># bind to SMSC as a tranceiver</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">())</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">dequeue_messages</span><span class="p">(),</span> <span class="n">cli</span><span class="o">.</span><span class="n">receive_data</span><span class="p">(),</span> <span class="n">cli</span><span class="o">.</span><span class="n">enquire_link</span><span class="p">())</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">unbind</span><span class="p">())</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+<span class="n">then</span> <span class="ow">in</span> <span class="n">your</span> <span class="n">application</span><span class="p">,</span> <span class="n">queue</span> <span class="n">items</span> <span class="n">to</span> <span class="n">the</span> <span class="n">queue</span><span class="p">;</span>
+
+<span class="c1"># queue messages to send</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
+        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>then in your application, queue items to the queue;</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># queue messages to send</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
+    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
+        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction to naz</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#installation">1 Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#usage">2 Usage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#as-a-library">2.1 As a library</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#as-a-cli-app">2.2 As a cli app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#features">3 Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#async-everywhere">3.1 async everywhere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#monitoring-and-observability">3.2 monitoring and observability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging">3.2.1 logging</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hooks">3.2.2 hooks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#integration-with-bug-trackers">3.2.3 integration with bug trackers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rate-limiting">3.3 Rate limiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#throttle-handling">3.4 Throttle handling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#queuing">3.5 Queuing</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">naz - naz is an async SMPP client.</a></li>
+      <li>Next: <a href="client.html" title="next chapter">Client</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/introduction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

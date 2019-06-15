@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>logger &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="state" href="state.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.logger">
+<span id="logger"></span><h1>logger<a class="headerlink" href="#module-naz.logger" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.logger.BaseLogger">
+<em class="property">class </em><code class="sig-prename descclassname">naz.logger.</code><code class="sig-name descname">BaseLogger</code><a class="reference internal" href="_modules/naz/logger.html#BaseLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.BaseLogger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Interface that must be implemented to satisfy naz’s logger.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.logger.BaseLogger.bind" title="naz.logger.BaseLogger.bind"><code class="xref py py-func docutils literal notranslate"><span class="pre">bind</span></code></a> and <a class="reference internal" href="#naz.logger.BaseLogger.log" title="naz.logger.BaseLogger.log"><code class="xref py py-func docutils literal notranslate"><span class="pre">log</span></code></a> methods with the type signatures shown.</p>
+<p>A logger is class with methods that are called whenever naz wants to log something.
+This enables developers to implement logging in any way that they want.</p>
+<dl class="method">
+<dt id="naz.logger.BaseLogger.bind">
+<em class="property">abstract </em><code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param">level</em>, <em class="sig-param">log_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/logger.html#BaseLogger.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.BaseLogger.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>called when a naz client is been instantiated so that the logger can be
+notified of loglevel &amp; log_metadata that a user supplied to a naz client.
+The logger can choose to bind these log_metadata to itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loglevel</strong> – logging level eg DEBUG</p></li>
+<li><p><strong>log_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – log metadata that can be included in all log statements</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.logger.BaseLogger.log">
+<em class="property">abstract </em><code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param">level</em>, <em class="sig-param">log_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/logger.html#BaseLogger.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.BaseLogger.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>called by naz everytime it wants to log something.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – logging level eg <cite>logging.INFO</cite></p></li>
+<li><p><strong>log_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – the message to log</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.logger.SimpleLogger">
+<em class="property">class </em><code class="sig-prename descclassname">naz.logger.</code><code class="sig-name descname">SimpleLogger</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/logger.html#SimpleLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.SimpleLogger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.logger.BaseLogger" title="naz.logger.BaseLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.logger.BaseLogger</span></code></a></p>
+<p>This is an implementation of BaseLogger.
+It implements a structured logger that renders logs as a dict.</p>
+<p>example usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;myLogger&quot;</span><span class="p">)</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+            <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;customer_id&quot;</span><span class="p">:</span> <span class="s2">&quot;34541&quot;</span><span class="p">})</span>
+<span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+           <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;web_request&quot;</span><span class="p">,</span> <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;https://www.google.com/&quot;</span><span class="p">})</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="naz.logger.SimpleLogger.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/logger.html#SimpleLogger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.SimpleLogger.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>logger_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the logger. it should be unique per logger.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.logger.SimpleLogger.bind">
+<code class="sig-name descname">bind</code><span class="sig-paren">(</span><em class="sig-param">level</em>, <em class="sig-param">log_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/logger.html#SimpleLogger.bind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.SimpleLogger.bind" title="Permalink to this definition">¶</a></dt>
+<dd><p>called when a naz client is been instantiated so that the logger can be
+notified of loglevel &amp; log_metadata that a user supplied to a naz client.
+The logger can choose to bind these log_metadata to itself.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>loglevel</strong> – logging level eg DEBUG</p></li>
+<li><p><strong>log_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – log metadata that can be included in all log statements</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.logger.SimpleLogger.log">
+<code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param">level</em>, <em class="sig-param">log_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/logger.html#SimpleLogger.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.logger.SimpleLogger.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>called by naz everytime it wants to log something.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>level</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – logging level eg <cite>logging.INFO</cite></p></li>
+<li><p><strong>log_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – the message to log</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="state.html" title="previous chapter">state</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/logger.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
