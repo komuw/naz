@@ -99,7 +99,7 @@ html_theme = "sphinx_rtd_theme"
 #
 # html_theme_options = {}
 # see: https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
-html_theme_options = {"display_version": True}
+html_theme_options = {"display_version": True, "canonical_url": "https://komuw.github.io/naz/"}
 
 
 # Add any paths that contain custom static files (such as style sheets) here,
