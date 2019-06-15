@@ -25,6 +25,9 @@ from .state import (
     SmppOptionalTag,
 )
 
+from . import utils
+import tracemalloc
+
 
 class Client:
     """
@@ -911,6 +914,7 @@ class Client:
                 return None
 
         smpp_command = SmppCommand.ENQUIRE_LINK
+        tracemalloc.start(25)
         while True:
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self._log(
@@ -996,6 +1000,10 @@ class Client:
                     "smpp_command": smpp_command,
                 },
             )
+
+            snapshot = tracemalloc.take_snapshot()
+            utils.display_top_allocators(snapshot)
+
             if TESTING:
                 return full_pdu
             await asyncio.sleep(self.enquire_link_interval)
