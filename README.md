@@ -6,7 +6,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/komuw/naz)
 
  
-[Documentation](https://naz.komu.engineer/)
+[Documentation](https://komuw.github.io/naz)
 
 
 naz is an async SMPP client.           
