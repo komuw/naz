@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>throttle &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="state" href="state.html" />
+    <link rel="prev" title="sequence" href="sequence.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.throttle">
+<span id="throttle"></span><h1>throttle<a class="headerlink" href="#module-naz.throttle" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.throttle.BaseThrottleHandler">
+<em class="property">class </em><code class="sig-prename descclassname">naz.throttle.</code><code class="sig-name descname">BaseThrottleHandler</code><a class="reference internal" href="_modules/naz/throttle.html#BaseThrottleHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.BaseThrottleHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>This is the interface that must be implemented to satisfy naz’s throttle handling.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.throttled" title="naz.throttle.BaseThrottleHandler.throttled"><code class="xref py py-func docutils literal notranslate"><span class="pre">throttled</span></code></a>, <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.not_throttled" title="naz.throttle.BaseThrottleHandler.not_throttled"><code class="xref py py-func docutils literal notranslate"><span class="pre">not_throttled</span></code></a>,
+<a class="reference internal" href="#naz.throttle.BaseThrottleHandler.allow_request" title="naz.throttle.BaseThrottleHandler.allow_request"><code class="xref py py-func docutils literal notranslate"><span class="pre">allow_request</span></code></a> and
+<a class="reference internal" href="#naz.throttle.BaseThrottleHandler.throttle_delay" title="naz.throttle.BaseThrottleHandler.throttle_delay"><code class="xref py py-func docutils literal notranslate"><span class="pre">throttle_delay</span></code></a> methods with the type signatures shown.</p>
+<p>When an SMPP client exceeds it’s rate limit, or when the SMSC is under load or for whatever reason;
+The SMSC may decide to start throtlling requests from that particular client.
+When it does so, it replies to the client with a throttling status. Under such conditions, it is important for the client to start
+rate limiting itself. The way naz implements this self imposed self-regulation is via Throttle Handlers.</p>
+<p>The methods in this class are also called when the SMSC is under load and is responding with <a href="#id1"><span class="problematic" id="id2">`</span></a>ESME_RMSGQFUL`(message queue full) responses</p>
+<dl class="method">
+<dt id="naz.throttle.BaseThrottleHandler.allow_request">
+<em class="property">abstract async </em><code class="sig-name descname">allow_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#BaseThrottleHandler.allow_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.BaseThrottleHandler.allow_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>this method will be called by naz just before sending a request to SMSC.
+The response from this method will determine wether naz will send the request or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.BaseThrottleHandler.not_throttled">
+<em class="property">abstract async </em><code class="sig-name descname">not_throttled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#BaseThrottleHandler.not_throttled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.BaseThrottleHandler.not_throttled" title="Permalink to this definition">¶</a></dt>
+<dd><p>this method will be called by naz everytime we get any response from SMSC that is not a throttling response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.BaseThrottleHandler.throttle_delay">
+<em class="property">abstract async </em><code class="sig-name descname">throttle_delay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#BaseThrottleHandler.throttle_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.BaseThrottleHandler.throttle_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>if the last <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.allow_request" title="naz.throttle.BaseThrottleHandler.allow_request"><code class="xref py py-func docutils literal notranslate"><span class="pre">allow_request</span></code></a> method call returned False(thus denying sending a request),
+naz will call the throttle_delay method
+to determine how long in seconds to wait before calling allow_request again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.BaseThrottleHandler.throttled">
+<em class="property">abstract async </em><code class="sig-name descname">throttled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#BaseThrottleHandler.throttled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.BaseThrottleHandler.throttled" title="Permalink to this definition">¶</a></dt>
+<dd><p>this method will be called by naz everytime we get a throttling response from SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.throttle.SimpleThrottleHandler">
+<em class="property">class </em><code class="sig-prename descclassname">naz.throttle.</code><code class="sig-name descname">SimpleThrottleHandler</code><span class="sig-paren">(</span><em class="sig-param">sampling_period=180.0</em>, <em class="sig-param">sample_size=50.0</em>, <em class="sig-param">deny_request_at=1.0</em>, <em class="sig-param">throttle_wait=3.0</em>, <em class="sig-param">log_handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#SimpleThrottleHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.SimpleThrottleHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.throttle.BaseThrottleHandler" title="naz.throttle.BaseThrottleHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.throttle.BaseThrottleHandler</span></code></a></p>
+<p>This is an implementation of BaseThrottleHandler.</p>
+<p>It works by:</p>
+<ul class="simple">
+<li><p>calculating the percentage of responses from the SMSC that are THROTTLING(or ESME_RMSGQFUL) responses.</p></li>
+<li><p>if that percentage goes above <code class="xref py py-attr docutils literal notranslate"><span class="pre">deny_request_at</span></code> percent AND     total number of responses from SMSC is greater than <code class="xref py py-attr docutils literal notranslate"><span class="pre">sample_size</span></code> over     <code class="xref py py-attr docutils literal notranslate"><span class="pre">sampling_period</span></code> seconds</p></li>
+<li><p>then deny making anymore requests to SMSC</p></li>
+</ul>
+<dl class="method">
+<dt id="naz.throttle.SimpleThrottleHandler.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">sampling_period=180.0</em>, <em class="sig-param">sample_size=50.0</em>, <em class="sig-param">deny_request_at=1.0</em>, <em class="sig-param">throttle_wait=3.0</em>, <em class="sig-param">log_handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#SimpleThrottleHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.SimpleThrottleHandler.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sampling_period</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – the duration in seconds over which we will calculate the percentage of throttled responses.</p></li>
+<li><p><strong>sample_size</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – the minimum number of responses we should have got from SMSC over :sampling_period duration to enable us make a decision.</p></li>
+<li><p><strong>deny_request_at</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – the percent of throtlled responses above which we will deny naz from sending more requests to SMSC.</p></li>
+<li><p><strong>throttle_wait</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – the time in seconds to wait before calling allow_request after the last allow_request that returned False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.SimpleThrottleHandler.allow_request">
+<em class="property">async </em><code class="sig-name descname">allow_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#SimpleThrottleHandler.allow_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.SimpleThrottleHandler.allow_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>this method will be called by naz just before sending a request to SMSC.
+The response from this method will determine wether naz will send the request or not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.SimpleThrottleHandler.not_throttled">
+<em class="property">async </em><code class="sig-name descname">not_throttled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#SimpleThrottleHandler.not_throttled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.SimpleThrottleHandler.not_throttled" title="Permalink to this definition">¶</a></dt>
+<dd><p>this method will be called by naz everytime we get any response from SMSC that is not a throttling response.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.SimpleThrottleHandler.throttle_delay">
+<em class="property">async </em><code class="sig-name descname">throttle_delay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#SimpleThrottleHandler.throttle_delay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.SimpleThrottleHandler.throttle_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>if the last <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.allow_request" title="naz.throttle.BaseThrottleHandler.allow_request"><code class="xref py py-func docutils literal notranslate"><span class="pre">allow_request</span></code></a> method call returned False(thus denying sending a request),
+naz will call the throttle_delay method
+to determine how long in seconds to wait before calling allow_request again.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.throttle.SimpleThrottleHandler.throttled">
+<em class="property">async </em><code class="sig-name descname">throttled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/throttle.html#SimpleThrottleHandler.throttled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.SimpleThrottleHandler.throttled" title="Permalink to this definition">¶</a></dt>
+<dd><p>this method will be called by naz everytime we get a throttling response from SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="sequence.html" title="previous chapter">sequence</a></li>
+      <li>Next: <a href="state.html" title="next chapter">state</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/throttle.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

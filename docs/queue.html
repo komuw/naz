@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>queue &#8212; naz v0.6.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ratelimiter" href="ratelimiter.html" />
+    <link rel="prev" title="nazcodec" href="nazcodec.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-naz.q">
+<span id="queue"></span><h1>queue<a class="headerlink" href="#module-naz.q" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.q.BaseOutboundQueue">
+<em class="property">class </em><code class="sig-prename descclassname">naz.q.</code><code class="sig-name descname">BaseOutboundQueue</code><a class="reference internal" href="_modules/naz/q.html#BaseOutboundQueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.BaseOutboundQueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>This is the interface that must be implemented to satisfy naz’s outbound queue.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.q.BaseOutboundQueue.enqueue" title="naz.q.BaseOutboundQueue.enqueue"><code class="xref py py-func docutils literal notranslate"><span class="pre">enqueue</span></code></a> and <a class="reference internal" href="#naz.q.BaseOutboundQueue.dequeue" title="naz.q.BaseOutboundQueue.dequeue"><code class="xref py py-func docutils literal notranslate"><span class="pre">dequeue</span></code></a> methods with the type signatures shown.</p>
+<p>naz calls an implementation of this class to enqueue and/or dequeue an item.</p>
+<dl class="method">
+<dt id="naz.q.BaseOutboundQueue.dequeue">
+<em class="property">abstract async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#BaseOutboundQueue.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.BaseOutboundQueue.dequeue" title="Permalink to this definition">¶</a></dt>
+<dd><p>dequeue an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>item that was dequeued</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.q.BaseOutboundQueue.enqueue">
+<em class="property">abstract async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#BaseOutboundQueue.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.BaseOutboundQueue.enqueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>enqueue/save an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – The item to be enqueued/saved</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.q.SimpleOutboundQueue">
+<em class="property">class </em><code class="sig-prename descclassname">naz.q.</code><code class="sig-name descname">SimpleOutboundQueue</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.q.BaseOutboundQueue" title="naz.q.BaseOutboundQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.q.BaseOutboundQueue</span></code></a></p>
+<p>This is an in-memory implementation of BaseOutboundQueue.</p>
+<p>Note: It should only be used for tests and demo purposes.</p>
+<dl class="method">
+<dt id="naz.q.SimpleOutboundQueue.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>maxsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the maximum number of items(not size) that can be put in the queue.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.q.SimpleOutboundQueue.dequeue">
+<em class="property">async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue.dequeue" title="Permalink to this definition">¶</a></dt>
+<dd><p>dequeue an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>item that was dequeued</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.q.SimpleOutboundQueue.enqueue">
+<em class="property">async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue.enqueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>enqueue/save an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – The item to be enqueued/saved</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">naz</a></h1>
+
+
+
+<p class="blurb">naz is an async SMPP client.</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=komuw&repo=naz&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/komuw/naz">
+    <img
+    alt="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    src="https://codecov.io/github/komuw/naz/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="nazcodec.html" title="previous chapter">nazcodec</a></li>
+      <li>Next: <a href="ratelimiter.html" title="next chapter">ratelimiter</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Komu Wairagu.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/queue.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
