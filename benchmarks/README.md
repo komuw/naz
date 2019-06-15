@@ -13,9 +13,9 @@ The benchmark was run this way:
 - The ping latency between the `naz` server in Sanfrancisco and the SMSC server in Amsterdam was about `154 ms`    
 - Approximately 100,000 messages were queued on the redis server.   
 - `naz-cli` would consume the messages from the redis queue and send them out to the SMSC.   
-- In a loop; the `SMSC` would run for a duration of between 13-16 minutes stop for a duration of 1-3 minutes then continue etc.
-- In a loop; the `redis server` would run for a duration of between 13-16 minutes stop for a duration of 1-3 minutes then continue etc.
-- All this while, `naz-cli` is still accessing the redis server and SMSC, re-establishing connections when neccessary.
+- In a loop; the `SMSC` would run for a duration of between 13-16 minutes, stop for a duration of 1-3 minutes then continue etc.
+- In a loop; the `redis server` would run for a duration of between 13-16 minutes, stop for a duration of 1-3 minutes then continue etc.
+- All this while, `naz-cli` is accessing the redis server and SMSC; re-establishing connections when neccessary.
 - All logs from `naz` were been sent to a timescaleDB container for later analysis.   
 - Container/host and custom metrics were also been sent to a prometheus container for later analysis.  
 
