@@ -1635,7 +1635,7 @@ class Client:
         self, TESTING: bool = False
     ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
         """
-        In loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
+        In a loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
@@ -1810,7 +1810,7 @@ class Client:
 
     async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
-        In loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
+        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.

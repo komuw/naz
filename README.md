@@ -278,7 +278,7 @@ my_naz_client = naz.Client(
 )
 ```
 
-then run the `naz-cli` as usaul:                
+then run the `naz-cli` as usual:                
 `naz-cli --client tmp.my_config.my_naz_client`    
 And just like that you are good to go. This is what errors from `naz` will look like on sentry(sans the emojis, ofcourse):   
 
