@@ -52,7 +52,6 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
 ]
 

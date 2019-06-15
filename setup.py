@@ -93,7 +93,7 @@ setup(
             "pypandoc",
             "twine",
             "wheel",
-            "Sphinx==2.0.1",
+            "Sphinx==2.1.1",
             "sphinx-autodoc-typehints==1.6.0",
             "redis==3.2.1",
             "pika==1.0.1",
