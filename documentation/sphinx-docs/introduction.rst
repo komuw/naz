@@ -445,3 +445,10 @@ then in your application, queue items to the queue;
             destination_addr="254722999999",
         )
     )
+
+
+
+
+4 Benchmarks
+===============
+Benchmarks can be found `here <https://github.com/komuw/naz/blob/master/benchmarks/README.md>`_ 
