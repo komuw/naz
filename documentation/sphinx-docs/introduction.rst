@@ -292,12 +292,14 @@ another example is if you want to update a database record whenever you get a de
 
 
 3.2.3 integration with bug trackers
-=====================
+======================================
 | If you want to integrate `naz` with your bug/issue/bug tracker of choice, all you have to do is use their logging integrator.   
-| As an example, to integrate ``naz`` with `sentry <https://sentry.io/>`_, all you have to do is import and init the sentry sdk. A good place to do that would be in the naz config file, ie;  
+| As an example, to integrate ``naz`` with `sentry <https://sentry.io/>`_, all you have to do is import and init the sentry sdk. A good place to do that would be in the naz config file, ie;
+
 ``/tmp/my_config.py``
 
 .. code-block:: python
+
     import naz
     from myfile import ExampleQueue
 
@@ -310,7 +312,8 @@ another example is if you want to update a database record whenever you get a de
         system_id="smppclient1",
         password="password",
         outboundqueue=ExampleQueue()
-)
+    )
+
 
 | then run the `naz-cli` as usaul:                
 | ``naz-cli --client tmp.my_config.my_naz_client``    
