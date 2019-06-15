@@ -74,8 +74,8 @@ naz is in active development and it's API may change in backward incompatible wa
 
 NB:
 
-* (a) For more information about all the parameters that `naz.Client` can take, consult the `documentation here <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
-* (b) More examples can be found `here <https://github.com/komuw/naz/tree/master/examples>`_ 
+* (a) For more information about all the parameters that `naz.Client` can take, consult the `docs <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
+* (b) More examples can be `found here <https://github.com/komuw/naz/tree/master/examples>`_ 
 * (c) if you need an SMSC server/gateway to test with, you can use the `docker-compose <https://github.com/komuw/naz/blob/master/docker-compose.yml>`_ file in the ``naz`` repo to bring up an SMSC simulator.
       That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your `naz.q.BaseOutboundQueue`.
 
@@ -122,8 +122,8 @@ then run:
 
 NB:
 
-* (a) For more information about the naz config file, consult the `documentation here <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
-* (b) More examples can be found `here <https://github.com/komuw/naz/tree/master/examples>`_ 
+* (a) For more information about the naz config file, consult the `documentation <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
+* (b) More examples can be found; `examples <https://github.com/komuw/naz/tree/master/examples>`_ 
       As an example, start the SMSC simulator(``docker-compose up``) then in another terminal run, 
       ``naz-cli --client examples.example_config.client``
 
@@ -385,7 +385,7 @@ You can implement the queuing mechanism any way you like, so long as it satisfie
         "destination_addr": string
     }
 
-For more information about all the parameters that are needed in the enqueued json object, consult the `documentation <https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol>`_ 
+For more information about all the parameters that are needed in the enqueued json object, `consult the documentation <https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol>`_ 
 
 | naz ships with a simple queue implementation called ``naz.q.SimpleOutboundQueue``
 | **NB:** ``naz.q.SimpleOutboundQueue`` should only be used for demo/test purposes.
@@ -451,4 +451,4 @@ then in your application, queue items to the queue;
 
 4 Benchmarks
 ===============
-Benchmarks can be found `here <https://github.com/komuw/naz/blob/master/benchmarks/README.md>`_ 
+Benchmarks can be found; `benchmarks <https://github.com/komuw/naz/blob/master/benchmarks/README.md>`_ 
