@@ -27,6 +27,7 @@ def display_top_allocators(snapshot, key_type="lineno", limit=15):
             tracemalloc.Filter(False, filename_pattern="<frozen importlib._bootstrap_external>"),
             tracemalloc.Filter(False, filename_pattern="<unknown>"),
             tracemalloc.Filter(False, filename_pattern="*json/encoder*"),
+            tracemalloc.Filter(False, filename_pattern="*json/decoder*"),
             # import fnmatch
             # fnmatch.fnmatch('/lib/python3.7/json/encoder.py', '*json/encoder*')
             # see https://pymotw.com/3/fnmatch/
@@ -36,6 +37,7 @@ def display_top_allocators(snapshot, key_type="lineno", limit=15):
             tracemalloc.Filter(False, filename_pattern="*stringprep.py"),
             tracemalloc.Filter(False, filename_pattern="*threading.py"),
             tracemalloc.Filter(False, filename_pattern="*traceback.py"),
+            tracemalloc.Filter(False, filename_pattern="*urllib/request*"),
         )
     )
     top_stats = snapshot.statistics(key_type)
