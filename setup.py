@@ -95,6 +95,7 @@ setup(
             "wheel",
             "Sphinx==2.1.1",
             "sphinx-autodoc-typehints==1.6.0",
+            "sphinx-rtd-theme==0.4.3",  # naz sphinx docs theme
             "redis==3.2.1",
             "pika==1.0.1",
         ],
