@@ -4,7 +4,8 @@ import naz
 
 from my_hook import BenchmarksHook
 from redis_queue import MyRedisQueue
-from my_logger import BenchmarksLogger
+
+# from my_logger import BenchmarksLogger
 
 # run as:
 #   naz-cli --client benchmarks.app.my_naz_client
@@ -16,11 +17,11 @@ my_naz_client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password=os.environ["SMSC_PASSWORD"],
-    loglevel="DEBUG",
+    loglevel="WARNING",
     log_metadata={"project": "naz_benchmarks"},
     outboundqueue=MyRedisQueue(),
     hook=BenchmarksHook(),
-    log_handler=BenchmarksLogger("naz.client"),
+    # log_handler=BenchmarksLogger("naz.client"),
     socket_timeout=15.00,
     enquire_link_interval=80.00,
     address_range="^{0}".format(
