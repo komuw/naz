@@ -38,5 +38,6 @@ test:
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
 
+# note `.nojekyll` file is important inside `docs/` folder
 sphinx:
 	@sphinx-build -a -E documentation/sphinx-docs/ docs/
