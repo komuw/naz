@@ -19,6 +19,8 @@ most recent version is listed first.
   - fixed a potential memory leak bug in `naz.correlater.SimpleCorrelater`
   - added a configurable `connection_timeout` which is the duration that `naz` will wait, for connection related activities with SMSC, before timing out.
   - `naz` is now able to re-establish connection and re-bind if the connection between it and SMSC is disconnected.  
+- renamed `connection_timeout` to `socket_timeout`: https://github.com/komuw/naz/pull/141
+- added benchmarks results: https://github.com/komuw/naz/pull/141
 
 
 ## **version:** v0.6.0-beta.1

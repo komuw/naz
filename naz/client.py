@@ -1,6 +1,7 @@
 import os
 import struct
 import random
+import socket
 import string
 import typing
 import asyncio
@@ -109,7 +110,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
-        connection_timeout: float = 30.0,
+        socket_timeout: float = 30.0,
     ) -> None:
         """
         Parameters:
@@ -153,7 +154,7 @@ class Client:
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
-            connection_timeout: duration that `naz` will wait, for connection related activities with SMSC, before timing out
+            socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out
         """
         self._validate_client_args(
             smsc_host=smsc_host,
@@ -193,7 +194,7 @@ class Client:
             throttle_handler=throttle_handler,
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
-            connection_timeout=connection_timeout,
+            socket_timeout=socket_timeout,
         )
 
         self._PID = os.getpid()
@@ -352,7 +353,7 @@ class Client:
         self.current_session_state = SmppSessionState.CLOSED
 
         self.drain_duration = drain_duration
-        self.connection_timeout = connection_timeout
+        self.socket_timeout = socket_timeout
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
@@ -395,7 +396,7 @@ class Client:
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
-        connection_timeout: float,
+        socket_timeout: float,
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -688,11 +689,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(connection_timeout, float):
+        if not isinstance(socket_timeout, float):
             errors.append(
                 ValueError(
-                    "`connection_timeout` should be of type:: `float` You entered: {0}".format(
-                        type(connection_timeout)
+                    "`socket_timeout` should be of type:: `float` You entered: {0}".format(
+                        type(socket_timeout)
                     )
                 )
             )
@@ -780,7 +781,7 @@ class Client:
         self.reader: asyncio.streams.StreamReader = reader
         self.writer: asyncio.streams.StreamWriter = writer
         sock = self.writer.get_extra_info("socket")
-        sock.settimeout(self.connection_timeout)
+        sock.settimeout(self.socket_timeout)
         # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
         # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
         # https://docs.python.org/3.6/library/socket.html#notes-on-socket-timeouts
@@ -893,7 +894,7 @@ class Client:
         # sleep during startup so that `naz` can have had time to connect & bind
         # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.connection_timeout / 5
+            retry_after = self.socket_timeout / 5
             self._log(
                 logging.DEBUG,
                 {
@@ -1258,7 +1259,7 @@ class Client:
             },
         )
 
-    async def build_submit_sm_pdu(
+    async def _build_submit_sm_pdu(
         self, short_message, log_id, hook_metadata, source_addr, destination_addr
     ) -> bytes:
         """
@@ -1275,7 +1276,7 @@ class Client:
         self._log(
             logging.DEBUG,
             {
-                "event": "naz.Client.build_submit_sm_pdu",
+                "event": "naz.Client._build_submit_sm_pdu",
                 "stage": "start",
                 "log_id": log_id,
                 "short_message": short_message,
@@ -1331,7 +1332,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.build_submit_sm_pdu",
+                    "event": "naz.Client._build_submit_sm_pdu",
                     "stage": "end",
                     "error": str(e),
                     "log_id": log_id,
@@ -1357,7 +1358,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.build_submit_sm_pdu",
+                    "event": "naz.Client._build_submit_sm_pdu",
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
@@ -1371,7 +1372,7 @@ class Client:
         self._log(
             logging.DEBUG,
             {
-                "event": "naz.Client.build_submit_sm_pdu",
+                "event": "naz.Client._build_submit_sm_pdu",
                 "stage": "end",
                 "log_id": log_id,
                 "short_message": short_message,
@@ -1419,7 +1420,15 @@ class Client:
             # 2. re-bind
             await self.connect(log_id=log_id)
             await self.tranceiver_bind(log_id=log_id)
-        except (ConnectionError, asyncio.TimeoutError) as e:
+        except (
+            ConnectionError,
+            TimeoutError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
             self._log(
                 logging.ERROR,
                 {
@@ -1585,7 +1594,16 @@ class Client:
                 # hack!! bad!!
                 # TODO: fix this
                 self.current_session_state = SmppSessionState.BOUND_TRX
-        except (ConnectionError, asyncio.TimeoutError) as e:
+        except (
+            ConnectionError,
+            TimeoutError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
+            # https://docs.python.org/3.6/library/socket.html#exceptions
             self._log(
                 logging.ERROR,
                 {
@@ -1636,7 +1654,7 @@ class Client:
                 # If the connection to SMSC is broken, there's no need to try and send messages
                 # sleep and wait for `Client.re_establish_conn_bind` to do its thing.
                 # this same thing cannot be done for `enquire_link` since we rely on it to kick on `re_establish_conn_bind`
-                retry_after = self.connection_timeout
+                retry_after = self.socket_timeout
                 self._log(
                     logging.INFO,
                     {
@@ -1719,14 +1737,14 @@ class Client:
                         short_message = item_to_dequeue["short_message"]
                         source_addr = item_to_dequeue["source_addr"]
                         destination_addr = item_to_dequeue["destination_addr"]
-                        full_pdu = await self.build_submit_sm_pdu(
+                        full_pdu = await self._build_submit_sm_pdu(
                             short_message, log_id, hook_metadata, source_addr, destination_addr
                         )
                     else:
                         full_pdu = item_to_dequeue["pdu"]
                 except KeyError as e:
                     e = KeyError(
-                        "enqueued message/object is missing required field:{}".format(str(e))
+                        "enqueued message/object is missing required field: {}".format(str(e))
                     )
                     self._log(
                         logging.ERROR,
@@ -1817,7 +1835,15 @@ class Client:
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
                 command_length_header_data = await self.reader.read(4)
-            except (ConnectionError, asyncio.TimeoutError) as e:
+            except (
+                ConnectionError,
+                TimeoutError,
+                asyncio.TimeoutError,
+                socket.error,
+                socket.herror,
+                socket.gaierror,
+                socket.timeout,
+            ) as e:
                 self._log(
                     logging.ERROR,
                     {
@@ -1866,7 +1892,15 @@ class Client:
                         # TODO: maybe we also need todo; `self.writer=None`
                         # so that the `re_establish_conn_bind` mechanism can kick in.
                         raise ConnectionError("socket connection broken")
-                except (ConnectionError, asyncio.TimeoutError) as e:
+                except (
+                    ConnectionError,
+                    TimeoutError,
+                    asyncio.TimeoutError,
+                    socket.error,
+                    socket.herror,
+                    socket.gaierror,
+                    socket.timeout,
+                ) as e:
                     self._log(
                         logging.ERROR,
                         {
@@ -2324,10 +2358,29 @@ class Client:
             assert isinstance(self.writer, asyncio.streams.StreamWriter)
             assert isinstance(self.writer.transport, asyncio.transports.Transport)
 
-        # see: https://github.com/komuw/naz/issues/117
-        self.writer.transport.set_write_buffer_limits(0)
-        await self.writer.drain()
-        self.writer.close()
+        try:
+            # see: https://github.com/komuw/naz/issues/117
+            self.writer.transport.set_write_buffer_limits(0)
+            await self.writer.drain()
+            self.writer.close()
+        except (
+            ConnectionError,
+            TimeoutError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.shutdown",
+                    "stage": "end",
+                    "state": "unable to write to SMSC",
+                    "error": str(e),
+                },
+            )
 
         # sleep so that client can:
         # - stop consuming from queue

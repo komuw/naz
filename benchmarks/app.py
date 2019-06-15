@@ -21,7 +21,7 @@ my_naz_client = naz.Client(
     outboundqueue=MyRedisQueue(),
     hook=BenchmarksHook(),
     log_handler=BenchmarksLogger("naz.client"),
-    connection_timeout=15.00,
+    socket_timeout=15.00,
     enquire_link_interval=80.00,
     address_range="^{0}".format(
         country_code

@@ -23,7 +23,7 @@ apt -y install docker-ce && \
 usermod -aG docker $(whoami) && \
 pip install -U docker-compose
 
-wget https://github.com/komuw/naz/archive/issues/103.zip && \
+wget https://github.com/komuw/naz/archive/master.zip && \
 unzip master.zip && \
 mv naz-master/ naz && \
 cd naz/benchmarks

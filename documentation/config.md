@@ -60,7 +60,7 @@ hook | python class instance implemeting functionality/hooks to be called by `na
 throttle_handler | python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC | naz.throttle.SimpleThrottleHandler
 correlation_handler | A python class instance that naz uses to store relations between SMPP sequence numbers and user applications' log_id's and/or hook_metadata. | naz.correlater.SimpleCorrelater
 drain_duration | duration in seconds that `naz` will wait for after receiving a termination signal. | 8.00   
-connection_timeout | duration that `naz` will wait, for connection related activities with SMSC, before timing out | 30.00     
+socket_timeout | duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out | 30.00     
 
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
