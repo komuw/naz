@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz - naz is an async SMPP client. &mdash; naz v0.6.1 documentation</title>
+  <title>Demo of naz &mdash; naz v0.6.1 documentation</title>
   
 
   
@@ -34,8 +34,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction to naz" href="introduction.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,7 +48,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> naz
+            <a href="index.html" class="icon icon-home"> naz
           
 
           
@@ -85,7 +84,6 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of naz</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -112,7 +110,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">naz</a>
+          <a href="index.html">naz</a>
         
       </nav>
 
@@ -141,15 +139,15 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="#">Docs</a> &raquo;</li>
+      <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>naz - naz is an async SMPP client.</li>
+      <li>Demo of naz</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/demo.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -162,50 +160,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="naz-naz-is-an-async-smpp-client">
-<h1>naz - naz is an async SMPP client.<a class="headerlink" href="#naz-naz-is-an-async-smpp-client" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="contents">
-<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#installation">1 Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#usage">2 Usage</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#as-a-library">2.1 As a library</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#as-a-cli-app">2.2 As a cli app</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#features">3 Features</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#async-everywhere">3.1 async everywhere</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#monitoring-and-observability">3.2 monitoring and observability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#logging">3.2.1 logging</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#hooks">3.2.2 hooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#integration-with-bug-trackers">3.2.3 integration with bug trackers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#rate-limiting">3.3 Rate limiting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#throttle-handling">3.4 Throttle handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#queuing">3.5 Queuing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#benchmarks">4 Benchmarks</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of naz</a></li>
-</ul>
-</div>
-</div>
-<div class="section" id="api-reference">
-<h2>API reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
-<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
-<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="logger.html">logger</a></li>
-</ul>
-</div>
-</div>
+  <div class="section" id="demo-of-naz">
+<h1>Demo of naz<a class="headerlink" href="#demo-of-naz" title="Permalink to this headline">¶</a></h1>
+<p>naz is an async SMPP client.
+It’s name is derived from Kenyan hip hop artiste, Nazizi.</p>
 </div>
 
 
@@ -213,13 +171,6 @@
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction to naz" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-    </div>
   
 
   <hr/>

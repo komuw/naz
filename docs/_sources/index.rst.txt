@@ -10,6 +10,8 @@ Contents
 
     introduction
 
+    example_demo
+
 API reference
 =============
 .. toctree::
