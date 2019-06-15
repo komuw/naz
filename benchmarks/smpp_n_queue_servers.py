@@ -141,6 +141,7 @@ if __name__ == "__main__":
         labels={"name": "redis_server", "use": "running_naz_benchmarks"},
         ports={"6379/tcp": 6379},
         command="redis-server --requirepass {0}".format(os.environ["REDIS_PASSWORD"]),
+        chaos=False,
     )
     redis_thread = threading.Thread(
         target=RedisServer.runner, name="Thread-<redis_naz_benchmarks_server>", daemon=True
@@ -152,5 +153,6 @@ if __name__ == "__main__":
         container_name="naz_benchmarks_SmppServer",
         labels={"name": "smpp_server", "use": "running_naz_benchmarks"},
         ports={"2775/tcp": 2775, "8884/tcp": 8884},
+        chaos=False,
     )
     SmppServer.runner()
