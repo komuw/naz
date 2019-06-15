@@ -33,6 +33,7 @@ class SimpleRateLimiter(BaseRateLimiter):
 
     example usage:
 
+    .. highlight:: python
     .. code-block:: python
 
         rateLimiter = SimpleRateLimiter(send_rate=10)

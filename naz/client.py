@@ -32,6 +32,7 @@ class Client:
 
     Example declaration:
 
+    .. highlight:: python
     .. code-block:: python
 
         import os
@@ -155,6 +156,9 @@ class Client:
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
             socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out
+
+        Raises:
+            NazClientError: raised if there’s an error instantiating a naz Client.
         """
         self._validate_client_args(
             smsc_host=smsc_host,
@@ -2392,7 +2396,7 @@ class Client:
 
 class NazClientError(Exception):
     """
-    Error raised when there's an error instanciating a naz Client.
+    Error raised when there's an error instantiating a naz Client.
     """
 
     pass
