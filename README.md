@@ -35,7 +35,9 @@ naz is in active development and it's API may change in backward incompatible wa
     + [integration with bug trackers(eg Sentry )](#23-integration-with-bug-trackers)
   + [Rate limiting](#3-rate-limiting)            
   + [Throttle handling](#4-throttle-handling)            
-  + [Queuing](#5-queuing)            
+  + [Queuing](#5-queuing)      
+      
+[Benchmarks](./benchmarks/README.md)
 
 
 ## Installation
