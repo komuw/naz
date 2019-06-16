@@ -34,7 +34,7 @@ def make_parser():
     parser.add_argument(
         "--client",
         required=True,
-        help="The dotted path to a python file conatining a `naz.Client` instance. \
+        help="The dotted path to a `naz.Client` instance. \
         eg: --client dotted.path.to.a.naz.Client.class.instance",
     )
     parser.add_argument(
