@@ -34,7 +34,7 @@ def make_parser():
     parser.add_argument(
         "--client",
         required=True,
-        help="The dotted path to a python file conatining a `naz.Client` instance. \
+        help="The dotted path to a `naz.Client` instance. \
         eg: --client dotted.path.to.a.naz.Client.class.instance",
     )
     parser.add_argument(
@@ -51,18 +51,20 @@ def make_parser():
 
 def main():
     """
+    entrypoint of naz-cli app.
     """
+    parser = make_parser()
+    args = parser.parse_args()
+    dry_run = args.dry_run
+    client = args.client
+
     _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
     logger = naz.logger.SimpleLogger("naz.cli")
-    logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
-    logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "start", "client_id": _client_id})
-
-    loop = asyncio.get_event_loop()
     try:
-        parser = make_parser()
-        args = parser.parse_args()
-        dry_run = args.dry_run
-        client = args.client
+        logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
+        logger.log(
+            logging.INFO, {"event": "naz.cli.main", "stage": "start", "client_id": _client_id}
+        )
         client = load.load_class(dotted_path=client, logger=logger)
         if dry_run:
             logger.log(
@@ -84,6 +86,7 @@ def main():
         if dry_run:
             return
         # call naz api
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(
             async_main(client=client, logger=logger, loop=loop, dry_run=dry_run)
         )

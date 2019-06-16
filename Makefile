@@ -10,6 +10,7 @@ upload:
 
 VERSION_STRING=$$(cat naz/__version__.py | grep "__version__" | sed -e 's/"__version__"://' | sed -e 's/,//g' | sed -e 's/"//g' | sed -e 's/ //g')
 uploadprod:
+	@printf "\n building sphinx documentation \n" && sphinx-build -a -E documentation/sphinx-docs/ docs/
 	@rm -rf build
 	@rm -rf dist
 	@sudo rm -rf naz.egg-info
@@ -38,5 +39,6 @@ test:
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
 
+# note `.nojekyll` file is important inside `docs/` folder
 sphinx:
-	@sphinx-build -a -E documentation/sphinx-docs/ sphinx-build
+	@sphinx-build -a -E documentation/sphinx-docs/ docs/

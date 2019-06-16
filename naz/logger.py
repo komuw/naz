@@ -46,6 +46,7 @@ class SimpleLogger(BaseLogger):
 
     example usage:
 
+    .. highlight:: python
     .. code-block:: python
 
         logger = SimpleLogger("myLogger")

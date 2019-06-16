@@ -211,6 +211,7 @@ class SimpleNazCodec(BaseNazCodec):
 
     example usage:
 
+    .. highlight:: python
     .. code-block:: python
 
        ncodec = SimpleNazCodec()

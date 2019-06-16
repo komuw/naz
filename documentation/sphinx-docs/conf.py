@@ -44,6 +44,7 @@ release = about["__version__"]
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+
 extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
@@ -52,7 +53,8 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
-    "sphinx.ext.napoleon",
+    "sphinx.ext.imgmath",
+    "sphinx.ext.napoleon",  # neccesary
     "sphinx_autodoc_typehints",
 ]
 
@@ -89,27 +91,16 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+html_theme = "sphinx_rtd_theme"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
 # html_theme_options = {}
-# see: https://github.com/bitprophet/alabaster/blob/master/docs/customization.rst
-html_theme_options = {
-    "description": "naz is an async SMPP client.",
-    "github_banner": False,
-    "travis_button": False,  # see: https://github.com/bitprophet/alabaster/pull/147
-    "badge_branch": "master",
-    "codecov_button": True,
-    "show_related": True,
-    "github_user": "komuw",
-    "pre_bg": "#4c4c4c",
-    "github_repo": "naz",
-    "github_type": "star",
-    "github_button": True,
-}
+# see: https://sphinx-rtd-theme.readthedocs.io/en/latest/configuring.html
+html_theme_options = {"display_version": True, "canonical_url": "https://komuw.github.io/naz/"}
+
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

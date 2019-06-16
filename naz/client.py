@@ -32,6 +32,7 @@ class Client:
 
     Example declaration:
 
+    .. highlight:: python
     .. code-block:: python
 
         import os
@@ -155,6 +156,9 @@ class Client:
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
             socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out
+
+        Raises:
+            NazClientError: raised if there’s an error instantiating a naz Client.
         """
         self._validate_client_args(
             smsc_host=smsc_host,
@@ -1631,7 +1635,7 @@ class Client:
         self, TESTING: bool = False
     ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
         """
-        In loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
+        In a loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
@@ -1806,7 +1810,7 @@ class Client:
 
     async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
         """
-        In loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
+        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
@@ -2392,7 +2396,7 @@ class Client:
 
 class NazClientError(Exception):
     """
-    Error raised when there's an error instanciating a naz Client.
+    Error raised when there's an error instantiating a naz Client.
     """
 
     pass

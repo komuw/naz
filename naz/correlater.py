@@ -69,6 +69,7 @@ class SimpleCorrelater(BaseCorrelater):
 
      The storage is done in memory using a python dictionary. The storage looks like:
 
+    .. highlight:: python
     .. code-block:: python
 
        {

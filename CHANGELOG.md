@@ -21,6 +21,7 @@ most recent version is listed first.
   - `naz` is now able to re-establish connection and re-bind if the connection between it and SMSC is disconnected.  
 - renamed `connection_timeout` to `socket_timeout`: https://github.com/komuw/naz/pull/141
 - added benchmarks results: https://github.com/komuw/naz/pull/141
+- updated documentation and moved it to [komuw.github.io/naz](https://komuw.github.io/naz/); https://github.com/komuw/naz/pull/146
 
 
 ## **version:** v0.6.0-beta.1
