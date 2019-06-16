@@ -5,9 +5,6 @@
 [![codecov](https://codecov.io/gh/komuw/naz/branch/master/graph/badge.svg)](https://codecov.io/gh/komuw/naz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/komuw/naz)
 
- 
-Comprehensive documetion is available -> [Documentation](https://komuw.github.io/naz)
-
 
 naz is an async SMPP client.           
 It's name is derived from Kenyan hip hop artiste, Nazizi.                             
@@ -20,6 +17,10 @@ naz has no third-party dependencies and it requires python version 3.6+
 
 naz is in active development and it's API may change in backward incompatible ways.               
 [https://pypi.python.org/pypi/naz](https://pypi.python.org/pypi/naz)                 
+
+
+Comprehensive documetion is available -> [Documentation](https://komuw.github.io/naz)
+
 
 **Contents:**          
 [Installation](#installation)         
