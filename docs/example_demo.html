@@ -168,8 +168,105 @@
   <div class="section" id="example-demo-of-using-naz">
 <h1>Example demo of using naz<a class="headerlink" href="#example-demo-of-using-naz" title="Permalink to this headline">¶</a></h1>
 <div class="line-block">
-<div class="line">In this demo, we will see how to use <cite>naz</cite>.</div>
-<div class="line">blah blah</div>
+<div class="line">In this demo, we will see how to use <code class="docutils literal notranslate"><span class="pre">naz</span></code>.</div>
+</div>
+<div class="line-block">
+<div class="line">We are going to start off on an empty directory</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /tmp/demo_naz/ <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> /tmp/demo_naz
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">Next we install <code class="docutils literal notranslate"><span class="pre">naz</span></code> and confirm that it is installed</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install naz <span class="o">&amp;&amp;</span> <span class="se">\</span>
+naz-cli --version
+  naz v0.6.1
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">In order to use <code class="docutils literal notranslate"><span class="pre">naz</span></code>, we need to have a place where messages are going to be stored before been submitted to the SMSC.</div>
+<div class="line">Messages are stored in a queue in <code class="docutils literal notranslate"><span class="pre">naz</span></code>. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), <code class="docutils literal notranslate"><span class="pre">naz</span></code> is queue agnostic.</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> will happily use any queue/broker so long as its implementation in software satisfies <code class="docutils literal notranslate"><span class="pre">naz</span></code>’s <a class="reference external" href="https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue">queueing interface</a></div>
+<div class="line">For this demo we will use redis as our queue of choice. So lets start a redis server, we will use docker for that;</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -p <span class="m">6379</span>:6379 redis:5.0-alpine
+  Redis is starting
+  Ready to accept connections
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">redis server is running a docker container and it is available for connection on the host at <code class="docutils literal notranslate"><span class="pre">localhost:6379</span></code></div>
+<div class="line">Now we need a way for <code class="docutils literal notranslate"><span class="pre">naz</span></code> to be able to communicate with the redis server, ie we need to implemnet <code class="docutils literal notranslate"><span class="pre">naz</span></code>’s <a class="reference external" href="https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue">queueing interface</a> for our redis server.</div>
+<div class="line">Let’s do that, we’ll create a file called <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_queue.py</span></code></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">import</span> <span class="nn">aioredis</span>  <span class="c1"># pip install aioredis</span>
+
+
+<span class="k">class</span> <span class="nc">MyRedisQueue</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">BaseOutboundQueue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    use redis as our queue.</span>
+<span class="sd">    This is an implementation of the `naz.q.BaseOutboundQueue` interface</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="mi">6379</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># use a password in prod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span> <span class="o">=</span> <span class="s2">&quot;naz_benchmarks_queue&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">_get_redis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span> <span class="o">=</span> <span class="n">await</span> <span class="n">aioredis</span><span class="o">.</span><span class="n">create_redis_pool</span><span class="p">(</span>
+            <span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">),</span>
+            <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="n">minsize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">maxsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
+
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="n">_redis</span> <span class="o">=</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
+        <span class="n">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">lpush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_redis</span> <span class="o">=</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="n">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">brpop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+                <span class="n">dequed_item</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+                <span class="k">return</span> <span class="n">dequed_item</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">With that we are now ready to have <code class="docutils literal notranslate"><span class="pre">naz</span></code> communicating with redis.</div>
+<div class="line">Now what we need is an smpp client to talk to SMSC. <code class="docutils literal notranslate"><span class="pre">naz</span></code> is that client, but we need to instantiate a class instance of <a class="reference external" href="https://komuw.github.io/naz/client.html#naz.client.Client">naz Client</a></div>
+<div class="line">Lets do that in a file called <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_client.py</span></code></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">from</span> <span class="nn">my_queue</span> <span class="kn">import</span> <span class="n">MyRedisQueue</span>
+
+<span class="n">my_naz_client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+    <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
+    <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">MyRedisQueue</span><span class="p">(),</span>
+<span class="p">)</span>
+</pre></div>
 </div>
 </div>
 
