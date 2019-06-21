@@ -948,3 +948,15 @@ class TestClient(TestCase):
             self.assertTrue(mock_hook_response.mock.called)
             self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
             self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+
+    def test_protocol_error(self):
+        """
+        tests that if we read bytes from connection and naz is unable to parse them,
+        it should close connection.
+        https://github.com/komuw/naz/issues/135
+        """
+        with mock.patch(
+            "naz.Client._unbind_and_disconnect", new=AsyncMock()
+        ) as mock_naz_unbind_and_disconnect:
+            self._run(self.cli._parse_response_pdu(pdu=b"\x00\x00\x00\x15\x80"))
+            self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)

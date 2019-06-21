@@ -772,6 +772,23 @@ class Client:
         else:
             return 60 * (1 * (2 ** current_retries))
 
+    def _msg_to_log(self, msg: bytes) -> str:
+        """
+        returns decoded string from bytes with any password removed.
+        the returned string is safe to log.
+        """
+        log_msg = ""
+        try:
+            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
+            if self.password in log_msg:
+                # do not log password, redact it from logs.
+                log_msg = log_msg.replace(self.password, "{REDACTED}")
+        except UnicodeDecodeError:
+            log_msg = str(msg)
+        except Exception:
+            pass
+        return log_msg
+
     async def connect(
         self, log_id: str = ""
     ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
@@ -1467,14 +1484,7 @@ class Client:
 
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
-        log_msg = ""
-        try:
-            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
-            # do not log password, redact it from logs.
-            if self.password in log_msg:
-                log_msg = log_msg.replace(self.password, "{REDACTED}")
-        except Exception:
-            pass
+        log_msg = self._msg_to_log(msg=msg)
         self._log(
             logging.INFO,
             {
@@ -1940,7 +1950,7 @@ class Client:
                 {
                     "event": "naz.Client.receive_data",
                     "stage": "end",
-                    "full_pdu_data": full_pdu_data,
+                    "full_pdu_data": self._msg_to_log(msg=full_pdu_data),
                 },
             )
             await self._parse_response_pdu(full_pdu_data)
@@ -1957,7 +1967,11 @@ class Client:
         Parameters:
             pdu: PDU in bytes, that have been read from network
         """
-        self._log(logging.DEBUG, {"event": "naz.Client._parse_response_pdu", "stage": "start"})
+        log_pdu = self._msg_to_log(msg=pdu)
+        self._log(
+            logging.DEBUG,
+            {"event": "naz.Client._parse_response_pdu", "stage": "start", "pdu": log_pdu},
+        )
 
         header_data = pdu[:16]
         body_data = pdu[16:]
@@ -1978,7 +1992,7 @@ class Client:
                     "stage": "end",
                     "state": "parse SMSC response error.",
                     "error": str(e),
-                    "pdu": str(pdu),  # TODO: maybe stringfy this
+                    "pdu": log_pdu,
                 },
             )
             # close connection
