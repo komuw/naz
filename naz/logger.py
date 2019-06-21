@@ -67,7 +67,6 @@ class SimpleLogger(BaseLogger):
             )
 
         self.logger_name = logger_name
-        self.logger: typing.Any = None
 
     def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
         level = self._nameToLevel(level=level)

@@ -782,8 +782,8 @@ class Client:
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id})
         reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
-        self.reader: asyncio.streams.StreamReader = reader
-        self.writer: asyncio.streams.StreamWriter = writer
+        self.reader = reader
+        self.writer = writer
         sock = self.writer.get_extra_info("socket")
         sock.settimeout(self.socket_timeout)
         # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
@@ -1987,14 +1987,14 @@ class Client:
 
         smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
-            e = ValueError("command_id:{0} is unknown.".format(command_id))
+            err = ValueError("command_id:{0} is unknown.".format(command_id))
             self._log(
                 logging.ERROR,
                 {
                     "event": "naz.Client._parse_response_pdu",
                     "stage": "end",
                     "state": "command_id:{0} is unknown.".format(command_id),
-                    "error": str(e),
+                    "error": str(err),
                 },
             )
             return None
