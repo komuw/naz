@@ -1965,9 +1965,23 @@ class Client:
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
 
-        command_id = struct.unpack(">I", command_id_header_data)[0]
-        command_status = struct.unpack(">I", command_status_header_data)[0]
-        sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
+        try:
+            command_id = struct.unpack(">I", command_id_header_data)[0]
+            command_status = struct.unpack(">I", command_status_header_data)[0]
+            sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
+        except (struct.error, IndexError) as e:
+            # TODO: close connection
+            # see: https://github.com/komuw/naz/issues/135
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client._parse_response_pdu",
+                    "stage": "end",
+                    "state": "parse SMSC response error.",
+                    "error": str(e),
+                    "pdu": pdu,  # TODO: maybe stringfy this
+                },
+            )
 
         smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
@@ -1977,7 +1991,6 @@ class Client:
                 {
                     "event": "naz.Client._parse_response_pdu",
                     "stage": "end",
-                    "log_id": "",
                     "state": "command_id:{0} is unknown.".format(command_id),
                     "error": str(e),
                 },
