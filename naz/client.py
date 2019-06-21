@@ -1983,6 +1983,7 @@ class Client:
             )
             # close connection
             await self.shutdown()
+            return None
 
         smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
