@@ -1970,7 +1970,6 @@ class Client:
             command_status = struct.unpack(">I", command_status_header_data)[0]
             sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
         except (struct.error, IndexError) as e:
-            # TODO: close connection
             # see: https://github.com/komuw/naz/issues/135
             self._log(
                 logging.ERROR,
@@ -1982,6 +1981,8 @@ class Client:
                     "pdu": pdu,  # TODO: maybe stringfy this
                 },
             )
+            # close connection
+            await self.shutdown()
 
         smpp_command = self._search_by_command_id_code(command_id)
         if not smpp_command:
