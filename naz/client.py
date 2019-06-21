@@ -2367,18 +2367,22 @@ class Client:
         )
         self.SHOULD_SHUT_DOWN = True
 
-        # we need to unbind first before closing writer
-        await self.unbind()
-
         if typing.TYPE_CHECKING:
             # make mypy happy; https://github.com/python/mypy/issues/4805
             assert isinstance(self.writer, asyncio.streams.StreamWriter)
             assert isinstance(self.writer.transport, asyncio.transports.Transport)
-
         try:
+            # 1. set buffers to 0
+            # 2. unbind
+            # 3. drain
+            # 4. close connection
+            # in that order
+
             # see: https://github.com/komuw/naz/issues/117
             self.writer.transport.set_write_buffer_limits(0)
-            await self.writer.drain()
+            await self.unbind()
+            async with self.drain_lock:
+                await self.writer.drain()
             self.writer.close()
         except (
             ConnectionError,
