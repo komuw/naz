@@ -1978,11 +1978,11 @@ class Client:
                     "stage": "end",
                     "state": "parse SMSC response error.",
                     "error": str(e),
-                    "pdu": pdu,  # TODO: maybe stringfy this
+                    "pdu": str(pdu),  # TODO: maybe stringfy this
                 },
             )
             # close connection
-            await self.shutdown()
+            await self._unbind_and_disconnect()
             return None
 
         smpp_command = self._search_by_command_id_code(command_id)
@@ -2369,6 +2369,25 @@ class Client:
         )
         self.SHOULD_SHUT_DOWN = True
 
+        await self._unbind_and_disconnect()
+
+        # sleep so that client can:
+        # - stop consuming from queue
+        # - finish sending any SMSes it may have already picked from queue
+        # - stop sending `enquire_link` requests
+        # - send unbind to SMSC
+        await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
+        self._log(logging.DEBUG, {"event": "naz.Client.shutdown", "stage": "end"})
+
+    async def _unbind_and_disconnect(self):
+        """
+        unbind from SMSC and close network connection.
+        This is usually done in two situations;
+          - when shutting down a naz client
+          - if we got into an unrecoverable state and need to start over; issues/135
+        """
+        self._log(logging.DEBUG, {"event": "naz.Client._unbind_and_disconnect", "stage": "start"})
+
         if typing.TYPE_CHECKING:
             # make mypy happy; https://github.com/python/mypy/issues/4805
             assert isinstance(self.writer, asyncio.streams.StreamWriter)
@@ -2398,19 +2417,13 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.shutdown",
+                    "event": "naz.Client._unbind_and_disconnect",
                     "stage": "end",
                     "state": "unable to write to SMSC",
                     "error": str(e),
                 },
             )
-
-        # sleep so that client can:
-        # - stop consuming from queue
-        # - finish sending any SMSes it may have already picked from queue
-        # - stop sending `enquire_link` requests
-        # - send unbind to SMSC
-        await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
+        self._log(logging.DEBUG, {"event": "naz.Client._unbind_and_disconnect", "stage": "end"})
 
 
 class NazClientError(Exception):
