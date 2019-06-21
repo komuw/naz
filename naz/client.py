@@ -888,7 +888,7 @@ class Client:
             },
         )
 
-    async def enquire_link(self, TESTING: bool = False) -> typing.Union[bytes, None]:
+    async def enquire_link(self, TESTING: bool = False) -> typing.Union[None, bytes]:
         """
         send an ENQUIRE_LINK pdu to SMSC.
 
@@ -1808,7 +1808,7 @@ class Client:
                     return {"throttle_handler_denied_request": "throttle_handler_denied_request"}
                 continue
 
-    async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
+    async def receive_data(self, TESTING: bool = False) -> typing.Union[None, bytes]:
         """
         In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
 

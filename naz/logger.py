@@ -67,6 +67,7 @@ class SimpleLogger(BaseLogger):
             )
 
         self.logger_name = logger_name
+        self.logger: typing.Union[None, logging.LoggerAdapter] = None
 
     def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
         level = self._nameToLevel(level=level)
@@ -79,13 +80,17 @@ class SimpleLogger(BaseLogger):
         if not self._logger.handlers:
             self._logger.addHandler(handler)
         self._logger.setLevel(level)
-        self.logger: logging.LoggerAdapter = NazLoggingAdapter(self._logger, log_metadata)
+        self.logger = NazLoggingAdapter(self._logger, log_metadata)
 
     def log(self, level: typing.Union[str, int], log_data: dict) -> None:
         level = self._nameToLevel(level=level)
 
         if not self.logger:
             self.bind(level=level, log_metadata={})
+        if typing.TYPE_CHECKING:
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.logger, logging.LoggerAdapter)
+
         if level >= logging.ERROR:
             self.logger.log(level, log_data, exc_info=True)
         else:
