@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hooks &mdash; naz v0.6.2 documentation</title>
+  <title>hooks &mdash; naz v0.6.3 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.6.2
+                v0.6.3
               </div>
             
           
@@ -204,7 +204,7 @@ just after a response is received from SMSC.</p>
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm_resp</p></li>
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
-<li><p><strong>smsc_response</strong> (<em>naz.CommandStatus</em>) – the response from SMSC.</p></li>
+<li><p><strong>smsc_response</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the response from SMSC.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -260,7 +260,7 @@ When this class is called by naz, it just logs the request or response.</p>
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm_resp</p></li>
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
-<li><p><strong>smsc_response</strong> (<em>naz.CommandStatus</em>) – the response from SMSC.</p></li>
+<li><p><strong>smsc_response</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the response from SMSC.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>

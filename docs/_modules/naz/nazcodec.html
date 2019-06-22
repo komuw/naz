@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.nazcodec &mdash; naz v0.6.2 documentation</title>
+  <title>naz.nazcodec &mdash; naz v0.6.3 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.6.2
+                v0.6.3
               </div>
             
           
@@ -303,8 +303,13 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">handle_decode_strict_error</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">):</span>
+        <span class="c1"># https://github.com/google/pytype/issues/349</span>
         <span class="k">raise</span> <span class="ne">UnicodeDecodeError</span><span class="p">(</span>
-            <span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin-1&quot;</span><span class="p">),</span> <span class="n">position</span><span class="p">,</span> <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span>
+            <span class="nb">chr</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin-1&quot;</span><span class="p">),</span>
+            <span class="n">position</span><span class="p">,</span>
+            <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>  <span class="c1"># pytype: disable=wrong-arg-types</span>
         <span class="p">)</span> <span class="kn">from</span> <span class="nn">indexErrorException</span>
 
     <span class="nd">@staticmethod</span>
@@ -323,10 +328,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_encode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="c1"># https://github.com/google/pytype/issues/348</span>
+        <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_encode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>  <span class="c1"># pytype: disable=module-attr</span>
 
     <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_decode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_decode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>  <span class="c1"># pytype: disable=module-attr</span>
 
 
 <div class="viewcode-block" id="BaseNazCodec"><a class="viewcode-back" href="../../nazcodec.html#naz.nazcodec.BaseNazCodec">[docs]</a><span class="k">class</span> <span class="nc">BaseNazCodec</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
