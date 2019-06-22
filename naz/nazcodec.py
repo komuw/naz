@@ -140,7 +140,11 @@ class GSM7BitCodec(codecs.Codec):
     @staticmethod
     def handle_decode_strict_error(char, position, obj, indexErrorException):
         raise UnicodeDecodeError(
-            "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj)
+            "gsm0338",
+            chr(char).encode("latin-1"),
+            position,
+            position + 1,
+            repr(obj),  # pytype: disable=wrong-arg-types
         ) from indexErrorException
 
     @staticmethod
