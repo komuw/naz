@@ -3,7 +3,7 @@ most recent version is listed first.
 
 
 ## **version:** v0.6.3
-- added static ananlysis support using pytype: https://github.com/komuw/naz/pull/148
+- added static analysis support using pytype: https://github.com/komuw/naz/pull/148
 
 
 ## **version:** v0.6.2
