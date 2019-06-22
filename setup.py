@@ -99,7 +99,7 @@ setup(
             "redis==3.2.1",
             "pika==1.0.1",
         ],
-        "test": ["flake8", "pylint", "black", "bandit", "docker==4.0.1", "mypy"],
+        "test": ["flake8", "pylint", "black", "bandit", "docker==4.0.1", "mypy", "pytype"],
         "benchmarks": [
             "asyncpg==0.18.3",
             "docker==4.0.1",
