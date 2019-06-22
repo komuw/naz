@@ -2414,7 +2414,7 @@ class Client:
             # in that order
 
             # see: https://github.com/komuw/naz/issues/117
-            self.writer.transport.set_write_buffer_limits(0)
+            self.writer.transport.set_write_buffer_limits(0)  # pytype: disable=attribute-error
             await self.unbind()
             async with self.drain_lock:
                 await self.writer.drain()
