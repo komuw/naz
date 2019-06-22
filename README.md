@@ -260,7 +260,7 @@ cli = naz.Client(
 
 
 #### 2.3 integration with bug trackers
-If you want to integrate `naz` with your bug/issue/bug tracker of choice, all you have to do is use their logging integrator.   
+If you want to integrate `naz` with your bug/issue tracker of choice, all you have to do is use their logging integrator.   
 As an example, to integrate `naz` with [sentry](https://sentry.io/), all you have to do is import and init the sentry sdk. A good place to do that would be in the naz config file, ie;  
 `/tmp/my_config.py`
 ```python

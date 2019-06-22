@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.6.1 documentation</title>
+  <title>naz.client &mdash; naz v0.6.2 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.6.1
+                v0.6.2
               </div>
             
           
@@ -2129,9 +2129,25 @@
         <span class="n">command_status_header_data</span> <span class="o">=</span> <span class="n">header_data</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span>
         <span class="n">sequence_number_header_data</span> <span class="o">=</span> <span class="n">header_data</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">]</span>
 
-        <span class="n">command_id</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">command_id_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">command_status</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">command_status_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">sequence_number_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">command_id</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">command_id_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">command_status</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">command_status_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">sequence_number_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># see: https://github.com/komuw/naz/issues/135</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._parse_response_pdu&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;parse SMSC response error.&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                    <span class="s2">&quot;pdu&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">pdu</span><span class="p">),</span>  <span class="c1"># TODO: maybe stringfy this</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="c1"># close connection</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unbind_and_disconnect</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">smpp_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_by_command_id_code</span><span class="p">(</span><span class="n">command_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">smpp_command</span><span class="p">:</span>
@@ -2141,7 +2157,6 @@
                 <span class="p">{</span>
                     <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._parse_response_pdu&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;command_id:</span><span class="si">{0}</span><span class="s2"> is unknown.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">command_id</span><span class="p">),</span>
                     <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
                 <span class="p">},</span>
@@ -2518,18 +2533,41 @@
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SHOULD_SHUT_DOWN</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># we need to unbind first before closing writer</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unbind_and_disconnect</span><span class="p">()</span>
+
+        <span class="c1"># sleep so that client can:</span>
+        <span class="c1"># - stop consuming from queue</span>
+        <span class="c1"># - finish sending any SMSes it may have already picked from queue</span>
+        <span class="c1"># - stop sending `enquire_link` requests</span>
+        <span class="c1"># - send unbind to SMSC</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drain_duration</span><span class="p">)</span>  <span class="c1"># asyncio.sleep so that we do not block eventloop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.shutdown&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">})</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_unbind_and_disconnect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        unbind from SMSC and close network connection.</span>
+<span class="sd">        This is usually done in two situations;</span>
+<span class="sd">          - when shutting down a naz client</span>
+<span class="sd">          - if we got into an unrecoverable state and need to start over; issues/135</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._unbind_and_disconnect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
             <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">)</span>
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">transports</span><span class="o">.</span><span class="n">Transport</span><span class="p">)</span>
-
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># 1. set buffers to 0</span>
+            <span class="c1"># 2. unbind</span>
+            <span class="c1"># 3. drain</span>
+            <span class="c1"># 4. close connection</span>
+            <span class="c1"># in that order</span>
+
             <span class="c1"># see: https://github.com/komuw/naz/issues/117</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">transport</span><span class="o">.</span><span class="n">set_write_buffer_limits</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
+            <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">drain_lock</span><span class="p">:</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">except</span> <span class="p">(</span>
             <span class="ne">ConnectionError</span><span class="p">,</span>
@@ -2543,19 +2581,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.shutdown&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._unbind_and_disconnect&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;unable to write to SMSC&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">)</span>
-
-        <span class="c1"># sleep so that client can:</span>
-        <span class="c1"># - stop consuming from queue</span>
-        <span class="c1"># - finish sending any SMSes it may have already picked from queue</span>
-        <span class="c1"># - stop sending `enquire_link` requests</span>
-        <span class="c1"># - send unbind to SMSC</span>
-        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">drain_duration</span><span class="p">)</span>  <span class="c1"># asyncio.sleep so that we do not block eventloop</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._unbind_and_disconnect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">})</span></div>
 
 
 <div class="viewcode-block" id="NazClientError"><a class="viewcode-back" href="../../client.html#naz.client.NazClientError">[docs]</a><span class="k">class</span> <span class="nc">NazClientError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>

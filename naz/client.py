@@ -772,6 +772,23 @@ class Client:
         else:
             return 60 * (1 * (2 ** current_retries))
 
+    def _msg_to_log(self, msg: bytes) -> str:
+        """
+        returns decoded string from bytes with any password removed.
+        the returned string is safe to log.
+        """
+        log_msg = ""
+        try:
+            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
+            if self.password in log_msg:
+                # do not log password, redact it from logs.
+                log_msg = log_msg.replace(self.password, "{REDACTED}")
+        except (UnicodeDecodeError, UnicodeError):
+            log_msg = str(msg)
+        except Exception:
+            pass
+        return log_msg
+
     async def connect(
         self, log_id: str = ""
     ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
@@ -782,8 +799,8 @@ class Client:
             log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id})
         reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
-        self.reader: asyncio.streams.StreamReader = reader
-        self.writer: asyncio.streams.StreamWriter = writer
+        self.reader = reader
+        self.writer = writer
         sock = self.writer.get_extra_info("socket")
         sock.settimeout(self.socket_timeout)
         # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
@@ -888,7 +905,7 @@ class Client:
             },
         )
 
-    async def enquire_link(self, TESTING: bool = False) -> typing.Union[bytes, None]:
+    async def enquire_link(self, TESTING: bool = False) -> typing.Union[None, bytes]:
         """
         send an ENQUIRE_LINK pdu to SMSC.
 
@@ -1467,14 +1484,7 @@ class Client:
 
         if isinstance(msg, str):
             msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
-        log_msg = ""
-        try:
-            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
-            # do not log password, redact it from logs.
-            if self.password in log_msg:
-                log_msg = log_msg.replace(self.password, "{REDACTED}")
-        except Exception:
-            pass
+        log_msg = self._msg_to_log(msg=msg)
         self._log(
             logging.INFO,
             {
@@ -1808,7 +1818,7 @@ class Client:
                     return {"throttle_handler_denied_request": "throttle_handler_denied_request"}
                 continue
 
-    async def receive_data(self, TESTING: bool = False) -> typing.Union[bytes, None]:
+    async def receive_data(self, TESTING: bool = False) -> typing.Union[None, bytes]:
         """
         In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
 
@@ -1940,7 +1950,7 @@ class Client:
                 {
                     "event": "naz.Client.receive_data",
                     "stage": "end",
-                    "full_pdu_data": full_pdu_data,
+                    "full_pdu_data": self._msg_to_log(msg=full_pdu_data),
                 },
             )
             await self._parse_response_pdu(full_pdu_data)
@@ -1957,7 +1967,11 @@ class Client:
         Parameters:
             pdu: PDU in bytes, that have been read from network
         """
-        self._log(logging.DEBUG, {"event": "naz.Client._parse_response_pdu", "stage": "start"})
+        log_pdu = self._msg_to_log(msg=pdu)
+        self._log(
+            logging.DEBUG,
+            {"event": "naz.Client._parse_response_pdu", "stage": "start", "pdu": log_pdu},
+        )
 
         header_data = pdu[:16]
         body_data = pdu[16:]
@@ -1965,21 +1979,36 @@ class Client:
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
 
-        command_id = struct.unpack(">I", command_id_header_data)[0]
-        command_status = struct.unpack(">I", command_status_header_data)[0]
-        sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
-
-        smpp_command = self._search_by_command_id_code(command_id)
-        if not smpp_command:
-            e = ValueError("command_id:{0} is unknown.".format(command_id))
+        try:
+            command_id = struct.unpack(">I", command_id_header_data)[0]
+            command_status = struct.unpack(">I", command_status_header_data)[0]
+            sequence_number = struct.unpack(">I", sequence_number_header_data)[0]
+        except (struct.error, IndexError) as e:
+            # see: https://github.com/komuw/naz/issues/135
             self._log(
                 logging.ERROR,
                 {
                     "event": "naz.Client._parse_response_pdu",
                     "stage": "end",
-                    "log_id": "",
-                    "state": "command_id:{0} is unknown.".format(command_id),
+                    "state": "parse SMSC response error.",
                     "error": str(e),
+                    "pdu": log_pdu,
+                },
+            )
+            # close connection
+            await self._unbind_and_disconnect()
+            return None
+
+        smpp_command = self._search_by_command_id_code(command_id)
+        if not smpp_command:
+            err = ValueError("command_id:{0} is unknown.".format(command_id))
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client._parse_response_pdu",
+                    "stage": "end",
+                    "state": "command_id:{0} is unknown.".format(command_id),
+                    "error": str(err),
                 },
             )
             return None
@@ -2354,18 +2383,41 @@ class Client:
         )
         self.SHOULD_SHUT_DOWN = True
 
-        # we need to unbind first before closing writer
-        await self.unbind()
+        await self._unbind_and_disconnect()
+
+        # sleep so that client can:
+        # - stop consuming from queue
+        # - finish sending any SMSes it may have already picked from queue
+        # - stop sending `enquire_link` requests
+        # - send unbind to SMSC
+        await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
+        self._log(logging.DEBUG, {"event": "naz.Client.shutdown", "stage": "end"})
+
+    async def _unbind_and_disconnect(self):
+        """
+        unbind from SMSC and close network connection.
+        This is usually done in two situations;
+          - when shutting down a naz client
+          - if we got into an unrecoverable state and need to start over; issues/135
+        """
+        self._log(logging.DEBUG, {"event": "naz.Client._unbind_and_disconnect", "stage": "start"})
 
         if typing.TYPE_CHECKING:
             # make mypy happy; https://github.com/python/mypy/issues/4805
             assert isinstance(self.writer, asyncio.streams.StreamWriter)
             assert isinstance(self.writer.transport, asyncio.transports.Transport)
-
         try:
+            # 1. set buffers to 0
+            # 2. unbind
+            # 3. drain
+            # 4. close connection
+            # in that order
+
             # see: https://github.com/komuw/naz/issues/117
             self.writer.transport.set_write_buffer_limits(0)
-            await self.writer.drain()
+            await self.unbind()
+            async with self.drain_lock:
+                await self.writer.drain()
             self.writer.close()
         except (
             ConnectionError,
@@ -2379,19 +2431,13 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.shutdown",
+                    "event": "naz.Client._unbind_and_disconnect",
                     "stage": "end",
                     "state": "unable to write to SMSC",
                     "error": str(e),
                 },
             )
-
-        # sleep so that client can:
-        # - stop consuming from queue
-        # - finish sending any SMSes it may have already picked from queue
-        # - stop sending `enquire_link` requests
-        # - send unbind to SMSC
-        await asyncio.sleep(self.drain_duration)  # asyncio.sleep so that we do not block eventloop
+        self._log(logging.DEBUG, {"event": "naz.Client._unbind_and_disconnect", "stage": "end"})
 
 
 class NazClientError(Exception):

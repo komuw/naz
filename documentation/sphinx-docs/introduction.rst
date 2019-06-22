@@ -170,38 +170,8 @@ NB:
 | and then these will show up in all log events.
 | by default, naz annotates all log events with smsc_host, system_id and client_id
 
-``naz`` also gives you the ability to supply your own logger. 
-For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
-
-.. code-block:: python
-
-    import naz
-
-    class KVlogger(naz.logger.BaseLogger):
-        def __init__(self):
-            self.logger = logging.getLogger("myKVlogger")
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter("%(message)s")
-            handler.setFormatter(formatter)
-            if not self.logger.handlers:
-                self.logger.addHandler(handler)
-            self.logger.setLevel("DEBUG")
-        def bind(self, loglevel, log_metadata):
-            pass
-        def log(self, level, log_data):
-            # implementation of key=value log renderer
-            message = ", ".join("{0}={1}".format(k, v) for k, v in log_data.items())
-            self.logger.log(level, message)
-
-    kvLog = KVlogger()
-    cli = naz.Client(
-        ...
-        log_handler=kvLog,
-    )
-
-
-``naz`` also gives you the ability to supply your own logger. 
-For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
+| ``naz`` also gives you the ability to supply your own logger. All you have to do is satisfy the `naz.logger.BaseLogger <https://komuw.github.io/naz/logger.html#naz.logger.BaseLogger>`_ interface
+| For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
 
 .. code-block:: python
 
@@ -232,7 +202,7 @@ For example if you wanted ``naz`` to use key=value style of logging, then just c
 
 3.2.2 hooks
 =====================
-| A hook is a class with two methods `request` and `response`, ie it implements naz's ``naz.hooks.BaseHook`` interface.
+| A hook is a class with two methods `request` and `response`, ie it implements naz's `naz.hooks.BaseHook <https://komuw.github.io/naz/hooks.html#naz.hooks.BaseHook>`_ interface
 | ``naz`` will call the `request` method just before sending request to SMSC and also call the `response` method just after getting response from SMSC.
 | The default hook that naz uses is ``naz.hooks.SimpleHook`` which just logs the request and response.
 | If you wanted, for example to keep metrics of all requests and responses to SMSC in your prometheus setup;
@@ -294,7 +264,7 @@ another example is if you want to update a database record whenever you get a de
 
 3.2.3 integration with bug trackers
 ======================================
-| If you want to integrate `naz` with your bug/issue/bug tracker of choice, all you have to do is use their logging integrator.   
+| If you want to integrate `naz` with your bug/issue tracker of choice, all you have to do is use their logging integrator.   
 | As an example, to integrate ``naz`` with `sentry <https://sentry.io/>`_, all you have to do is import and init the sentry sdk. A good place to do that would be in the naz config file, ie;
 
 ``/tmp/my_config.py``
@@ -328,8 +298,10 @@ another example is if you want to update a database record whenever you get a de
 3.3 Rate limiting
 =====================
 | Sometimes you want to control the rate at which the client sends requests to an SMSC/server. ``naz`` lets you do this, by allowing you to specify a custom rate limiter.
-| By default, naz uses a simple token bucket rate limiting algorithm implemented in ``naz.ratelimiter.SimpleRateLimiter``
-| You can customize naz's ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the ``naz.ratelimiter.BaseRateLimiter`` interface)
+| By default, naz uses a simple token bucket rate limiting algorithm implemented in ``naz.ratelimiter.SimpleRateLimiter``   
+
+| You can customize naz's ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the `naz.ratelimiter.BaseRateLimiter <https://komuw.github.io/naz/ratelimiter.html#naz.ratelimiter.BaseRateLimiter>`_ interface)
+
 | To customize the default ratelimiter, for example to send at a rate of 35 requests per second.
 
 .. code-block:: python
@@ -348,7 +320,7 @@ another example is if you want to update a database record whenever you get a de
 | This can happen, say if the client has surpassed the rate at which it is supposed to send requests at, or the SMSC is under load or for whatever reason ¯_(ツ)_/¯
 
 The way naz handles throtlling is via Throttle handlers.
-A throttle handler is a class that implements the ``naz.BaseThrottleHandler``
+A throttle handler is a class that implements the `naz.throttle.BaseThrottleHandler <https://komuw.github.io/naz/throttle.html#naz.throttle.BaseThrottleHandler>`_ interface
 
 By default naz uses ``naz.throttle.SimpleThrottleHandler`` to handle throttling.
 As an example if you want to deny outgoing requests if the percentage of throttles is above 1.2% over a period of 180 seconds and the total number of responses from SMSC is greater than 45, then;
@@ -370,7 +342,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 
 It's via a queuing interface. Your application queues messages to a queue, ``naz`` consumes from that queue and then naz sends those messages to SMSC/server.
 
-You can implement the queuing mechanism any way you like, so long as it satisfies the ``naz.q.BaseOutboundQueue``
+You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseOutboundQueue <https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue>`_ interface
 
 | Your application should call that class's enqueue method to enqueue messages.
 | Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:
