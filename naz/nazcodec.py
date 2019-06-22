@@ -139,6 +139,7 @@ class GSM7BitCodec(codecs.Codec):
 
     @staticmethod
     def handle_decode_strict_error(char, position, obj, indexErrorException):
+        # https://github.com/google/pytype/issues/349
         raise UnicodeDecodeError(
             "gsm0338",
             chr(char).encode("latin-1"),
@@ -163,6 +164,7 @@ class UCS2Codec(codecs.Codec):
     """
 
     def encode(self, input, errors="strict"):
+        # https://github.com/google/pytype/issues/348
         return codecs.utf_16_be_encode(input, errors)  # pytype: disable=module-attr
 
     def decode(self, input, errors="strict"):
