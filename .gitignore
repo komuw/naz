@@ -46,6 +46,9 @@ coverage.xml
 # mypy
 *.mypy_cache/
 
+# pytype
+.pytype/
+
 # sphinx
 sphinx-build
 docs/.buildinfo

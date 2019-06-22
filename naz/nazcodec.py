@@ -139,8 +139,13 @@ class GSM7BitCodec(codecs.Codec):
 
     @staticmethod
     def handle_decode_strict_error(char, position, obj, indexErrorException):
+        # https://github.com/google/pytype/issues/349
         raise UnicodeDecodeError(
-            "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj)
+            "gsm0338",
+            chr(char).encode("latin-1"),
+            position,
+            position + 1,
+            repr(obj),  # pytype: disable=wrong-arg-types
         ) from indexErrorException
 
     @staticmethod
@@ -159,10 +164,11 @@ class UCS2Codec(codecs.Codec):
     """
 
     def encode(self, input, errors="strict"):
-        return codecs.utf_16_be_encode(input, errors)
+        # https://github.com/google/pytype/issues/348
+        return codecs.utf_16_be_encode(input, errors)  # pytype: disable=module-attr
 
     def decode(self, input, errors="strict"):
-        return codecs.utf_16_be_decode(input, errors)
+        return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
 
 class BaseNazCodec(abc.ABC):

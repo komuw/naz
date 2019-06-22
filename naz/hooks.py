@@ -5,7 +5,7 @@ import typing
 from . import logger
 
 if typing.TYPE_CHECKING:
-    import naz  # noqa: F401
+    from . import state  # noqa: F401
 
 
 class BaseHook(abc.ABC):
@@ -32,7 +32,11 @@ class BaseHook(abc.ABC):
 
     @abc.abstractmethod
     async def response(
-        self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: "naz.CommandStatus"
+        self,
+        smpp_command: str,
+        log_id: str,
+        hook_metadata: str,
+        smsc_response: "state.CommandStatus",
     ) -> None:
         """
         called after a response is received from SMSC.
@@ -78,7 +82,11 @@ class SimpleHook(BaseHook):
         )
 
     async def response(
-        self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: "naz.CommandStatus"
+        self,
+        smpp_command: str,
+        log_id: str,
+        hook_metadata: str,
+        smsc_response: "state.CommandStatus",
     ) -> None:
         self.logger.log(
             logging.NOTSET,

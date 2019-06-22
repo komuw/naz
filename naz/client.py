@@ -7,6 +7,7 @@ import typing
 import asyncio
 import logging
 
+# pytype: disable=pyi-error
 from . import q
 from . import hooks
 from . import logger
@@ -24,6 +25,8 @@ from .state import (
     SmppDataCoding,
     SmppOptionalTag,
 )
+
+# pytype: disable=pyi-error
 
 
 class Client:
@@ -2414,7 +2417,8 @@ class Client:
             # in that order
 
             # see: https://github.com/komuw/naz/issues/117
-            self.writer.transport.set_write_buffer_limits(0)
+            self.writer.transport.set_write_buffer_limits(0)  # pytype: disable=attribute-error
+            # https://github.com/google/pytype/issues/350
             await self.unbind()
             async with self.drain_lock:
                 await self.writer.drain()

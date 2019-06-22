@@ -38,7 +38,8 @@ test:
 	@printf "\n run flake8::\n" && flake8 .
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C naz/ tests/ cli/ documentation/ examples/ benchmarks/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
-	@printf "\n run mypy::\n" && mypy --show-column-numbers --strict naz/
+	@printf "\n run mypy::\n" && mypy --show-column-numbers --ignore-missing-imports -p cli -p naz
+	@printf "\n run pytype::\n" && pytype --verbosity 0 --python-version 3.6 --protocols --strict-import --keep-going naz/ cli/
 
 # note `.nojekyll` file is important inside `docs/` folder
 sphinx:

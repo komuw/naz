@@ -82,7 +82,7 @@ class SimpleLogger(BaseLogger):
         self._logger.setLevel(level)
         self.logger = NazLoggingAdapter(self._logger, log_metadata)
 
-    def log(self, level: typing.Union[str, int], log_data: dict) -> None:
+    def log(self, level: typing.Union[str, int], log_data: typing.Union[str, dict]) -> None:
         level = self._nameToLevel(level=level)
 
         if not self.logger:

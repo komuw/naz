@@ -2,6 +2,10 @@
 most recent version is listed first.
 
 
+## **version:** v0.6.3
+- added static analysis support using pytype: https://github.com/komuw/naz/pull/148
+
+
 ## **version:** v0.6.2
 - If `naz` were to encounter an SMPP protocol error, it now bails early by unbinding and closing connection: https://github.com/komuw/naz/pull/147
 
