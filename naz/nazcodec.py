@@ -159,10 +159,10 @@ class UCS2Codec(codecs.Codec):
     """
 
     def encode(self, input, errors="strict"):
-        return codecs.utf_16_be_encode(input, errors)
+        return codecs.utf_16_be_encode(input, errors)  # pytype: disable=module-attr
 
     def decode(self, input, errors="strict"):
-        return codecs.utf_16_be_decode(input, errors)
+        return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
 
 class BaseNazCodec(abc.ABC):
