@@ -783,7 +783,7 @@ class Client:
             if self.password in log_msg:
                 # do not log password, redact it from logs.
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
-        except UnicodeDecodeError:
+        except (UnicodeDecodeError, UnicodeError):
             log_msg = str(msg)
         except Exception:
             pass
