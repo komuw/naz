@@ -7,6 +7,7 @@ import typing
 import asyncio
 import logging
 
+# pytype: disable=pyi-error
 from . import q
 from . import hooks
 from . import logger
@@ -24,6 +25,8 @@ from .state import (
     SmppDataCoding,
     SmppOptionalTag,
 )
+
+# pytype: disable=pyi-error
 
 
 class Client:

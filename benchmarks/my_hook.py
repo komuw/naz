@@ -45,7 +45,11 @@ class BenchmarksHook(naz.hooks.BaseHook):
             await self.loop.run_in_executor(executor, functools.partial(self._publish))
 
     async def response(
-        self, smpp_command: str, log_id: str, hook_metadata: str, smsc_response: naz.CommandStatus
+        self,
+        smpp_command: str,
+        log_id: str,
+        hook_metadata: str,
+        smsc_response: naz.state.CommandStatus,
     ) -> None:
         self.counter.labels(
             project="naz_benchmarks",
