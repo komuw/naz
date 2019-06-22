@@ -936,6 +936,23 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="mi">60</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">current_retries</span><span class="p">))</span>
 
+    <span class="k">def</span> <span class="nf">_msg_to_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        returns decoded string from bytes with any password removed.</span>
+<span class="sd">        the returned string is safe to log.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">log_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_errors_level</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="ow">in</span> <span class="n">log_msg</span><span class="p">:</span>
+                <span class="c1"># do not log password, redact it from logs.</span>
+                <span class="n">log_msg</span> <span class="o">=</span> <span class="n">log_msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{REDACTED}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">UnicodeError</span><span class="p">):</span>
+            <span class="n">log_msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">log_msg</span>
+
 <div class="viewcode-block" id="Client.connect"><a class="viewcode-back" href="../../client.html#naz.client.Client.connect">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">]:</span>
@@ -946,8 +963,8 @@
             <span class="n">log_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">17</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">})</span>
         <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">open_connection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smsc_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">smsc_port</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span> <span class="o">=</span> <span class="n">reader</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span> <span class="o">=</span> <span class="n">writer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">writer</span>
         <span class="n">sock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">get_extra_info</span><span class="p">(</span><span class="s2">&quot;socket&quot;</span><span class="p">)</span>
         <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span><span class="p">)</span>
         <span class="c1"># A socket object can be in one of three modes: blocking, non-blocking, or timeout.</span>
@@ -1052,7 +1069,7 @@
             <span class="p">},</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="Client.enquire_link"><a class="viewcode-back" href="../../client.html#naz.client.Client.enquire_link">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">enquire_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TESTING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="Client.enquire_link"><a class="viewcode-back" href="../../client.html#naz.client.Client.enquire_link">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">enquire_link</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TESTING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        send an ENQUIRE_LINK pdu to SMSC.</span>
 
@@ -1631,14 +1648,7 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_errors_level</span><span class="p">)</span>
-        <span class="n">log_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">log_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_errors_level</span><span class="p">)</span>
-            <span class="c1"># do not log password, redact it from logs.</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="ow">in</span> <span class="n">log_msg</span><span class="p">:</span>
-                <span class="n">log_msg</span> <span class="o">=</span> <span class="n">log_msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{REDACTED}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="n">log_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
             <span class="p">{</span>
@@ -1972,7 +1982,7 @@
                     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;throttle_handler_denied_request&quot;</span><span class="p">:</span> <span class="s2">&quot;throttle_handler_denied_request&quot;</span><span class="p">}</span>
                 <span class="k">continue</span></div>
 
-<div class="viewcode-block" id="Client.receive_data"><a class="viewcode-back" href="../../client.html#naz.client.Client.receive_data">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">receive_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TESTING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="Client.receive_data"><a class="viewcode-back" href="../../client.html#naz.client.Client.receive_data">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">receive_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TESTING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled &lt;Client._parse_response_pdu&gt;`.</span>
 
@@ -2104,7 +2114,7 @@
                 <span class="p">{</span>
                     <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.receive_data&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;full_pdu_data&quot;</span><span class="p">:</span> <span class="n">full_pdu_data</span><span class="p">,</span>
+                    <span class="s2">&quot;full_pdu_data&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">full_pdu_data</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_response_pdu</span><span class="p">(</span><span class="n">full_pdu_data</span><span class="p">)</span>
@@ -2121,7 +2131,11 @@
 <span class="sd">        Parameters:</span>
 <span class="sd">            pdu: PDU in bytes, that have been read from network</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._parse_response_pdu&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">})</span>
+        <span class="n">log_pdu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_msg_to_log</span><span class="p">(</span><span class="n">msg</span><span class="o">=</span><span class="n">pdu</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._parse_response_pdu&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;pdu&quot;</span><span class="p">:</span> <span class="n">log_pdu</span><span class="p">},</span>
+        <span class="p">)</span>
 
         <span class="n">header_data</span> <span class="o">=</span> <span class="n">pdu</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span>
         <span class="n">body_data</span> <span class="o">=</span> <span class="n">pdu</span><span class="p">[</span><span class="mi">16</span><span class="p">:]</span>
@@ -2142,7 +2156,7 @@
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;parse SMSC response error.&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                    <span class="s2">&quot;pdu&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">pdu</span><span class="p">),</span>  <span class="c1"># TODO: maybe stringfy this</span>
+                    <span class="s2">&quot;pdu&quot;</span><span class="p">:</span> <span class="n">log_pdu</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
             <span class="c1"># close connection</span>
@@ -2151,14 +2165,14 @@
 
         <span class="n">smpp_command</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_search_by_command_id_code</span><span class="p">(</span><span class="n">command_id</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">smpp_command</span><span class="p">:</span>
-            <span class="n">e</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;command_id:</span><span class="si">{0}</span><span class="s2"> is unknown.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">command_id</span><span class="p">))</span>
+            <span class="n">err</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;command_id:</span><span class="si">{0}</span><span class="s2"> is unknown.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">command_id</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
                 <span class="p">{</span>
                     <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._parse_response_pdu&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;command_id:</span><span class="si">{0}</span><span class="s2"> is unknown.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">command_id</span><span class="p">),</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
