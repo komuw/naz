@@ -2,8 +2,10 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 
+import io
 import logging
 import datetime
+import tempfile
 from unittest import TestCase
 
 import naz
@@ -44,6 +46,25 @@ class TestLogger(TestCase):
     def test_bind_and_log_dict(self):
         self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
         self.logger.log(level=logging.WARN, log_data={"name": "Magic Johnson"})
+
+    def test_custom_handler(self):
+        with io.StringIO() as _temp_stream:
+            _handler = logging.StreamHandler(stream=_temp_stream)
+            logger = naz.logger.SimpleLogger("yo", handler=_handler)
+            logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+            logger.log(level=logging.WARN, log_data={"someKey": "someValue"})
+
+            self.assertIn("JayZ", _temp_stream.getvalue())
+
+        _file_name = "/tmp/naz_test_custom_handler"
+        _handler = logging.FileHandler(filename=_file_name)
+        logger = naz.logger.SimpleLogger("yolo", handler=_handler)
+        logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+        logger.log(level=logging.WARN, log_data={"someKey": "someValue"})
+
+        with open(_file_name) as f:
+            content = f.read()
+            self.assertIn("JayZ", content)
 
 
 class KVlogger(naz.logger.BaseLogger):
