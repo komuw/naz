@@ -87,7 +87,7 @@ class SimpleLogger(BaseLogger):
         if not self._logger.handlers:
             self._logger.addHandler(self.handler)
         self._logger.setLevel(level)
-        self.logger = NazLoggingAdapter(self._logger, log_metadata)
+        self.logger = _NazLoggingAdapter(self._logger, log_metadata)
 
     def log(self, level: typing.Union[str, int], log_data: typing.Union[str, dict]) -> None:
         level = self._nameToLevel(level=level)
@@ -118,7 +118,7 @@ class SimpleLogger(BaseLogger):
             ) from e
 
 
-class NazLoggingAdapter(logging.LoggerAdapter):
+class _NazLoggingAdapter(logging.LoggerAdapter):
     _converter = time.localtime
     _formatter = logging.Formatter()
 
@@ -161,7 +161,7 @@ class BreachHandler(logging.StreamHandler):
     When a trigger condition(eg a certain log level) is met;
     then all the logs in the buffer are flushed into a given stream(file, stdout etc)
 
-    It is inspired by; https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/
+    It is inspired by the article `Triggering Diagnostic Logging on Exception <https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/>`_
 
     example usage:
 
@@ -174,6 +174,19 @@ class BreachHandler(logging.StreamHandler):
 
         logger.log(logging.INFO, {"name": "Jayz"})
         logger.log(logging.ERROR, {"msg": "Houston, we got 99 problems."})
+
+        # or alternatively, to use it with python stdlib logger
+        logger = logging.getLogger("my-logger")
+        handler = naz.logger.BreachHandler()
+        formatter = logging.Formatter("%(message)s")
+        handler.setFormatter(formatter)
+        handler.setLevel("DEBUG")
+        if not logger.handlers:
+            logger.addHandler(handler)
+        logger.setLevel("DEBUG")
+
+        logger.info("I did records for Tweet before y'all could even tweet - Dr. Missy Elliot")
+        logger.error("damn")
     """
 
     def __init__(self, trigger_level=logging.WARNING, buffer_size=10_000, stream=None):

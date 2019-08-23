@@ -35,7 +35,7 @@ def makelog(log_directory="/usr/src/nazLog", log_file="naz_log_file"):
 log_file = makelog()
 
 
-class MyLogAdapter(naz.logger.NazLoggingAdapter):
+class MyLogAdapter(naz.logger._NazLoggingAdapter):
     def process(self, msg, kwargs):
         timestamp = self.formatTime()
         if isinstance(msg, str):
