@@ -56,7 +56,7 @@ class SimpleLogger(BaseLogger):
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
 
-    def __init__(self, logger_name: str):
+    def __init__(self, logger_name: str, handler: logging.Handler = logging.StreamHandler()):
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
@@ -65,20 +65,26 @@ class SimpleLogger(BaseLogger):
             raise ValueError(
                 "`logger_name` should be of type:: `str` You entered: {0}".format(type(logger_name))
             )
+        if not isinstance(handler, logging.Handler):
+            raise ValueError(
+                "`handler` should be of type:: `logging.Handler` You entered: {0}".format(
+                    type(handler)
+                )
+            )
 
         self.logger_name = logger_name
+        self.handler = handler
         self.logger: typing.Union[None, logging.LoggerAdapter] = None
 
     def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
         level = self._nameToLevel(level=level)
 
         self._logger = logging.getLogger(self.logger_name)
-        handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        handler.setLevel(level)
+        self.handler.setFormatter(formatter)
+        self.handler.setLevel(level)
         if not self._logger.handlers:
-            self._logger.addHandler(handler)
+            self._logger.addHandler(self.handler)
         self._logger.setLevel(level)
         self.logger = NazLoggingAdapter(self._logger, log_metadata)
 
