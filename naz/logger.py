@@ -157,14 +157,32 @@ class NazLoggingAdapter(logging.LoggerAdapter):
 
 class BreachHandler(logging.StreamHandler):
     """
-    Log handler that buffers logs in an in-memory ring buffer until a trigger.
+    This is an implementation of `logging.Handler` that puts logs in an in-memory ring buffer.
     When a trigger condition(eg a certain log level) is met;
-      - then all the logs in the buffer are flushed into a given stream(file, stdout etc)
+    then all the logs in the buffer are flushed into a given stream(file, stdout etc)
 
-    Inspired by; https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/
+    It is inspired by; https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/
+
+    example usage:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        _handler = naz.logger.BreachHandler()
+        logger = naz.logger.SimpleLogger("aha", handler=_handler)
+        logger.bind(level="INFO", log_metadata={"id": "123"})
+
+        logger.log(logging.INFO, {"name": "Jayz"})
+        logger.log(logging.ERROR, {"msg": "Houston, we got 99 problems."})
     """
 
     def __init__(self, trigger_level=logging.WARNING, buffer_size=10_000, stream=None):
+        """
+        Parameters:
+            trigger_level: the log level that will trigger this handler to flush logs to :py:attr:`~stream`
+            buffer_size: the maximum number of log records to store in the ring buffer
+            stream: a `file like object <https://docs.python.org/3/library/io.html>`_ that can be logged to.
+        """
         # call `logging.StreamHandler` init
         super(BreachHandler, self).__init__(stream=stream)
         self.trigger_level = trigger_level
@@ -173,6 +191,7 @@ class BreachHandler(logging.StreamHandler):
 
     def emit(self, record):
         """
+        Emit a record.
         Implementation is mostly taken from `logging.StreamHandler`
         """
         try:
