@@ -2,6 +2,7 @@ import abc
 import time
 import typing
 import logging
+import collections
 
 
 class BaseLogger(abc.ABC):
@@ -152,3 +153,46 @@ class NazLoggingAdapter(logging.LoggerAdapter):
         t = time.strftime(self._formatter.default_time_format, ct)
         s = self._formatter.default_msec_format % (t, msecs)
         return s
+
+
+class BreachHandler(logging.StreamHandler):
+    """
+    Log handler that buffers logs in an in-memory ring buffer until a trigger.
+    When a trigger condition(eg a certain log level) is met;
+      - then all the logs in the buffer are flushed into a given stream(file, stdout etc)
+
+    Inspired by; https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/
+    """
+
+    def __init__(self, trigger_level=logging.WARNING, buffer_size=10_000, stream=None):
+        # call `logging.StreamHandler` init
+        super(BreachHandler, self).__init__(stream=stream)
+        self.trigger_level = trigger_level
+        self.buffer_size = buffer_size
+        self.buffered_logs = collections.deque(maxlen=self.buffer_size)
+
+    def emit(self, record):
+        """
+        Implementation is mostly taken from `logging.StreamHandler`
+        """
+        try:
+            # 1. append new item to deque(ring-buffer)
+            msg = self.format(record)
+            self.buffered_logs.append(msg)
+
+            # 2. check if the loglevel of the current record >= `self.trigger_level`
+            #    if it is.
+            #      (a) acquire lock
+            #      (b) stream.write and flush from `self.buffered_logs`
+            #      (c) clear out `self.buffered_logs`
+            if record.levelno < self.trigger_level:
+                return
+            else:
+                stream = self.stream
+                for _msg in self.buffered_logs:
+                    stream.write(_msg)
+                    stream.write(self.terminator)
+                self.buffered_logs.clear()
+                self.flush()
+        except Exception:
+            self.handleError(record)
