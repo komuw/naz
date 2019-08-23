@@ -5,7 +5,6 @@
 import io
 import logging
 import datetime
-import tempfile
 from unittest import TestCase
 
 import naz
