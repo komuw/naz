@@ -2,6 +2,10 @@
 most recent version is listed first.
 
 
+## **version:** v0.6.4
+- added a logging BreachHandler: https://github.com/komuw/naz/pull/149
+
+
 ## **version:** v0.6.3
 - added static analysis support using pytype: https://github.com/komuw/naz/pull/148
 
