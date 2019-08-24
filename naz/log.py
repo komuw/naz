@@ -208,7 +208,7 @@ class BreachHandler(handlers.MemoryHandler):
         Parameters:
             flushLevel: the log level that will trigger this handler to flush logs to :py:attr:`~target`
             capacity: the maximum number of log records to store in the ring buffer
-            target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used
+            target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
         """
         # call `logging.handlers.MemoryHandler` init
