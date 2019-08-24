@@ -65,36 +65,6 @@ class TestLogger(TestCase):
             content = f.read()
             self.assertIn("JayZ", content)
 
-    def test_breach_handler(self):
-        with io.StringIO() as _temp_stream:
-            _handler = naz.log.BreachHandler(buffer_size=4, stream=_temp_stream)
-            logger = naz.log.SimpleLogger("aha", handler=_handler)
-            logger.bind(level="INFO", log_metadata={"name": "JayZ"})
-
-            # log at level less than `_handler.trigger_level`
-            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
-            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "two": 2})
-            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "three": 3})
-            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "four": 4})
-            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "five": 5})
-            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "six": 6})
-            self.assertIn("", _temp_stream.getvalue())  # nothing is logged
-
-            # log at level greater than or equal to `_handler.trigger_level`
-            logger.log(level=logging.WARN, log_data={"trace_id": 781125213295, "seven": 7})
-
-            # assert that the handler used a circular buffer
-            self.assertNotIn("one", _temp_stream.getvalue())
-            self.assertNotIn("two", _temp_stream.getvalue())
-            self.assertNotIn("three", _temp_stream.getvalue())
-
-            # assert everything in the buffer after trigger level is reached
-            # is flushed to `_handler.stream`
-            self.assertIn("five", _temp_stream.getvalue())
-            self.assertIn("six", _temp_stream.getvalue())
-            self.assertIn("seven", _temp_stream.getvalue())
-            self.assertIn(str(781125213295), _temp_stream.getvalue())
-
 
 class KVlogger(naz.log.BaseLogger):
     """
@@ -144,3 +114,68 @@ class TestCustomLogger(TestCase):
             level=logging.WARN,
             log_data={"event": "myEvent", "stage": "start", "log_id": log_id, "now": now},
         )
+
+
+class TestBreachHandler(TestCase):
+    """
+    run tests as:
+        python -m unittest discover -v -s .
+    run one testcase as:
+        python -m unittest -v tests.test_logger.TestBreachHandler.test_something
+    """
+
+    def test_use_with_naz_logger(self):
+        with io.StringIO() as _temp_stream:
+            _handler = naz.log.BreachHandler(
+                capacity=4, target=logging.StreamHandler(stream=_temp_stream)
+            )
+            logger = naz.log.SimpleLogger("aha", handler=_handler)
+            logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+
+            # log at level less than `_handler.trigger_level`
+            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
+            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "two": 2})
+            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "three": 3})
+            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "four": 4})
+            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "five": 5})
+            logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "six": 6})
+            self.assertIn("", _temp_stream.getvalue())  # nothing is logged
+
+            # log at level greater than or equal to `_handler.trigger_level`
+            logger.log(level=logging.WARN, log_data={"trace_id": 781125213295, "seven": 7})
+
+            # assert that the handler used a circular buffer
+            self.assertNotIn("one", _temp_stream.getvalue())
+            self.assertNotIn("two", _temp_stream.getvalue())
+            self.assertNotIn("three", _temp_stream.getvalue())
+
+            # assert everything in the buffer after trigger level is reached
+            # is flushed to `_handler.stream`
+            self.assertIn("five", _temp_stream.getvalue())
+            self.assertIn("six", _temp_stream.getvalue())
+            self.assertIn("seven", _temp_stream.getvalue())
+            self.assertIn(str(781125213295), _temp_stream.getvalue())
+
+    def test_use_with_stdlib_logger(self):
+        with io.StringIO() as _temp_stream:
+            handler = naz.log.BreachHandler(
+                capacity=3, target=logging.StreamHandler(stream=_temp_stream)
+            )
+
+            logger = logging.getLogger("my-logger")
+            formatter = logging.Formatter("%(message)s")
+            handler.setFormatter(formatter)
+            handler.setLevel("DEBUG")
+            if not logger.handlers:
+                logger.addHandler(handler)
+            logger.setLevel("DEBUG")
+
+            logger.info("one")
+            logger.info("two")
+            logger.info("three")
+            logger.info("I did records for Tweet before y'all could even tweet - Dr. Missy Elliot")
+            logger.error("damn!")
+
+            self.assertNotIn("one", _temp_stream.getvalue())
+            self.assertIn("Dr. Missy Elliot", _temp_stream.getvalue())
+            self.assertIn("damn!", _temp_stream.getvalue())

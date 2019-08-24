@@ -11,7 +11,7 @@ upload:
 VERSION_STRING=$$(cat naz/__version__.py | grep "__version__" | sed -e 's/"__version__"://' | sed -e 's/,//g' | sed -e 's/"//g' | sed -e 's/ //g')
 uploadprod:
 	@printf "\n building sphinx documentation \n" && sphinx-build -a -E documentation/sphinx-docs/ docs/
-	@printf "\n git commit docs/ \n" && git add docs/ && git commit -m 'update docs/' 
+	@printf "\n git commit docs/ \n" && git add docs/ && git commit -m 'update docs/' | echo
 	@rm -rf build
 	@rm -rf dist
 	@sudo rm -rf naz.egg-info

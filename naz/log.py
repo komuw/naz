@@ -3,6 +3,7 @@ import time
 import typing
 import logging
 import collections
+from logging import handlers
 
 
 class BaseLogger(abc.ABC):
@@ -155,7 +156,7 @@ class _NazLoggingAdapter(logging.LoggerAdapter):
         return s
 
 
-class BreachHandler(logging.StreamHandler):
+class BreachHandler(handlers.MemoryHandler):
     """
     This is an implementation of `logging.Handler` that puts logs in an in-memory ring buffer.
     When a trigger condition(eg a certain log level) is met;
@@ -172,6 +173,8 @@ class BreachHandler(logging.StreamHandler):
 
     .. highlight:: python
     .. code-block:: python
+
+        import naz, logging
 
         _handler = naz.log.BreachHandler()
         logger = naz.log.SimpleLogger("aha", handler=_handler)
@@ -194,44 +197,34 @@ class BreachHandler(logging.StreamHandler):
         logger.error("damn")
     """
 
-    def __init__(self, trigger_level=logging.WARNING, buffer_size=10_000, stream=None):
+    def __init__(
+        self,
+        flushLevel=logging.WARNING,
+        capacity=10_000,
+        target=logging.StreamHandler(),
+        flushOnClose=False,
+    ):
         """
         Parameters:
-            trigger_level: the log level that will trigger this handler to flush logs to :py:attr:`~stream`
-            buffer_size: the maximum number of log records to store in the ring buffer
-            stream: a `file like object <https://docs.python.org/3/library/io.html>`_ that can be logged to.
+            flushLevel: the log level that will trigger this handler to flush logs to :py:attr:`~target`
+            capacity: the maximum number of log records to store in the ring buffer
+            target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
+            flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
         """
-        # call `logging.StreamHandler` init
-        super(BreachHandler, self).__init__(stream=stream)
-        self.trigger_level = trigger_level
-        self.buffer_size = buffer_size
-        self.buffered_logs = collections.deque(maxlen=self.buffer_size)
+        # call `logging.handlers.MemoryHandler` init
+        super(BreachHandler, self).__init__(
+            capacity=capacity,
+            flushLevel=flushLevel,
+            target=target,
+            flushOnClose=flushOnClose,  # pytype: disable=wrong-keyword-args
+        )
+        self.buffer = collections.deque(maxlen=self.capacity)  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
-        # memory used by `buffered_logs` will always be == 250*10_000/(1000*1000) == 2.5MB
+        # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
 
-    def emit(self, record):
+    def shouldFlush(self, record):
         """
-        Emit a record.
-        Implementation is mostly taken from `logging.StreamHandler`
+        Check for record at the flushLevel or higher.
+        Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
-        try:
-            # 1. append new item to deque(ring-buffer)
-            msg = self.format(record)
-            self.buffered_logs.append(msg)
-
-            # 2. check if the loglevel of the current record >= `self.trigger_level`
-            #    if it is.
-            #      (a) acquire lock
-            #      (b) stream.write and flush from `self.buffered_logs`
-            #      (c) clear out `self.buffered_logs`
-            if record.levelno < self.trigger_level:
-                return
-            else:
-                stream = self.stream
-                for _msg in self.buffered_logs:
-                    stream.write(_msg)
-                    stream.write(self.terminator)
-                self.buffered_logs.clear()
-                self.flush()
-        except Exception:
-            self.handleError(record)
+        return record.levelno >= self.flushLevel  # pytype: disable=attribute-error
