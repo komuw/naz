@@ -4,6 +4,10 @@ from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
 
 # run as:
 #  naz-cli --client examples.example_config.client
+
+handler = naz.logger.BreachHandler(buffer_size=400)
+
+
 client = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
@@ -18,4 +22,5 @@ client = naz.Client(
     enquire_link_interval=70.00,
     rateLimiter=MyRateLimiter(),
     address_range="^254",  # any msisdns beginning with 254. See Appendix A of SMPP spec doc
+    logger=naz.logger.SimpleLogger("naz.client", handler=handler),
 )

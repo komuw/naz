@@ -56,16 +56,16 @@ class SimpleHook(BaseHook):
     When this class is called by naz, it just logs the request or response.
     """
 
-    def __init__(self, log_handler: typing.Union[None, logger.BaseLogger] = None) -> None:
-        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+    def __init__(self, logger: typing.Union[None, logger.BaseLogger] = None) -> None:
+        if not isinstance(logger, (type(None), logger.BaseLogger)):
             raise ValueError(
-                "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
-                    type(log_handler)
+                "`logger` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                    type(logger)
                 )
             )
 
-        if log_handler is not None:
-            self.logger = log_handler
+        if logger is not None:
+            self.logger = logger
         else:
             self.logger = logger.SimpleLogger("naz.SimpleHook")
 

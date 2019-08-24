@@ -370,6 +370,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">trigger_level</span> <span class="o">=</span> <span class="n">trigger_level</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">buffered_logs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span><span class="p">)</span></div>
+        <span class="c1"># assuming each log record is 250 bytes, then the maximum</span>
+        <span class="c1"># memory used by `buffered_logs` will always be == 250*10_000/(1000*1000) == 2.5MB</span>
 
 <div class="viewcode-block" id="BreachHandler.emit"><a class="viewcode-back" href="../../logger.html#naz.logger.BreachHandler.emit">[docs]</a>    <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
