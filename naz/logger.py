@@ -161,10 +161,12 @@ class BreachHandler(logging.StreamHandler):
     When a trigger condition(eg a certain log level) is met;
     then all the logs in the buffer are flushed into a given stream(file, stdout etc)
 
-    It is a bit like `logging.handlers.MemoryHandler <https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler>`_ except that it does not flush when the
-    ring-buffer capacity is met but only when/if the trigger is met.
+    It is a bit like
+    `logging.handlers.MemoryHandler <https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler>`_
+    except that it does not flush when the ring-buffer capacity is met but only when/if the trigger is met.
 
-    It is inspired by the article `Triggering Diagnostic Logging on Exception <https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/>`_
+    It is inspired by the article
+    `Triggering Diagnostic Logging on Exception <https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/>`_
 
     example usage:
 

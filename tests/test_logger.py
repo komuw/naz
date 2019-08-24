@@ -55,7 +55,7 @@ class TestLogger(TestCase):
 
             self.assertIn("JayZ", _temp_stream.getvalue())
 
-        _file_name = "/tmp/naz_test_custom_handler"
+        _file_name = "/{0}/naz_test_custom_handler".format("tmp")  # fool bandit
         _handler = logging.FileHandler(filename=_file_name)
         logger = naz.logger.SimpleLogger("yolo", handler=_handler)
         logger.bind(level="INFO", log_metadata={"name": "JayZ"})

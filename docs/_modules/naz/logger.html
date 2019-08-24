@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.logger &mdash; naz v0.6.3 documentation</title>
+  <title>naz.logger &mdash; naz v0.6.4 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.6.3
+                v0.6.4
               </div>
             
           
@@ -325,10 +325,12 @@
 <span class="sd">    When a trigger condition(eg a certain log level) is met;</span>
 <span class="sd">    then all the logs in the buffer are flushed into a given stream(file, stdout etc)</span>
 
-<span class="sd">    It is a bit like `logging.handlers.MemoryHandler &lt;https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler&gt;`_ except that it does not flush when the</span>
-<span class="sd">    ring-buffer capacity is met but only when/if the trigger is met.</span>
+<span class="sd">    It is a bit like</span>
+<span class="sd">    `logging.handlers.MemoryHandler &lt;https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler&gt;`_</span>
+<span class="sd">    except that it does not flush when the ring-buffer capacity is met but only when/if the trigger is met.</span>
 
-<span class="sd">    It is inspired by the article `Triggering Diagnostic Logging on Exception &lt;https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/&gt;`_</span>
+<span class="sd">    It is inspired by the article</span>
+<span class="sd">    `Triggering Diagnostic Logging on Exception &lt;https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/&gt;`_</span>
 
 <span class="sd">    example usage:</span>
 

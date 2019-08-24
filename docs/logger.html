@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>logger &mdash; naz v0.6.3 documentation</title>
+  <title>logger &mdash; naz v0.6.4 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                v0.6.3
+                v0.6.4
               </div>
             
           
@@ -282,9 +282,11 @@ The logger can choose to bind these log_metadata to itself.</p>
 <p>This is an implementation of <cite>logging.Handler</cite> that puts logs in an in-memory ring buffer.
 When a trigger condition(eg a certain log level) is met;
 then all the logs in the buffer are flushed into a given stream(file, stdout etc)</p>
-<p>It is a bit like <a class="reference external" href="https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler">logging.handlers.MemoryHandler</a> except that it does not flush when the
-ring-buffer capacity is met but only when/if the trigger is met.</p>
-<p>It is inspired by the article <a class="reference external" href="https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/">Triggering Diagnostic Logging on Exception</a></p>
+<p>It is a bit like
+<a class="reference external" href="https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler">logging.handlers.MemoryHandler</a>
+except that it does not flush when the ring-buffer capacity is met but only when/if the trigger is met.</p>
+<p>It is inspired by the article
+<a class="reference external" href="https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/">Triggering Diagnostic Logging on Exception</a></p>
 <p>example usage:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_handler</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">BreachHandler</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;aha&quot;</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">_handler</span><span class="p">)</span>
