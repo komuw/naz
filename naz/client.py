@@ -10,7 +10,7 @@ import logging
 # pytype: disable=pyi-error
 from . import q
 from . import hooks
-from . import logger
+from . import log
 from . import nazcodec
 from . import sequence
 from . import throttle
@@ -103,7 +103,7 @@ class Client:
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
-        log_handler: typing.Union[None, logger.BaseLogger] = None,
+        logger: typing.Union[None, log.BaseLogger] = None,
         loglevel: str = "INFO",
         log_metadata: typing.Union[None, dict] = None,
         codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
@@ -145,7 +145,7 @@ class Client:
             outboundqueue:	python class instance implementing some queueing mechanism. \
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
-            log_handler: python class instance to be used for logging
+            logger: python class instance to be used for logging
             loglevel:	the level at which to log
             log_metadata: metadata that will be included in all log statements
             codec_class: python class instance to be used to encode/decode messages
@@ -190,7 +190,7 @@ class Client:
             replace_if_present_flag=replace_if_present_flag,
             sm_default_msg_id=sm_default_msg_id,
             enquire_link_interval=enquire_link_interval,
-            log_handler=log_handler,
+            logger=logger,
             loglevel=loglevel,
             log_metadata=log_metadata,
             codec_class=codec_class,
@@ -321,27 +321,27 @@ class Client:
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
-        if log_handler is not None:
-            self.logger = log_handler
+        if logger is not None:
+            self.logger = logger
         else:
-            self.logger = logger.SimpleLogger("naz.client")
+            self.logger = log.SimpleLogger("naz.client")
         self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
         self._sanity_check_logger()
 
         if rateLimiter is not None:
             self.rateLimiter = rateLimiter
         else:
-            self.rateLimiter = ratelimiter.SimpleRateLimiter(log_handler=self.logger)
+            self.rateLimiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
 
         if hook is not None:
             self.hook = hook
         else:
-            self.hook = hooks.SimpleHook(log_handler=self.logger)
+            self.hook = hooks.SimpleHook(logger=self.logger)
 
         if throttle_handler is not None:
             self.throttle_handler = throttle_handler
         else:
-            self.throttle_handler = throttle.SimpleThrottleHandler(log_handler=self.logger)
+            self.throttle_handler = throttle.SimpleThrottleHandler(logger=self.logger)
 
         # class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata
         # this will be used to track different pdu's and user generated log_id
@@ -392,7 +392,7 @@ class Client:
         replace_if_present_flag: int,
         sm_default_msg_id: int,
         enquire_link_interval: float,
-        log_handler: typing.Union[None, logger.BaseLogger],
+        logger: typing.Union[None, log.BaseLogger],
         loglevel: str,
         log_metadata: typing.Union[None, dict],
         codec_class: typing.Union[None, nazcodec.BaseNazCodec],
@@ -602,11 +602,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(log_handler, (type(None), logger.BaseLogger)):
+        if not isinstance(logger, (type(None), log.BaseLogger)):
             errors.append(
                 ValueError(
-                    "`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
-                        type(log_handler)
+                    "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
+                        type(logger)
                     )
                 )
             )

@@ -174,7 +174,7 @@
 <span class="c1"># pytype: disable=pyi-error</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">q</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">hooks</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nazcodec</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">sequence</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">throttle</span>
@@ -267,7 +267,7 @@
         <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
         <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">55.00</span><span class="p">,</span>
-        <span class="n">log_handler</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">loglevel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
         <span class="n">log_metadata</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">nazcodec</span><span class="o">.</span><span class="n">BaseNazCodec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -309,7 +309,7 @@
 <span class="sd">            outboundqueue:	python class instance implementing some queueing mechanism. \</span>
 <span class="sd">                messages to be sent to SMSC are queued using the said mechanism before been sent</span>
 <span class="sd">            client_id:	a unique string identifying a naz client class instance</span>
-<span class="sd">            log_handler: python class instance to be used for logging</span>
+<span class="sd">            logger: python class instance to be used for logging</span>
 <span class="sd">            loglevel:	the level at which to log</span>
 <span class="sd">            log_metadata: metadata that will be included in all log statements</span>
 <span class="sd">            codec_class: python class instance to be used to encode/decode messages</span>
@@ -354,7 +354,7 @@
             <span class="n">replace_if_present_flag</span><span class="o">=</span><span class="n">replace_if_present_flag</span><span class="p">,</span>
             <span class="n">sm_default_msg_id</span><span class="o">=</span><span class="n">sm_default_msg_id</span><span class="p">,</span>
             <span class="n">enquire_link_interval</span><span class="o">=</span><span class="n">enquire_link_interval</span><span class="p">,</span>
-            <span class="n">log_handler</span><span class="o">=</span><span class="n">log_handler</span><span class="p">,</span>
+            <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
             <span class="n">loglevel</span><span class="o">=</span><span class="n">loglevel</span><span class="p">,</span>
             <span class="n">log_metadata</span><span class="o">=</span><span class="n">log_metadata</span><span class="p">,</span>
             <span class="n">codec_class</span><span class="o">=</span><span class="n">codec_class</span><span class="p">,</span>
@@ -485,27 +485,27 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">log_handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">log_handler</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;naz.client&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;naz.client&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_metadata</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sanity_check_logger</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">rateLimiter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">rateLimiter</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">log_handler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">hook</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hook</span> <span class="o">=</span> <span class="n">hook</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">hook</span> <span class="o">=</span> <span class="n">hooks</span><span class="o">.</span><span class="n">SimpleHook</span><span class="p">(</span><span class="n">log_handler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hook</span> <span class="o">=</span> <span class="n">hooks</span><span class="o">.</span><span class="n">SimpleHook</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">throttle_handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">throttle_handler</span> <span class="o">=</span> <span class="n">throttle_handler</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">throttle_handler</span> <span class="o">=</span> <span class="n">throttle</span><span class="o">.</span><span class="n">SimpleThrottleHandler</span><span class="p">(</span><span class="n">log_handler</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">throttle_handler</span> <span class="o">=</span> <span class="n">throttle</span><span class="o">.</span><span class="n">SimpleThrottleHandler</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
 
         <span class="c1"># class storing SMPP sequence_number and their corresponding log_id and/or hook_metadata</span>
         <span class="c1"># this will be used to track different pdu&#39;s and user generated log_id</span>
@@ -556,7 +556,7 @@
         <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">log_handler</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">],</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">],</span>
         <span class="n">loglevel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">log_metadata</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
         <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">nazcodec</span><span class="o">.</span><span class="n">BaseNazCodec</span><span class="p">],</span>
@@ -766,11 +766,11 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_handler</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">)):</span>
             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`log_handler` should be of type:: `None` or `naz.logger.BaseLogger` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">log_handler</span><span class="p">)</span>
+                    <span class="s2">&quot;`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>

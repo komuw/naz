@@ -645,7 +645,7 @@ class TestClient(TestCase):
             self.assertTrue(mock_correlater_get.mock.call_args[1]["sequence_number"])
 
     def test_logger_called(self):
-        with mock.patch("naz.logger.SimpleLogger.log") as mock_logger_log:
+        with mock.patch("naz.log.SimpleLogger.log") as mock_logger_log:
             mock_logger_log.return_value = None
             self._run(
                 self.cli._parse_response_pdu(

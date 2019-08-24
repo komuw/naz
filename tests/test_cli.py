@@ -132,7 +132,7 @@ class TestCliSigHandling(TestCase):
             drain_duration=0.001,
         )
         self.loop = asyncio.get_event_loop()
-        self.logger = naz.logger.SimpleLogger("naz.TestCliSigHandling")
+        self.logger = naz.log.SimpleLogger("naz.TestCliSigHandling")
 
     def tearDown(self):
         pass

@@ -34,7 +34,7 @@ class Server:
         self.chaos = chaos
 
         self.docker_client = docker.from_env()
-        self.logger = naz.logger.SimpleLogger("naz_benchmarks.{0}".format(self.container_name))
+        self.logger = naz.log.SimpleLogger("naz_benchmarks.{0}".format(self.container_name))
         self.logger.bind(
             level="INFO", log_metadata={"container_name": self.container_name, "chaos": self.chaos}
         )

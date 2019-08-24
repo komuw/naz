@@ -20,7 +20,7 @@ async def send_messages():
     MAX_NUM_OF_MESSAGES = 100_004
     MSGS_SENT = 0
 
-    logger = naz.logger.SimpleLogger("naz_benchmarks.message_producer")
+    logger = naz.log.SimpleLogger("naz_benchmarks.message_producer")
     while True:
         try:
             log_id = "{}-".format(MSGS_SENT + 1) + "".join(

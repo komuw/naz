@@ -59,7 +59,7 @@ def main():
     client = args.client
 
     _client_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=17))
-    logger = naz.logger.SimpleLogger("naz.cli")
+    logger = naz.log.SimpleLogger("naz.cli")
     try:
         logger.log(logging.INFO, "\n\n\t {} \n\n".format("Naz: the SMPP client."))
         logger.log(
@@ -99,7 +99,7 @@ def main():
 
 async def async_main(
     client: naz.Client,
-    logger: naz.logger.SimpleLogger,
+    logger: naz.log.SimpleLogger,
     loop: asyncio.events.AbstractEventLoop,
     dry_run: bool,
 ):

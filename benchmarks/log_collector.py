@@ -8,7 +8,7 @@ import naz
 import asyncpg
 
 
-logger = naz.logger.SimpleLogger("naz_benchmarks.log_collector")
+logger = naz.log.SimpleLogger("naz_benchmarks.log_collector")
 logger.log(logging.INFO, {"event": "log_collector.start"})
 
 

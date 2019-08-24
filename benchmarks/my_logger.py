@@ -35,7 +35,7 @@ def makelog(log_directory="/usr/src/nazLog", log_file="naz_log_file"):
 log_file = makelog()
 
 
-class MyLogAdapter(naz.logger._NazLoggingAdapter):
+class MyLogAdapter(naz.log._NazLoggingAdapter):
     def process(self, msg, kwargs):
         timestamp = self.formatTime()
         if isinstance(msg, str):
@@ -55,7 +55,7 @@ class MyLogAdapter(naz.logger._NazLoggingAdapter):
             return self._dumps(str(e))
 
 
-class BenchmarksLogger(naz.logger.SimpleLogger):
+class BenchmarksLogger(naz.log.SimpleLogger):
     def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
         level = self._nameToLevel(level=level)
         self._logger = logging.getLogger(self.logger_name)

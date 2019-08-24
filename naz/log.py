@@ -173,8 +173,8 @@ class BreachHandler(logging.StreamHandler):
     .. highlight:: python
     .. code-block:: python
 
-        _handler = naz.logger.BreachHandler()
-        logger = naz.logger.SimpleLogger("aha", handler=_handler)
+        _handler = naz.log.BreachHandler()
+        logger = naz.log.SimpleLogger("aha", handler=_handler)
         logger.bind(level="INFO", log_metadata={"id": "123"})
 
         logger.log(logging.INFO, {"name": "Jayz"})
@@ -182,7 +182,7 @@ class BreachHandler(logging.StreamHandler):
 
         # or alternatively, to use it with python stdlib logger
         logger = logging.getLogger("my-logger")
-        handler = naz.logger.BreachHandler()
+        handler = naz.log.BreachHandler()
         formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
         handler.setLevel("DEBUG")

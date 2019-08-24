@@ -191,7 +191,7 @@ naz lets you do this, by allowing you to specify a custom rate limiter.</p>
 
 <dl class="class">
 <dt id="naz.ratelimiter.SimpleRateLimiter">
-<em class="property">class </em><code class="sig-prename descclassname">naz.ratelimiter.</code><code class="sig-name descname">SimpleRateLimiter</code><span class="sig-paren">(</span><em class="sig-param">send_rate=100000.0</em>, <em class="sig-param">log_handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.ratelimiter.</code><code class="sig-name descname">SimpleRateLimiter</code><span class="sig-paren">(</span><em class="sig-param">send_rate=100000.0</em>, <em class="sig-param">logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#naz.ratelimiter.BaseRateLimiter" title="naz.ratelimiter.BaseRateLimiter"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.ratelimiter.BaseRateLimiter</span></code></a></p>
 <p>This is an implementation of BaseRateLimiter.</p>
 <p>It does rate limiting using a <a class="reference external" href="https://en.wikipedia.org/wiki/Token_bucket">token bucket rate limiting algorithm</a></p>
@@ -203,7 +203,7 @@ naz lets you do this, by allowing you to specify a custom rate limiter.</p>
 </div>
 <dl class="method">
 <dt id="naz.ratelimiter.SimpleRateLimiter.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">send_rate=100000.0</em>, <em class="sig-param">log_handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">send_rate=100000.0</em>, <em class="sig-param">logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/ratelimiter.html#SimpleRateLimiter.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.ratelimiter.SimpleRateLimiter.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>send_rate</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – the maximum rate, in messages/second, at which naz can send messages to SMSC.</p>

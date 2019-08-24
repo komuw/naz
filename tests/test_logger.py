@@ -19,7 +19,7 @@ class TestLogger(TestCase):
     """
 
     def setUp(self):
-        self.logger = naz.logger.SimpleLogger("myLogger")
+        self.logger = naz.log.SimpleLogger("myLogger")
 
     def tearDown(self):
         pass
@@ -49,7 +49,7 @@ class TestLogger(TestCase):
     def test_custom_handler(self):
         with io.StringIO() as _temp_stream:
             _handler = logging.StreamHandler(stream=_temp_stream)
-            logger = naz.logger.SimpleLogger("yo", handler=_handler)
+            logger = naz.log.SimpleLogger("yo", handler=_handler)
             logger.bind(level="INFO", log_metadata={"name": "JayZ"})
             logger.log(level=logging.WARN, log_data={"someKey": "someValue"})
 
@@ -57,7 +57,7 @@ class TestLogger(TestCase):
 
         _file_name = "/{0}/naz_test_custom_handler".format("tmp")  # fool bandit
         _handler = logging.FileHandler(filename=_file_name)
-        logger = naz.logger.SimpleLogger("yolo", handler=_handler)
+        logger = naz.log.SimpleLogger("yolo", handler=_handler)
         logger.bind(level="INFO", log_metadata={"name": "JayZ"})
         logger.log(level=logging.WARN, log_data={"someKey": "someValue"})
 
@@ -67,8 +67,8 @@ class TestLogger(TestCase):
 
     def test_breach_handler(self):
         with io.StringIO() as _temp_stream:
-            _handler = naz.logger.BreachHandler(buffer_size=4, stream=_temp_stream)
-            logger = naz.logger.SimpleLogger("aha", handler=_handler)
+            _handler = naz.log.BreachHandler(buffer_size=4, stream=_temp_stream)
+            logger = naz.log.SimpleLogger("aha", handler=_handler)
             logger.bind(level="INFO", log_metadata={"name": "JayZ"})
 
             # log at level less than `_handler.trigger_level`
@@ -96,7 +96,7 @@ class TestLogger(TestCase):
             self.assertIn(str(781125213295), _temp_stream.getvalue())
 
 
-class KVlogger(naz.logger.BaseLogger):
+class KVlogger(naz.log.BaseLogger):
     """
     A simple implementation of a key=value
     log renderer.

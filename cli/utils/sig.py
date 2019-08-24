@@ -7,7 +7,7 @@ import naz
 
 
 async def _signal_handling(
-    logger: naz.logger.BaseLogger, client: naz.Client, loop: asyncio.events.AbstractEventLoop
+    logger: naz.log.BaseLogger, client: naz.Client, loop: asyncio.events.AbstractEventLoop
 ) -> None:
     try:
         for _signal in [signal.SIGHUP, signal.SIGQUIT, signal.SIGTERM]:
@@ -31,7 +31,7 @@ async def _signal_handling(
 
 
 async def _handle_termination_signal(
-    logger: naz.logger.BaseLogger, _signal: "signal.Signals", client: naz.Client
+    logger: naz.log.BaseLogger, _signal: "signal.Signals", client: naz.Client
 ) -> None:
     logger.log(
         logging.INFO,

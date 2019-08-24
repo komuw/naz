@@ -49,7 +49,7 @@ encoding | encoding<sup>1</sup> used to encode messages been sent to SMSC | gsm0
 sequence_generator | python class instance used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
 outboundqueue | python class instance implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
 client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
-log_handler | python class instance to be used for logging | naz.logger.SimpleLogger        
+logger | python class instance to be used for logging | naz.log.SimpleLogger        
 loglevel | the level at which to log | INFO
 log_metadata | metadata that will be included in all log statements | {"smsc_host": smsc_host, "system_id": system_id}
 codec_class | python class instance to be used to encode/decode messages | naz.nazcodec.SimpleNazCodec
