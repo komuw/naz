@@ -377,9 +377,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># call `logging.handlers.MemoryHandler` init</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BreachHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">capacity</span><span class="o">=</span><span class="n">capacity</span><span class="p">,</span> <span class="n">flushLevel</span><span class="o">=</span><span class="n">flushLevel</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">flushOnClose</span><span class="o">=</span><span class="n">flushOnClose</span>
+            <span class="n">capacity</span><span class="o">=</span><span class="n">capacity</span><span class="p">,</span>
+            <span class="n">flushLevel</span><span class="o">=</span><span class="n">flushLevel</span><span class="p">,</span>
+            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
+            <span class="n">flushOnClose</span><span class="o">=</span><span class="n">flushOnClose</span><span class="p">,</span>  <span class="c1"># pytype: disable=wrong-keyword-args</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span>  <span class="c1"># pytype: disable=attribute-error</span></div>
         <span class="c1"># assuming each log record is 250 bytes, then the maximum</span>
         <span class="c1"># memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB</span>
 
@@ -388,7 +391,7 @@
 <span class="sd">        Check for record at the flushLevel or higher.</span>
 <span class="sd">        Implementation is mostly taken from `logging.handlers.MemoryHandler`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flushLevel</span></div></div>
+        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flushLevel</span>  <span class="c1"># pytype: disable=attribute-error</span></div></div>
 </pre></div>
 
            </div>
