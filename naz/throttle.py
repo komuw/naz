@@ -3,7 +3,7 @@ import time
 import typing
 import logging
 
-from . import logger
+from . import log
 
 
 class BaseThrottleHandler(abc.ABC):
@@ -74,7 +74,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         sample_size: float = 50.00,
         deny_request_at: float = 1.00,
         throttle_wait: float = 3.00,
-        logger: typing.Union[None, logger.BaseLogger] = None,
+        logger: typing.Union[None, log.BaseLogger] = None,
     ) -> None:
         """
         Parameters:
@@ -107,9 +107,9 @@ class SimpleThrottleHandler(BaseThrottleHandler):
                     type(throttle_wait)
                 )
             )
-        if not isinstance(logger, (type(None), logger.BaseLogger)):
+        if not isinstance(logger, (type(None), log.BaseLogger)):
             raise ValueError(
-                "`logger` should be of type:: `None` or `naz.logger.BaseLogger` You entered: {0}".format(
+                "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
                     type(logger)
                 )
             )
@@ -126,7 +126,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         if logger is not None:
             self.logger = logger
         else:
-            self.logger = logger.SimpleLogger("naz.SimpleThrottleHandler")
+            self.logger = log.SimpleLogger("naz.SimpleThrottleHandler")
 
     @property
     def percent_throttles(self) -> float:

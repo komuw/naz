@@ -166,7 +166,7 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span>
 
 <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">state</span>  <span class="c1"># noqa: F401</span>
@@ -220,10 +220,10 @@
 <span class="sd">    When this class is called by naz, it just logs the request or response.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleHook.__init__"><a class="viewcode-back" href="../../hooks.html#naz.hooks.SimpleHook.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">logger</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">)):</span>
+<div class="viewcode-block" id="SimpleHook.__init__"><a class="viewcode-back" href="../../hooks.html#naz.hooks.SimpleHook.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`logger` should be of type:: `None` or `naz.logger.BaseLogger` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="nb">type</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -231,7 +231,7 @@
         <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;naz.SimpleHook&quot;</span><span class="p">)</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;naz.SimpleHook&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="SimpleHook.request"><a class="viewcode-back" href="../../hooks.html#naz.hooks.SimpleHook.request">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>

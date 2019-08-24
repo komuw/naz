@@ -170,14 +170,14 @@ NB:
 | and then these will show up in all log events.
 | by default, naz annotates all log events with smsc_host, system_id and client_id
 
-| ``naz`` also gives you the ability to supply your own logger. All you have to do is satisfy the `naz.logger.BaseLogger <https://komuw.github.io/naz/logger.html#naz.logger.BaseLogger>`_ interface
+| ``naz`` also gives you the ability to supply your own logger. All you have to do is satisfy the `naz.log.BaseLogger <https://komuw.github.io/naz/logger.html#naz.log.BaseLogger>`_ interface
 | For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
 
 .. code-block:: python
 
     import naz
 
-    class KVlogger(naz.logger.BaseLogger):
+    class KVlogger(naz.log.BaseLogger):
         def __init__(self):
             self.logger = logging.getLogger("myKVlogger")
             handler = logging.StreamHandler()
@@ -196,7 +196,7 @@ NB:
     kvLog = KVlogger()
     cli = naz.Client(
         ...
-        log_handler=kvLog,
+        logger=kvLog,
     )
 
 
