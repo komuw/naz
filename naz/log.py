@@ -213,9 +213,12 @@ class BreachHandler(handlers.MemoryHandler):
         """
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(
-            capacity=capacity, flushLevel=flushLevel, target=target, flushOnClose=flushOnClose
+            capacity=capacity,
+            flushLevel=flushLevel,
+            target=target,
+            flushOnClose=flushOnClose,  # pytype: disable=wrong-keyword-args
         )
-        self.buffer = collections.deque(maxlen=self.capacity)
+        self.buffer = collections.deque(maxlen=self.capacity)  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
 
@@ -224,4 +227,4 @@ class BreachHandler(handlers.MemoryHandler):
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
-        return record.levelno >= self.flushLevel
+        return record.levelno >= self.flushLevel  # pytype: disable=attribute-error
