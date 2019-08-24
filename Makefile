@@ -43,4 +43,5 @@ test:
 
 # note `.nojekyll` file is important inside `docs/` folder
 sphinx:
+	@touch docs/.nojekyll
 	@sphinx-build -a -E documentation/sphinx-docs/ docs/
