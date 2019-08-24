@@ -67,7 +67,9 @@ class TestLogger(TestCase):
 
     def test_breach_handler(self):
         with io.StringIO() as _temp_stream:
-            _handler = naz.log.BreachHandler(buffer_size=4, stream=_temp_stream)
+            _handler = naz.log.BreachHandler(
+                capacity=4, target=logging.StreamHandler(stream=_temp_stream)
+            )
             logger = naz.log.SimpleLogger("aha", handler=_handler)
             logger.bind(level="INFO", log_metadata={"name": "JayZ"})
 
