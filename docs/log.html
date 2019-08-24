@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>log &mdash; naz v0.6.4 documentation</title>
+  <title>log &mdash; naz v0.6.5 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                v0.6.4
+                v0.6.5
               </div>
             
           
@@ -277,8 +277,8 @@ The logger can choose to bind these log_metadata to itself.</p>
 
 <dl class="class">
 <dt id="naz.log.BreachHandler">
-<em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">BreachHandler</code><span class="sig-paren">(</span><em class="sig-param">trigger_level=30</em>, <em class="sig-param">buffer_size=10000</em>, <em class="sig-param">stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">logging.StreamHandler</span></code></p>
+<em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">BreachHandler</code><span class="sig-paren">(</span><em class="sig-param">flushLevel=30</em>, <em class="sig-param">capacity=10000</em>, <em class="sig-param">target=&lt;StreamHandler &lt;stderr&gt; (NOTSET)&gt;</em>, <em class="sig-param">flushOnClose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">logging.handlers.MemoryHandler</span></code></p>
 <p>This is an implementation of <cite>logging.Handler</cite> that puts logs in an in-memory ring buffer.
 When a trigger condition(eg a certain log level) is met;
 then all the logs in the buffer are flushed into a given stream(file, stdout etc)</p>
@@ -288,7 +288,9 @@ except that it does not flush when the ring-buffer capacity is met but only when
 <p>It is inspired by the article
 <a class="reference external" href="https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/">Triggering Diagnostic Logging on Exception</a></p>
 <p>example usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_handler</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">BreachHandler</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span><span class="o">,</span> <span class="nn">logging</span>
+
+<span class="n">_handler</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">BreachHandler</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;aha&quot;</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">_handler</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span> <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;123&quot;</span><span class="p">})</span>
 
@@ -311,23 +313,24 @@ except that it does not flush when the ring-buffer capacity is met but only when
 </div>
 <dl class="method">
 <dt id="naz.log.BreachHandler.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">trigger_level=30</em>, <em class="sig-param">buffer_size=10000</em>, <em class="sig-param">stream=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">flushLevel=30</em>, <em class="sig-param">capacity=10000</em>, <em class="sig-param">target=&lt;StreamHandler &lt;stderr&gt; (NOTSET)&gt;</em>, <em class="sig-param">flushOnClose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>trigger_level</strong> – the log level that will trigger this handler to flush logs to <code class="xref py py-attr docutils literal notranslate"><span class="pre">stream</span></code></p></li>
-<li><p><strong>buffer_size</strong> – the maximum number of log records to store in the ring buffer</p></li>
-<li><p><strong>stream</strong> – a <a class="reference external" href="https://docs.python.org/3/library/io.html">file like object</a> that can be logged to.</p></li>
+<li><p><strong>flushLevel</strong> – the log level that will trigger this handler to flush logs to <code class="xref py py-attr docutils literal notranslate"><span class="pre">target</span></code></p></li>
+<li><p><strong>capacity</strong> – the maximum number of log records to store in the ring buffer</p></li>
+<li><p><strong>target</strong> – the ultimate <a class="reference external" href="https://docs.python.org/3.6/library/logging.html#logging.Handler">log handler</a> that will be used</p></li>
+<li><p><strong>flushOnClose</strong> – whether to flush the buffer when the handler is closed even if the flush level hasn’t been exceeded</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.log.BreachHandler.emit">
-<code class="sig-name descname">emit</code><span class="sig-paren">(</span><em class="sig-param">record</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.emit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.emit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Emit a record.
-Implementation is mostly taken from <cite>logging.StreamHandler</cite></p>
+<dt id="naz.log.BreachHandler.shouldFlush">
+<code class="sig-name descname">shouldFlush</code><span class="sig-paren">(</span><em class="sig-param">record</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.shouldFlush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.shouldFlush" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check for record at the flushLevel or higher.
+Implementation is mostly taken from <cite>logging.handlers.MemoryHandler</cite></p>
 </dd></dl>
 
 </dd></dl>

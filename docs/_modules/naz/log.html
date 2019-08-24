@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.log &mdash; naz v0.6.4 documentation</title>
+  <title>naz.log &mdash; naz v0.6.5 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.6.4
+                v0.6.5
               </div>
             
           
@@ -167,6 +167,7 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">handlers</span>
 
 
 <div class="viewcode-block" id="BaseLogger"><a class="viewcode-back" href="../../log.html#naz.log.BaseLogger">[docs]</a><span class="k">class</span> <span class="nc">BaseLogger</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
@@ -319,7 +320,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
 
-<div class="viewcode-block" id="BreachHandler"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler">[docs]</a><span class="k">class</span> <span class="nc">BreachHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler">[docs]</a><span class="k">class</span> <span class="nc">BreachHandler</span><span class="p">(</span><span class="n">handlers</span><span class="o">.</span><span class="n">MemoryHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is an implementation of `logging.Handler` that puts logs in an in-memory ring buffer.</span>
 <span class="sd">    When a trigger condition(eg a certain log level) is met;</span>
@@ -336,6 +337,8 @@
 
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import naz, logging</span>
 
 <span class="sd">        _handler = naz.log.BreachHandler()</span>
 <span class="sd">        logger = naz.log.SimpleLogger(&quot;aha&quot;, handler=_handler)</span>
@@ -358,47 +361,34 @@
 <span class="sd">        logger.error(&quot;damn&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trigger_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">flushLevel</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
+        <span class="n">capacity</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span>
+        <span class="n">target</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(),</span>
+        <span class="n">flushOnClose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
-<span class="sd">            trigger_level: the log level that will trigger this handler to flush logs to :py:attr:`~stream`</span>
-<span class="sd">            buffer_size: the maximum number of log records to store in the ring buffer</span>
-<span class="sd">            stream: a `file like object &lt;https://docs.python.org/3/library/io.html&gt;`_ that can be logged to.</span>
+<span class="sd">            flushLevel: the log level that will trigger this handler to flush logs to :py:attr:`~target`</span>
+<span class="sd">            capacity: the maximum number of log records to store in the ring buffer</span>
+<span class="sd">            target: the ultimate `log handler &lt;https://docs.python.org/3.6/library/logging.html#logging.Handler&gt;`_ that will be used</span>
+<span class="sd">            flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn&#39;t been exceeded</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># call `logging.StreamHandler` init</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">BreachHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trigger_level</span> <span class="o">=</span> <span class="n">trigger_level</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffered_logs</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">buffer_size</span><span class="p">)</span></div>
+        <span class="c1"># call `logging.handlers.MemoryHandler` init</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BreachHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">capacity</span><span class="o">=</span><span class="n">capacity</span><span class="p">,</span> <span class="n">flushLevel</span><span class="o">=</span><span class="n">flushLevel</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">flushOnClose</span><span class="o">=</span><span class="n">flushOnClose</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span><span class="p">)</span></div>
         <span class="c1"># assuming each log record is 250 bytes, then the maximum</span>
-        <span class="c1"># memory used by `buffered_logs` will always be == 250*10_000/(1000*1000) == 2.5MB</span>
+        <span class="c1"># memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB</span>
 
-<div class="viewcode-block" id="BreachHandler.emit"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.emit">[docs]</a>    <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler.shouldFlush"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.shouldFlush">[docs]</a>    <span class="k">def</span> <span class="nf">shouldFlush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Emit a record.</span>
-<span class="sd">        Implementation is mostly taken from `logging.StreamHandler`</span>
+<span class="sd">        Check for record at the flushLevel or higher.</span>
+<span class="sd">        Implementation is mostly taken from `logging.handlers.MemoryHandler`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># 1. append new item to deque(ring-buffer)</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">buffered_logs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-
-            <span class="c1"># 2. check if the loglevel of the current record &gt;= `self.trigger_level`</span>
-            <span class="c1">#    if it is.</span>
-            <span class="c1">#      (a) acquire lock</span>
-            <span class="c1">#      (b) stream.write and flush from `self.buffered_logs`</span>
-            <span class="c1">#      (c) clear out `self.buffered_logs`</span>
-            <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">trigger_level</span><span class="p">:</span>
-                <span class="k">return</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">stream</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stream</span>
-                <span class="k">for</span> <span class="n">_msg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffered_logs</span><span class="p">:</span>
-                    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">_msg</span><span class="p">)</span>
-                    <span class="n">stream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">terminator</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">buffered_logs</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">handleError</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flushLevel</span></div></div>
 </pre></div>
 
            </div>
