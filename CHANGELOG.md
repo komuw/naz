@@ -5,6 +5,7 @@ most recent version is listed first.
 ## **version:** v0.6.4
 - added a logging BreachHandler: https://github.com/komuw/naz/pull/149
 - renamed `naz.logger` to `naz.log`: https://github.com/komuw/naz/pull/150
+- fix documentation styling: https://github.com/komuw/naz/pull/151
 
 
 ## **version:** v0.6.3
