@@ -2,6 +2,7 @@ import abc
 import time
 import typing
 import logging
+import collections
 
 
 class BaseLogger(abc.ABC):
@@ -56,7 +57,7 @@ class SimpleLogger(BaseLogger):
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
 
-    def __init__(self, logger_name: str):
+    def __init__(self, logger_name: str, handler: logging.Handler = logging.StreamHandler()):
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
@@ -65,22 +66,28 @@ class SimpleLogger(BaseLogger):
             raise ValueError(
                 "`logger_name` should be of type:: `str` You entered: {0}".format(type(logger_name))
             )
+        if not isinstance(handler, logging.Handler):
+            raise ValueError(
+                "`handler` should be of type:: `logging.Handler` You entered: {0}".format(
+                    type(handler)
+                )
+            )
 
         self.logger_name = logger_name
+        self.handler = handler
         self.logger: typing.Union[None, logging.LoggerAdapter] = None
 
     def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
         level = self._nameToLevel(level=level)
 
         self._logger = logging.getLogger(self.logger_name)
-        handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
-        handler.setFormatter(formatter)
-        handler.setLevel(level)
+        self.handler.setFormatter(formatter)
+        self.handler.setLevel(level)
         if not self._logger.handlers:
-            self._logger.addHandler(handler)
+            self._logger.addHandler(self.handler)
         self._logger.setLevel(level)
-        self.logger = NazLoggingAdapter(self._logger, log_metadata)
+        self.logger = _NazLoggingAdapter(self._logger, log_metadata)
 
     def log(self, level: typing.Union[str, int], log_data: typing.Union[str, dict]) -> None:
         level = self._nameToLevel(level=level)
@@ -111,7 +118,7 @@ class SimpleLogger(BaseLogger):
             ) from e
 
 
-class NazLoggingAdapter(logging.LoggerAdapter):
+class _NazLoggingAdapter(logging.LoggerAdapter):
     _converter = time.localtime
     _formatter = logging.Formatter()
 
@@ -146,3 +153,85 @@ class NazLoggingAdapter(logging.LoggerAdapter):
         t = time.strftime(self._formatter.default_time_format, ct)
         s = self._formatter.default_msec_format % (t, msecs)
         return s
+
+
+class BreachHandler(logging.StreamHandler):
+    """
+    This is an implementation of `logging.Handler` that puts logs in an in-memory ring buffer.
+    When a trigger condition(eg a certain log level) is met;
+    then all the logs in the buffer are flushed into a given stream(file, stdout etc)
+
+    It is a bit like
+    `logging.handlers.MemoryHandler <https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler>`_
+    except that it does not flush when the ring-buffer capacity is met but only when/if the trigger is met.
+
+    It is inspired by the article
+    `Triggering Diagnostic Logging on Exception <https://tersesystems.com/blog/2019/07/28/triggering-diagnostic-logging-on-exception/>`_
+
+    example usage:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        _handler = naz.logger.BreachHandler()
+        logger = naz.logger.SimpleLogger("aha", handler=_handler)
+        logger.bind(level="INFO", log_metadata={"id": "123"})
+
+        logger.log(logging.INFO, {"name": "Jayz"})
+        logger.log(logging.ERROR, {"msg": "Houston, we got 99 problems."})
+
+        # or alternatively, to use it with python stdlib logger
+        logger = logging.getLogger("my-logger")
+        handler = naz.logger.BreachHandler()
+        formatter = logging.Formatter("%(message)s")
+        handler.setFormatter(formatter)
+        handler.setLevel("DEBUG")
+        if not logger.handlers:
+            logger.addHandler(handler)
+        logger.setLevel("DEBUG")
+
+        logger.info("I did records for Tweet before y'all could even tweet - Dr. Missy Elliot")
+        logger.error("damn")
+    """
+
+    def __init__(self, trigger_level=logging.WARNING, buffer_size=10_000, stream=None):
+        """
+        Parameters:
+            trigger_level: the log level that will trigger this handler to flush logs to :py:attr:`~stream`
+            buffer_size: the maximum number of log records to store in the ring buffer
+            stream: a `file like object <https://docs.python.org/3/library/io.html>`_ that can be logged to.
+        """
+        # call `logging.StreamHandler` init
+        super(BreachHandler, self).__init__(stream=stream)
+        self.trigger_level = trigger_level
+        self.buffer_size = buffer_size
+        self.buffered_logs = collections.deque(maxlen=self.buffer_size)
+        # assuming each log record is 250 bytes, then the maximum
+        # memory used by `buffered_logs` will always be == 250*10_000/(1000*1000) == 2.5MB
+
+    def emit(self, record):
+        """
+        Emit a record.
+        Implementation is mostly taken from `logging.StreamHandler`
+        """
+        try:
+            # 1. append new item to deque(ring-buffer)
+            msg = self.format(record)
+            self.buffered_logs.append(msg)
+
+            # 2. check if the loglevel of the current record >= `self.trigger_level`
+            #    if it is.
+            #      (a) acquire lock
+            #      (b) stream.write and flush from `self.buffered_logs`
+            #      (c) clear out `self.buffered_logs`
+            if record.levelno < self.trigger_level:
+                return
+            else:
+                stream = self.stream
+                for _msg in self.buffered_logs:
+                    stream.write(_msg)
+                    stream.write(self.terminator)
+                self.buffered_logs.clear()
+                self.flush()
+        except Exception:
+            self.handleError(record)

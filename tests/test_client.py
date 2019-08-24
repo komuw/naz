@@ -903,7 +903,7 @@ class TestClient(TestCase):
             self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
 
     def test_command_status_lookup(self):
-        command_status = 411041792
+        command_status = 411_041_792
         command_status = self.cli._search_by_command_status_value(
             command_status_value=command_status
         )
@@ -934,7 +934,7 @@ class TestClient(TestCase):
         with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
             sequence_number = 1
             bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
-            command_status = 411041792
+            command_status = 411_041_792
             self._run(
                 self.cli.command_handlers(
                     body_data=b"body_data",
