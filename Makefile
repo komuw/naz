@@ -42,6 +42,7 @@ test:
 	@printf "\n run pytype::\n" && pytype --verbosity 0 --python-version 3.6 --protocols --strict-import --keep-going naz/ cli/
 
 # note `.nojekyll` file is important inside `docs/` folder
+# without it, css styling for docs in https://komuw.github.io/naz/ is broken
 sphinx:
 	@touch docs/.nojekyll
 	@sphinx-build -a -E documentation/sphinx-docs/ docs/

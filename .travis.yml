@@ -31,6 +31,7 @@ script:
   - export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
   - coverage report --show-missing --fail-under=84
   - sphinx-build -a -E documentation/sphinx-docs/ docs/
+  - stat docs/.nojekyll # make sure that file exists.
   - |
     git remote set-branches --add origin master # https://github.com/travis-ci/travis-ci/issues/6069
     git fetch
