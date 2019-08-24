@@ -1,5 +1,0 @@
-=====================
-  Demo of naz
-=====================
-naz is an async SMPP client.
-It's name is derived from Kenyan hip hop artiste, Nazizi.
