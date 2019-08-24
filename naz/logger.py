@@ -206,6 +206,8 @@ class BreachHandler(logging.StreamHandler):
         self.trigger_level = trigger_level
         self.buffer_size = buffer_size
         self.buffered_logs = collections.deque(maxlen=self.buffer_size)
+        # assuming each log record is 250 bytes, then the maximum
+        # memory used by `buffered_logs` will always be == 250*10_000/(1000*1000) == 2.5MB
 
     def emit(self, record):
         """
