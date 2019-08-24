@@ -1,4 +1,4 @@
-logger
+log
 ---------------
 
 .. automodule:: naz.log

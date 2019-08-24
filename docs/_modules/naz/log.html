@@ -98,7 +98,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../throttle.html">throttle</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../state.html">state</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../logger.html">logger</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../log.html">log</a></li>
 </ul>
 
             
@@ -169,7 +169,7 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 
 
-<div class="viewcode-block" id="BaseLogger"><a class="viewcode-back" href="../../logger.html#naz.log.BaseLogger">[docs]</a><span class="k">class</span> <span class="nc">BaseLogger</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseLogger"><a class="viewcode-back" href="../../log.html#naz.log.BaseLogger">[docs]</a><span class="k">class</span> <span class="nc">BaseLogger</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Interface that must be implemented to satisfy naz&#39;s logger.</span>
 <span class="sd">    User implementations should inherit this class and</span>
@@ -179,7 +179,7 @@
 <span class="sd">    This enables developers to implement logging in any way that they want.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseLogger.bind"><a class="viewcode-back" href="../../logger.html#naz.log.BaseLogger.bind">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+<div class="viewcode-block" id="BaseLogger.bind"><a class="viewcode-back" href="../../log.html#naz.log.BaseLogger.bind">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">log_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        called when a naz client is been instantiated so that the logger can be</span>
@@ -192,7 +192,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;`bind` method must be implemented.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseLogger.log"><a class="viewcode-back" href="../../logger.html#naz.log.BaseLogger.log">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+<div class="viewcode-block" id="BaseLogger.log"><a class="viewcode-back" href="../../log.html#naz.log.BaseLogger.log">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">log_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        called by naz everytime it wants to log something.</span>
@@ -204,7 +204,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;`log` method must be implemented.&quot;</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="SimpleLogger"><a class="viewcode-back" href="../../logger.html#naz.log.SimpleLogger">[docs]</a><span class="k">class</span> <span class="nc">SimpleLogger</span><span class="p">(</span><span class="n">BaseLogger</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleLogger"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger">[docs]</a><span class="k">class</span> <span class="nc">SimpleLogger</span><span class="p">(</span><span class="n">BaseLogger</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is an implementation of BaseLogger.</span>
 <span class="sd">    It implements a structured logger that renders logs as a dict.</span>
@@ -221,7 +221,7 @@
 <span class="sd">                   {&quot;event&quot;: &quot;web_request&quot;, &quot;url&quot;: &quot;https://www.google.com/&quot;})</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleLogger.__init__"><a class="viewcode-back" href="../../logger.html#naz.log.SimpleLogger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()):</span>
+<div class="viewcode-block" id="SimpleLogger.__init__"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logger_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">handler</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
 <span class="sd">            logger_name: name of the logger. it should be unique per logger.</span>
@@ -241,7 +241,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">handler</span> <span class="o">=</span> <span class="n">handler</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">LoggerAdapter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
-<div class="viewcode-block" id="SimpleLogger.bind"><a class="viewcode-back" href="../../logger.html#naz.log.SimpleLogger.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">log_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleLogger.bind"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger.bind">[docs]</a>    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">log_metadata</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nameToLevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logger_name</span><span class="p">)</span>
@@ -253,7 +253,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">_NazLoggingAdapter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="p">,</span> <span class="n">log_metadata</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleLogger.log"><a class="viewcode-back" href="../../logger.html#naz.log.SimpleLogger.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">log_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleLogger.log"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger.log">[docs]</a>    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">log_data</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nameToLevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">:</span>
@@ -319,7 +319,7 @@
         <span class="k">return</span> <span class="n">s</span>
 
 
-<div class="viewcode-block" id="BreachHandler"><a class="viewcode-back" href="../../logger.html#naz.log.BreachHandler">[docs]</a><span class="k">class</span> <span class="nc">BreachHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler">[docs]</a><span class="k">class</span> <span class="nc">BreachHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is an implementation of `logging.Handler` that puts logs in an in-memory ring buffer.</span>
 <span class="sd">    When a trigger condition(eg a certain log level) is met;</span>
@@ -358,7 +358,7 @@
 <span class="sd">        logger.error(&quot;damn&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../logger.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trigger_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trigger_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">10_000</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
 <span class="sd">            trigger_level: the log level that will trigger this handler to flush logs to :py:attr:`~stream`</span>
@@ -373,7 +373,7 @@
         <span class="c1"># assuming each log record is 250 bytes, then the maximum</span>
         <span class="c1"># memory used by `buffered_logs` will always be == 250*10_000/(1000*1000) == 2.5MB</span>
 
-<div class="viewcode-block" id="BreachHandler.emit"><a class="viewcode-back" href="../../logger.html#naz.log.BreachHandler.emit">[docs]</a>    <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler.emit"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.emit">[docs]</a>    <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Emit a record.</span>
 <span class="sd">        Implementation is mostly taken from `logging.StreamHandler`</span>
