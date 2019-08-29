@@ -37,16 +37,23 @@ class MockStreamReader:
     def __init__(self, pdu):
         self.pdu = pdu
 
+        blocks = []
+        blocks.append(self.pdu)
+        self.data = b"".join(blocks)
+
     async def read(self, n_index=-1):
         if n_index == 0:
             return b""
-        blocks = []
-        blocks.append(self.pdu)
-        data = b"".join(blocks)
-        if n_index == 4:
-            return data[:n_index]
+
+        if n_index == -1:
+            _to_read_data = self.data  # read all data
+            _remaining_data = b""
         else:
-            return data[4:]
+            _to_read_data = self.data[:n_index]
+            _remaining_data = self.data[n_index:]
+
+        self.data = _remaining_data
+        return _to_read_data
 
 
 class TestClient(TestCase):
