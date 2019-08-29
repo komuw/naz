@@ -1852,7 +1852,23 @@ class Client:
                 # TODO: look at `pause_reading` and `resume_reading` methods
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
-                header_data = await self.reader.read(self._header_pdu_length)
+                header_data = await self.reader.readexactly(self._header_pdu_length)
+            except asyncio.IncompleteReadError as e:
+                # see: https://github.com/komuw/naz/issues/135
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "unable to read exactly {0}bytes of smpp header.".format(
+                            self._header_pdu_length
+                        ),
+                        "error": str(e),
+                    },
+                )
+                header_data == b""
+                # close connection. it will be automatically reconnect later
+                await self._unbind_and_disconnect()
             except (
                 ConnectionError,
                 TimeoutError,

@@ -41,16 +41,27 @@ class MockStreamReader:
         blocks.append(self.pdu)
         self.data = b"".join(blocks)
 
-    async def read(self, n_index=-1):
-        if n_index == 0:
+    async def read(self, n=-1):
+        if n == 0:
             return b""
 
-        if n_index == -1:
+        if n == -1:
             _to_read_data = self.data  # read all data
             _remaining_data = b""
         else:
-            _to_read_data = self.data[:n_index]
-            _remaining_data = self.data[n_index:]
+            _to_read_data = self.data[:n]
+            _remaining_data = self.data[n:]
+
+        self.data = _remaining_data
+        return _to_read_data
+
+    async def readexactly(self, n):
+        _to_read_data = self.data[:n]
+        _remaining_data = self.data[n:]
+
+        if len(_to_read_data) != n:
+            # unable to read exactly n bytes
+            raise asyncio.IncompleteReadError(partial=_to_read_data, expected=n)
 
         self.data = _remaining_data
         return _to_read_data
