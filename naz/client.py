@@ -1852,6 +1852,12 @@ class Client:
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
                 command_length_header_data = await self.reader.read(4)
+
+                # make sure the header data be 4 bytes
+                while len(command_length_header_data) != 4:
+                    more_bytes = await self.reader.read(4 - len(command_length_header_data))
+                    command_length_header_data = command_length_header_data + more_bytes
+
             except (
                 ConnectionError,
                 TimeoutError,
