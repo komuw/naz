@@ -24,14 +24,39 @@ def AsyncMock(*args, **kwargs):
     return mock_coro
 
 
+class MockStreamWriter:
+    """
+    This is a mock of python's StreamWriter;
+    https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamWriter
+    """
+
+    def __init__(self, _is_closing=True):
+        self.transport = self._create_transport(_is_closing=_is_closing)
+
+    async def drain(self):
+        pass
+
+    def close(self):
+        pass
+
+    def _create_transport(self, _is_closing):
+        class MockTransport:
+            def __init__(self, _is_closing):
+                self._is_closing = _is_closing
+
+            def set_write_buffer_limits(self, n):
+                pass
+
+            def is_closing(self):
+                return self._is_closing
+
+        return MockTransport(_is_closing=_is_closing)
+
+
 class MockStreamReader:
     """
     This is a mock of python's StreamReader;
     https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamReader
-
-    We mock the reader having a succesful submit_sm_resp PDU.
-    For the first read we return the first 4bytes,
-    the second read, we return the remaining bytes.
     """
 
     def __init__(self, pdu):
@@ -491,10 +516,25 @@ class TestClient(TestCase):
                 b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
             )
 
-            # TODO: also create a MockStreamWriter
             mock_naz_connect.mock.return_value = (
                 MockStreamReader(pdu=submit_sm_resp_pdu),
-                "MockStreamWriter",
+                MockStreamWriter(),
+            )
+
+            reader, writer = self._run(self.cli.connect())
+            self.cli.reader = reader
+            self.cli.writer = writer
+            received_pdu = self._run(self.cli.receive_data(TESTING=True))
+            self.assertEqual(received_pdu, submit_sm_resp_pdu)
+
+    # TODO: rename and make work
+    def test_cool(self):
+        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
+            submit_sm_resp_pdu = b"\x00\x00\x00"
+
+            mock_naz_connect.mock.return_value = (
+                MockStreamReader(pdu=submit_sm_resp_pdu),
+                MockStreamWriter(),
             )
 
             reader, writer = self._run(self.cli.connect())
