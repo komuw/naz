@@ -1865,7 +1865,6 @@ class Client:
                         "error": str(e),
                     },
                 )
-                header_data == b""
                 # close connection. it will be automatically reconnected later
                 await self._unbind_and_disconnect()
                 if TESTING:
