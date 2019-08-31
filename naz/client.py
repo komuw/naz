@@ -18,12 +18,12 @@ from . import correlater
 from . import ratelimiter
 
 from .state import (
-    SmppSessionState,
     SmppCommand,
     CommandStatus,
-    SmppCommandStatus,
     SmppDataCoding,
     SmppOptionalTag,
+    SmppSessionState,
+    SmppCommandStatus,
 )
 
 # pytype: disable=pyi-error

@@ -126,20 +126,20 @@ class _NazLoggingAdapter(logging.LoggerAdapter):
     _formatter = logging.Formatter()
 
     def process(
-        self, msg: typing.Union[str, dict], kwargs: typing.Dict[str, typing.Any]
-    ) -> typing.Tuple[str, typing.Dict[str, typing.Any]]:
+        self, msg: typing.Union[str, dict], kwargs: typing.MutableMapping[str, typing.Any]
+    ) -> typing.Tuple[str, typing.MutableMapping[str, typing.Any]]:
         timestamp = self.formatTime()
 
         if isinstance(msg, str):
-            merged_msg = "{0} {1} {2}".format(timestamp, msg, self.extra)
+            str_merged_msg = "{0} {1} {2}".format(timestamp, msg, self.extra)
             if self.extra == {}:
-                merged_msg = "{0} {1}".format(timestamp, msg)
-            return merged_msg, kwargs
+                str_merged_msg = "{0} {1}".format(timestamp, msg)
+            return str_merged_msg, kwargs
         else:
             _timestamp = {"timestamp": timestamp}
             # _timestamp should appear first in resulting dict
-            merged_msg = {**_timestamp, **msg, **self.extra}
-            return "{0}".format(merged_msg), kwargs
+            dict_merged_msg = {**_timestamp, **msg, **self.extra}
+            return "{0}".format(dict_merged_msg), kwargs
 
     def formatTime(self) -> str:
         """
@@ -154,7 +154,7 @@ class _NazLoggingAdapter(logging.LoggerAdapter):
         now = time.time()
         msecs = (now - int(now)) * 1000
 
-        ct = self._converter(now)
+        ct = self._converter(now)  # type: ignore
         t = time.strftime(self._formatter.default_time_format, ct)
         s = self._formatter.default_msec_format % (t, msecs)
         return s
@@ -216,13 +216,15 @@ class BreachHandler(handlers.MemoryHandler):
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
         """
         # call `logging.handlers.MemoryHandler` init
-        super(BreachHandler, self).__init__(
+        super(BreachHandler, self).__init__(  # type: ignore
             capacity=capacity,
             flushLevel=flushLevel,
             target=target,
             flushOnClose=flushOnClose,  # pytype: disable=wrong-keyword-args
         )
-        self.buffer = collections.deque(maxlen=self.capacity)  # pytype: disable=attribute-error
+        self.buffer: collections.deque = collections.deque(
+            maxlen=self.capacity  # type: ignore
+        )  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
 
@@ -231,4 +233,4 @@ class BreachHandler(handlers.MemoryHandler):
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
-        return record.levelno >= self.flushLevel  # pytype: disable=attribute-error
+        return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error

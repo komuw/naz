@@ -9,6 +9,7 @@ most recent version is listed first.
 - make sire that `naz` reads exacly the first 16bytes of the smpp header: https://github.com/komuw/naz/pull/155   
   - this builds on the [earlier work](https://github.com/komuw/naz/pull/153) but now `naz` takes it a step further and will unbind & close connection if it is unable to read the entire SMPP header
   - this is done to prevent inconsistency and also to try and be faithful to the smpp spec.
+- enhance type annotations of `naz.log`: https://github.com/komuw/naz/pull/156
 
 
 ## **version:** v0.6.5
