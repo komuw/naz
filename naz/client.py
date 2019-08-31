@@ -18,12 +18,12 @@ from . import correlater
 from . import ratelimiter
 
 from .state import (
-    SmppSessionState,
     SmppCommand,
     CommandStatus,
-    SmppCommandStatus,
     SmppDataCoding,
     SmppOptionalTag,
+    SmppSessionState,
+    SmppCommandStatus,
 )
 
 # pytype: disable=pyi-error
@@ -1865,7 +1865,6 @@ class Client:
                         "error": str(e),
                     },
                 )
-                header_data == b""
                 # close connection. it will be automatically reconnected later
                 await self._unbind_and_disconnect()
                 if TESTING:
