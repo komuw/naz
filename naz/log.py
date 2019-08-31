@@ -58,7 +58,9 @@ class SimpleLogger(BaseLogger):
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
 
-    def __init__(self, logger_name: str, handler: logging.Handler = logging.StreamHandler()):
+    def __init__(
+        self, logger_name: str, handler: logging.Handler = logging.StreamHandler()
+    ) -> None:
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
@@ -123,7 +125,9 @@ class _NazLoggingAdapter(logging.LoggerAdapter):
     _converter = time.localtime
     _formatter = logging.Formatter()
 
-    def process(self, msg, kwargs):
+    def process(
+        self, msg: typing.Union[str, dict], kwargs: typing.Dict[str, typing.Any]
+    ) -> typing.Tuple[str, typing.Dict[str, typing.Any]]:
         timestamp = self.formatTime()
 
         if isinstance(msg, str):
@@ -137,7 +141,7 @@ class _NazLoggingAdapter(logging.LoggerAdapter):
             merged_msg = {**_timestamp, **msg, **self.extra}
             return "{0}".format(merged_msg), kwargs
 
-    def formatTime(self):
+    def formatTime(self) -> str:
         """
         Return the creation time of the specified log event as formatted text.
 
@@ -199,11 +203,11 @@ class BreachHandler(handlers.MemoryHandler):
 
     def __init__(
         self,
-        flushLevel=logging.WARNING,
-        capacity=10_000,
-        target=logging.StreamHandler(),
-        flushOnClose=False,
-    ):
+        flushLevel: int = logging.WARNING,
+        capacity: int = 10_000,
+        target: logging.Handler = logging.StreamHandler(),
+        flushOnClose: bool = False,
+    ) -> None:
         """
         Parameters:
             flushLevel: the log level that will trigger this handler to flush logs to :py:attr:`~target`
@@ -222,7 +226,7 @@ class BreachHandler(handlers.MemoryHandler):
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
 
-    def shouldFlush(self, record):
+    def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
