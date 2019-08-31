@@ -10,6 +10,7 @@ most recent version is listed first.
   - this builds on the [earlier work](https://github.com/komuw/naz/pull/153) but now `naz` takes it a step further and will unbind & close connection if it is unable to read the entire SMPP header
   - this is done to prevent inconsistency and also to try and be faithful to the smpp spec.
 
+
 ## **version:** v0.6.5
 - Simplify Breach log handler: https://github.com/komuw/naz/pull/152
 
