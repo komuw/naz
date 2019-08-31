@@ -1849,7 +1849,6 @@ class Client:
                     # make mypy happy; https://github.com/python/mypy/issues/4805
                     assert isinstance(self.reader, asyncio.streams.StreamReader)
 
-                # TODO: look at `pause_reading` and `resume_reading` methods
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
                 header_data = await self.reader.readexactly(self._header_pdu_length)
@@ -1869,6 +1868,9 @@ class Client:
                 header_data == b""
                 # close connection. it will be automatically reconnected later
                 await self._unbind_and_disconnect()
+                if TESTING:
+                    # offer escape hatch for tests to come out of endless loop
+                    return header_data
             except (
                 ConnectionError,
                 TimeoutError,

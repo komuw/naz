@@ -30,14 +30,24 @@ class MockStreamWriter:
     https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamWriter
     """
 
-    def __init__(self, _is_closing=True):
+    def __init__(self, _is_closing=False):
         self.transport = self._create_transport(_is_closing=_is_closing)
 
     async def drain(self):
         pass
 
     def close(self):
+        # when this is called, we set the transport to be in closed/closing state
+        self.transport = self._create_transport(_is_closing=True)
+
+    def write(self, data):
         pass
+
+    def get_extra_info(self, name, default=None):
+        # when this is called, we set the transport to be in open state.
+        # this is because this method is called in `naz.Client.connect`
+        # so it is the only chance we have of 're-establishing' connection
+        self.transport = self._create_transport(_is_closing=False)
 
     def _create_transport(self, _is_closing):
         class MockTransport:
@@ -515,7 +525,6 @@ class TestClient(TestCase):
             submit_sm_resp_pdu = (
                 b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
             )
-
             mock_naz_connect.mock.return_value = (
                 MockStreamReader(pdu=submit_sm_resp_pdu),
                 MockStreamWriter(),
@@ -527,11 +536,15 @@ class TestClient(TestCase):
             received_pdu = self._run(self.cli.receive_data(TESTING=True))
             self.assertEqual(received_pdu, submit_sm_resp_pdu)
 
-    # TODO: rename and make work
-    def test_cool(self):
-        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
+    def test_partial_reads_disconnect(self):
+        """
+        test that if we are unable to read the full 16byte smpp header,
+        then we should close the connection.
+        """
+        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect, mock.patch(
+            "naz.Client._unbind_and_disconnect", new=AsyncMock()
+        ) as mock_naz_unbind_and_disconnect:
             submit_sm_resp_pdu = b"\x00\x00\x00"
-
             mock_naz_connect.mock.return_value = (
                 MockStreamReader(pdu=submit_sm_resp_pdu),
                 MockStreamWriter(),
@@ -541,7 +554,8 @@ class TestClient(TestCase):
             self.cli.reader = reader
             self.cli.writer = writer
             received_pdu = self._run(self.cli.receive_data(TESTING=True))
-            self.assertEqual(received_pdu, submit_sm_resp_pdu)
+            self.assertEqual(received_pdu, b"")
+            self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)
 
     def test_enquire_link_resp(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:

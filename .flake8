@@ -1,6 +1,9 @@
 [flake8]
 max-line-length = 150
-# ignore = E125, E123, E251
+
+# ignore this flake8 warnings since they are not pep8 compliant.
+# see `black` documentation
+ignore = E203, E266, E501, W503
 exclude =
     # No need to traverse our git directory
     .git,
