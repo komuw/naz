@@ -119,6 +119,7 @@ class TestClient(TestCase):
             password=os.getenv("password", "password"),
             outboundqueue=self.outboundqueue,
             loglevel="DEBUG",  # run tests with debug so as to debug what is going on
+            logger=naz.log.SimpleLogger("TestClient", handler=naz.log.BreachHandler(capacity=200)),
         )
 
         self.docker_client = docker.from_env()
