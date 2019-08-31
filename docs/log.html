@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>log &mdash; naz v0.6.5 documentation</title>
+  <title>log &mdash; naz v0.6.6 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                v0.6.5
+                v0.6.6
               </div>
             
           
@@ -234,6 +234,9 @@ It implements a structured logger that renders logs as a dict.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>logger_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – name of the logger. it should be unique per logger.</p>
 </dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -317,11 +320,14 @@ except that it does not flush when the ring-buffer capacity is met but only when
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>flushLevel</strong> – the log level that will trigger this handler to flush logs to <code class="xref py py-attr docutils literal notranslate"><span class="pre">target</span></code></p></li>
-<li><p><strong>capacity</strong> – the maximum number of log records to store in the ring buffer</p></li>
-<li><p><strong>target</strong> – the ultimate <a class="reference external" href="https://docs.python.org/3.6/library/logging.html#logging.Handler">log handler</a> that will be used.</p></li>
-<li><p><strong>flushOnClose</strong> – whether to flush the buffer when the handler is closed even if the flush level hasn’t been exceeded</p></li>
+<li><p><strong>flushLevel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the log level that will trigger this handler to flush logs to <code class="xref py py-attr docutils literal notranslate"><span class="pre">target</span></code></p></li>
+<li><p><strong>capacity</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the maximum number of log records to store in the ring buffer</p></li>
+<li><p><strong>target</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Handler</span></code>) – the ultimate <a class="reference external" href="https://docs.python.org/3.6/library/logging.html#logging.Handler">log handler</a> that will be used.</p></li>
+<li><p><strong>flushOnClose</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to flush the buffer when the handler is closed even if the flush level hasn’t been exceeded</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -331,6 +337,11 @@ except that it does not flush when the ring-buffer capacity is met but only when
 <code class="sig-name descname">shouldFlush</code><span class="sig-paren">(</span><em class="sig-param">record</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.shouldFlush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.shouldFlush" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check for record at the flushLevel or higher.
 Implementation is mostly taken from <cite>logging.handlers.MemoryHandler</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

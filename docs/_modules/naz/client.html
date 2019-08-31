@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.6.5 documentation</title>
+  <title>naz.client &mdash; naz v0.6.6 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.6.5
+                v0.6.6
               </div>
             
           
@@ -182,12 +182,12 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">ratelimiter</span>
 
 <span class="kn">from</span> <span class="nn">.state</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">SmppSessionState</span><span class="p">,</span>
     <span class="n">SmppCommand</span><span class="p">,</span>
     <span class="n">CommandStatus</span><span class="p">,</span>
-    <span class="n">SmppCommandStatus</span><span class="p">,</span>
     <span class="n">SmppDataCoding</span><span class="p">,</span>
     <span class="n">SmppOptionalTag</span><span class="p">,</span>
+    <span class="n">SmppSessionState</span><span class="p">,</span>
+    <span class="n">SmppCommandStatus</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># pytype: disable=pyi-error</span>
@@ -522,6 +522,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">CLOSED</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">=</span> <span class="mi">16</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">drain_duration</span> <span class="o">=</span> <span class="n">drain_duration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span> <span class="o">=</span> <span class="n">socket_timeout</span>
@@ -1012,7 +1013,7 @@
         <span class="p">)</span>
 
         <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
         <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
         <span class="c1"># the status for success see section 5.1.3</span>
         <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
@@ -1125,7 +1126,7 @@
             <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
 
             <span class="c1"># header</span>
-            <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+            <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
             <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
             <span class="n">command_status</span> <span class="o">=</span> <span class="mh">0x00000000</span>  <span class="c1"># not used for `enquire_link`</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1211,7 +1212,7 @@
         <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
 
         <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
         <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
         <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
         <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
@@ -1270,7 +1271,7 @@
         <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
 
         <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
         <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
         <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
         <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
@@ -1317,7 +1318,7 @@
         <span class="p">)</span>
 
         <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
         <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
         <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
         <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
@@ -1510,7 +1511,7 @@
         <span class="p">)</span>
 
         <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
         <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
         <span class="c1"># the status for success see section 5.1.3</span>
         <span class="n">command_status</span> <span class="o">=</span> <span class="mh">0x00000000</span>  <span class="c1"># not used for `submit_sm`</span>
@@ -2006,16 +2007,33 @@
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span>
 
-            <span class="n">command_length_header_data</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+            <span class="n">header_data</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
                     <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
                     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">)</span>
 
-                <span class="c1"># todo: look at `pause_reading` and `resume_reading` methods</span>
                 <span class="c1"># `client.reader` and `client.writer` should not have timeouts since they are non-blocking</span>
                 <span class="c1"># https://github.com/komuw/naz/issues/116</span>
-                <span class="n">command_length_header_data</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">header_data</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="o">.</span><span class="n">readexactly</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">IncompleteReadError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># see: https://github.com/komuw/naz/issues/135</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.receive_data&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;unable to read exactly </span><span class="si">{0}</span><span class="s2">bytes of smpp header.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span>
+                        <span class="p">),</span>
+                        <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                    <span class="p">},</span>
+                <span class="p">)</span>
+                <span class="c1"># close connection. it will be automatically reconnected later</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unbind_and_disconnect</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">TESTING</span><span class="p">:</span>
+                    <span class="c1"># offer escape hatch for tests to come out of endless loop</span>
+                    <span class="k">return</span> <span class="n">header_data</span>
             <span class="k">except</span> <span class="p">(</span>
                 <span class="ne">ConnectionError</span><span class="p">,</span>
                 <span class="ne">TimeoutError</span><span class="p">,</span>
@@ -2035,7 +2053,7 @@
                     <span class="p">},</span>
                 <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">command_length_header_data</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">header_data</span> <span class="o">==</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="n">retry_count</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">poll_read_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_after</span><span class="p">(</span><span class="n">retry_count</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
@@ -2057,8 +2075,9 @@
                 <span class="c1"># we didn&#39;t fail to read from SMSC</span>
                 <span class="n">retry_count</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="n">total_pdu_length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">command_length_header_data</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">MSGLEN</span> <span class="o">=</span> <span class="n">total_pdu_length</span> <span class="o">-</span> <span class="mi">4</span>
+            <span class="c1"># first 4bytes of header are the command_length</span>
+            <span class="n">total_pdu_length</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="n">header_data</span><span class="p">[:</span><span class="mi">4</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">MSGLEN</span> <span class="o">=</span> <span class="n">total_pdu_length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span>
             <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">bytes_recd</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">while</span> <span class="n">bytes_recd</span> <span class="o">&lt;</span> <span class="n">MSGLEN</span><span class="p">:</span>
@@ -2111,7 +2130,7 @@
                 <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
                 <span class="n">bytes_recd</span> <span class="o">=</span> <span class="n">bytes_recd</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
 
-            <span class="n">full_pdu_data</span> <span class="o">=</span> <span class="n">command_length_header_data</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
+            <span class="n">full_pdu_data</span> <span class="o">=</span> <span class="n">header_data</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chunks</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
                 <span class="p">{</span>
@@ -2140,8 +2159,8 @@
             <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._parse_response_pdu&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;pdu&quot;</span><span class="p">:</span> <span class="n">log_pdu</span><span class="p">},</span>
         <span class="p">)</span>
 
-        <span class="n">header_data</span> <span class="o">=</span> <span class="n">pdu</span><span class="p">[:</span><span class="mi">16</span><span class="p">]</span>
-        <span class="n">body_data</span> <span class="o">=</span> <span class="n">pdu</span><span class="p">[</span><span class="mi">16</span><span class="p">:]</span>
+        <span class="n">header_data</span> <span class="o">=</span> <span class="n">pdu</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span><span class="p">]</span>
+        <span class="n">body_data</span> <span class="o">=</span> <span class="n">pdu</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="p">:]</span>
         <span class="n">command_id_header_data</span> <span class="o">=</span> <span class="n">header_data</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="mi">8</span><span class="p">]</span>
         <span class="n">command_status_header_data</span> <span class="o">=</span> <span class="n">header_data</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">]</span>
         <span class="n">sequence_number_header_data</span> <span class="o">=</span> <span class="n">header_data</span><span class="p">[</span><span class="mi">12</span><span class="p">:</span><span class="mi">16</span><span class="p">]</span>
@@ -2482,7 +2501,7 @@
         <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
 
         <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
         <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
         <span class="n">command_status</span> <span class="o">=</span> <span class="mh">0x00000000</span>  <span class="c1"># not used for `unbind`</span>
         <span class="k">try</span><span class="p">:</span>
