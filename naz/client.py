@@ -358,6 +358,7 @@ class Client:
         self.naz_message_protocol_version = "1"
 
         self.current_session_state = SmppSessionState.CLOSED
+        self._header_pdu_length = 16
 
         self.drain_duration = drain_duration
         self.socket_timeout = socket_timeout
@@ -848,7 +849,7 @@ class Client:
         )
 
         # header
-        command_length = 16 + len(body)  # 16 is for headers
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
         command_status = SmppCommandStatus.ESME_ROK.value
@@ -961,7 +962,7 @@ class Client:
             body = b""
 
             # header
-            command_length = 16 + len(body)  # 16 is for headers
+            command_length = self._header_pdu_length + len(body)  # 16 is for headers
             command_id = self.command_ids[smpp_command]
             command_status = 0x00000000  # not used for `enquire_link`
             try:
@@ -1047,7 +1048,7 @@ class Client:
         body = b""
 
         # header
-        command_length = 16 + len(body)  # 16 is for headers
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
@@ -1106,7 +1107,7 @@ class Client:
         body = b""
 
         # header
-        command_length = 16 + len(body)  # 16 is for headers
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
@@ -1153,7 +1154,7 @@ class Client:
         )
 
         # header
-        command_length = 16 + len(body)  # 16 is for headers
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         command_status = SmppCommandStatus.ESME_ROK.value
         sequence_number = sequence_number
@@ -1346,7 +1347,7 @@ class Client:
         )
 
         # header
-        command_length = 16 + len(body)  # 16 is for headers
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         # the status for success see section 5.1.3
         command_status = 0x00000000  # not used for `submit_sm`
@@ -1842,22 +1843,34 @@ class Client:
                 )
                 return None
 
-            command_length_header_data = b""
+            header_data = b""
             try:
                 if typing.TYPE_CHECKING:
                     # make mypy happy; https://github.com/python/mypy/issues/4805
                     assert isinstance(self.reader, asyncio.streams.StreamReader)
 
-                # todo: look at `pause_reading` and `resume_reading` methods
                 # `client.reader` and `client.writer` should not have timeouts since they are non-blocking
                 # https://github.com/komuw/naz/issues/116
-                command_length_header_data = await self.reader.read(4)
-
-                # make sure the header data be 4 bytes
-                while len(command_length_header_data) != 4:
-                    more_bytes = await self.reader.read(4 - len(command_length_header_data))
-                    command_length_header_data = command_length_header_data + more_bytes
-
+                header_data = await self.reader.readexactly(self._header_pdu_length)
+            except asyncio.IncompleteReadError as e:
+                # see: https://github.com/komuw/naz/issues/135
+                self._log(
+                    logging.ERROR,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "unable to read exactly {0}bytes of smpp header.".format(
+                            self._header_pdu_length
+                        ),
+                        "error": str(e),
+                    },
+                )
+                header_data == b""
+                # close connection. it will be automatically reconnected later
+                await self._unbind_and_disconnect()
+                if TESTING:
+                    # offer escape hatch for tests to come out of endless loop
+                    return header_data
             except (
                 ConnectionError,
                 TimeoutError,
@@ -1877,7 +1890,7 @@ class Client:
                     },
                 )
 
-            if command_length_header_data == b"":
+            if header_data == b"":
                 retry_count += 1
                 poll_read_interval = self._retry_after(retry_count)
                 self._log(
@@ -1899,8 +1912,9 @@ class Client:
                 # we didn't fail to read from SMSC
                 retry_count = 0
 
-            total_pdu_length = struct.unpack(">I", command_length_header_data)[0]
-            MSGLEN = total_pdu_length - 4
+            # first 4bytes of header are the command_length
+            total_pdu_length = struct.unpack(">I", header_data[:4])[0]
+            MSGLEN = total_pdu_length - self._header_pdu_length
             chunks = []
             bytes_recd = 0
             while bytes_recd < MSGLEN:
@@ -1953,7 +1967,7 @@ class Client:
                 chunks.append(chunk)
                 bytes_recd = bytes_recd + len(chunk)
 
-            full_pdu_data = command_length_header_data + b"".join(chunks)
+            full_pdu_data = header_data + b"".join(chunks)
             self._log(
                 logging.DEBUG,
                 {
@@ -1982,8 +1996,8 @@ class Client:
             {"event": "naz.Client._parse_response_pdu", "stage": "start", "pdu": log_pdu},
         )
 
-        header_data = pdu[:16]
-        body_data = pdu[16:]
+        header_data = pdu[: self._header_pdu_length]
+        body_data = pdu[self._header_pdu_length :]
         command_id_header_data = header_data[4:8]
         command_status_header_data = header_data[8:12]
         sequence_number_header_data = header_data[12:16]
@@ -2324,7 +2338,7 @@ class Client:
         body = b""
 
         # header
-        command_length = 16 + len(body)  # 16 is for headers
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
         command_status = 0x00000000  # not used for `unbind`
         try:
