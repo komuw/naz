@@ -215,6 +215,9 @@ class BreachHandler(handlers.MemoryHandler):
             target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
         """
+        self._validate_args(
+            flushLevel=flushLevel, capacity=capacity, target=target, flushOnClose=flushOnClose
+        )
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(  # type: ignore
             capacity=capacity,
@@ -234,3 +237,28 @@ class BreachHandler(handlers.MemoryHandler):
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
         return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
+
+    def _validate_args(
+        self, flushLevel: int, capacity: int, target: logging.Handler, flushOnClose: bool
+    ):
+        if not isinstance(flushLevel, int):
+            raise ValueError(
+                "`flushLevel` should be of type:: `int` You entered: {0}".format(type(flushLevel))
+            )
+        if not isinstance(capacity, int):
+            raise ValueError(
+                "`capacity` should be of type:: `int` You entered: {0}".format(type(capacity))
+            )
+
+        if not isinstance(target, logging.Handler):
+            raise ValueError(
+                "`target` should be of type:: `logging.Handler` You entered: {0}".format(
+                    type(target)
+                )
+            )
+        if not isinstance(flushOnClose, bool):
+            raise ValueError(
+                "`flushOnClose` should be of type:: `bool` You entered: {0}".format(
+                    type(flushOnClose)
+                )
+            )
