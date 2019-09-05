@@ -239,20 +239,26 @@ class BreachHandler(handlers.MemoryHandler):
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
+        self._heartbeat()
+        return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
+
+    def _heartbeat(self):
         import pdb
 
         pdb.set_trace()
         if self.heartbeatInterval:
             #  name, level, pathname, lineno, msg, args, exc_info, func=None, sinfo=None, **kwargs
+            # see: https://docs.python.org/3/library/logging.html#logging.LogRecord
             record = logging.makeLogRecord(
                 {
                     "level": logging.INFO,
                     "name": "BreachHandler",
-                    "msg": "heartbeat sent every {0} minutes".format(self.heartbeatInterval),
+                    "msg": "BreachHandler heartbeat sent every {0} minutes".format(
+                        self.heartbeatInterval
+                    ),
                 }
             )
             self.target.emit(record=record)
-        return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
 
     def _validate_args(
         self, flushLevel: int, capacity: int, target: logging.Handler, flushOnClose: bool
