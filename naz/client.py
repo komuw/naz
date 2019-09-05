@@ -2054,6 +2054,7 @@ class Client:
             )
 
         await self.command_handlers(
+            raw_pdu=pdu,
             body_data=body_data,
             smpp_command=smpp_command,
             command_status_value=command_status,
@@ -2074,6 +2075,7 @@ class Client:
 
     async def command_handlers(
         self,
+        raw_pdu: bytes,
         body_data: bytes,
         smpp_command: str,
         command_status_value: int,
@@ -2085,7 +2087,8 @@ class Client:
         This routes the various different SMPP PDU to their respective handlers.
 
         Parameters:
-            body_data: PDU body
+            raw_pdu: the full PDU as received from SMSC
+            body_data: PDU body as received from SMSC
             smpp_command: type of PDU been sent. eg bind_transceiver
             command_status_value: the response code from SMSC for a specific PDU
             sequence_number: SMPP sequence_number
@@ -2235,6 +2238,7 @@ class Client:
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
 
+            # TODO: look into the truthfulness of the following comment
             # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
@@ -2304,6 +2308,7 @@ class Client:
                 log_id=log_id,
                 hook_metadata=hook_metadata,
                 smsc_response=commandStatus,
+                raw_pdu=raw_pdu,
             )
         except Exception as e:
             self._log(

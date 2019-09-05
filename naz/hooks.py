@@ -37,6 +37,7 @@ class BaseHook(abc.ABC):
         log_id: str,
         hook_metadata: str,
         smsc_response: "state.CommandStatus",
+        raw_pdu: bytes,
     ) -> None:
         """
         called after a response is received from SMSC.
@@ -46,6 +47,7 @@ class BaseHook(abc.ABC):
             log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
             hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
             smsc_response: the response from SMSC.
+            raw_pdu: the full PDU as received from SMSC
         """
         raise NotImplementedError("response method must be implemented.")
 
@@ -87,6 +89,7 @@ class SimpleHook(BaseHook):
         log_id: str,
         hook_metadata: str,
         smsc_response: "state.CommandStatus",
+        raw_pdu: bytes,
     ) -> None:
         self.logger.log(
             logging.NOTSET,
@@ -97,5 +100,6 @@ class SimpleHook(BaseHook):
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
                 "smsc_response": smsc_response.description,
+                "raw_pdu": raw_pdu,
             },
         )
