@@ -207,6 +207,7 @@ class BreachHandler(handlers.MemoryHandler):
         capacity: int = 10_000,
         target: logging.Handler = logging.StreamHandler(),
         flushOnClose: bool = False,
+        heartbeatInterval: typing.Union[None, int] = None,
     ) -> None:
         """
         Parameters:
@@ -214,6 +215,7 @@ class BreachHandler(handlers.MemoryHandler):
             capacity: the maximum number of log records to store in the ring buffer
             target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
+            TODO: add doc for heartbeatInterval
         """
         self._validate_args(
             flushLevel=flushLevel, capacity=capacity, target=target, flushOnClose=flushOnClose
@@ -230,12 +232,26 @@ class BreachHandler(handlers.MemoryHandler):
         )  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
+        self.heartbeatInterval = heartbeatInterval
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
+        import pdb
+
+        pdb.set_trace()
+        if self.heartbeatInterval:
+            #  name, level, pathname, lineno, msg, args, exc_info, func=None, sinfo=None, **kwargs
+            record = logging.makeLogRecord(
+                {
+                    "level": logging.INFO,
+                    "name": "BreachHandler",
+                    "msg": "heartbeat sent every {0} minutes".format(self.heartbeatInterval),
+                }
+            )
+            self.target.emit(record=record)
         return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
 
     def _validate_args(
