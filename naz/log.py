@@ -215,10 +215,16 @@ class BreachHandler(handlers.MemoryHandler):
             capacity: the maximum number of log records to store in the ring buffer
             target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
-            TODO: add doc for heartbeatInterval
+            heartbeatInterval: can be an integer or None. If it is an integer, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
+                               If it is None(the default), then no heartbeat log record is emitted.
+                               If you do decide to set it, a good value is 1800(ie 30 minutes)
         """
         self._validate_args(
-            flushLevel=flushLevel, capacity=capacity, target=target, flushOnClose=flushOnClose
+            flushLevel=flushLevel,
+            capacity=capacity,
+            target=target,
+            flushOnClose=flushOnClose,
+            heartbeatInterval=heartbeatInterval,
         )
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(  # type: ignore
@@ -232,8 +238,11 @@ class BreachHandler(handlers.MemoryHandler):
         )  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
-        self.heartbeatInterval = heartbeatInterval * 60  # seconds
-        self._s_time = time.monotonic()
+
+        self.heartbeatInterval = heartbeatInterval
+        if self.heartbeatInterval:
+            self.heartbeatInterval = heartbeatInterval  # seconds
+            self._s_time = time.monotonic()
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
@@ -244,9 +253,13 @@ class BreachHandler(handlers.MemoryHandler):
         return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
 
     def _heartbeat(self):
+        if not self.heartbeatInterval:
+            return
+        import pdb
+
+        pdb.set_trace()
         # check if `heartbeatInterval` seconds have passed.
         # if they have, emit a heartbeat log record to the target handler
-
         _now = time.monotonic()
         _diff = _now - self._s_time
         if _diff >= self.heartbeatInterval:
@@ -257,9 +270,11 @@ class BreachHandler(handlers.MemoryHandler):
                 {
                     "level": logging.INFO,
                     "name": "BreachHandler",
-                    "msg": "BreachHandler heartbeat sent every {0} minutes".format(
-                        self.heartbeatInterval
-                    ),
+                    "pathname": "naz.log.BreachHandler",
+                    "msg": {
+                        "event": "naz.BreachHandler.heartbeat",
+                        "heartbeatInterval": self.heartbeatInterval,
+                    },
                 }
             )
             self.target.emit(record=record)
@@ -270,7 +285,7 @@ class BreachHandler(handlers.MemoryHandler):
         capacity: int,
         target: logging.Handler,
         flushOnClose: bool,
-        heartbeatInterval: typing.Union[None, int] = None,
+        heartbeatInterval: typing.Union[None, int],
     ):
         if not isinstance(flushLevel, int):
             raise ValueError(
