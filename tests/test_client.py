@@ -325,6 +325,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -344,6 +345,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.UNBIND,
                     command_status_value=0,
@@ -363,6 +365,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -440,6 +443,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -461,6 +465,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0x00000058,
@@ -564,6 +569,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -929,6 +935,7 @@ class TestClient(TestCase):
             alert_notification = naz.SmppCommand.ALERT_NOTIFICATION
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=alert_notification,
                     command_status_value=0,
@@ -948,6 +955,7 @@ class TestClient(TestCase):
             reserved_for_smpp_extension_a = naz.SmppCommand.RESERVED_FOR_SMPP_EXTENSION_A
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=reserved_for_smpp_extension_a,
                     command_status_value=0,
@@ -967,6 +975,7 @@ class TestClient(TestCase):
             bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=bind_transceiver,
                     command_status_value=0,
@@ -1016,6 +1025,7 @@ class TestClient(TestCase):
             command_status = 411_041_792
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=bind_transceiver,
                     command_status_value=command_status,
