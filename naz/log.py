@@ -244,6 +244,8 @@ class BreachHandler(handlers.MemoryHandler):
             self.heartbeatInterval = heartbeatInterval  # seconds
             self._s_time = time.monotonic()
 
+        self.target.setLevel(logging.DEBUG)
+
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
         Check for record at the flushLevel or higher.
@@ -268,13 +270,15 @@ class BreachHandler(handlers.MemoryHandler):
                 {
                     "level": logging.INFO,
                     "name": "BreachHandler",
-                    "pathname": "naz.log.BreachHandler",
+                    "pathname": ".../naz/naz/log.py",
+                    "func": "BreachHandler._heartbeat",
                     "msg": {
                         "event": "naz.BreachHandler.heartbeat",
                         "heartbeatInterval": self.heartbeatInterval,
                     },
                 }
             )
+
             self.target.emit(record=record)
 
     def _validate_args(
