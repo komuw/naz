@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Client &mdash; naz v0.6.6 documentation</title>
+  <title>Client &mdash; naz v0.6.7 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.7
               </div>
             
           
@@ -259,12 +259,13 @@
 
 <dl class="method">
 <dt id="naz.client.Client.command_handlers">
-<em class="property">async </em><code class="sig-name descname">command_handlers</code><span class="sig-paren">(</span><em class="sig-param">body_data</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">command_status_value</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.command_handlers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.command_handlers" title="Permalink to this definition">¶</a></dt>
+<em class="property">async </em><code class="sig-name descname">command_handlers</code><span class="sig-paren">(</span><em class="sig-param">pdu</em>, <em class="sig-param">body_data</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">command_status_value</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.command_handlers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.command_handlers" title="Permalink to this definition">¶</a></dt>
 <dd><p>This routes the various different SMPP PDU to their respective handlers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>body_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – PDU body</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as received from SMSC</p></li>
+<li><p><strong>body_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – PDU body as received from SMSC</p></li>
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – type of PDU been sent. eg bind_transceiver</p></li>
 <li><p><strong>command_status_value</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the response code from SMSC for a specific PDU</p></li>
 <li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>

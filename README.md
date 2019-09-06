@@ -1,7 +1,7 @@
 ## naz          
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/616e5c6664dd4c1abb26f34f0bf566ae)](https://www.codacy.com/app/komuw/naz)
-[![Build Status](https://travis-ci.com/komuw/naz.svg?branch=master)](https://travis-ci.com/komuw/naz)
+[![ci](https://github.com/komuw/naz/workflows/naz%20ci/badge.svg)](https://github.com/komuw/naz/actions)
 [![codecov](https://codecov.io/gh/komuw/naz/branch/master/graph/badge.svg)](https://codecov.io/gh/komuw/naz)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/komuw/naz)
 
@@ -458,7 +458,7 @@ for i in range(0, 5):
 
 #### 6. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
-  - [Passing continous integration](https://travis-ci.com/komuw/naz/builds)
+  - [Passing continous integration](https://github.com/komuw/naz/actions)
   - [statically analyzed code](https://www.codacy.com/app/komuw/naz/dashboard)
 
 
