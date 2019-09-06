@@ -8,7 +8,7 @@ jobs:
   static_analysis:
     name: static_analysis
     runs-on: ubuntu-18.04
-    timeout-minutes: 5
+    timeout-minutes: 4
     steps:
       - name: Set up python
         uses: actions/setup-python@v1
@@ -33,7 +33,6 @@ jobs:
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
-          sudo apt -y update; sudo apt-get -y install pandoc curl
           pip install -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
@@ -50,11 +49,10 @@ jobs:
         env:
           PYTHONASYNCIODEBUG: '1'
 
-   
   tests:
     name: tests
     runs-on: ubuntu-18.04
-    timeout-minutes: 5
+    timeout-minutes: 4
     steps:
       - name: Set up python
         uses: actions/setup-python@v1
@@ -67,7 +65,7 @@ jobs:
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
-          sudo apt -y update; sudo apt-get -y install pandoc curl
+          sudo apt -y update; sudo apt-get -y install curl
           pip install -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
@@ -78,7 +76,6 @@ jobs:
           coverage erase
           export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
           coverage report --show-missing --fail-under=84
-
 
   docs:
     name: docs
@@ -96,7 +93,7 @@ jobs:
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
-          sudo apt -y update; sudo apt-get -y install pandoc curl
+          sudo apt -y update; sudo apt-get -y install pandoc
           pip install -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
