@@ -33,6 +33,7 @@ jobs:
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
+          sudo apt -y update; sudo apt-get -y install pandoc
           pip install -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
@@ -65,7 +66,7 @@ jobs:
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
-          sudo apt -y update; sudo apt-get -y install curl
+          sudo apt -y update; sudo apt-get -y install curl pandoc
           pip install -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
