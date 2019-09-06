@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>hooks &mdash; naz v0.6.6 documentation</title>
+  <title>hooks &mdash; naz v0.6.7 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.7
               </div>
             
           
@@ -173,42 +173,43 @@
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Interface that must be implemented to satisfy naz’s hooks.
 User implementations should inherit this class and
-implement the <a class="reference internal" href="#naz.hooks.BaseHook.request" title="naz.hooks.BaseHook.request"><code class="xref py py-func docutils literal notranslate"><span class="pre">request</span></code></a> and <a class="reference internal" href="#naz.hooks.BaseHook.response" title="naz.hooks.BaseHook.response"><code class="xref py py-func docutils literal notranslate"><span class="pre">response</span></code></a> methods with the type signatures shown.</p>
-<p>A hook is class with methods that are called just before a request is sent to SMSC and
-just after a response is received from SMSC.</p>
+implement the <a class="reference internal" href="#naz.hooks.BaseHook.to_smsc" title="naz.hooks.BaseHook.to_smsc"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_smsc</span></code></a> and <a class="reference internal" href="#naz.hooks.BaseHook.from_smsc" title="naz.hooks.BaseHook.from_smsc"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_smsc</span></code></a> methods with the type signatures shown.</p>
+<p>A hook is class with methods that are called just before sending data to SMSC and just after receiving data from SMSC.</p>
 <dl class="method">
-<dt id="naz.hooks.BaseHook.request">
-<em class="property">abstract async </em><code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#BaseHook.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>called before a request is sent to SMSC.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
-<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
-<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="naz.hooks.BaseHook.response">
-<em class="property">abstract async </em><code class="sig-name descname">response</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">smsc_response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#BaseHook.response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook.response" title="Permalink to this definition">¶</a></dt>
-<dd><p>called after a response is received from SMSC.</p>
+<dt id="naz.hooks.BaseHook.from_smsc">
+<em class="property">abstract async </em><code class="sig-name descname">from_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">status</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#BaseHook.from_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook.from_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called after receiving data from SMSC.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm_resp</p></li>
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
-<li><p><strong>smsc_response</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the response from SMSC.</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the state of request/response from SMSC.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as received from SMSC</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.hooks.BaseHook.to_smsc">
+<em class="property">abstract async </em><code class="sig-name descname">to_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#BaseHook.to_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook.to_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called before sending data to SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as sent to SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -233,38 +234,40 @@ When this class is called by naz, it just logs the request or response.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.hooks.SimpleHook.request">
-<em class="property">async </em><code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>called before a request is sent to SMSC.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
-<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
-<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="naz.hooks.SimpleHook.response">
-<em class="property">async </em><code class="sig-name descname">response</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">smsc_response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.response"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.response" title="Permalink to this definition">¶</a></dt>
-<dd><p>called after a response is received from SMSC.</p>
+<dt id="naz.hooks.SimpleHook.from_smsc">
+<em class="property">async </em><code class="sig-name descname">from_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">status</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.from_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.from_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called after receiving data from SMSC.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm_resp</p></li>
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
-<li><p><strong>smsc_response</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the response from SMSC.</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the state of request/response from SMSC.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as received from SMSC</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.hooks.SimpleHook.to_smsc">
+<em class="property">async </em><code class="sig-name descname">to_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.to_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.to_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called before sending data to SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as sent to SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
