@@ -129,7 +129,7 @@ class TestBreachHandler(TestCase):
             _handler = naz.log.BreachHandler(
                 capacity=4, target=logging.StreamHandler(stream=_temp_stream)
             )
-            logger = naz.log.SimpleLogger("aha", handler=_handler)
+            logger = naz.log.SimpleLogger("test_use_with_naz_logger", handler=_handler)
             logger.bind(level="INFO", log_metadata={"name": "JayZ"})
 
             # log at level less than `_handler.trigger_level`
@@ -179,3 +179,28 @@ class TestBreachHandler(TestCase):
             self.assertNotIn("one", _temp_stream.getvalue())
             self.assertIn("Dr. Missy Elliot", _temp_stream.getvalue())
             self.assertIn("damn!", _temp_stream.getvalue())
+
+    # def test_heartbeat(self):
+    #     # with io.StringIO() as _temp_stream:
+    #     #     heartbeatInterval = 1.0
+    #     #     _handler = naz.log.BreachHandler(
+    #     #         capacity=4,
+    #     #         target=logging.StreamHandler(stream=_temp_stream),
+    #     #         # heartbeatInterval=heartbeatInterval,
+    #     #     )
+    #     #     logger = naz.log.SimpleLogger("test_heartbeat", handler=_handler)
+    #     #     logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+
+    #     with io.StringIO() as _temp_stream:
+    #         _handler = naz.log.BreachHandler(
+    #             capacity=4, target=logging.StreamHandler(stream=_temp_stream)
+    #         )
+    #         logger = naz.log.SimpleLogger("test_use_with_naz_logger", handler=_handler)
+    #         logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+
+    #         # log at level less than `_handler.trigger_level`
+    #         logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
+
+    #         # log at level less than `_handler.trigger_level`
+    #         logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
+    #         self.assertIn("", _temp_stream.getvalue())  # nothing is logged
