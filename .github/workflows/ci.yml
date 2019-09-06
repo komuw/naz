@@ -71,16 +71,19 @@ jobs:
 
       - name: run tests
         run: |
-          naz-cli --version && naz-cli --help
+          naz-cli --version
+          naz-cli --help
           naz-cli --client examples.example_config.client --dry-run
           coverage erase
           export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
           coverage report --show-missing --fail-under=84
+        env:
+          PYTHONASYNCIODEBUG: '1'
 
   docs:
     name: docs
     runs-on: ubuntu-18.04
-    timeout-minutes: 2
+    timeout-minutes: 3
     steps:
       - name: Set up python
         uses: actions/setup-python@v1
@@ -99,7 +102,6 @@ jobs:
 
       - name: check docs are okay
         run: |
-          naz-cli --version && naz-cli --help
           sphinx-build -a -E documentation/sphinx-docs/ docs/
           stat docs/.nojekyll # make sure that file exists.
 
