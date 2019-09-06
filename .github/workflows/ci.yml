@@ -1,0 +1,112 @@
+# DOCS: https://help.github.com/en/articles/workflow-syntax-for-github-actions
+
+name: naz ci
+on: [pull_request, push]
+
+jobs:
+
+  static_analysis:
+    name: static_analysis
+    runs-on: ubuntu-18.04
+    timeout-minutes: 5
+    steps:
+      - name: Set up python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+
+      - name: Check out code
+        uses: actions/checkout@v1
+  
+      - name: check if changes have release notes
+        if: github.ref != 'refs/heads/master'
+        run: |
+          ChangedFiles=`git diff --name-only origin/master`
+          echo $ChangedFiles
+          case "$ChangedFiles" in
+            *CHANGELOG.*)
+                printf "\n Thanks, your commits include update to release notes. \n";;
+            *)
+                printf "\n You should add release notes to CHANGELOG.md \n" && exit 77;;
+          esac
+
+      - name: install apt and pip deps
+        run: |
+          pwd; ls -lsha
+          sudo apt -y update; sudo apt-get -y install pandoc curl
+          pip install -e .[dev,test,benchmarks]
+          find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
+
+      - name: run them analyzers
+        run: |
+          black --line-length=100 --check . ||  { printf "\\n\\t please use black to format your code."; exit 77; }
+          flake8 .
+          pylint --enable=E --disable=W,R,C naz/ tests/ cli/ documentation/ examples/ benchmarks/
+          bandit -r --exclude .venv -ll .
+          # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
+          # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
+          mypy --show-column-numbers --ignore-missing-imports -p cli -p naz #--strict
+          pytype --verbosity 0 --python-version 3.6 --protocols --strict-import --keep-going naz/ cli/
+        env:
+          PYTHONASYNCIODEBUG: '1'
+
+   
+  tests:
+    name: tests
+    runs-on: ubuntu-18.04
+    timeout-minutes: 5
+    steps:
+      - name: Set up python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+
+      - name: Check out code
+        uses: actions/checkout@v1
+  
+      - name: install apt and pip deps
+        run: |
+          pwd; ls -lsha
+          sudo apt -y update; sudo apt-get -y install pandoc curl
+          pip install -e .[dev,test,benchmarks]
+          find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
+
+      - name: run tests
+        run: |
+          naz-cli --version && naz-cli --help
+          naz-cli --client examples.example_config.client --dry-run
+          coverage erase
+          export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
+          coverage report --show-missing --fail-under=84
+
+
+  docs:
+    name: docs
+    runs-on: ubuntu-18.04
+    timeout-minutes: 2
+    steps:
+      - name: Set up python
+        uses: actions/setup-python@v1
+        with:
+          python-version: '3.6'
+
+      - name: Check out code
+        uses: actions/checkout@v1
+  
+      - name: install apt and pip deps
+        run: |
+          pwd; ls -lsha
+          sudo apt -y update; sudo apt-get -y install pandoc curl
+          pip install -e .[dev,test,benchmarks]
+          find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
+
+      - name: check docs are okay
+        run: |
+          naz-cli --version && naz-cli --help
+          sphinx-build -a -E documentation/sphinx-docs/ docs/
+          stat docs/.nojekyll # make sure that file exists.
+
+
+  # deploy:
+  #   name: deploy
+  #   runs-on: ubuntu-18.04
