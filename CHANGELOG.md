@@ -2,6 +2,12 @@
 most recent version is listed first.
 
 
+## **version:** v0.6.7
+- make available to `hooks` the raw pdu as sent/received to/from SMSC: https://github.com/komuw/naz/pull/159
+- rename the `naz.hooks.BaseHook` methods: https://github.com/komuw/naz/pull/159 
+  The new names are more correct and indicate what is actually taking place.
+
+
 ## **version:** v0.6.6
 - make sure that `naz` reads exactly the first 4bytes of an smpp header: https://github.com/komuw/naz/pull/153  
   - if `naz` is unable to read exactly those bytes, it unbinds and closes the connection
