@@ -232,7 +232,8 @@ class BreachHandler(handlers.MemoryHandler):
         )  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
-        self.heartbeatInterval = heartbeatInterval
+        self.heartbeatInterval = heartbeatInterval * 60  # seconds
+        self._s_time = time.monotonic()
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
@@ -243,10 +244,13 @@ class BreachHandler(handlers.MemoryHandler):
         return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
 
     def _heartbeat(self):
-        import pdb
+        # check if `heartbeatInterval` seconds have passed.
+        # if they have, emit a heartbeat log record to the target handler
 
-        pdb.set_trace()
-        if self.heartbeatInterval:
+        _now = time.monotonic()
+        _diff = _now - self._s_time
+        if _diff >= self.heartbeatInterval:
+            self._s_time = _now
             #  name, level, pathname, lineno, msg, args, exc_info, func=None, sinfo=None, **kwargs
             # see: https://docs.python.org/3/library/logging.html#logging.LogRecord
             record = logging.makeLogRecord(
@@ -261,7 +265,12 @@ class BreachHandler(handlers.MemoryHandler):
             self.target.emit(record=record)
 
     def _validate_args(
-        self, flushLevel: int, capacity: int, target: logging.Handler, flushOnClose: bool
+        self,
+        flushLevel: int,
+        capacity: int,
+        target: logging.Handler,
+        flushOnClose: bool,
+        heartbeatInterval: typing.Union[None, int] = None,
     ):
         if not isinstance(flushLevel, int):
             raise ValueError(
@@ -282,5 +291,11 @@ class BreachHandler(handlers.MemoryHandler):
             raise ValueError(
                 "`flushOnClose` should be of type:: `bool` You entered: {0}".format(
                     type(flushOnClose)
+                )
+            )
+        if not isinstance(heartbeatInterval, (type(None), int)):
+            raise ValueError(
+                "`heartbeatInterval` should be of type:: `None` or `int` You entered: {0}".format(
+                    type(heartbeatInterval)
                 )
             )
