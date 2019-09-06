@@ -49,7 +49,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
         smpp_command: str,
         log_id: str,
         hook_metadata: str,
-        status: "state.CommandStatus",
+        status: "naz.state.CommandStatus",
         pdu: bytes,
     ) -> None:
         self.counter.labels(
