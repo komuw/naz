@@ -217,3 +217,31 @@ class TestBreachHandler(TestCase):
         logger.log(level=logging.INFO, log_data={"song_id": 543, "name": "Zion"})
         self.assertIn("naz.BreachHandler.heartbeat", self._temp_stream.getvalue())
         self.assertIn(str(heartbeatInterval), self._temp_stream.getvalue())
+
+    def test_after_flush_buffer_is_empty(self):
+        _handler = naz.log.BreachHandler(
+            capacity=3, target=logging.StreamHandler(stream=self._temp_stream)
+        )
+        logger = naz.log.SimpleLogger("test_after_flush_buffer_is_empty", handler=_handler)
+        logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+
+        # log at level less than `_handler.trigger_level`
+        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
+        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "two": 2})
+        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "three": 3})
+        # assert buffer has items
+        self.assertEqual(len(_handler.buffer), 3)
+
+        # log at level greater than or equal to `_handler.trigger_level`
+        logger.log(level=logging.WARN, log_data={"trace_id": 781125213295, "four": 7})
+
+        # assert everything in the buffer after trigger level is reached
+        # is flushed to `_handler.stream`
+        self.assertIn("two", self._temp_stream.getvalue())
+        self.assertIn("three", self._temp_stream.getvalue())
+        self.assertIn("four", self._temp_stream.getvalue())
+        self.assertIn(str(781125213295), self._temp_stream.getvalue())
+
+        # assert buffer is cleared after flushing
+        self.assertEqual(len(_handler.buffer), 0)
+        self.assertEqual(_handler.buffer, [])
