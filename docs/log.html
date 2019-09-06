@@ -280,7 +280,7 @@ The logger can choose to bind these log_metadata to itself.</p>
 
 <dl class="class">
 <dt id="naz.log.BreachHandler">
-<em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">BreachHandler</code><span class="sig-paren">(</span><em class="sig-param">flushLevel=30</em>, <em class="sig-param">capacity=10000</em>, <em class="sig-param">target=&lt;StreamHandler &lt;stderr&gt; (NOTSET)&gt;</em>, <em class="sig-param">flushOnClose=False</em>, <em class="sig-param">heartbeatInterval=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">BreachHandler</code><span class="sig-paren">(</span><em class="sig-param">flushLevel=30</em>, <em class="sig-param">capacity=1000</em>, <em class="sig-param">target=&lt;StreamHandler &lt;stderr&gt; (NOTSET)&gt;</em>, <em class="sig-param">flushOnClose=False</em>, <em class="sig-param">heartbeatInterval=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">logging.handlers.MemoryHandler</span></code></p>
 <p>This is an implementation of <cite>logging.Handler</cite> that puts logs in an in-memory ring buffer.
 When a trigger condition(eg a certain log level) is met;
@@ -316,7 +316,7 @@ except that it does not flush when the ring-buffer capacity is met but only when
 </div>
 <dl class="method">
 <dt id="naz.log.BreachHandler.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">flushLevel=30</em>, <em class="sig-param">capacity=10000</em>, <em class="sig-param">target=&lt;StreamHandler &lt;stderr&gt; (NOTSET)&gt;</em>, <em class="sig-param">flushOnClose=False</em>, <em class="sig-param">heartbeatInterval=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">flushLevel=30</em>, <em class="sig-param">capacity=1000</em>, <em class="sig-param">target=&lt;StreamHandler &lt;stderr&gt; (NOTSET)&gt;</em>, <em class="sig-param">flushOnClose=False</em>, <em class="sig-param">heartbeatInterval=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#BreachHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.BreachHandler.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

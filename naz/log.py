@@ -204,7 +204,7 @@ class BreachHandler(handlers.MemoryHandler):
     def __init__(
         self,
         flushLevel: int = logging.WARNING,
-        capacity: int = 10_000,
+        capacity: int = 1_000,
         target: logging.Handler = logging.StreamHandler(),
         flushOnClose: bool = False,
         heartbeatInterval: typing.Union[None, float] = None,
@@ -244,7 +244,7 @@ class BreachHandler(handlers.MemoryHandler):
             self.heartbeatInterval = heartbeatInterval  # seconds
             self._s_time = time.monotonic()
 
-        self.target.setLevel(logging.DEBUG)
+        self.target.setLevel(logging.DEBUG)  # type: ignore
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
@@ -278,8 +278,7 @@ class BreachHandler(handlers.MemoryHandler):
                     },
                 }
             )
-
-            self.target.emit(record=record)
+            self.target.emit(record=record)  # pytype: disable=attribute-error
 
     def _validate_args(
         self,

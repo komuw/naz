@@ -368,7 +368,7 @@
 <div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">flushLevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
-        <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+        <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>
         <span class="n">target</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(),</span>
         <span class="n">flushOnClose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">heartbeatInterval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -408,7 +408,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">heartbeatInterval</span> <span class="o">=</span> <span class="n">heartbeatInterval</span>  <span class="c1"># seconds</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_s_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
 <div class="viewcode-block" id="BreachHandler.shouldFlush"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.shouldFlush">[docs]</a>    <span class="k">def</span> <span class="nf">shouldFlush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -442,8 +442,7 @@
                     <span class="p">},</span>
                 <span class="p">}</span>
             <span class="p">)</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">)</span>  <span class="c1"># pytype: disable=attribute-error</span>
 
     <span class="k">def</span> <span class="nf">_validate_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
