@@ -458,7 +458,7 @@ for i in range(0, 5):
 
 #### 6. Well written(if I have to say so myself):
   - [Good test coverage](https://codecov.io/gh/komuw/naz)
-  - [Passing continous integration](https://travis-ci.com/komuw/naz/builds)
+  - [Passing continous integration](https://github.com/komuw/naz/actions)
   - [statically analyzed code](https://www.codacy.com/app/komuw/naz/dashboard)
 
 
