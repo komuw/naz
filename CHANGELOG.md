@@ -7,6 +7,7 @@ most recent version is listed first.
 - rename the `naz.hooks.BaseHook` methods: https://github.com/komuw/naz/pull/159 
   The new names are more correct and indicate what is actually taking place.
 - use github actions for CI: https://github.com/komuw/naz/pull/162
+- Add heartbeat to BreachHandler: https://github.com/komuw/naz/pull/161
 
 
 ## **version:** v0.6.6
