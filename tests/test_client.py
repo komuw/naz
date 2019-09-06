@@ -1023,9 +1023,10 @@ class TestClient(TestCase):
             sequence_number = 1
             bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
             command_status = 411_041_792
+            full_pdu = b"pdu"
             self._run(
                 self.cli.command_handlers(
-                    pdu=b"pdu",
+                    pdu=full_pdu,
                     body_data=b"body_data",
                     smpp_command=bind_transceiver,
                     command_status_value=command_status,
@@ -1039,6 +1040,8 @@ class TestClient(TestCase):
                 mock_hook_from_smsc.mock.call_args[1]["smpp_command"], bind_transceiver
             )
             self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "log_id")
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]['pdu'], full_pdu)
+
 
     def test_protocol_error(self):
         """
