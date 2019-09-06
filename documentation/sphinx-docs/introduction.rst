@@ -202,8 +202,8 @@ NB:
 
 3.2.2 hooks
 =====================
-| A hook is a class with two methods `request` and `response`, ie it implements naz's `naz.hooks.BaseHook <https://komuw.github.io/naz/hooks.html#naz.hooks.BaseHook>`_ interface
-| ``naz`` will call the `request` method just before sending request to SMSC and also call the `response` method just after getting response from SMSC.
+| A hook is a class with two methods `to_smsc` and `from_smsc`, ie it implements naz's `naz.hooks.BaseHook <https://komuw.github.io/naz/hooks.html#naz.hooks.BaseHook>`_ interface
+| ``naz`` will call the `to_smsc` method just before sending data to SMSC and also call the `from_smsc` method just after getting data from SMSC.
 | The default hook that naz uses is ``naz.hooks.SimpleHook`` which just logs the request and response.
 | If you wanted, for example to keep metrics of all requests and responses to SMSC in your prometheus setup;
 
@@ -213,14 +213,15 @@ NB:
     from prometheus_client import Counter
 
     class MyPrometheusHook(naz.hooks.BaseHook):
-        async def request(self, smpp_command, log_id, hook_metadata):
+        async def to_smsc(self, smpp_command, log_id, hook_metadata, pdu):
             c = Counter('my_requests', 'Description of counter')
             c.inc() # Increment by 1
-        async def response(self,
+        async def from_smsc(self,
                         smpp_command,
                         log_id,
                         hook_metadata,
-                        smsc_response):
+                        status,
+                        pdu):
             c = Counter('my_responses', 'Description of counter')
             c.inc() # Increment by 1
 
@@ -238,13 +239,14 @@ another example is if you want to update a database record whenever you get a de
     import naz
 
     class SetMessageStateHook(naz.hooks.BaseHook):
-        async def request(self, smpp_command, log_id, hook_metadata):
+        async def to_smsc(self, smpp_command, log_id, hook_metadata, pdu):
             pass
-        async def response(self,
+        async def from_smsc(self,
                         smpp_command,
                         log_id,
                         hook_metadata,
-                        smsc_response):
+                        status,
+                        pdu):
             if smpp_command == naz.SmppCommand.DELIVER_SM:
                 conn = sqlite3.connect('mySmsDB.db')
                 c = conn.cursor()
