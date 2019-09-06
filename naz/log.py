@@ -207,7 +207,7 @@ class BreachHandler(handlers.MemoryHandler):
         capacity: int = 10_000,
         target: logging.Handler = logging.StreamHandler(),
         flushOnClose: bool = False,
-        heartbeatInterval: typing.Union[None, int] = None,
+        heartbeatInterval: typing.Union[None, float] = None,
     ) -> None:
         """
         Parameters:
@@ -215,9 +215,9 @@ class BreachHandler(handlers.MemoryHandler):
             capacity: the maximum number of log records to store in the ring buffer
             target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
-            heartbeatInterval: can be an integer or None. If it is an integer, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
+            heartbeatInterval: can be an float or None. If it is an float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
                                If it is None(the default), then no heartbeat log record is emitted.
-                               If you do decide to set it, a good value is 1800(ie 30 minutes)
+                               If you do decide to set it, a good value is 1800(ie 30 minutes) or more.
         """
         self._validate_args(
             flushLevel=flushLevel,
@@ -255,9 +255,7 @@ class BreachHandler(handlers.MemoryHandler):
     def _heartbeat(self):
         if not self.heartbeatInterval:
             return
-        import pdb
 
-        pdb.set_trace()
         # check if `heartbeatInterval` seconds have passed.
         # if they have, emit a heartbeat log record to the target handler
         _now = time.monotonic()
@@ -285,7 +283,7 @@ class BreachHandler(handlers.MemoryHandler):
         capacity: int,
         target: logging.Handler,
         flushOnClose: bool,
-        heartbeatInterval: typing.Union[None, int],
+        heartbeatInterval: typing.Union[None, float],
     ):
         if not isinstance(flushLevel, int):
             raise ValueError(
@@ -308,9 +306,9 @@ class BreachHandler(handlers.MemoryHandler):
                     type(flushOnClose)
                 )
             )
-        if not isinstance(heartbeatInterval, (type(None), int)):
+        if not isinstance(heartbeatInterval, (type(None), float)):
             raise ValueError(
-                "`heartbeatInterval` should be of type:: `None` or `int` You entered: {0}".format(
+                "`heartbeatInterval` should be of type:: `None` or `float` You entered: {0}".format(
                     type(heartbeatInterval)
                 )
             )
