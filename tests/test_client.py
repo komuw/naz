@@ -1040,8 +1040,7 @@ class TestClient(TestCase):
                 mock_hook_from_smsc.mock.call_args[1]["smpp_command"], bind_transceiver
             )
             self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "log_id")
-            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]['pdu'], full_pdu)
-
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["pdu"], full_pdu)
 
     def test_protocol_error(self):
         """
