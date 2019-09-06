@@ -24,7 +24,7 @@ class Hook(naz.hooks.BaseHook):
             },
         )
 
-    async def response(self, smpp_command, log_id, hook_metadata, smsc_response, raw_pdu):
+    async def response(self, smpp_command, log_id, hook_metadata, smsc_response, pdu):
         self.logger.log(
             logging.INFO,
             {
@@ -34,7 +34,7 @@ class Hook(naz.hooks.BaseHook):
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
                 "smsc_response": smsc_response,
-                "raw_pdu": raw_pdu,
+                "pdu": pdu,
             },
         )
 

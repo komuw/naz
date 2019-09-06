@@ -1576,7 +1576,7 @@ class Client:
         try:
             # call user's hook for requests
             await self.hook.request(
-                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
+                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata, pdu=msg
             )
         except Exception as e:
             self._log(
@@ -2054,7 +2054,7 @@ class Client:
             )
 
         await self.command_handlers(
-            raw_pdu=pdu,
+            pdu=pdu,
             body_data=body_data,
             smpp_command=smpp_command,
             command_status_value=command_status,
@@ -2075,7 +2075,7 @@ class Client:
 
     async def command_handlers(
         self,
-        raw_pdu: bytes,
+        pdu: bytes,
         body_data: bytes,
         smpp_command: str,
         command_status_value: int,
@@ -2087,7 +2087,7 @@ class Client:
         This routes the various different SMPP PDU to their respective handlers.
 
         Parameters:
-            raw_pdu: the full PDU as received from SMSC
+            pdu: the full PDU as received from SMSC
             body_data: PDU body as received from SMSC
             smpp_command: type of PDU been sent. eg bind_transceiver
             command_status_value: the response code from SMSC for a specific PDU
@@ -2308,7 +2308,7 @@ class Client:
                 log_id=log_id,
                 hook_metadata=hook_metadata,
                 smsc_response=commandStatus,
-                raw_pdu=raw_pdu,
+                pdu=pdu,
             )
         except Exception as e:
             self._log(
