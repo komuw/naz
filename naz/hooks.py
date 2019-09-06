@@ -12,42 +12,44 @@ class BaseHook(abc.ABC):
     """
     Interface that must be implemented to satisfy naz's hooks.
     User implementations should inherit this class and
-    implement the :func:`request <BaseHook.request>` and :func:`response <BaseHook.response>` methods with the type signatures shown.
+    implement the :func:`to_smsc <BaseHook.to_smsc>` and :func:`from_smsc <BaseHook.from_smsc>` methods with the type signatures shown.
 
-    A hook is class with methods that are called just before a request is sent to SMSC and
-    just after a response is received from SMSC.
+    A hook is class with methods that are called just before sending data to SMSC and just after receiving data from SMSC.
     """
 
     @abc.abstractmethod
-    async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
+    async def to_smsc(self, smpp_command: str, log_id: str, hook_metadata: str, pdu: bytes) -> None:
         """
-        called before a request is sent to SMSC.
+        called before sending data to SMSC.
 
         Parameters:
             smpp_command: any one of the SMSC commands eg submit_sm
             log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
             hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
+            pdu: the full PDU as sent to SMSC
         """
-        raise NotImplementedError("request method must be implemented.")
+        raise NotImplementedError("to_smsc method must be implemented.")
 
     @abc.abstractmethod
-    async def response(
+    async def from_smsc(
         self,
         smpp_command: str,
         log_id: str,
         hook_metadata: str,
-        smsc_response: "state.CommandStatus",
+        status: "state.CommandStatus",
+        pdu: bytes,
     ) -> None:
         """
-        called after a response is received from SMSC.
+        called after receiving data from SMSC.
 
         Parameters:
             smpp_command: any one of the SMSC commands eg submit_sm_resp
             log_id: an ID that a user's application had previously supplied to naz to track/correlate different messages.
             hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
-            smsc_response: the response from SMSC.
+            status: the state of request/response from SMSC.
+            pdu: the full PDU as received from SMSC
         """
-        raise NotImplementedError("response method must be implemented.")
+        raise NotImplementedError("from_smsc method must be implemented.")
 
 
 class SimpleHook(BaseHook):
@@ -69,33 +71,36 @@ class SimpleHook(BaseHook):
         else:
             self.logger = log.SimpleLogger("naz.SimpleHook")
 
-    async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
+    async def to_smsc(self, smpp_command: str, log_id: str, hook_metadata: str, pdu: bytes) -> None:
         self.logger.log(
             logging.NOTSET,
             {
-                "event": "naz.SimpleHook.request",
+                "event": "naz.SimpleHook.to_smsc",
                 "stage": "start",
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
+                "pdu": pdu,
             },
         )
 
-    async def response(
+    async def from_smsc(
         self,
         smpp_command: str,
         log_id: str,
         hook_metadata: str,
-        smsc_response: "state.CommandStatus",
+        status: "state.CommandStatus",
+        pdu: bytes,
     ) -> None:
         self.logger.log(
             logging.NOTSET,
             {
-                "event": "naz.SimpleHook.response",
+                "event": "naz.SimpleHook.from_smsc",
                 "stage": "start",
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
-                "smsc_response": smsc_response.description,
+                "status": status.description,
+                "pdu": pdu,
             },
         )

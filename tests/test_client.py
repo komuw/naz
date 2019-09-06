@@ -325,6 +325,7 @@ class TestClient(TestCase):
             sequence_number = 3
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -344,6 +345,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.UNBIND,
                     command_status_value=0,
@@ -363,6 +365,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -440,6 +443,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0,
@@ -461,6 +465,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.DELIVER_SM,
                     command_status_value=0x00000058,
@@ -474,22 +479,23 @@ class TestClient(TestCase):
             self.assertFalse(mock_not_throttled.mock.called)
 
     def test_response_hook_called(self):
-        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+        with mock.patch("naz.hooks.SimpleHook.from_smsc", new=AsyncMock()) as mock_hook_from_smsc:
             self._run(
                 self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
                 )
             )
-            self.assertTrue(mock_hook_response.mock.called)
+            self.assertTrue(mock_hook_from_smsc.mock.called)
             self.assertEqual(
-                mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM_RESP
+                mock_hook_from_smsc.mock.call_args[1]["smpp_command"],
+                naz.SmppCommand.SUBMIT_SM_RESP,
             )
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "")
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "")
 
     def test_hook_called_with_metadata(self):
         with mock.patch(
-            "naz.hooks.SimpleHook.request", new=AsyncMock()
-        ) as mock_hook_request, mock.patch(
+            "naz.hooks.SimpleHook.to_smsc", new=AsyncMock()
+        ) as mock_hook_to_smsc, mock.patch(
             "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue:
             log_id = "12345"
@@ -511,14 +517,14 @@ class TestClient(TestCase):
             self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             self._run(self.cli.dequeue_messages(TESTING=True))
 
-            self.assertTrue(mock_hook_request.mock.called)
+            self.assertTrue(mock_hook_to_smsc.mock.called)
             self.assertEqual(
-                mock_hook_request.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
+                mock_hook_to_smsc.mock.call_args[1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
             )
-            self.assertEqual(mock_hook_request.mock.call_args[1]["log_id"], log_id)
-            self.assertEqual(mock_hook_request.mock.call_args[1]["hook_metadata"], hook_metadata)
+            self.assertEqual(mock_hook_to_smsc.mock.call_args[1]["log_id"], log_id)
+            self.assertEqual(mock_hook_to_smsc.mock.call_args[1]["hook_metadata"], hook_metadata)
             self.assertEqual(
-                json.loads(mock_hook_request.mock.call_args[1]["hook_metadata"]), _hook_metadata
+                json.loads(mock_hook_to_smsc.mock.call_args[1]["hook_metadata"]), _hook_metadata
             )
 
     def test_receving_data(self):
@@ -563,6 +569,7 @@ class TestClient(TestCase):
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=naz.SmppCommand.ENQUIRE_LINK,
                     command_status_value=0,
@@ -812,7 +819,9 @@ class TestClient(TestCase):
             )
 
             # 3. RECEIVE DELIVER_SM
-            with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            with mock.patch(
+                "naz.hooks.SimpleHook.from_smsc", new=AsyncMock()
+            ) as mock_hook_from_smsc:
                 tag = naz.SmppOptionalTag.receipted_message_id
                 length = 0x0018  # 24 in length
                 tag_n_len = struct.pack(">HH", tag, length)
@@ -828,13 +837,14 @@ class TestClient(TestCase):
                 deliver_sm_pdu = deliver_sm_pdu + tag_n_len + value
                 self._run(self.cli._parse_response_pdu(pdu=deliver_sm_pdu))
 
-                self.assertTrue(mock_hook_response.mock.called)
+                self.assertTrue(mock_hook_from_smsc.mock.called)
                 self.assertEqual(
-                    mock_hook_response.mock.call_args[1]["smpp_command"], naz.SmppCommand.DELIVER_SM
+                    mock_hook_from_smsc.mock.call_args[1]["smpp_command"],
+                    naz.SmppCommand.DELIVER_SM,
                 )
-                self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], log_id)
+                self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], log_id)
                 self.assertEqual(
-                    mock_hook_response.mock.call_args[1]["hook_metadata"], hook_metadata
+                    mock_hook_from_smsc.mock.call_args[1]["hook_metadata"], hook_metadata
                 )
 
     def test_re_establish_conn_bind(self):
@@ -920,11 +930,12 @@ class TestClient(TestCase):
         """
         test that `Client.command_handlers` behaves okay for unkown command_ids
         """
-        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+        with mock.patch("naz.hooks.SimpleHook.from_smsc", new=AsyncMock()) as mock_hook_from_smsc:
             sequence_number = 3
             alert_notification = naz.SmppCommand.ALERT_NOTIFICATION
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=alert_notification,
                     command_status_value=0,
@@ -933,17 +944,18 @@ class TestClient(TestCase):
                     hook_metadata="hook_metadata",
                 )
             )
-            self.assertTrue(mock_hook_response.mock.called)
+            self.assertTrue(mock_hook_from_smsc.mock.called)
             self.assertEqual(
-                mock_hook_response.mock.call_args[1]["smpp_command"], alert_notification
+                mock_hook_from_smsc.mock.call_args[1]["smpp_command"], alert_notification
             )
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "log_id")
 
             # reserved command_id's
             sequence_number = 4
             reserved_for_smpp_extension_a = naz.SmppCommand.RESERVED_FOR_SMPP_EXTENSION_A
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=reserved_for_smpp_extension_a,
                     command_status_value=0,
@@ -952,17 +964,18 @@ class TestClient(TestCase):
                     hook_metadata="hook_metadata",
                 )
             )
-            self.assertTrue(mock_hook_response.mock.called)
+            self.assertTrue(mock_hook_from_smsc.mock.called)
             self.assertEqual(
-                mock_hook_response.mock.call_args[1]["smpp_command"], reserved_for_smpp_extension_a
+                mock_hook_from_smsc.mock.call_args[1]["smpp_command"], reserved_for_smpp_extension_a
             )
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "log_id")
 
             # known command_id
             sequence_number = 5
             bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
             self._run(
                 self.cli.command_handlers(
+                    pdu=b"pdu",
                     body_data=b"body_data",
                     smpp_command=bind_transceiver,
                     command_status_value=0,
@@ -971,9 +984,11 @@ class TestClient(TestCase):
                     hook_metadata="hook_metadata",
                 )
             )
-            self.assertTrue(mock_hook_response.mock.called)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+            self.assertTrue(mock_hook_from_smsc.mock.called)
+            self.assertEqual(
+                mock_hook_from_smsc.mock.call_args[1]["smpp_command"], bind_transceiver
+            )
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "log_id")
 
     def test_command_status_lookup(self):
         command_status = 411_041_792
@@ -1004,12 +1019,14 @@ class TestClient(TestCase):
         """
         tests of bugs gotten via benchmarks
         """
-        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+        with mock.patch("naz.hooks.SimpleHook.from_smsc", new=AsyncMock()) as mock_hook_from_smsc:
             sequence_number = 1
             bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
             command_status = 411_041_792
+            full_pdu = b"pdu"
             self._run(
                 self.cli.command_handlers(
+                    pdu=full_pdu,
                     body_data=b"body_data",
                     smpp_command=bind_transceiver,
                     command_status_value=command_status,
@@ -1018,9 +1035,12 @@ class TestClient(TestCase):
                     hook_metadata="hook_metadata",
                 )
             )
-            self.assertTrue(mock_hook_response.mock.called)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["smpp_command"], bind_transceiver)
-            self.assertEqual(mock_hook_response.mock.call_args[1]["log_id"], "log_id")
+            self.assertTrue(mock_hook_from_smsc.mock.called)
+            self.assertEqual(
+                mock_hook_from_smsc.mock.call_args[1]["smpp_command"], bind_transceiver
+            )
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["log_id"], "log_id")
+            self.assertEqual(mock_hook_from_smsc.mock.call_args[1]["pdu"], full_pdu)
 
     def test_protocol_error(self):
         """

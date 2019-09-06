@@ -32,7 +32,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
         # 3. number_of_messages_total{project="naz_benchmarks"}
         # 4. rate(number_of_messages_total{smpp_command="submit_sm",state="request"}[30s])  # msg sending over the past 30seconds
 
-    async def request(self, smpp_command: str, log_id: str, hook_metadata: str) -> None:
+    async def to_smsc(self, smpp_command: str, log_id: str, hook_metadata: str, pdu: bytes) -> None:
         self.counter.labels(
             project="naz_benchmarks",
             smpp_command=smpp_command,
@@ -44,18 +44,19 @@ class BenchmarksHook(naz.hooks.BaseHook):
         ) as executor:
             await self.loop.run_in_executor(executor, functools.partial(self._publish))
 
-    async def response(
+    async def from_smsc(
         self,
         smpp_command: str,
         log_id: str,
         hook_metadata: str,
-        smsc_response: naz.state.CommandStatus,
+        status: "naz.state.CommandStatus",
+        pdu: bytes,
     ) -> None:
         self.counter.labels(
             project="naz_benchmarks",
             smpp_command=smpp_command,
             state="response",
-            response_code=smsc_response.code,
+            response_code=status.code,
         ).inc()  # Increment by 1
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix

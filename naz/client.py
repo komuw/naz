@@ -1575,8 +1575,8 @@ class Client:
 
         try:
             # call user's hook for requests
-            await self.hook.request(
-                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata
+            await self.hook.to_smsc(
+                smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata, pdu=msg
             )
         except Exception as e:
             self._log(
@@ -1586,7 +1586,7 @@ class Client:
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": "request hook error",
+                    "state": "to_smsc hook error",
                     "error": str(e),
                 },
             )
@@ -2054,6 +2054,7 @@ class Client:
             )
 
         await self.command_handlers(
+            pdu=pdu,
             body_data=body_data,
             smpp_command=smpp_command,
             command_status_value=command_status,
@@ -2074,6 +2075,7 @@ class Client:
 
     async def command_handlers(
         self,
+        pdu: bytes,
         body_data: bytes,
         smpp_command: str,
         command_status_value: int,
@@ -2085,7 +2087,8 @@ class Client:
         This routes the various different SMPP PDU to their respective handlers.
 
         Parameters:
-            body_data: PDU body
+            pdu: the full PDU as received from SMSC
+            body_data: PDU body as received from SMSC
             smpp_command: type of PDU been sent. eg bind_transceiver
             command_status_value: the response code from SMSC for a specific PDU
             sequence_number: SMPP sequence_number
@@ -2235,7 +2238,6 @@ class Client:
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
 
-            # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
                 # get associated user supplied log_id if any
@@ -2299,11 +2301,12 @@ class Client:
 
         # call user's hook for responses
         try:
-            await self.hook.response(
+            await self.hook.from_smsc(
                 smpp_command=smpp_command,
                 log_id=log_id,
                 hook_metadata=hook_metadata,
-                smsc_response=commandStatus,
+                status=commandStatus,
+                pdu=pdu,
             )
         except Exception as e:
             self._log(
@@ -2313,7 +2316,7 @@ class Client:
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": "response hook error",
+                    "state": "from_smsc hook error",
                     "error": str(e),
                 },
             )
