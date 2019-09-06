@@ -139,7 +139,7 @@ class TestBreachHandler(TestCase):
             logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "four": 4})
             logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "five": 5})
             logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "six": 6})
-            self.assertIn("", _temp_stream.getvalue())  # nothing is logged
+            self.assertEqual("", _temp_stream.getvalue())  # nothing is logged
 
             # log at level greater than or equal to `_handler.trigger_level`
             logger.log(level=logging.WARN, log_data={"trace_id": 781125213295, "seven": 7})
@@ -182,14 +182,22 @@ class TestBreachHandler(TestCase):
 
     # def test_heartbeat(self):
     #     # with io.StringIO() as _temp_stream:
-    #     #     heartbeatInterval = 1.0
-    #     #     _handler = naz.log.BreachHandler(
-    #     #         capacity=4,
-    #     #         target=logging.StreamHandler(stream=_temp_stream),
-    #     #         # heartbeatInterval=heartbeatInterval,
-    #     #     )
-    #     #     logger = naz.log.SimpleLogger("test_heartbeat", handler=_handler)
-    #     #     logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+    #     _temp_stream = io.StringIO()
+    #     heartbeatInterval = 0.0001
+
+    #     _handler = naz.log.BreachHandler(
+    #         capacity=4,
+    #         target=logging.StreamHandler(stream=_temp_stream),
+    #         heartbeatInterval=heartbeatInterval,
+    #     )
+    #     logger = naz.log.SimpleLogger("test_heartbeat", handler=_handler)
+    #     logger.bind(level="INFO", log_metadata={"artist": "Missy"})
+    #     self.assertEqual("", _temp_stream.getvalue())
+    #     logger.log(level=logging.INFO, log_data={"song_id": 1234, "name": "The Rain"})
+    #     import pdb
+
+    #     pdb.set_trace()
+    #     self.assertIn("", _temp_stream.getvalue())
 
     #     with io.StringIO() as _temp_stream:
     #         _handler = naz.log.BreachHandler(
