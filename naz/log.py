@@ -264,7 +264,6 @@ class BreachHandler(handlers.MemoryHandler):
         _diff = _now - self._s_time
         if _diff >= self.heartbeatInterval:
             self._s_time = _now
-            #  name, level, pathname, lineno, msg, args, exc_info, func=None, sinfo=None, **kwargs
             # see: https://docs.python.org/3/library/logging.html#logging.LogRecord
             record = logging.makeLogRecord(
                 {
