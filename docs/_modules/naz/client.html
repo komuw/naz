@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.6.6 documentation</title>
+  <title>naz.client &mdash; naz v0.6.7 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.6.6
+                v0.6.7
               </div>
             
           
@@ -1739,8 +1739,8 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># call user&#39;s hook for requests</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">hook</span><span class="o">.</span><span class="n">request</span><span class="p">(</span>
-                <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="o">=</span><span class="n">hook_metadata</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">hook</span><span class="o">.</span><span class="n">to_smsc</span><span class="p">(</span>
+                <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="o">=</span><span class="n">hook_metadata</span><span class="p">,</span> <span class="n">pdu</span><span class="o">=</span><span class="n">msg</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
@@ -1750,7 +1750,7 @@
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
                     <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
-                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;request hook error&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;to_smsc hook error&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">)</span>
@@ -2218,6 +2218,7 @@
             <span class="p">)</span>
 
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_handlers</span><span class="p">(</span>
+            <span class="n">pdu</span><span class="o">=</span><span class="n">pdu</span><span class="p">,</span>
             <span class="n">body_data</span><span class="o">=</span><span class="n">body_data</span><span class="p">,</span>
             <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
             <span class="n">command_status_value</span><span class="o">=</span><span class="n">command_status</span><span class="p">,</span>
@@ -2238,6 +2239,7 @@
 
 <div class="viewcode-block" id="Client.command_handlers"><a class="viewcode-back" href="../../client.html#naz.client.Client.command_handlers">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">command_handlers</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pdu</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
         <span class="n">body_data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
         <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">command_status_value</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2249,7 +2251,8 @@
 <span class="sd">        This routes the various different SMPP PDU to their respective handlers.</span>
 
 <span class="sd">        Parameters:</span>
-<span class="sd">            body_data: PDU body</span>
+<span class="sd">            pdu: the full PDU as received from SMSC</span>
+<span class="sd">            body_data: PDU body as received from SMSC</span>
 <span class="sd">            smpp_command: type of PDU been sent. eg bind_transceiver</span>
 <span class="sd">            command_status_value: the response code from SMSC for a specific PDU</span>
 <span class="sd">            sequence_number: SMPP sequence_number</span>
@@ -2399,7 +2402,6 @@
             <span class="c1"># sm_length, Int, 1 octet.It is length of short message user data in octets.</span>
             <span class="c1"># short_message, C-Octet String, 0-254 octet</span>
 
-            <span class="c1"># NB: user&#39;s hook has already been called.</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">deliver_sm_resp</span><span class="p">(</span><span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># get associated user supplied log_id if any</span>
@@ -2463,11 +2465,12 @@
 
         <span class="c1"># call user&#39;s hook for responses</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">hook</span><span class="o">.</span><span class="n">response</span><span class="p">(</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">hook</span><span class="o">.</span><span class="n">from_smsc</span><span class="p">(</span>
                 <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                 <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
                 <span class="n">hook_metadata</span><span class="o">=</span><span class="n">hook_metadata</span><span class="p">,</span>
-                <span class="n">smsc_response</span><span class="o">=</span><span class="n">commandStatus</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">commandStatus</span><span class="p">,</span>
+                <span class="n">pdu</span><span class="o">=</span><span class="n">pdu</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
@@ -2477,7 +2480,7 @@
                     <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
                     <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
-                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;response hook error&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;from_smsc hook error&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
                 <span class="p">},</span>
             <span class="p">)</span></div>
