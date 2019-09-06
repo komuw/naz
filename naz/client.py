@@ -1575,7 +1575,7 @@ class Client:
 
         try:
             # call user's hook for requests
-            await self.hook.request(
+            await self.hook.to_smsc(
                 smpp_command=smpp_command, log_id=log_id, hook_metadata=hook_metadata, pdu=msg
             )
         except Exception as e:
@@ -1586,7 +1586,7 @@ class Client:
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": "request hook error",
+                    "state": "to_smsc hook error",
                     "error": str(e),
                 },
             )
@@ -2303,11 +2303,11 @@ class Client:
 
         # call user's hook for responses
         try:
-            await self.hook.response(
+            await self.hook.from_smsc(
                 smpp_command=smpp_command,
                 log_id=log_id,
                 hook_metadata=hook_metadata,
-                smsc_response=commandStatus,
+                status=commandStatus,
                 pdu=pdu,
             )
         except Exception as e:
@@ -2318,7 +2318,7 @@ class Client:
                     "stage": "end",
                     "smpp_command": smpp_command,
                     "log_id": log_id,
-                    "state": "response hook error",
+                    "state": "from_smsc hook error",
                     "error": str(e),
                 },
             )

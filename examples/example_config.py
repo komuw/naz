@@ -12,11 +12,11 @@ class Hook(naz.hooks.BaseHook):
     def __init__(self):
         self.logger = naz.log.SimpleLogger("MyHook")
 
-    async def request(self, smpp_command, log_id, hook_metadata, pdu):
+    async def to_smsc(self, smpp_command, log_id, hook_metadata, pdu):
         self.logger.log(
             logging.INFO,
             {
-                "event": "naz.SimpleHook.request",
+                "event": "naz.SimpleHook.to_smsc",
                 "stage": "start",
                 "smpp_command": smpp_command,
                 "log_id": log_id,
@@ -25,16 +25,16 @@ class Hook(naz.hooks.BaseHook):
             },
         )
 
-    async def response(self, smpp_command, log_id, hook_metadata, smsc_response, pdu):
+    async def from_smsc(self, smpp_command, log_id, hook_metadata, status, pdu):
         self.logger.log(
             logging.INFO,
             {
-                "event": "naz.SimpleHook.response",
+                "event": "naz.SimpleHook.from_smsc",
                 "stage": "start",
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
-                "smsc_response": smsc_response,
+                "status": status,
                 "pdu": pdu,
             },
         )
