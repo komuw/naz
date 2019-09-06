@@ -474,7 +474,7 @@ class TestClient(TestCase):
             self.assertFalse(mock_not_throttled.mock.called)
 
     def test_response_hook_called(self):
-        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+        with mock.patch("naz.hooks.SimpleHook.from_smsc", new=AsyncMock()) as mock_hook_response:
             self._run(
                 self.cli._parse_response_pdu(
                     pdu=b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
@@ -488,7 +488,7 @@ class TestClient(TestCase):
 
     def test_hook_called_with_metadata(self):
         with mock.patch(
-            "naz.hooks.SimpleHook.request", new=AsyncMock()
+            "naz.hooks.SimpleHook.to_smsc", new=AsyncMock()
         ) as mock_hook_request, mock.patch(
             "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue:
@@ -812,7 +812,9 @@ class TestClient(TestCase):
             )
 
             # 3. RECEIVE DELIVER_SM
-            with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+            with mock.patch(
+                "naz.hooks.SimpleHook.from_smsc", new=AsyncMock()
+            ) as mock_hook_response:
                 tag = naz.SmppOptionalTag.receipted_message_id
                 length = 0x0018  # 24 in length
                 tag_n_len = struct.pack(">HH", tag, length)
@@ -920,7 +922,7 @@ class TestClient(TestCase):
         """
         test that `Client.command_handlers` behaves okay for unkown command_ids
         """
-        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+        with mock.patch("naz.hooks.SimpleHook.from_smsc", new=AsyncMock()) as mock_hook_response:
             sequence_number = 3
             alert_notification = naz.SmppCommand.ALERT_NOTIFICATION
             self._run(
@@ -1004,7 +1006,7 @@ class TestClient(TestCase):
         """
         tests of bugs gotten via benchmarks
         """
-        with mock.patch("naz.hooks.SimpleHook.response", new=AsyncMock()) as mock_hook_response:
+        with mock.patch("naz.hooks.SimpleHook.from_smsc", new=AsyncMock()) as mock_hook_response:
             sequence_number = 1
             bind_transceiver = naz.SmppCommand.BIND_TRANSCEIVER
             command_status = 411_041_792
