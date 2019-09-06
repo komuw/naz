@@ -2238,8 +2238,6 @@ class Client:
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
 
-            # TODO: look into the truthfulness of the following comment
-            # NB: user's hook has already been called.
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
                 # get associated user supplied log_id if any
