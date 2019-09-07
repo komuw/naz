@@ -208,6 +208,7 @@ class BreachHandler(handlers.MemoryHandler):
         target: logging.Handler = logging.StreamHandler(),
         flushOnClose: bool = False,
         heartbeatInterval: typing.Union[None, float] = None,
+        targetLevel: str = "DEBUG",
     ) -> None:
         """
         Parameters:
@@ -218,6 +219,7 @@ class BreachHandler(handlers.MemoryHandler):
             heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
                                If it is None(the default), then no heartbeat log record is emitted.
                                If you do decide to set it, a good value is at least 1800(ie 30 minutes).
+            targetLevel: the log level to be applied/set to to :py:attr:`~target`
         """
         self._validate_args(
             flushLevel=flushLevel,
@@ -225,6 +227,7 @@ class BreachHandler(handlers.MemoryHandler):
             target=target,
             flushOnClose=flushOnClose,
             heartbeatInterval=heartbeatInterval,
+            targetLevel=targetLevel,
         )
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(  # type: ignore
@@ -244,7 +247,8 @@ class BreachHandler(handlers.MemoryHandler):
             self.heartbeatInterval = heartbeatInterval  # seconds
             self._s_time = time.monotonic()
 
-        self.target.setLevel(logging.DEBUG)  # type: ignore
+        self.targetLevel = targetLevel
+        self.target.setLevel(self.targetLevel)
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
@@ -286,6 +290,7 @@ class BreachHandler(handlers.MemoryHandler):
         target: logging.Handler,
         flushOnClose: bool,
         heartbeatInterval: typing.Union[None, float],
+        targetLevel: str,
     ):
         if not isinstance(flushLevel, int):
             raise ValueError(
@@ -312,5 +317,15 @@ class BreachHandler(handlers.MemoryHandler):
             raise ValueError(
                 "`heartbeatInterval` should be of type:: `None` or `float` You entered: {0}".format(
                     type(heartbeatInterval)
+                )
+            )
+        if not isinstance(targetLevel, str):
+            raise ValueError(
+                "`targetLevel` should be of type:: `str` You entered: {0}".format(type(targetLevel))
+            )
+        if targetLevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            raise ValueError(
+                """`targetLevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                    targetLevel
                 )
             )

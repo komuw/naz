@@ -372,6 +372,7 @@
         <span class="n">target</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(),</span>
         <span class="n">flushOnClose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">heartbeatInterval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">targetLevel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
@@ -382,6 +383,7 @@
 <span class="sd">            heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.</span>
 <span class="sd">                               If it is None(the default), then no heartbeat log record is emitted.</span>
 <span class="sd">                               If you do decide to set it, a good value is at least 1800(ie 30 minutes).</span>
+<span class="sd">            targetLevel: the log level to be applied/set to to :py:attr:`~target`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_args</span><span class="p">(</span>
             <span class="n">flushLevel</span><span class="o">=</span><span class="n">flushLevel</span><span class="p">,</span>
@@ -389,6 +391,7 @@
             <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
             <span class="n">flushOnClose</span><span class="o">=</span><span class="n">flushOnClose</span><span class="p">,</span>
             <span class="n">heartbeatInterval</span><span class="o">=</span><span class="n">heartbeatInterval</span><span class="p">,</span>
+            <span class="n">targetLevel</span><span class="o">=</span><span class="n">targetLevel</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># call `logging.handlers.MemoryHandler` init</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">BreachHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -408,7 +411,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">heartbeatInterval</span> <span class="o">=</span> <span class="n">heartbeatInterval</span>  <span class="c1"># seconds</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_s_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span> <span class="o">=</span> <span class="n">targetLevel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BreachHandler.shouldFlush"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.shouldFlush">[docs]</a>    <span class="k">def</span> <span class="nf">shouldFlush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -450,6 +454,7 @@
         <span class="n">target</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">,</span>
         <span class="n">flushOnClose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">heartbeatInterval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">targetLevel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flushLevel</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -476,6 +481,16 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`heartbeatInterval` should be of type:: `None` or `float` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="nb">type</span><span class="p">(</span><span class="n">heartbeatInterval</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targetLevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`targetLevel` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">targetLevel</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">targetLevel</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NOTSET&quot;</span><span class="p">,</span> <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">,</span> <span class="s2">&quot;CRITICAL&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sd">&quot;&quot;&quot;`targetLevel` should be one of; &#39;NOTSET&#39;, &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39; or &#39;CRITICAL&#39;. You entered: {0}&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">targetLevel</span>
                 <span class="p">)</span>
             <span class="p">)</span></div>
 </pre></div>
