@@ -18,6 +18,7 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v1
   
+      # TODO: fix this, for master branch it fails
       - name: check if changes have release notes
         if: github.ref != 'refs/heads/master'
         run: |
