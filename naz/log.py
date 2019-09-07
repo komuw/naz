@@ -255,10 +255,24 @@ class BreachHandler(handlers.MemoryHandler):
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
-        self._heartbeat()
         return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
 
-    def _heartbeat(self):
+    def emit(self, record: logging.LogRecord) -> None:
+        """
+        Emit a record.
+        Append the record. If shouldFlush() tells us to, call flush() to process
+        the buffer.
+
+        Implementation is taken from `logging.handlers.MemoryHandler`
+        """
+        self._heartbeat()
+
+        if record.levelno >= self.targetLevel:
+            self.buffer.append(record)
+        if self.shouldFlush(record):
+            self.flush()
+
+    def _heartbeat(self) -> None:
         if not self.heartbeatInterval:
             return
 
@@ -291,7 +305,7 @@ class BreachHandler(handlers.MemoryHandler):
         flushOnClose: bool,
         heartbeatInterval: typing.Union[None, float],
         targetLevel: str,
-    ):
+    ) -> None:
         if not isinstance(flushLevel, int):
             raise ValueError(
                 "`flushLevel` should be of type:: `int` You entered: {0}".format(type(flushLevel))
