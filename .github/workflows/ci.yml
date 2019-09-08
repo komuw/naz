@@ -21,7 +21,10 @@ jobs:
       # TODO: fix this, for master branch it fails
       - name: check if changes have release notes
         if: github.ref != 'refs/heads/master'
+        env:
+          GIT_BRANCH: ${{ github.ref }}
         run: |
+          echo $GIT_BRANCH
           ChangedFiles=`git diff --name-only origin/master`
           echo $ChangedFiles
           case "$ChangedFiles" in
