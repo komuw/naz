@@ -208,6 +208,7 @@ class BreachHandler(handlers.MemoryHandler):
         target: logging.Handler = logging.StreamHandler(),
         flushOnClose: bool = False,
         heartbeatInterval: typing.Union[None, float] = None,
+        targetLevel: str = "DEBUG",
     ) -> None:
         """
         Parameters:
@@ -218,6 +219,7 @@ class BreachHandler(handlers.MemoryHandler):
             heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
                                If it is None(the default), then no heartbeat log record is emitted.
                                If you do decide to set it, a good value is at least 1800(ie 30 minutes).
+            targetLevel: the log level to be applied/set to :py:attr:`~target`
         """
         self._validate_args(
             flushLevel=flushLevel,
@@ -225,6 +227,7 @@ class BreachHandler(handlers.MemoryHandler):
             target=target,
             flushOnClose=flushOnClose,
             heartbeatInterval=heartbeatInterval,
+            targetLevel=targetLevel,
         )
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(  # type: ignore
@@ -244,17 +247,32 @@ class BreachHandler(handlers.MemoryHandler):
             self.heartbeatInterval = heartbeatInterval  # seconds
             self._s_time = time.monotonic()
 
-        self.target.setLevel(logging.DEBUG)  # type: ignore
+        self.targetLevel: int = logging._nameToLevel[targetLevel.upper()]
+        self.target.setLevel(self.targetLevel)  # type: ignore
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
         Check for record at the flushLevel or higher.
         Implementation is mostly taken from `logging.handlers.MemoryHandler`
         """
-        self._heartbeat()
         return record.levelno >= self.flushLevel  # type: ignore # pytype: disable=attribute-error
 
-    def _heartbeat(self):
+    def emit(self, record: logging.LogRecord) -> None:
+        """
+        Emit a record.
+        Append the record. If shouldFlush() tells us to, call flush() to process
+        the buffer.
+
+        Implementation is taken from `logging.handlers.MemoryHandler`
+        """
+        self._heartbeat()
+
+        if record.levelno >= self.targetLevel:
+            self.buffer.append(record)
+        if self.shouldFlush(record):
+            self.flush()
+
+    def _heartbeat(self) -> None:
         if not self.heartbeatInterval:
             return
 
@@ -277,7 +295,7 @@ class BreachHandler(handlers.MemoryHandler):
                     },
                 }
             )
-            self.target.emit(record=record)  # pytype: disable=attribute-error
+            self.target.emit(record=record)  # type: ignore # pytype: disable=attribute-error
 
     def _validate_args(
         self,
@@ -286,7 +304,8 @@ class BreachHandler(handlers.MemoryHandler):
         target: logging.Handler,
         flushOnClose: bool,
         heartbeatInterval: typing.Union[None, float],
-    ):
+        targetLevel: str,
+    ) -> None:
         if not isinstance(flushLevel, int):
             raise ValueError(
                 "`flushLevel` should be of type:: `int` You entered: {0}".format(type(flushLevel))
@@ -312,5 +331,15 @@ class BreachHandler(handlers.MemoryHandler):
             raise ValueError(
                 "`heartbeatInterval` should be of type:: `None` or `float` You entered: {0}".format(
                     type(heartbeatInterval)
+                )
+            )
+        if not isinstance(targetLevel, str):
+            raise ValueError(
+                "`targetLevel` should be of type:: `str` You entered: {0}".format(type(targetLevel))
+            )
+        if targetLevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            raise ValueError(
+                """`targetLevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                    targetLevel
                 )
             )
