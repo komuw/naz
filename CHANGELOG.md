@@ -2,6 +2,10 @@
 most recent version is listed first.
 
 
+## **version:** v0.6.8
+- add target level to Breachandler: https://github.com/komuw/naz/pull/163
+
+
 ## **version:** v0.6.7
 - make available to `hooks` the raw pdu as sent/received to/from SMSC: https://github.com/komuw/naz/pull/159
 - rename the `naz.hooks.BaseHook` methods: https://github.com/komuw/naz/pull/159 
