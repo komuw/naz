@@ -219,7 +219,7 @@ class BreachHandler(handlers.MemoryHandler):
             heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
                                If it is None(the default), then no heartbeat log record is emitted.
                                If you do decide to set it, a good value is at least 1800(ie 30 minutes).
-            targetLevel: the log level to be applied/set to to :py:attr:`~target`
+            targetLevel: the log level to be applied/set to :py:attr:`~target`
         """
         self._validate_args(
             flushLevel=flushLevel,
