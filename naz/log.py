@@ -248,7 +248,7 @@ class BreachHandler(handlers.MemoryHandler):
             self._s_time = time.monotonic()
 
         self.targetLevel: int = logging._nameToLevel[targetLevel.upper()]
-        self.target.setLevel(self.targetLevel)
+        self.target.setLevel(self.targetLevel)  # type: ignore
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
         """
@@ -295,7 +295,7 @@ class BreachHandler(handlers.MemoryHandler):
                     },
                 }
             )
-            self.target.emit(record=record)  # pytype: disable=attribute-error
+            self.target.emit(record=record)  # type: ignore # pytype: disable=attribute-error
 
     def _validate_args(
         self,

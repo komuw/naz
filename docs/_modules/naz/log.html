@@ -412,7 +412,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_s_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">_nameToLevel</span><span class="p">[</span><span class="n">targetLevel</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">)</span>  <span class="c1"># type: ignore</span></div>
 
 <div class="viewcode-block" id="BreachHandler.shouldFlush"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.shouldFlush">[docs]</a>    <span class="k">def</span> <span class="nf">shouldFlush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -459,7 +459,7 @@
                     <span class="p">},</span>
                 <span class="p">}</span>
             <span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">)</span>  <span class="c1"># pytype: disable=attribute-error</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">)</span>  <span class="c1"># type: ignore # pytype: disable=attribute-error</span>
 
     <span class="k">def</span> <span class="nf">_validate_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
