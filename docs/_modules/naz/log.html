@@ -383,7 +383,7 @@
 <span class="sd">            heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.</span>
 <span class="sd">                               If it is None(the default), then no heartbeat log record is emitted.</span>
 <span class="sd">                               If you do decide to set it, a good value is at least 1800(ie 30 minutes).</span>
-<span class="sd">            targetLevel: the log level to be applied/set to to :py:attr:`~target`</span>
+<span class="sd">            targetLevel: the log level to be applied/set to :py:attr:`~target`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_args</span><span class="p">(</span>
             <span class="n">flushLevel</span><span class="o">=</span><span class="n">flushLevel</span><span class="p">,</span>
@@ -411,7 +411,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">heartbeatInterval</span> <span class="o">=</span> <span class="n">heartbeatInterval</span>  <span class="c1"># seconds</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_s_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">monotonic</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span> <span class="o">=</span> <span class="n">targetLevel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">_nameToLevel</span><span class="p">[</span><span class="n">targetLevel</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BreachHandler.shouldFlush"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.shouldFlush">[docs]</a>    <span class="k">def</span> <span class="nf">shouldFlush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -419,10 +419,24 @@
 <span class="sd">        Check for record at the flushLevel or higher.</span>
 <span class="sd">        Implementation is mostly taken from `logging.handlers.MemoryHandler`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_heartbeat</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flushLevel</span>  <span class="c1"># type: ignore # pytype: disable=attribute-error</span></div>
 
-    <span class="k">def</span> <span class="nf">_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BreachHandler.emit"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.emit">[docs]</a>    <span class="k">def</span> <span class="nf">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Emit a record.</span>
+<span class="sd">        Append the record. If shouldFlush() tells us to, call flush() to process</span>
+<span class="sd">        the buffer.</span>
+
+<span class="sd">        Implementation is taken from `logging.handlers.MemoryHandler`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_heartbeat</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">targetLevel</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">record</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shouldFlush</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_heartbeat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">heartbeatInterval</span><span class="p">:</span>
             <span class="k">return</span>
 
@@ -455,7 +469,7 @@
         <span class="n">flushOnClose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">heartbeatInterval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">targetLevel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flushLevel</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`flushLevel` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">flushLevel</span><span class="p">))</span>
