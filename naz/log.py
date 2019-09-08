@@ -247,7 +247,7 @@ class BreachHandler(handlers.MemoryHandler):
             self.heartbeatInterval = heartbeatInterval  # seconds
             self._s_time = time.monotonic()
 
-        self.targetLevel = targetLevel
+        self.targetLevel: int = logging._nameToLevel[targetLevel.upper()]
         self.target.setLevel(self.targetLevel)
 
     def shouldFlush(self, record: logging.LogRecord) -> bool:
