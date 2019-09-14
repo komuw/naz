@@ -18,5 +18,4 @@ client = naz.Client(
     enquire_link_interval=70.00,
     rateLimiter=MyRateLimiter(),
     address_range="^254",  # any msisdns beginning with 254. See Appendix A of SMPP spec doc
-    logger=naz.log.SimpleLogger("okayy", naz.log.BreachHandler(capacity=30)),
 )
