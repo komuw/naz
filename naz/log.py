@@ -297,8 +297,8 @@ class BreachHandler(handlers.MemoryHandler):
             )
             self.target.emit(record=record)  # type: ignore # pytype: disable=attribute-error
 
+    @staticmethod
     def _validate_args(
-        self,
         flushLevel: int,
         capacity: int,
         target: logging.Handler,
