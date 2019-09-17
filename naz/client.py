@@ -781,7 +781,6 @@ class Client:
         returns decoded string from bytes with any password removed.
         the returned string is safe to log.
         """
-        log_msg = ""
         try:
             log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
             if self.password in log_msg:
@@ -790,7 +789,7 @@ class Client:
         except (UnicodeDecodeError, UnicodeError):
             log_msg = str(msg)
         except Exception:
-            log_msg = str(msg)
+            log_msg = ""
         return log_msg
 
     async def connect(
