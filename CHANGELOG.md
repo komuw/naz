@@ -2,6 +2,10 @@
 most recent version is listed first.
 
 
+## **version:** v0.7.0
+- Use python 3.7 since it has better `async/await` support: https://github.com/komuw/naz/pull/166
+
+
 ## **version:** v0.6.8
 - add target level to Breachandler: https://github.com/komuw/naz/pull/163
 
