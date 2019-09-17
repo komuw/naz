@@ -56,6 +56,7 @@ jobs:
           pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/
         env:
           PYTHONASYNCIODEBUG: '1'
+          NAZ_DEBUG: 'NAZ_DEBUG'
 
   tests:
     name: tests
@@ -87,6 +88,7 @@ jobs:
           coverage report --show-missing --fail-under=84
         env:
           PYTHONASYNCIODEBUG: '1'
+          NAZ_DEBUG: 'NAZ_DEBUG'
 
   docs:
     name: docs
