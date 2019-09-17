@@ -141,9 +141,7 @@ class TestCliSigHandling(TestCase):
         return self.loop.run_until_complete(coro)
 
     def test_success_signal_handling(self):
-        self._run(
-            cli.utils.sig._signal_handling(logger=self.logger, client=self.client, loop=self.loop)
-        )
+        self._run(cli.utils.sig._signal_handling(logger=self.logger, client=self.client))
 
     def test_success_handle_termination_signal(self):
         with mock.patch("naz.Client.shutdown", new=AsyncMock()) as mock_naz_shutdown:

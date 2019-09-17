@@ -86,10 +86,10 @@ def main():
         if dry_run:
             return
         # call naz api
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(
-            async_main(client=client, logger=logger, loop=loop, dry_run=dry_run)
-        )
+        asyncio_debug = False
+        if os.environ.get("NAZ_DEBUG", None):
+            asyncio_debug = True
+        asyncio.run(async_main(client=client, logger=logger, dry_run=dry_run), debug=asyncio_debug)
     except Exception as e:
         logger.log(logging.ERROR, {"event": "naz.cli.main", "stage": "end", "error": str(e)})
         sys.exit(77)
@@ -97,12 +97,7 @@ def main():
         logger.log(logging.INFO, {"event": "naz.cli.main", "stage": "end"})
 
 
-async def async_main(
-    client: naz.Client,
-    logger: naz.log.SimpleLogger,
-    loop: asyncio.events.AbstractEventLoop,
-    dry_run: bool,
-):
+async def async_main(client: naz.Client, logger: naz.log.SimpleLogger, dry_run: bool):
     # connect & bind to the SMSC host
     await client.connect()
     await client.tranceiver_bind()
@@ -112,8 +107,7 @@ async def async_main(
         client.dequeue_messages(TESTING=dry_run),
         client.receive_data(TESTING=dry_run),
         client.enquire_link(TESTING=dry_run),
-        sig._signal_handling(logger=logger, client=client, loop=loop),
-        loop=loop,
+        sig._signal_handling(logger=logger, client=client),
     )
     await tasks
 

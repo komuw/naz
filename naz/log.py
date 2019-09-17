@@ -167,7 +167,7 @@ class BreachHandler(handlers.MemoryHandler):
     then all the logs in the buffer are flushed into a given stream(file, stdout etc)
 
     It is a bit like
-    `logging.handlers.MemoryHandler <https://docs.python.org/3.6/library/logging.handlers.html#logging.handlers.MemoryHandler>`_
+    `logging.handlers.MemoryHandler <https://docs.python.org/3/library/logging.handlers.html#logging.handlers.MemoryHandler>`_
     except that it does not flush when the ring-buffer capacity is met but only when/if the trigger is met.
 
     It is inspired by the article
@@ -214,7 +214,7 @@ class BreachHandler(handlers.MemoryHandler):
         Parameters:
             flushLevel: the log level that will trigger this handler to flush logs to :py:attr:`~target`
             capacity: the maximum number of log records to store in the ring buffer
-            target: the ultimate `log handler <https://docs.python.org/3.6/library/logging.html#logging.Handler>`_ that will be used.
+            target: the ultimate `log handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
             heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
                                If it is None(the default), then no heartbeat log record is emitted.
@@ -297,8 +297,8 @@ class BreachHandler(handlers.MemoryHandler):
             )
             self.target.emit(record=record)  # type: ignore # pytype: disable=attribute-error
 
+    @staticmethod
     def _validate_args(
-        self,
         flushLevel: int,
         capacity: int,
         target: logging.Handler,

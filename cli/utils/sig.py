@@ -6,9 +6,12 @@ import functools
 import naz
 
 
-async def _signal_handling(
-    logger: naz.log.BaseLogger, client: naz.Client, loop: asyncio.events.AbstractEventLoop
-) -> None:
+async def _signal_handling(logger: naz.log.BaseLogger, client: naz.Client) -> None:
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.get_event_loop()
+
     try:
         for _signal in [signal.SIGHUP, signal.SIGQUIT, signal.SIGTERM]:
             loop.add_signal_handler(
