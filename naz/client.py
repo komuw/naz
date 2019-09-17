@@ -798,21 +798,32 @@ class Client:
         """
         make a network connection to SMSC server.
         """
-        if log_id == "":
-            log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
-        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id})
-        reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
-        self.reader = reader
-        self.writer = writer
-        sock = self.writer.get_extra_info("socket")
-        sock.settimeout(self.socket_timeout)
-        # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
-        # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
-        # https://docs.python.org/3/library/socket.html#notes-on-socket-timeouts
+        try:
+            if log_id == "":
+                log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+            self._log(
+                logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id}
+            )
+            reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
+            self.reader = reader
+            self.writer = writer
+            sock = self.writer.get_extra_info("socket")
+            sock.settimeout(self.socket_timeout)
+            # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
+            # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
+            # https://docs.python.org/3/library/socket.html#notes-on-socket-timeouts
 
-        self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
-        self.current_session_state = SmppSessionState.OPEN
-        return reader, writer
+            self._log(
+                logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id}
+            )
+            self.current_session_state = SmppSessionState.OPEN
+            return reader, writer
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {"event": "naz.Client.connect", "stage": "end", "log_id": log_id, "error": str(e)},
+            )
+            return self.reader, self.writer
 
     async def tranceiver_bind(self, log_id: str = "") -> None:
         """
@@ -1841,6 +1852,21 @@ class Client:
                     },
                 )
                 return None
+            if self.current_session_state != SmppSessionState.BOUND_TRX:
+                not_bound_interval = 7
+                self._log(
+                    logging.INFO,
+                    {
+                        "event": "naz.Client.receive_data",
+                        "stage": "end",
+                        "state": "client yet to bind to SMSC. sleeping for {0:.2f} seconds".format(
+                            not_bound_interval
+                        ),
+                    },
+                )
+                await asyncio.sleep(not_bound_interval)
+                await self.re_establish_conn_bind(smpp_command="", log_id="")
+                continue
 
             header_data = b""
             try:
