@@ -798,9 +798,12 @@ class Client:
         """
         make a network connection to SMSC server.
         """
+        log_id = (
+            log_id
+            if log_id
+            else "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
+        )
         try:
-            if log_id == "":
-                log_id = "".join(random.choices(string.ascii_lowercase + string.digits, k=17))
             self._log(
                 logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id}
             )
