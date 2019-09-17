@@ -13,7 +13,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
+          python-version: '3.7'
 
       - name: Check out code
         uses: actions/checkout@v1
@@ -53,7 +53,7 @@ jobs:
           # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
           # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
           mypy --show-column-numbers --ignore-missing-imports -p cli -p naz #--strict
-          pytype --verbosity 0 --python-version 3.6 --protocols --strict-import --keep-going naz/ cli/
+          pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/
         env:
           PYTHONASYNCIODEBUG: '1'
 
@@ -65,7 +65,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
+          python-version: '3.7'
 
       - name: Check out code
         uses: actions/checkout@v1
@@ -96,7 +96,7 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: '3.6'
+          python-version: '3.7'
 
       - name: Check out code
         uses: actions/checkout@v1

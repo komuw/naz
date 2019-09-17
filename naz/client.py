@@ -809,7 +809,7 @@ class Client:
         sock.settimeout(self.socket_timeout)
         # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
         # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
-        # https://docs.python.org/3.6/library/socket.html#notes-on-socket-timeouts
+        # https://docs.python.org/3/library/socket.html#notes-on-socket-timeouts
 
         self._log(logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id})
         self.current_session_state = SmppSessionState.OPEN
@@ -1621,7 +1621,7 @@ class Client:
             socket.gaierror,
             socket.timeout,
         ) as e:
-            # https://docs.python.org/3.6/library/socket.html#exceptions
+            # https://docs.python.org/3/library/socket.html#exceptions
             self._log(
                 logging.ERROR,
                 {

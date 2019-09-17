@@ -27,7 +27,7 @@ def AsyncMock(*args, **kwargs):
 class MockStreamWriter:
     """
     This is a mock of python's StreamWriter;
-    https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamWriter
+    https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter
     """
 
     def __init__(self, _is_closing=False):
@@ -66,7 +66,7 @@ class MockStreamWriter:
 class MockStreamReader:
     """
     This is a mock of python's StreamReader;
-    https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamReader
+    https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader
     """
 
     def __init__(self, pdu):

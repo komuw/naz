@@ -23,7 +23,7 @@ apt-get -y install pandoc && pip install -e .[dev,test,benchmarks]
 - add tests
 - format your code using [black](https://github.com/ambv/black):                      
 ```shell
-black --line-length=100 --target-version py36 .
+black --line-length=100 .
 ```                     
 - run [flake8](https://pypi.python.org/pypi/flake8) on the code and fix any issues:                      
 ```shell

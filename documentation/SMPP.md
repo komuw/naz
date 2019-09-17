@@ -86,7 +86,7 @@ The following SMPP PDU data type definitions are used to define the SMPP paramet
 **NB:** todo this in python use:
 ```python
 ## https://stackoverflow.com/a/846045/2768067
-## https://docs.python.org/3.6/library/struct.html#format-characters
+## https://docs.python.org/3/library/struct.html#format-characters
 import struct
 print struct.pack('>I', 134) # '>I' is a format string. > means big endian and I means unsigned int
 ```              
@@ -94,7 +94,7 @@ print struct.pack('>I', 134) # '>I' is a format string. > means big endian and I
 ```python
 import struct
 interface_version = 34
-struct.pack('>B', interface_version) # here we use `B` because has size 1 see; https://docs.python.org/3.6/library/struct.html#format-characters
+struct.pack('>B', interface_version) # here we use `B` because has size 1 see; https://docs.python.org/3/library/struct.html#format-characters
 ```
 
 - C-Octet String - A series of **ASCII characters** terminated with the **NULL** character. eg `system_id` is a C-Octet String.            
