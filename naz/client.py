@@ -790,7 +790,7 @@ class Client:
         except (UnicodeDecodeError, UnicodeError):
             log_msg = str(msg)
         except Exception:
-            pass
+            log_msg = str(msg)
         return log_msg
 
     async def connect(
