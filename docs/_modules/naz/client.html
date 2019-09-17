@@ -945,7 +945,6 @@
 <span class="sd">        returns decoded string from bytes with any password removed.</span>
 <span class="sd">        the returned string is safe to log.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">log_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_errors_level</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="ow">in</span> <span class="n">log_msg</span><span class="p">:</span>
@@ -954,7 +953,7 @@
         <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">UnicodeError</span><span class="p">):</span>
             <span class="n">log_msg</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">pass</span>
+            <span class="n">log_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">return</span> <span class="n">log_msg</span>
 
 <div class="viewcode-block" id="Client.connect"><a class="viewcode-back" href="../../client.html#naz.client.Client.connect">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
