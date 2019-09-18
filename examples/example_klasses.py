@@ -121,7 +121,7 @@ class ExampleRedisQueue(naz.q.BaseOutboundQueue):
 if __name__ == "__main__":
     my_queue = ExampleRedisQueue()
     loop = asyncio.get_event_loop()
-    for i in range(0, 4):
+    for i in range(0, 40):
         print("submit_sm round:", i)
         item_to_enqueue = {
             "version": "1",

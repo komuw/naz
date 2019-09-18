@@ -98,11 +98,12 @@ def main():
 
 
 async def async_main(client: naz.Client, logger: naz.log.SimpleLogger, dry_run: bool):
-    # connect & bind to the SMSC host
-    # await client.connect()
-    # await client.tranceiver_bind()
-
-    # send any queued messages to SMSC, read any data from SMSC and continually check the state of the SMSC
+    # 1. connect to the SMSC host
+    # 2. bind to the SMSC host
+    # 3. send any queued messages to SMSC
+    # 4. read any data from SMSC
+    # 5. continually check the state of the SMSC
+    # 6. add signal termination handlers
     tasks = asyncio.gather(
         client.connect(),
         client.tranceiver_bind(),
