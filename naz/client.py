@@ -1862,7 +1862,7 @@ class Client:
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "end",
-                        "state": "client yet to bind to SMSC. sleeping for {0:.2f} seconds".format(
+                        "state": "naz is yet to bind to SMSC. sleeping for {0:.2f} seconds".format(
                             retry_after
                         ),
                     },
