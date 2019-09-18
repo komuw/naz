@@ -794,9 +794,7 @@ class Client:
             log_msg = ""
         return log_msg
 
-    async def connect(
-        self, log_id: str = ""
-    ) -> typing.Tuple[asyncio.streams.StreamReader, asyncio.streams.StreamWriter]:
+    async def connect(self, log_id: str = "") -> None:
         """
         make a network connection to SMSC server.
         """
@@ -822,7 +820,6 @@ class Client:
                 logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id}
             )
             self.current_session_state = SmppSessionState.OPEN
-            return reader, writer
         except (
             OSError,
             ConnectionError,
@@ -837,7 +834,6 @@ class Client:
                 logging.ERROR,
                 {"event": "naz.Client.connect", "stage": "end", "log_id": log_id, "error": str(e)},
             )
-            return self.reader, self.writer
 
     async def tranceiver_bind(self, log_id: str = "") -> None:
         """

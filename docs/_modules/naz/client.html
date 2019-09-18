@@ -528,6 +528,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">SHOULD_SHUT_DOWN</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">drain_lock</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
 
+        <span class="c1"># For exceptions, we try and avoid catch-all blocks. Instead we catch only the exceptions we expect.</span>
+        <span class="c1"># Exception hierarchy: https://docs.python.org/3/library/exceptions.html#exception-hierarchy</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_validate_client_args</span><span class="p">(</span>
         <span class="n">smsc_host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -955,9 +958,7 @@
             <span class="n">log_msg</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">return</span> <span class="n">log_msg</span>
 
-<div class="viewcode-block" id="Client.connect"><a class="viewcode-back" href="../../client.html#naz.client.Client.connect">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">]:</span>
+<div class="viewcode-block" id="Client.connect"><a class="viewcode-back" href="../../client.html#naz.client.Client.connect">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        make a network connection to SMSC server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -983,13 +984,20 @@
                 <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">}</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">OPEN</span>
-            <span class="k">return</span> <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span>
+            <span class="ne">OSError</span><span class="p">,</span>
+            <span class="ne">ConnectionError</span><span class="p">,</span>
+            <span class="ne">TimeoutError</span><span class="p">,</span>
+            <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">,</span>
+            <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
+            <span class="n">socket</span><span class="o">.</span><span class="n">herror</span><span class="p">,</span>
+            <span class="n">socket</span><span class="o">.</span><span class="n">gaierror</span><span class="p">,</span>
+            <span class="n">socket</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
                 <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span>
-            <span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span></div>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Client.tranceiver_bind"><a class="viewcode-back" href="../../client.html#naz.client.Client.tranceiver_bind">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">tranceiver_bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1622,6 +1630,7 @@
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span>
+            <span class="ne">OSError</span><span class="p">,</span>
             <span class="ne">ConnectionError</span><span class="p">,</span>
             <span class="ne">TimeoutError</span><span class="p">,</span>
             <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">,</span>

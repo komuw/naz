@@ -377,7 +377,6 @@ try:
         cli.enquire_link(),
     )
     loop.run_until_complete(tasks)
-    loop.run_forever()
 except Exception as e:
     print("exception occured. error={0}".format(str(e)))
 finally:
@@ -451,7 +450,6 @@ try:
     )
     tasks = asyncio.gather(cli.dequeue_messages(), cli.receive_data(), cli.enquire_link())
     loop.run_until_complete(tasks)
-    loop.run_forever()
 except Exception as e:
     print("error={0}".format(str(e)))
 finally:

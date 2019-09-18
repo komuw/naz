@@ -259,7 +259,6 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
         <span class="n">cli</span><span class="o">.</span><span class="n">enquire_link</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
-    <span class="n">loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 <span class="k">finally</span><span class="p">:</span>
@@ -569,16 +568,21 @@ As an example if you want to deny outgoing requests if the percentage of throttl
     <span class="o">...</span>
     <span class="n">outboundqueue</span><span class="o">=</span><span class="n">my_queue</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="c1"># connect to the SMSC host</span>
-<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">connect</span><span class="p">())</span>
-<span class="c1"># bind to SMSC as a tranceiver</span>
-<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">())</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="c1"># read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC</span>
-    <span class="n">tasks</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">dequeue_messages</span><span class="p">(),</span> <span class="n">cli</span><span class="o">.</span><span class="n">receive_data</span><span class="p">(),</span> <span class="n">cli</span><span class="o">.</span><span class="n">enquire_link</span><span class="p">())</span>
+    <span class="c1"># 1. connect to the SMSC host</span>
+    <span class="c1"># 2. bind to the SMSC host</span>
+    <span class="c1"># 3. send any queued messages to SMSC</span>
+    <span class="c1"># 4. read any data from SMSC</span>
+    <span class="c1"># 5. continually check the state of the SMSC</span>
+    <span class="n">tasks</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="n">cli</span><span class="o">.</span><span class="n">connect</span><span class="p">(),</span>
+        <span class="n">cli</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">(),</span>
+        <span class="n">cli</span><span class="o">.</span><span class="n">dequeue_messages</span><span class="p">(),</span>
+        <span class="n">cli</span><span class="o">.</span><span class="n">receive_data</span><span class="p">(),</span>
+        <span class="n">cli</span><span class="o">.</span><span class="n">enquire_link</span><span class="p">(),</span>
+    <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
-    <span class="n">loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
     <span class="k">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 <span class="k">finally</span><span class="p">:</span>
