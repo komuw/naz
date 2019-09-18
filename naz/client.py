@@ -820,7 +820,16 @@ class Client:
             )
             self.current_session_state = SmppSessionState.OPEN
             return reader, writer
-        except Exception as e:
+        except (
+            OSError,
+            ConnectionError,
+            TimeoutError,
+            asyncio.TimeoutError,
+            socket.error,
+            socket.herror,
+            socket.gaierror,
+            socket.timeout,
+        ) as e:
             self._log(
                 logging.ERROR,
                 {"event": "naz.Client.connect", "stage": "end", "log_id": log_id, "error": str(e)},
@@ -1458,6 +1467,7 @@ class Client:
             await self.connect(log_id=log_id)
             await self.tranceiver_bind(log_id=log_id)
         except (
+            OSError,
             ConnectionError,
             TimeoutError,
             asyncio.TimeoutError,
