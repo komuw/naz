@@ -535,6 +535,7 @@ class TestClient(TestCase):
 
     def test_receving_data(self):
         with mock.patch("asyncio.open_connection", new=AsyncMock()) as mock_naz_connect:
+            # TODO: this sample PDU's should be in one place
             submit_sm_resp_pdu = (
                 b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
             )
@@ -856,6 +857,14 @@ class TestClient(TestCase):
         with mock.patch("asyncio.open_connection", new=AsyncMock()) as mock_naz_connect, mock.patch(
             "naz.Client.tranceiver_bind", new=AsyncMock()
         ) as mock_naz_tranceiver_bind:
+            submit_sm_resp_pdu = (
+                b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
+            )
+            mock_naz_connect.mock.return_value = (
+                MockStreamReader(pdu=submit_sm_resp_pdu),
+                MockStreamWriter(),
+            )
+
             self._run(
                 self.cli.re_establish_conn_bind(
                     smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="log_id", TESTING=True
