@@ -25,7 +25,7 @@ jobs:
           GIT_BRANCH: ${{ github.ref }}
         run: |
           echo $GIT_BRANCH
-          if [ "$GIT_BRANCH" == "master" ]
+          if [ "$GIT_BRANCH" == "refs/heads/master" ]
           then
               printf "\n $GIT_BRANCH branch, ignoring check for relese notes \n"
           elif [ "$GIT_BRANCH" == *"refs/tags/"* ]
