@@ -141,16 +141,20 @@ item_to_enqueue = {
 }
 loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
 
-# connect to the SMSC host
-reader, writer = loop.run_until_complete(cli.connect())
-# bind to SMSC as a tranceiver
-loop.run_until_complete(cli.tranceiver_bind())
-
 try:
-    # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
-    tasks = asyncio.gather(cli.dequeue_messages(), cli.receive_data(), cli.enquire_link())
+    # 1. connect to the SMSC host
+    # 2. bind to the SMSC host
+    # 3. send any queued messages to SMSC
+    # 4. read any data from SMSC
+    # 5. continually check the state of the SMSC
+    tasks = asyncio.gather(
+        cli.connect(),
+        cli.tranceiver_bind(),
+        cli.dequeue_messages(),
+        cli.receive_data(),
+        cli.enquire_link(),
+    )
     loop.run_until_complete(tasks)
-    loop.run_forever()
 except Exception as e:
     print("\n\t error occured. error={0}".format(str(e)))
 finally:
