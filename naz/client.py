@@ -932,7 +932,7 @@ class Client:
         # sleep during startup so that `naz` can have had time to connect & bind
         # we rely on `enquire_link` to kick on `re_establish_conn_bind`
         while self.current_session_state != SmppSessionState.BOUND_TRX:
-            retry_after = self.socket_timeout / 5
+            retry_after = self.socket_timeout
             self._log(
                 logging.DEBUG,
                 {
@@ -1856,18 +1856,18 @@ class Client:
                 )
                 return None
             if self.current_session_state != SmppSessionState.BOUND_TRX:
-                not_bound_interval = 7
+                retry_after = self.socket_timeout
                 self._log(
-                    logging.INFO,
+                    logging.DEBUG,
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "end",
                         "state": "client yet to bind to SMSC. sleeping for {0:.2f} seconds".format(
-                            not_bound_interval
+                            retry_after
                         ),
                     },
                 )
-                await asyncio.sleep(not_bound_interval)
+                await asyncio.sleep(retry_after)
                 await self.re_establish_conn_bind(smpp_command="", log_id="")
                 continue
 
