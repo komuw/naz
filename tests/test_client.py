@@ -247,9 +247,9 @@ class TestClient(TestCase):
         )
 
     def test_can_connect(self):
-        reader, writer = self._run(self.cli.connect())
-        self.assertTrue(hasattr(reader, "read"))
-        self.assertTrue(hasattr(writer, "write"))
+        self._run(self.cli.connect())
+        self.assertTrue(hasattr(self.cli.reader, "read"))
+        self.assertTrue(hasattr(self.cli.writer, "write"))
 
     def test_can_bind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
@@ -264,7 +264,7 @@ class TestClient(TestCase):
 
     def test_submit_sm_enqueue(self):
         with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
-            reader, writer = self._run(self.cli.connect())
+            self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
             log_id = "12345"
             self._run(
@@ -537,9 +537,7 @@ class TestClient(TestCase):
                 MockStreamWriter(),
             )
 
-            reader, writer = self._run(self.cli.connect())
-            self.cli.reader = reader
-            self.cli.writer = writer
+            self._run(self.cli.connect())
             received_pdu = self._run(self.cli.receive_data(TESTING=True))
             self.assertEqual(received_pdu, submit_sm_resp_pdu)
 
@@ -557,9 +555,7 @@ class TestClient(TestCase):
                 MockStreamWriter(),
             )
 
-            reader, writer = self._run(self.cli.connect())
-            self.cli.reader = reader
-            self.cli.writer = writer
+            self._run(self.cli.connect())
             received_pdu = self._run(self.cli.receive_data(TESTING=True))
             self.assertEqual(received_pdu, b"")
             self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)
