@@ -49,6 +49,8 @@ class MockStreamWriter:
         # so it is the only chance we have of 're-establishing' connection
         self.transport = self._create_transport(_is_closing=False)
 
+        return self.transport
+
     def _create_transport(self, _is_closing):
         class MockTransport:
             def __init__(self, _is_closing):
@@ -59,6 +61,9 @@ class MockStreamWriter:
 
             def is_closing(self):
                 return self._is_closing
+
+            def settimeout(self, socket_timeout):
+                pass
 
         return MockTransport(_is_closing=_is_closing)
 
@@ -120,6 +125,7 @@ class TestClient(TestCase):
             outboundqueue=self.outboundqueue,
             loglevel="DEBUG",  # run tests with debug so as to debug what is going on
             logger=naz.log.SimpleLogger("TestClient", handler=naz.log.BreachHandler(capacity=200)),
+            socket_timeout=0.0000001,
         )
 
         self.docker_client = docker.from_env()
@@ -528,7 +534,7 @@ class TestClient(TestCase):
             )
 
     def test_receving_data(self):
-        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect:
+        with mock.patch("asyncio.open_connection", new=AsyncMock()) as mock_naz_connect:
             submit_sm_resp_pdu = (
                 b"\x00\x00\x00\x12\x80\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00\x030\x00"
             )
@@ -546,7 +552,7 @@ class TestClient(TestCase):
         test that if we are unable to read the full 16byte smpp header,
         then we should close the connection.
         """
-        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect, mock.patch(
+        with mock.patch("asyncio.open_connection", new=AsyncMock()) as mock_naz_connect, mock.patch(
             "naz.Client._unbind_and_disconnect", new=AsyncMock()
         ) as mock_naz_unbind_and_disconnect:
             submit_sm_resp_pdu = b"\x00\x00\x00"
@@ -847,7 +853,7 @@ class TestClient(TestCase):
         """
         test that `Client.re_establish_conn_bind` calls `Client.connect` & `Client.tranceiver_bind`
         """
-        with mock.patch("naz.Client.connect", new=AsyncMock()) as mock_naz_connect, mock.patch(
+        with mock.patch("asyncio.open_connection", new=AsyncMock()) as mock_naz_connect, mock.patch(
             "naz.Client.tranceiver_bind", new=AsyncMock()
         ) as mock_naz_tranceiver_bind:
             self._run(
