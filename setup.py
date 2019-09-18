@@ -1,10 +1,8 @@
 import os
 import ast
-
+import codecs
 from setuptools import setup, find_packages
 
-# To use a consistent encoding
-import codecs
 
 here = os.path.abspath(os.path.dirname(__file__))
 about = {}

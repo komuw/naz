@@ -3,15 +3,12 @@ Every contribution to naz is important.
 
                      
 
-Contributor offers to license certain software (a “Contribution” or multiple
-“Contributions”) to naz, and naz agrees to accept said Contributions,
-under the terms of the MIT License.
-Contributor understands and agrees that naz shall have the irrevocable and perpetual right to make
-and distribute copies of any Contribution, as well as to create and distribute collective works and
-derivative works of any Contribution, under the MIT License.
+Contributions are under the [MIT License](https://github.com/komuw/naz/blob/master/LICENSE.txt).
 
 
-Now,                   
+
+Answer the following questions,                   
+
 
 # What(What have you changed?)
 - 
