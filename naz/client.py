@@ -50,7 +50,7 @@ class Client:
                 password=os.getenv("password", "password"),
                 outboundqueue=outboundqueue,
             )
- 
+
         # 1. connect to the SMSC host
         # 2. bind to the SMSC host
         # 3. send any queued messages to SMSC
