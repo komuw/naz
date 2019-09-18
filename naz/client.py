@@ -1858,7 +1858,7 @@ class Client:
             if self.current_session_state != SmppSessionState.BOUND_TRX:
                 retry_after = self.socket_timeout
                 self._log(
-                    logging.DEBUG,
+                    logging.INFO,
                     {
                         "event": "naz.Client.receive_data",
                         "stage": "end",
