@@ -2,6 +2,12 @@
 most recent version is listed first.
 
 
+
+## **version:** v0.7.1 
+- add ability to start `naz` even when SMSC is down: https://github.com/komuw/naz/pull/168    
+  this may be important when you want to deploy `naz` when the mno/SMSC is down and you want `naz` to automatically connect when the SMSC comes back online.
+
+
 ## **version:** v0.7.0
 - Use python 3.7 since it has better `async/await` support: https://github.com/komuw/naz/pull/166
 
