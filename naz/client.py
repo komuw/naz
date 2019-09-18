@@ -50,22 +50,21 @@ class Client:
                 password=os.getenv("password", "password"),
                 outboundqueue=outboundqueue,
             )
-
-        loop = asyncio.get_event_loop()
-        # connect to the SMSC host
-        _, _ = loop.run_until_complete(client.connect())
-        # bind to SMSC as a tranceiver
-        loop.run_until_complete(client.tranceiver_bind())
-
-        # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC
+ 
+        # 1. connect to the SMSC host
+        # 2. bind to the SMSC host
+        # 3. send any queued messages to SMSC
+        # 4. read any data from SMSC
+        # 5. continually check the state of the SMSC
         tasks = asyncio.gather(
+            client.connect(),
+            client.tranceiver_bind(),
             client.dequeue_messages(),
             client.receive_data(),
             client.enquire_link(),
-            loop=loop,
         )
+        loop = asyncio.get_event_loop()
         loop.run_until_complete(tasks)
-
     """
 
     def __init__(

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.0 documentation</title>
+  <title>naz.client &mdash; naz v0.7.1 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.0
+                v0.7.1
               </div>
             
           
@@ -214,22 +214,21 @@
 <span class="sd">                password=os.getenv(&quot;password&quot;, &quot;password&quot;),</span>
 <span class="sd">                outboundqueue=outboundqueue,</span>
 <span class="sd">            )</span>
-
-<span class="sd">        loop = asyncio.get_event_loop()</span>
-<span class="sd">        # connect to the SMSC host</span>
-<span class="sd">        _, _ = loop.run_until_complete(client.connect())</span>
-<span class="sd">        # bind to SMSC as a tranceiver</span>
-<span class="sd">        loop.run_until_complete(client.tranceiver_bind())</span>
-
-<span class="sd">        # read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC</span>
+<span class="sd"> </span>
+<span class="sd">        # 1. connect to the SMSC host</span>
+<span class="sd">        # 2. bind to the SMSC host</span>
+<span class="sd">        # 3. send any queued messages to SMSC</span>
+<span class="sd">        # 4. read any data from SMSC</span>
+<span class="sd">        # 5. continually check the state of the SMSC</span>
 <span class="sd">        tasks = asyncio.gather(</span>
+<span class="sd">            client.connect(),</span>
+<span class="sd">            client.tranceiver_bind(),</span>
 <span class="sd">            client.dequeue_messages(),</span>
 <span class="sd">            client.receive_data(),</span>
 <span class="sd">            client.enquire_link(),</span>
-<span class="sd">            loop=loop,</span>
 <span class="sd">        )</span>
+<span class="sd">        loop = asyncio.get_event_loop()</span>
 <span class="sd">        loop.run_until_complete(tasks)</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Client.__init__"><a class="viewcode-back" href="../../client.html#naz.client.Client.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
@@ -962,21 +961,35 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        make a network connection to SMSC server.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">log_id</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">log_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">17</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">})</span>
-        <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">open_connection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smsc_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">smsc_port</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">writer</span>
-        <span class="n">sock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">get_extra_info</span><span class="p">(</span><span class="s2">&quot;socket&quot;</span><span class="p">)</span>
-        <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span><span class="p">)</span>
-        <span class="c1"># A socket object can be in one of three modes: blocking, non-blocking, or timeout.</span>
-        <span class="c1"># At the OS level, sockets in timeout mode are internally set in non-blocking mode.</span>
-        <span class="c1"># https://docs.python.org/3/library/socket.html#notes-on-socket-timeouts</span>
+        <span class="n">log_id</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">log_id</span>
+            <span class="k">if</span> <span class="n">log_id</span>
+            <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">17</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">}</span>
+            <span class="p">)</span>
+            <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">open_connection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smsc_host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">smsc_port</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reader</span> <span class="o">=</span> <span class="n">reader</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">writer</span>
+            <span class="n">sock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">get_extra_info</span><span class="p">(</span><span class="s2">&quot;socket&quot;</span><span class="p">)</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span><span class="p">)</span>
+            <span class="c1"># A socket object can be in one of three modes: blocking, non-blocking, or timeout.</span>
+            <span class="c1"># At the OS level, sockets in timeout mode are internally set in non-blocking mode.</span>
+            <span class="c1"># https://docs.python.org/3/library/socket.html#notes-on-socket-timeouts</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">OPEN</span>
-        <span class="k">return</span> <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">}</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">OPEN</span>
+            <span class="k">return</span> <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.connect&quot;</span><span class="p">,</span> <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span></div>
 
 <div class="viewcode-block" id="Client.tranceiver_bind"><a class="viewcode-back" href="../../client.html#naz.client.Client.tranceiver_bind">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">tranceiver_bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1082,7 +1095,7 @@
         <span class="c1"># sleep during startup so that `naz` can have had time to connect &amp; bind</span>
         <span class="c1"># we rely on `enquire_link` to kick on `re_establish_conn_bind`</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">!=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">BOUND_TRX</span><span class="p">:</span>
-            <span class="n">retry_after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span> <span class="o">/</span> <span class="mi">5</span>
+            <span class="n">retry_after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
                 <span class="p">{</span>
@@ -2005,6 +2018,21 @@
                     <span class="p">},</span>
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">!=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">BOUND_TRX</span><span class="p">:</span>
+                <span class="n">retry_after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.receive_data&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;naz is yet to bind to SMSC. sleeping for </span><span class="si">{0:.2f}</span><span class="s2"> seconds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="n">retry_after</span>
+                        <span class="p">),</span>
+                    <span class="p">},</span>
+                <span class="p">)</span>
+                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">retry_after</span><span class="p">)</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">re_establish_conn_bind</span><span class="p">(</span><span class="n">smpp_command</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
 
             <span class="n">header_data</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
             <span class="k">try</span><span class="p">:</span>

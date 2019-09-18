@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Client &mdash; naz v0.7.0 documentation</title>
+  <title>Client &mdash; naz v0.7.1 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.0
+                v0.7.1
               </div>
             
           
@@ -186,19 +186,19 @@
         <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
     <span class="p">)</span>
 
-<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
-<span class="c1"># connect to the SMSC host</span>
-<span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">())</span>
-<span class="c1"># bind to SMSC as a tranceiver</span>
-<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">client</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">())</span>
-
-<span class="c1"># read any data from SMSC, send any queued messages to SMSC and continually check the state of the SMSC</span>
+<span class="c1"># 1. connect to the SMSC host</span>
+<span class="c1"># 2. bind to the SMSC host</span>
+<span class="c1"># 3. send any queued messages to SMSC</span>
+<span class="c1"># 4. read any data from SMSC</span>
+<span class="c1"># 5. continually check the state of the SMSC</span>
 <span class="n">tasks</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(),</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">(),</span>
     <span class="n">client</span><span class="o">.</span><span class="n">dequeue_messages</span><span class="p">(),</span>
     <span class="n">client</span><span class="o">.</span><span class="n">receive_data</span><span class="p">(),</span>
     <span class="n">client</span><span class="o">.</span><span class="n">enquire_link</span><span class="p">(),</span>
-    <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
 <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
 </pre></div>
 </div>
