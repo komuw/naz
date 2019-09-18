@@ -8,7 +8,7 @@ Contributions are under the [MIT License](https://github.com/komuw/naz/blob/mast
 ## To contribute:            
 
 - open a [github issue](https://github.com/komuw/naz/issues) to first discuss the change you want to make.
-- once the github issue has been discussed and approved, you can now proceeds
+- once the github issue has been discussed and approved, you can now proceed
 - fork this repo.
 - install pre-requiste software:             
 ```shell
