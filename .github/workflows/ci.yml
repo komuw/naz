@@ -24,7 +24,12 @@ jobs:
         env:
           GIT_BRANCH: ${{ github.ref }}
         run: |
-          if [ "$GIT_BRANCH" == "master" ]; then
+          echo $GIT_BRANCH
+          if [ "$GIT_BRANCH" == "master" ]
+          then
+              printf "\n $GIT_BRANCH branch, ignoring check for relese notes \n"
+          elif [ "$GIT_BRANCH" == *"refs/tags/"* ]
+          then
               printf "\n $GIT_BRANCH branch, ignoring check for relese notes \n"
           else
               ChangedFiles=`git diff --name-only origin/master`
