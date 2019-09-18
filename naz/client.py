@@ -364,6 +364,9 @@ class Client:
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
+        # For exceptions, we try and avoid catch-all blocks. Instead we catch only the exceptions we expect.
+        # Exception hierarchy: https://docs.python.org/3/library/exceptions.html#exception-hierarchy
+
     @staticmethod
     def _validate_client_args(
         smsc_host: str,
