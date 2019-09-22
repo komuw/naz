@@ -1437,6 +1437,9 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
+        # the only reason this method is called is because connection has closed.
+        # so lets set the session state to reflect that fact
+        self.current_session_state = SmppSessionState.CLOSED
         self._log(
             logging.INFO,
             {
@@ -1463,7 +1466,9 @@ class Client:
         # 1. re-connect
         # 2. re-bind
         await self.connect(log_id=log_id)
-        await self.tranceiver_bind(log_id=log_id)
+        if self.current_session_state == SmppSessionState.OPEN:
+            # state can only be open if `client.connect` succeded
+            await self.tranceiver_bind(log_id=log_id)
         self._log(
             logging.INFO,
             {
