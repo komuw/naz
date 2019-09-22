@@ -3,6 +3,10 @@ most recent version is listed first.
 
 
 
+## **version:** v0.7.2  
+- fix infinite loop bug, which could occur while re-establishing connection & re-binding to SMSC: https://github.com/komuw/naz/pull/171
+
+
 ## **version:** v0.7.1 
 - add ability to start `naz` even when SMSC is down: https://github.com/komuw/naz/pull/168    
   this may be important when you want to deploy `naz` when the mno/SMSC is down and you want `naz` to automatically connect when the SMSC comes back online.
