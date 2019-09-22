@@ -1460,32 +1460,19 @@ class Client:
             )
             return None
 
-        try:
-            # 1. re-connect
-            # 2. re-bind
-            await self.connect(log_id=log_id)
-            await self.tranceiver_bind(log_id=log_id)
-        except (
-            OSError,
-            ConnectionError,
-            TimeoutError,
-            asyncio.TimeoutError,
-            socket.error,
-            socket.herror,
-            socket.gaierror,
-            socket.timeout,
-        ) as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.re_establish_conn_bind",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "unable to re-connect & re-bind to SMSC",
-                    "error": str(e),
-                },
-            )
+        # 1. re-connect
+        # 2. re-bind
+        await self.connect(log_id=log_id)
+        await self.tranceiver_bind(log_id=log_id)
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.re_establish_conn_bind",
+                "stage": "end",
+                "smpp_command": smpp_command,
+                "log_id": log_id,
+            },
+        )
         if TESTING:
             # offer escape hatch for tests to come out of endless loop
             return None
