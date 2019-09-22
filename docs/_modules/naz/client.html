@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.1 documentation</title>
+  <title>naz.client &mdash; naz v0.7.2 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.1
+                v0.7.2
               </div>
             
           
@@ -1601,6 +1601,9 @@
 <span class="sd">        Parameters:</span>
 <span class="sd">            TESTING: indicates whether this method is been called while running tests.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># the only reason this method is called is because connection has closed.</span>
+        <span class="c1"># so lets set the session state to reflect that fact</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">CLOSED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
             <span class="p">{</span>
@@ -1624,32 +1627,21 @@
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># 1. re-connect</span>
-            <span class="c1"># 2. re-bind</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
+        <span class="c1"># 1. re-connect</span>
+        <span class="c1"># 2. re-bind</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">==</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">OPEN</span><span class="p">:</span>
+            <span class="c1"># state can only be open if `client.connect` succeded</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">tranceiver_bind</span><span class="p">(</span><span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
-        <span class="k">except</span> <span class="p">(</span>
-            <span class="ne">OSError</span><span class="p">,</span>
-            <span class="ne">ConnectionError</span><span class="p">,</span>
-            <span class="ne">TimeoutError</span><span class="p">,</span>
-            <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">,</span>
-            <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
-            <span class="n">socket</span><span class="o">.</span><span class="n">herror</span><span class="p">,</span>
-            <span class="n">socket</span><span class="o">.</span><span class="n">gaierror</span><span class="p">,</span>
-            <span class="n">socket</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
-        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.re_establish_conn_bind&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
-                    <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
-                    <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;unable to re-connect &amp; re-bind to SMSC&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                <span class="p">},</span>
-            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.re_establish_conn_bind&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="n">TESTING</span><span class="p">:</span>
             <span class="c1"># offer escape hatch for tests to come out of endless loop</span>
             <span class="k">return</span> <span class="kc">None</span></div>
