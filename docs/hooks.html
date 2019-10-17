@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>hooks &mdash; naz v0.7.3 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/hooks.html"/>
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="nazcodec" href="nazcodec.html" />
+    <link rel="prev" title="correlater" href="correlater.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>hooks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/hooks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-naz.hooks">
+<span id="hooks"></span><h1>hooks<a class="headerlink" href="#module-naz.hooks" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.hooks.BaseHook">
+<em class="property">class </em><code class="sig-prename descclassname">naz.hooks.</code><code class="sig-name descname">BaseHook</code><a class="reference internal" href="_modules/naz/hooks.html#BaseHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Interface that must be implemented to satisfy naz’s hooks.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.hooks.BaseHook.to_smsc" title="naz.hooks.BaseHook.to_smsc"><code class="xref py py-func docutils literal notranslate"><span class="pre">to_smsc</span></code></a> and <a class="reference internal" href="#naz.hooks.BaseHook.from_smsc" title="naz.hooks.BaseHook.from_smsc"><code class="xref py py-func docutils literal notranslate"><span class="pre">from_smsc</span></code></a> methods with the type signatures shown.</p>
+<p>A hook is class with methods that are called just before sending data to SMSC and just after receiving data from SMSC.</p>
+<dl class="method">
+<dt id="naz.hooks.BaseHook.from_smsc">
+<em class="property">abstract async </em><code class="sig-name descname">from_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">status</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#BaseHook.from_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook.from_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called after receiving data from SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm_resp</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the state of request/response from SMSC.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as received from SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.hooks.BaseHook.to_smsc">
+<em class="property">abstract async </em><code class="sig-name descname">to_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#BaseHook.to_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.BaseHook.to_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called before sending data to SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as sent to SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.hooks.SimpleHook">
+<em class="property">class </em><code class="sig-prename descclassname">naz.hooks.</code><code class="sig-name descname">SimpleHook</code><span class="sig-paren">(</span><em class="sig-param">logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.hooks.BaseHook" title="naz.hooks.BaseHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.hooks.BaseHook</span></code></a></p>
+<p>This is an implementation of BaseHook.
+When this class is called by naz, it just logs the request or response.</p>
+<dl class="method">
+<dt id="naz.hooks.SimpleHook.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">logger=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.hooks.SimpleHook.from_smsc">
+<em class="property">async </em><code class="sig-name descname">from_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">status</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.from_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.from_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called after receiving data from SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm_resp</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>status</strong> (<a class="reference internal" href="state.html#naz.state.CommandStatus" title="naz.state.CommandStatus"><em>state.CommandStatus</em></a>) – the state of request/response from SMSC.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as received from SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.hooks.SimpleHook.to_smsc">
+<em class="property">async </em><code class="sig-name descname">to_smsc</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata</em>, <em class="sig-param">pdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/hooks.html#SimpleHook.to_smsc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.hooks.SimpleHook.to_smsc" title="Permalink to this definition">¶</a></dt>
+<dd><p>called before sending data to SMSC.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the full PDU as sent to SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="nazcodec.html" class="btn btn-neutral float-right" title="nazcodec" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="correlater.html" class="btn btn-neutral float-left" title="correlater" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
