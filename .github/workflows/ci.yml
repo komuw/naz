@@ -66,7 +66,7 @@ jobs:
   tests:
     name: tests
     runs-on: ubuntu-18.04
-    timeout-minutes: 4
+    timeout-minutes: 6
     steps:
       - name: Set up python
         uses: actions/setup-python@v1
