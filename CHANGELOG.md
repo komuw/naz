@@ -2,6 +2,9 @@
 most recent version is listed first.
 
 
+## **version:** v0.7.3
+- make `naz.SimpleCorrelater.delete_after_ttl()` private: https://github.com/komuw/naz/pull/172
+
 
 ## **version:** v0.7.2  
 - fix infinite loop bug, which could occur while re-establishing connection & re-binding to SMSC: https://github.com/komuw/naz/pull/171
