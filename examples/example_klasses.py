@@ -67,7 +67,7 @@ class ExampleBroker(naz.broker.BaseBroker):
         """
         maxsize is the max number of items(not size) that can be put in the queue.
         """
-        self.queue: asyncio.queues.Broker = asyncio.Broker(maxsize=maxsize)
+        self.queue: asyncio.queues.Broker = asyncio.Queue(maxsize=maxsize)
 
     async def enqueue(self, item: dict) -> None:
         self.queue.put_nowait(item)

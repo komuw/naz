@@ -100,7 +100,7 @@ import naz
 
 class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self):
-        self.queue = asyncio.Broker(maxsize=1000)
+        self.queue =  asyncio.Queue(maxsize=1000)
     async def enqueue(self, item):
         self.queue.put_nowait(item)
     async def dequeue(self):
