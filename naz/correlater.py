@@ -130,7 +130,7 @@ class SimpleCorrelater(BaseCorrelater):
             }
 
         # garbage collect
-        await self.delete_after_ttl()
+        await self._delete_after_ttl()
 
     async def get(
         self,
@@ -144,14 +144,14 @@ class SimpleCorrelater(BaseCorrelater):
             item = self.store.get(sequence_number)
         if not item:
             # garbage collect
-            await self.delete_after_ttl()
+            await self._delete_after_ttl()
             return "", ""
 
         # garbage collect
-        await self.delete_after_ttl()
+        await self._delete_after_ttl()
         return item["log_id"], item["hook_metadata"]
 
-    async def delete_after_ttl(self) -> None:
+    async def _delete_after_ttl(self) -> None:
         """
         iterate over all stored items and delete any that are
         older than self.max_ttl seconds
