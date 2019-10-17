@@ -10,12 +10,12 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
-from . import broker
 from . import nazcodec
 from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
+from . import broker as the_broker
 
 from .state import (
     SmppCommand,
@@ -73,7 +73,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        broker: broker.BaseBroker,
+        broker: the_broker.BaseBroker,
         client_id: typing.Union[None, str] = None,
         system_type: str = "",
         addr_ton: int = 0,
@@ -373,7 +373,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        broker: broker.BaseBroker,
+        broker: the_broker.BaseBroker,
         client_id: typing.Union[None, str],
         system_type: str,
         addr_ton: int,
@@ -437,7 +437,7 @@ class Client:
                     "`password` should be of type:: `str` You entered: {0}".format(type(password))
                 )
             )
-        if not isinstance(broker, broker.BaseBroker):
+        if not isinstance(broker, the_broker.BaseBroker):
             errors.append(
                 ValueError(
                     "`broker` should be of type:: `naz.broker.BaseBroker` You entered: {0}".format(
