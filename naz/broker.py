@@ -5,7 +5,7 @@ import typing
 
 class BaseBroker(abc.ABC):
     """
-    This is the interface that must be implemented to satisfy naz's outbound queue.
+    This is the interface that must be implemented to satisfy naz's broker.
     User implementations should inherit this class and
     implement the :func:`enqueue <BaseBroker.enqueue>` and :func:`dequeue <BaseBroker.dequeue>` methods with the type signatures shown.
 
@@ -33,7 +33,7 @@ class BaseBroker(abc.ABC):
         raise NotImplementedError("dequeue method must be implemented.")
 
 
-class SimpleOutboundQueue(BaseBroker):
+class SimpleBroker(BaseBroker):
     """
     This is an in-memory implementation of BaseBroker.
 

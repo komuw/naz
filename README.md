@@ -56,13 +56,13 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+broker = naz.q.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 
 # queue messages to send
@@ -101,7 +101,7 @@ finally:
 (a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)            
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)         
 (c) if you need a SMSC server/gateway to test with, you can use the [docker-compose file in this repo](https://github.com/komuw/naz/blob/master/docker-compose.yml) to bring up an SMSC simulator.        
-That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your outboundqueue.
+That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your broker.
 
 
 #### 2. As a cli app
@@ -117,7 +117,7 @@ client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleQueue()
+    broker=ExampleQueue()
 )
 ```
 and a python file, `myfile.py` (in the current working directory) with the contents:
@@ -179,13 +179,13 @@ import naz
 import asyncio
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+broker = naz.q.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 ```
 
@@ -281,7 +281,7 @@ my_naz_client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleQueue()
+    broker=ExampleQueue()
 )
 ```
 
@@ -350,17 +350,17 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```  
 For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
 
-`naz` ships with a simple queue implementation called [`naz.q.SimpleOutboundQueue`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
+`naz` ships with a simple queue implementation called [`naz.q.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
 An example of using that;
 ```python
 import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-my_queue = naz.q.SimpleOutboundQueue(maxsize=1000,) # can hold upto 1000 items
+my_queue = naz.q.SimpleBroker(maxsize=1000,) # can hold upto 1000 items
 cli = naz.Client(
     ...
-    outboundqueue=my_queue,
+    broker=my_queue,
 )
 
 try:
@@ -426,13 +426,13 @@ class RedisExampleQueue(naz.q.BaseBroker):
         return dequed_item
 
 loop = asyncio.get_event_loop()
-outboundqueue = RedisExampleQueue()
+broker = RedisExampleQueue()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 
 try:

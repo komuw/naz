@@ -101,7 +101,7 @@
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=MyRedisQueue(),
+        broker=MyRedisQueue(),
     )
 
 | We have instantiated a ``naz`` client and passed in the redis queue implementation.

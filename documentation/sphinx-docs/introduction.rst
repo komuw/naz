@@ -35,13 +35,13 @@ naz is in active development and it's API may change in backward incompatible wa
     import naz
 
     loop = asyncio.get_event_loop()
-    outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+    broker = naz.q.SimpleBroker(maxsize=1000)
     cli = naz.Client(
         smsc_host="127.0.0.1",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=outboundqueue,
+        broker=broker,
     )
 
     # queue messages to send
@@ -102,7 +102,7 @@ create a python config file, eg; `/tmp/my_app.py`
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=ExampleQueue()
+        broker=ExampleQueue()
     )
 
 
@@ -146,13 +146,13 @@ NB:
     import naz
     import asyncio
     loop = asyncio.get_event_loop()
-    outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+    broker = naz.q.SimpleBroker(maxsize=1000)
     cli = naz.Client(
         smsc_host="127.0.0.1",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=outboundqueue,
+        broker=broker,
     )
 
 3.2 monitoring and observability
@@ -288,7 +288,7 @@ another example is if you want to update a database record whenever you get a de
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=ExampleQueue()
+        broker=ExampleQueue()
     )
 
 
@@ -366,8 +366,8 @@ You can implement the queuing mechanism any way you like, so long as it satisfie
 
 For more information about all the parameters that are needed in the enqueued json object, `consult the documentation <https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol>`_ 
 
-| naz ships with a simple queue implementation called ``naz.q.SimpleOutboundQueue``
-| **NB:** ``naz.q.SimpleOutboundQueue`` should only be used for demo/test purposes.
+| naz ships with a simple queue implementation called ``naz.q.SimpleBroker``
+| **NB:** ``naz.q.SimpleBroker`` should only be used for demo/test purposes.
 
 An example of using that queue;
 
@@ -377,10 +377,10 @@ An example of using that queue;
     import naz
 
     loop = asyncio.get_event_loop()
-    my_queue = naz.q.SimpleOutboundQueue(maxsize=1000) # can hold upto 1000 items
+    my_queue = naz.q.SimpleBroker(maxsize=1000) # can hold upto 1000 items
     cli = naz.Client(
         ...
-        outboundqueue=my_queue,
+        broker=my_queue,
     )
 
     try:

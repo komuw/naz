@@ -116,13 +116,13 @@ class TestClient(TestCase):
     """
 
     def setUp(self):
-        self.outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+        self.broker = naz.q.SimpleBroker(maxsize=1000)
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
             smsc_port=2775,
             system_id="smppclient1",
             password=os.getenv("password", "password"),
-            outboundqueue=self.outboundqueue,
+            broker=self.broker,
             loglevel="DEBUG",  # run tests with debug so as to debug what is going on
             logger=naz.log.SimpleLogger("TestClient", handler=naz.log.BreachHandler(capacity=200)),
             socket_timeout=0.0000001,
@@ -169,7 +169,7 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 log_metadata="bad-Type",
-                outboundqueue=self.outboundqueue,
+                broker=self.broker,
             )
 
         self.assertRaises(naz.client.NazClientError, mock_create_client)
@@ -190,7 +190,7 @@ class TestClient(TestCase):
             "smsc_port": DummyClientArg,
             "system_id": DummyClientArg,
             "password": DummyClientArg,
-            "outboundqueue": DummyClientArg,
+            "broker": DummyClientArg,
             "system_type": DummyClientArg,
             "interface_version": DummyClientArg,
             "addr_ton": DummyClientArg,
@@ -242,7 +242,7 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 encoding=encoding,
-                outboundqueue=self.outboundqueue,
+                broker=self.broker,
             )
 
         self.assertRaises(ValueError, mock_create_client)
@@ -269,7 +269,7 @@ class TestClient(TestCase):
         # todo: test bind_response
 
     def test_submit_sm_enqueue(self):
-        with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+        with mock.patch("naz.q.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
             log_id = "12345"
@@ -288,7 +288,7 @@ class TestClient(TestCase):
             )
 
     def test_submit_sm_sending(self):
-        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+        with mock.patch("naz.q.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = {
@@ -367,7 +367,7 @@ class TestClient(TestCase):
             )
 
     def test_command_handlers_deliver_sm(self):
-        with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+        with mock.patch("naz.q.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
@@ -406,7 +406,7 @@ class TestClient(TestCase):
             )
 
     def test_no_sending_if_throttler(self):
-        with mock.patch("naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+        with mock.patch("naz.q.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             sample_size = 8.0
             throttle_handler = naz.throttle.SimpleThrottleHandler(
                 sampling_period=5.0, sample_size=sample_size, deny_request_at=0.4
@@ -416,7 +416,7 @@ class TestClient(TestCase):
                 smsc_port=2775,
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
-                outboundqueue=self.outboundqueue,
+                broker=self.broker,
                 throttle_handler=throttle_handler,
                 loglevel="DEBUG",
             )
@@ -502,7 +502,7 @@ class TestClient(TestCase):
         with mock.patch(
             "naz.hooks.SimpleHook.to_smsc", new=AsyncMock()
         ) as mock_hook_to_smsc, mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
@@ -568,7 +568,7 @@ class TestClient(TestCase):
             self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)
 
     def test_enquire_link_resp(self):
-        with mock.patch("naz.q.SimpleOutboundQueue.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+        with mock.patch("naz.q.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             sequence_number = 7
             self._run(
                 self.cli.command_handlers(
@@ -603,7 +603,7 @@ class TestClient(TestCase):
         send a `submit_sm` request when session state is `BOUND_TRX`
         """
         with mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
@@ -627,7 +627,7 @@ class TestClient(TestCase):
 
     def test_broken_broker(self):
         with mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             mock_naz_dequeue.mock.side_effect = ValueError("This test broker has 99 Problems")
             self._run(self.cli.connect())
@@ -641,7 +641,7 @@ class TestClient(TestCase):
         try sending a `submit_sm` request when session state is `OPEN`
         """
         with mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
@@ -664,7 +664,7 @@ class TestClient(TestCase):
         try sending a `submit_sm` request when session state is `CLOSED`
         """
         with mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue, mock.patch(
             "naz.client.asyncio.sleep", new=AsyncMock()
         ) as mock_sleep:
@@ -686,7 +686,7 @@ class TestClient(TestCase):
         with mock.patch(
             "naz.correlater.SimpleCorrelater.put", new=AsyncMock()
         ) as mock_correlater_put, mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
@@ -765,7 +765,7 @@ class TestClient(TestCase):
         with mock.patch(
             "naz.sequence.SimpleSequenceGenerator.next_sequence"
         ) as mock_sequence, mock.patch(
-            "naz.q.SimpleOutboundQueue.dequeue", new=AsyncMock()
+            "naz.q.SimpleBroker.dequeue", new=AsyncMock()
         ) as mock_naz_dequeue:
             mock_sequence_number = 909_012
             mock_sequence.return_value = mock_sequence_number

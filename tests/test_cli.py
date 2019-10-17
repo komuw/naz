@@ -40,7 +40,7 @@ NAZ_CLIENT = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleRedisQueue(),
+    broker=ExampleRedisQueue(),
     encoding="gsm0338",
     sequence_generator=MySeqGen(),
     loglevel="INFO",
@@ -128,7 +128,7 @@ class TestCliSigHandling(TestCase):
             smsc_port=6767,
             system_id="system_id",
             password=os.environ.get("password", "password"),
-            outboundqueue=naz.q.SimpleOutboundQueue(),
+            broker=naz.q.SimpleBroker(),
             drain_duration=0.001,
         )
         self.loop = asyncio.get_event_loop()

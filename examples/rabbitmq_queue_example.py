@@ -121,13 +121,13 @@ class RabbitmqExampleQueue(naz.q.BaseBroker):
 
 
 loop = asyncio.get_event_loop()
-outboundqueue = RabbitmqExampleQueue()
+broker = RabbitmqExampleQueue()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password=os.getenv("password", "password"),
-    outboundqueue=outboundqueue,
+    broker=broker,
     enquire_link_interval=17.00,
 )
 
@@ -139,7 +139,7 @@ item_to_enqueue = {
     "source_addr": "254722111111",
     "destination_addr": "254722999999",
 }
-loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+loop.run_until_complete(broker.enqueue(item_to_enqueue))
 
 try:
     # 1. connect to the SMSC host

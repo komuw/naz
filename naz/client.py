@@ -42,13 +42,13 @@ class Client:
         import asyncio
         import naz
 
-        outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+        broker = naz.q.SimpleBroker(maxsize=1000)
         client = naz.Client(
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
-                outboundqueue=outboundqueue,
+                broker=broker,
             )
 
         # 1. connect to the SMSC host
@@ -73,7 +73,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        outboundqueue: q.BaseBroker,
+        broker: q.BaseBroker,
         client_id: typing.Union[None, str] = None,
         system_type: str = "",
         addr_ton: int = 0,
@@ -141,7 +141,7 @@ class Client:
             sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
             encoding:	encoding1 used to encode messages been sent to SMSC
             sequence_generator:	python class instance used to generate sequence_numbers
-            outboundqueue:	python class instance implementing some queueing mechanism. \
+            broker:	python class instance implementing some queueing mechanism. \
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
             logger: python class instance to be used for logging
@@ -167,7 +167,7 @@ class Client:
             smsc_port=smsc_port,
             system_id=system_id,
             password=password,
-            outboundqueue=outboundqueue,
+            broker=broker,
             client_id=client_id,
             system_type=system_type,
             addr_ton=addr_ton,
@@ -208,7 +208,7 @@ class Client:
         self.smsc_port = smsc_port
         self.system_id = system_id
         self.password = password
-        self.outboundqueue = outboundqueue
+        self.broker = broker
 
         if client_id is not None:
             self.client_id = client_id
@@ -373,7 +373,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        outboundqueue: q.BaseBroker,
+        broker: q.BaseBroker,
         client_id: typing.Union[None, str],
         system_type: str,
         addr_ton: int,
@@ -437,11 +437,11 @@ class Client:
                     "`password` should be of type:: `str` You entered: {0}".format(type(password))
                 )
             )
-        if not isinstance(outboundqueue, q.BaseBroker):
+        if not isinstance(broker, q.BaseBroker):
             errors.append(
                 ValueError(
-                    "`outboundqueue` should be of type:: `naz.q.BaseBroker` You entered: {0}".format(
-                        type(outboundqueue)
+                    "`broker` should be of type:: `naz.q.BaseBroker` You entered: {0}".format(
+                        type(broker)
                     )
                 )
             )
@@ -1030,7 +1030,7 @@ class Client:
                 ">IIII", command_length, command_id, command_status, sequence_number
             )
             full_pdu = header + body
-            # dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
+            # dont queue enquire_link in SimpleBroker since we dont want it to be behind 10k msgs etc
             await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
             self._log(
                 logging.DEBUG,
@@ -1082,7 +1082,7 @@ class Client:
             "smpp_command": smpp_command,
         }
         try:
-            await self.outboundqueue.enqueue(item_to_enqueue)
+            await self.broker.enqueue(item_to_enqueue)
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1134,7 +1134,7 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        # dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
+        # dont queue unbind_resp in SimpleBroker since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
         self._log(
             logging.INFO,
@@ -1188,7 +1188,7 @@ class Client:
             "smpp_command": smpp_command,
         }
         try:
-            await self.outboundqueue.enqueue(item_to_enqueue)
+            await self.broker.enqueue(item_to_enqueue)
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1216,7 +1216,7 @@ class Client:
         self, short_message: str, log_id: str, source_addr: str, destination_addr: str
     ) -> None:
         """
-        enqueues a SUBMIT_SM pdu to :attr:`outboundqueue <Client.outboundqueue>`
+        enqueues a SUBMIT_SM pdu to :attr:`broker <Client.broker>`
         That PDU will later on be sent to SMSC.
 
         Parameters:
@@ -1279,7 +1279,7 @@ class Client:
             "destination_addr": destination_addr,
         }
         try:
-            await self.outboundqueue.enqueue(item_to_enqueue)
+            await self.broker.enqueue(item_to_enqueue)
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1662,7 +1662,7 @@ class Client:
         self, TESTING: bool = False
     ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
         """
-        In a loop; dequeues items from the :attr:`outboundqueue <Client.outboundqueue>` and sends them to SMSC.
+        In a loop; dequeues items from the :attr:`broker <Client.broker>` and sends them to SMSC.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
@@ -1733,7 +1733,7 @@ class Client:
                     )
 
                 try:
-                    item_to_dequeue = await self.outboundqueue.dequeue()
+                    item_to_dequeue = await self.broker.dequeue()
                 except Exception as e:
                     dequeue_retry_count += 1
                     poll_queue_interval = self._retry_after(dequeue_retry_count)
@@ -2414,7 +2414,7 @@ class Client:
 
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
         full_pdu = header + body
-        # dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc
+        # dont queue unbind in SimpleBroker since we dont want it to be behind 10k msgs etc
         await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
         self._log(
             logging.INFO,
