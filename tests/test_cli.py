@@ -128,7 +128,7 @@ class TestCliSigHandling(TestCase):
             smsc_port=6767,
             system_id="system_id",
             password=os.environ.get("password", "password"),
-            broker=naz.q.SimpleBroker(),
+            broker=naz.broker.SimpleBroker(),
             drain_duration=0.001,
         )
         self.loop = asyncio.get_event_loop()

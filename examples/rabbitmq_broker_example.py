@@ -8,7 +8,7 @@ import naz
 import pika
 
 
-class RabbitmqExampleBroker(naz.q.BaseBroker):
+class RabbitmqExampleBroker(naz.broker.BaseBroker):
     """
     use rabbitMQ as our broker.
     Note that in practice, you would probaly want to use a non-blocking rabbitMQ client.

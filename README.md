@@ -56,7 +56,7 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-broker = naz.q.SimpleBroker(maxsize=1000)
+broker = naz.broker.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
@@ -126,7 +126,7 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 import asyncio
 import naz
 
-class ExampleBroker(naz.q.BaseBroker):
+class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self):
         loop = asyncio.get_event_loop()
         self.queue = asyncio.Broker(maxsize=1000, loop=loop)
@@ -179,7 +179,7 @@ import naz
 import asyncio
 
 loop = asyncio.get_event_loop()
-broker = naz.q.SimpleBroker(maxsize=1000)
+broker = naz.broker.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
@@ -350,14 +350,14 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```  
 For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
 
-`naz` ships with a simple broker implementation called [`naz.q.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/broker.py).                     
+`naz` ships with a simple broker implementation called [`naz.broker.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/broker.py).                     
 An example of using that;
 ```python
 import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-my_broker = naz.q.SimpleBroker(maxsize=1000,) # can hold upto 1000 items
+my_broker = naz.broker.SimpleBroker(maxsize=1000,) # can hold upto 1000 items
 cli = naz.Client(
     ...
     broker=my_broker,
@@ -405,7 +405,7 @@ import asyncio
 import naz
 import aioredis
 
-class RedisExampleBroker(naz.q.BaseBroker):
+class RedisExampleBroker(naz.broker.BaseBroker):
     """
     use redis as our broker.
     This implements a basic FIFO queue using redis.

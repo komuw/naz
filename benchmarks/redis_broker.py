@@ -6,7 +6,7 @@ import naz
 import aioredis
 
 
-class MyRedisBroker(naz.q.BaseBroker):
+class MyRedisBroker(naz.broker.BaseBroker):
     """
     use redis as our broker.
 

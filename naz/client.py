@@ -42,7 +42,7 @@ class Client:
         import asyncio
         import naz
 
-        broker = naz.q.SimpleBroker(maxsize=1000)
+        broker = naz.broker.SimpleBroker(maxsize=1000)
         client = naz.Client(
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
@@ -73,7 +73,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        broker: q.BaseBroker,
+        broker: broker.BaseBroker,
         client_id: typing.Union[None, str] = None,
         system_type: str = "",
         addr_ton: int = 0,
@@ -373,7 +373,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        broker: q.BaseBroker,
+        broker: broker.BaseBroker,
         client_id: typing.Union[None, str],
         system_type: str,
         addr_ton: int,
@@ -437,10 +437,10 @@ class Client:
                     "`password` should be of type:: `str` You entered: {0}".format(type(password))
                 )
             )
-        if not isinstance(broker, q.BaseBroker):
+        if not isinstance(broker, broker.BaseBroker):
             errors.append(
                 ValueError(
-                    "`broker` should be of type:: `naz.q.BaseBroker` You entered: {0}".format(
+                    "`broker` should be of type:: `naz.broker.BaseBroker` You entered: {0}".format(
                         type(broker)
                     )
                 )

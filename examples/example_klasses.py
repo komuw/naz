@@ -62,7 +62,7 @@ class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
             self.updated_at = now
 
 
-class ExampleBroker(naz.q.BaseBroker):
+class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self, maxsize: int = 1000) -> None:
         """
         maxsize is the max number of items(not size) that can be put in the queue.
@@ -76,7 +76,7 @@ class ExampleBroker(naz.q.BaseBroker):
         return await self.queue.get()
 
 
-class ExampleRedisBroker(naz.q.BaseBroker):
+class ExampleRedisBroker(naz.broker.BaseBroker):
     """
     use redis as our queue.
 

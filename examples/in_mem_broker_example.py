@@ -4,7 +4,7 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-broker = naz.q.SimpleBroker(maxsize=1000)
+broker = naz.broker.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,

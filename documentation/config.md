@@ -98,7 +98,7 @@ client = naz.Client(
 import asyncio
 import naz
 
-class ExampleBroker(naz.q.BaseBroker):
+class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self):
         self.queue = asyncio.Broker(maxsize=1000)
     async def enqueue(self, item):
