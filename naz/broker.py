@@ -3,11 +3,11 @@ import asyncio
 import typing
 
 
-class BaseOutboundQueue(abc.ABC):
+class BaseBroker(abc.ABC):
     """
     This is the interface that must be implemented to satisfy naz's outbound queue.
     User implementations should inherit this class and
-    implement the :func:`enqueue <BaseOutboundQueue.enqueue>` and :func:`dequeue <BaseOutboundQueue.dequeue>` methods with the type signatures shown.
+    implement the :func:`enqueue <BaseBroker.enqueue>` and :func:`dequeue <BaseBroker.dequeue>` methods with the type signatures shown.
 
     naz calls an implementation of this class to enqueue and/or dequeue an item.
     """
@@ -33,9 +33,9 @@ class BaseOutboundQueue(abc.ABC):
         raise NotImplementedError("dequeue method must be implemented.")
 
 
-class SimpleOutboundQueue(BaseOutboundQueue):
+class SimpleOutboundQueue(BaseBroker):
     """
-    This is an in-memory implementation of BaseOutboundQueue.
+    This is an in-memory implementation of BaseBroker.
 
     Note: It should only be used for tests and demo purposes.
     """

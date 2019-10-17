@@ -73,7 +73,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        outboundqueue: q.BaseOutboundQueue,
+        outboundqueue: q.BaseBroker,
         client_id: typing.Union[None, str] = None,
         system_type: str = "",
         addr_ton: int = 0,
@@ -373,7 +373,7 @@ class Client:
         smsc_port: int,
         system_id: str,
         password: str,
-        outboundqueue: q.BaseOutboundQueue,
+        outboundqueue: q.BaseBroker,
         client_id: typing.Union[None, str],
         system_type: str,
         addr_ton: int,
@@ -437,10 +437,10 @@ class Client:
                     "`password` should be of type:: `str` You entered: {0}".format(type(password))
                 )
             )
-        if not isinstance(outboundqueue, q.BaseOutboundQueue):
+        if not isinstance(outboundqueue, q.BaseBroker):
             errors.append(
                 ValueError(
-                    "`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: {0}".format(
+                    "`outboundqueue` should be of type:: `naz.q.BaseBroker` You entered: {0}".format(
                         type(outboundqueue)
                     )
                 )

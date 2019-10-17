@@ -8,7 +8,7 @@ import naz
 import pika
 
 
-class RabbitmqExampleQueue(naz.q.BaseOutboundQueue):
+class RabbitmqExampleQueue(naz.q.BaseBroker):
     """
     use rabbitMQ as our queue.
     Note that in practice, you would probaly want to use a non-blocking rabbitMQ client.

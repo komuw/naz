@@ -22,7 +22,7 @@
 
 | In order to use ``naz``, we need to have a place where messages are going to be stored before been submitted to the SMSC.
 | Messages are stored in a queue in ``naz``. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), ``naz`` is queue agnostic.
-| ``naz`` will happily use any queue/broker so long as its implementation in software satisfies ``naz``'s `queueing interface <https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue>`_
+| ``naz`` will happily use any queue/broker so long as its implementation in software satisfies ``naz``'s `queueing interface <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_
 | For this demo we will use redis as our queue of choice. So lets start a redis server, we will use docker for that;
 
 .. code-block:: bash
@@ -32,7 +32,7 @@
       Ready to accept connections
 
 | redis server is running a docker container and it is available for connection on the host at ``localhost:6379``
-| Now we need a way for ``naz`` to be able to communicate with the redis server, ie we need to implemnet ``naz``'s `queueing interface <https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue>`_ for our redis server.
+| Now we need a way for ``naz`` to be able to communicate with the redis server, ie we need to implemnet ``naz``'s `queueing interface <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_ for our redis server.
 | Let's do that, we'll create a file called ``/tmp/demo_naz/my_queue.py``
 
 .. code-block:: python
@@ -45,10 +45,10 @@
     import aioredis  # pip install aioredis
 
 
-    class MyRedisQueue(naz.q.BaseOutboundQueue):
+    class MyRedisQueue(naz.q.BaseBroker):
         """
         use redis as our queue.
-        This is an implementation of the `naz.q.BaseOutboundQueue` interface
+        This is an implementation of the `naz.q.BaseBroker` interface
         """
 
         def __init__(self):

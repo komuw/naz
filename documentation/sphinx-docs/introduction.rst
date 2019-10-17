@@ -82,7 +82,7 @@ NB:
 * (a) For more information about all the parameters that `naz.Client` can take, consult the `docs <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
 * (b) More examples can be `found here <https://github.com/komuw/naz/tree/master/examples>`_ 
 * (c) if you need an SMSC server/gateway to test with, you can use the `docker-compose <https://github.com/komuw/naz/blob/master/docker-compose.yml>`_ file in the ``naz`` repo to bring up an SMSC simulator.
-      That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your `naz.q.BaseOutboundQueue`.
+      That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your `naz.q.BaseBroker`.
 
 
 
@@ -112,7 +112,7 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 
     import asyncio
     import naz
-    class ExampleQueue(naz.q.BaseOutboundQueue):
+    class ExampleQueue(naz.q.BaseBroker):
         def __init__(self):
             loop = asyncio.get_event_loop()
             self.queue = asyncio.Queue(maxsize=1000, loop=loop)
@@ -348,7 +348,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 
 It's via a queuing interface. Your application queues messages to a queue, ``naz`` consumes from that queue and then naz sends those messages to SMSC/server.
 
-You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseOutboundQueue <https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue>`_ interface
+You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseBroker <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_ interface
 
 | Your application should call that class's enqueue method to enqueue messages.
 | Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:

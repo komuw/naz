@@ -126,7 +126,7 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 import asyncio
 import naz
 
-class ExampleQueue(naz.q.BaseOutboundQueue):
+class ExampleQueue(naz.q.BaseBroker):
     def __init__(self):
         loop = asyncio.get_event_loop()
         self.queue = asyncio.Queue(maxsize=1000, loop=loop)
@@ -335,7 +335,7 @@ cli = naz.Client(
 #### 5. Queuing
 **How does your application and `naz` talk with each other?**         
 It's via a queuing interface. Your application queues messages to a queue, `naz` consumes from that queue and then `naz` sends those messages to SMSC/server.       
-You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseOutboundQueue` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
+You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseBroker` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
 Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the queue.         
 Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:              
 ```bash
@@ -405,7 +405,7 @@ import asyncio
 import naz
 import aioredis
 
-class RedisExampleQueue(naz.q.BaseOutboundQueue):
+class RedisExampleQueue(naz.q.BaseBroker):
     """
     use redis as our queue.
     This implements a basic FIFO queue using redis.
