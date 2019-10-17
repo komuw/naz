@@ -1,6 +1,6 @@
 from .client import Client  # noqa: F401
 
-from . import q  # noqa: F401
+from . import broker  # noqa: F401
 from . import throttle  # noqa: F401
 from . import sequence  # noqa: F401
 from . import log  # noqa: F401
