@@ -36,7 +36,7 @@ Comprehensive documetion is available -> [Documentation](https://komuw.github.io
     + [integration with bug trackers(eg Sentry )](#23-integration-with-bug-trackers)
   + [Rate limiting](#3-rate-limiting)            
   + [Throttle handling](#4-throttle-handling)            
-  + [Queuing](#5-queuing)      
+  + [Broker](#5-broker)      
       
 [Benchmarks](./benchmarks/README.md)
 
@@ -332,10 +332,10 @@ cli = naz.Client(
 )
 ```
 
-#### 5. Queuing
+#### 5. Broker
 **How does your application and `naz` talk with each other?**         
 It's via a broker interface. Your application queues messages to a broker, `naz` consumes from that broker and then `naz` sends those messages to SMSC/server.       
-You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseBroker` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
+You can implement the broker mechanism any way you like, so long as it satisfies the `BaseBroker` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/broker.py)             
 Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the broker.         
 Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:              
 ```bash
@@ -350,7 +350,7 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```  
 For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
 
-`naz` ships with a simple broker implementation called [`naz.q.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
+`naz` ships with a simple broker implementation called [`naz.q.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/broker.py).                     
 An example of using that;
 ```python
 import asyncio

@@ -342,7 +342,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
         throttle_handler=throttler,
     )
 
-3.5 Queuing
+3.5 Broker
 =====================
 `How does your application and naz talk with each other?`
 
