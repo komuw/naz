@@ -8,7 +8,7 @@ import aioredis
 
 class MyRedisBroker(naz.q.BaseBroker):
     """
-    use redis as our queue.
+    use redis as our broker.
 
     DO NOT USE THIS IN PRODUCTION. It is untested.
 

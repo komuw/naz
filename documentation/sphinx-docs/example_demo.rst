@@ -21,9 +21,9 @@
       naz v0.6.1
 
 | In order to use ``naz``, we need to have a place where messages are going to be stored before been submitted to the SMSC.
-| Messages are stored in a queue in ``naz``. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), ``naz`` is queue agnostic.
-| ``naz`` will happily use any queue/broker so long as its implementation in software satisfies ``naz``'s `queueing interface <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_
-| For this demo we will use redis as our queue of choice. So lets start a redis server, we will use docker for that;
+| Messages are stored in a broker in ``naz``. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), ``naz`` is broker agnostic.
+| ``naz`` will happily use any queue/broker so long as its implementation in software satisfies ``naz``'s `broker interface <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_
+| For this demo we will use redis as our broker of choice. So lets start a redis server, we will use docker for that;
 
 .. code-block:: bash
 
@@ -32,8 +32,8 @@
       Ready to accept connections
 
 | redis server is running a docker container and it is available for connection on the host at ``localhost:6379``
-| Now we need a way for ``naz`` to be able to communicate with the redis server, ie we need to implemnet ``naz``'s `queueing interface <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_ for our redis server.
-| Let's do that, we'll create a file called ``/tmp/demo_naz/my_queue.py``
+| Now we need a way for ``naz`` to be able to communicate with the redis server, ie we need to implemnet ``naz``'s `broker interface <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_ for our redis server.
+| Let's do that, we'll create a file called ``/tmp/demo_naz/my_broker.py``
 
 .. code-block:: python
 
@@ -47,7 +47,7 @@
 
     class MyRedisBroker(naz.q.BaseBroker):
         """
-        use redis as our queue.
+        use redis as our broker.
         This is an implementation of the `naz.q.BaseBroker` interface
         """
 
@@ -94,7 +94,7 @@
 .. code-block:: python
 
     import naz
-    from my_queue import MyRedisBroker
+    from my_broker import MyRedisBroker
 
     my_naz_client = naz.Client(
         smsc_host="localhost",
@@ -104,7 +104,7 @@
         broker=MyRedisBroker(),
     )
 
-| We have instantiated a ``naz`` client and passed in the redis queue implementation.
+| We have instantiated a ``naz`` client and passed in the redis broker implementation.
 | The ``naz`` client expects to be communicating with an ``SMSC`` server listening on ``localhost:2775``. 
 | We are going to run an SMSC simulator in this demo, however, if you have a real SMSC server to connect to; you can replace the ``smsc_host``, ``smsc_port``, ``system_id``, ``password`` and any other SMSC related settings.
 | Consult the `naz Client documentation <https://komuw.github.io/naz/client.html#naz.client.Client.__init__>`_ to see all the options that you can use to instantaite a naz Client.
@@ -231,6 +231,6 @@
       "pid": 28125,
   }
 
-| ``naz`` gives you a lot more possibilities; you can change queues at will, you can change the way logging is done(including passing in your own logging implementation), you can have custom rate limiting, custom throttle handling, hooks that get called at various stages of messages passing in through naz, and so much more.
+| ``naz`` gives you a lot more possibilities; you can change brokers at will, you can change the way logging is done(including passing in your own logging implementation), you can have custom rate limiting, custom throttle handling, hooks that get called at various stages of messages passing in through naz, and so much more.
 
 | Go through `the documentation <https://komuw.github.io/naz/>`_ to learn much more.
