@@ -346,9 +346,9 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 =====================
 `How does your application and naz talk with each other?`
 
-It's via a queuing interface. Your application queues messages to a queue, ``naz`` consumes from that queue and then naz sends those messages to SMSC/server.
+It's via a broker interface. Your application queues messages to a broker, ``naz`` consumes from that broker and then naz sends those messages to SMSC/server.
 
-You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseBroker <https://komuw.github.io/naz/broker.html#naz.q.BaseBroker>`_ interface
+You can implement the broker mechanism any way you like, so long as it satisfies the `naz.q.BaseBroker <https://komuw.github.io/naz/broker.html#naz.q.BaseBroker>`_ interface
 
 | Your application should call that class's enqueue method to enqueue messages.
 | Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:
@@ -366,10 +366,10 @@ You can implement the queuing mechanism any way you like, so long as it satisfie
 
 For more information about all the parameters that are needed in the enqueued json object, `consult the documentation <https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol>`_ 
 
-| naz ships with a simple queue implementation called ``naz.q.SimpleBroker``
+| naz ships with a simple broker implementation called ``naz.q.SimpleBroker``
 | **NB:** ``naz.q.SimpleBroker`` should only be used for demo/test purposes.
 
-An example of using that queue;
+An example of using that broker;
 
 .. code-block:: python
 
@@ -377,10 +377,10 @@ An example of using that queue;
     import naz
 
     loop = asyncio.get_event_loop()
-    my_queue = naz.q.SimpleBroker(maxsize=1000) # can hold upto 1000 items
+    my_broker = naz.q.SimpleBroker(maxsize=1000) # can hold upto 1000 items
     cli = naz.Client(
         ...
-        broker=my_queue,
+        broker=my_broker,
     )
 
     try:

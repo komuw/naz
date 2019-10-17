@@ -119,7 +119,7 @@ class ExampleRedisBroker(naz.q.BaseBroker):
 
 
 if __name__ == "__main__":
-    my_queue = ExampleRedisBroker()
+    my_broker = ExampleRedisBroker()
     loop = asyncio.get_event_loop()
     for i in range(0, 4):
         print("submit_sm round:", i)
@@ -132,4 +132,4 @@ if __name__ == "__main__":
             "destination_addr": "254722999999",
             "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
         }
-        loop.run_until_complete(my_queue.enqueue(item_to_enqueue))
+        loop.run_until_complete(my_broker.enqueue(item_to_enqueue))

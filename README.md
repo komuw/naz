@@ -334,9 +334,9 @@ cli = naz.Client(
 
 #### 5. Queuing
 **How does your application and `naz` talk with each other?**         
-It's via a queuing interface. Your application queues messages to a queue, `naz` consumes from that queue and then `naz` sends those messages to SMSC/server.       
+It's via a broker interface. Your application queues messages to a broker, `naz` consumes from that broker and then `naz` sends those messages to SMSC/server.       
 You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseBroker` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
-Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the queue.         
+Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the broker.         
 Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:              
 ```bash
 {
@@ -350,17 +350,17 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```  
 For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
 
-`naz` ships with a simple queue implementation called [`naz.q.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
+`naz` ships with a simple broker implementation called [`naz.q.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
 An example of using that;
 ```python
 import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-my_queue = naz.q.SimpleBroker(maxsize=1000,) # can hold upto 1000 items
+my_broker = naz.q.SimpleBroker(maxsize=1000,) # can hold upto 1000 items
 cli = naz.Client(
     ...
-    broker=my_queue,
+    broker=my_broker,
 )
 
 try:
@@ -398,7 +398,7 @@ for i in range(0, 4):
 ```                   
                          
                          
-Here is another example, but where we now use redis for our queue;
+Here is another example, but where we now use redis for our broker;
 ```python
 import json
 import asyncio
@@ -407,7 +407,7 @@ import aioredis
 
 class RedisExampleBroker(naz.q.BaseBroker):
     """
-    use redis as our queue.
+    use redis as our broker.
     This implements a basic FIFO queue using redis.
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
     https://redis.io/commands/lpush

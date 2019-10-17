@@ -10,7 +10,7 @@ import pika
 
 class RabbitmqExampleBroker(naz.q.BaseBroker):
     """
-    use rabbitMQ as our queue.
+    use rabbitMQ as our broker.
     Note that in practice, you would probaly want to use a non-blocking rabbitMQ client.
 
     Since naz, uses python3's asyncio; any IO calls should not be blocking.

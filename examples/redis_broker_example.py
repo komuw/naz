@@ -8,7 +8,7 @@ import aioredis
 
 class RedisExampleBroker(naz.q.BaseBroker):
     """
-    use redis as our queue.
+    use redis as our broker.
 
     This implements a basic FIFO queue using redis.
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
