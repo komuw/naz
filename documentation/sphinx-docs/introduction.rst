@@ -348,7 +348,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 
 It's via a queuing interface. Your application queues messages to a queue, ``naz`` consumes from that queue and then naz sends those messages to SMSC/server.
 
-You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseBroker <https://komuw.github.io/naz/queue.html#naz.q.BaseBroker>`_ interface
+You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseBroker <https://komuw.github.io/naz/broker.html#naz.q.BaseBroker>`_ interface
 
 | Your application should call that class's enqueue method to enqueue messages.
 | Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:
