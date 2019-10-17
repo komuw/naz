@@ -25,10 +25,10 @@ jobs:
           GIT_BRANCH: ${{ github.ref }}
         run: |
           echo $GIT_BRANCH
-          if [ "$GIT_BRANCH" == "refs/heads/master" ]
+          if [[ "$GIT_BRANCH" == "refs/heads/master" ]]
           then
               printf "\n $GIT_BRANCH branch, ignoring check for relese notes \n"
-          elif [ "$GIT_BRANCH" == *"refs/tags/"* ]
+          elif [[  "$GIT_BRANCH" == *"refs/tags/"* ]]
           then
               printf "\n $GIT_BRANCH branch, ignoring check for relese notes \n"
           else
@@ -66,7 +66,7 @@ jobs:
   tests:
     name: tests
     runs-on: ubuntu-18.04
-    timeout-minutes: 4
+    timeout-minutes: 6
     steps:
       - name: Set up python
         uses: actions/setup-python@v1

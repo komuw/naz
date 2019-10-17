@@ -102,7 +102,7 @@ class TestCorrelater(TestCase):
 
     def test_get_calls_delete(self):
         with mock.patch(
-            "naz.correlater.SimpleCorrelater.delete_after_ttl", new=AsyncMock()
+            "naz.correlater.SimpleCorrelater._delete_after_ttl", new=AsyncMock()
         ) as mock_correlater_delete_after_ttl:
             self._run(
                 self.correlater.get(
@@ -113,7 +113,7 @@ class TestCorrelater(TestCase):
 
     def test_put_calls_delete(self):
         with mock.patch(
-            "naz.correlater.SimpleCorrelater.delete_after_ttl", new=AsyncMock()
+            "naz.correlater.SimpleCorrelater._delete_after_ttl", new=AsyncMock()
         ) as mock_correlater_delete_after_ttl:
             self._run(
                 self.correlater.put(
