@@ -3,7 +3,7 @@ import os
 import naz
 
 from my_hook import BenchmarksHook
-from redis_queue import MyRedisQueue
+from redis_broker import MyRedisBroker
 from my_logger import BenchmarksLogger
 
 # run as:
@@ -18,7 +18,7 @@ my_naz_client = naz.Client(
     password=os.environ["SMSC_PASSWORD"],
     loglevel="DEBUG",
     log_metadata={"project": "naz_benchmarks"},
-    broker=MyRedisQueue(),
+    broker=MyRedisBroker(),
     hook=BenchmarksHook(),
     logger=BenchmarksLogger("naz.client"),
     socket_timeout=15.00,

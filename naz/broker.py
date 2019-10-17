@@ -49,7 +49,7 @@ class SimpleBroker(BaseBroker):
             raise ValueError(
                 "`maxsize` should be of type:: `int` You entered: {0}".format(type(maxsize))
             )
-        self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize)
+        self.queue: asyncio.queues.Broker = asyncio.Broker(maxsize=maxsize)
 
     async def enqueue(self, item: dict) -> None:
         self.queue.put_nowait(item)

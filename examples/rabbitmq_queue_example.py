@@ -8,7 +8,7 @@ import naz
 import pika
 
 
-class RabbitmqExampleQueue(naz.q.BaseBroker):
+class RabbitmqExampleBroker(naz.q.BaseBroker):
     """
     use rabbitMQ as our queue.
     Note that in practice, you would probaly want to use a non-blocking rabbitMQ client.
@@ -121,7 +121,7 @@ class RabbitmqExampleQueue(naz.q.BaseBroker):
 
 
 loop = asyncio.get_event_loop()
-broker = RabbitmqExampleQueue()
+broker = RabbitmqExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,

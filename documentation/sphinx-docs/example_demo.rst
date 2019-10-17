@@ -45,7 +45,7 @@
     import aioredis  # pip install aioredis
 
 
-    class MyRedisQueue(naz.q.BaseBroker):
+    class MyRedisBroker(naz.q.BaseBroker):
         """
         use redis as our queue.
         This is an implementation of the `naz.q.BaseBroker` interface
@@ -94,14 +94,14 @@
 .. code-block:: python
 
     import naz
-    from my_queue import MyRedisQueue
+    from my_queue import MyRedisBroker
 
     my_naz_client = naz.Client(
         smsc_host="localhost",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        broker=MyRedisQueue(),
+        broker=MyRedisBroker(),
     )
 
 | We have instantiated a ``naz`` client and passed in the redis queue implementation.

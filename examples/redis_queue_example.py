@@ -6,7 +6,7 @@ import naz
 import aioredis
 
 
-class RedisExampleQueue(naz.q.BaseBroker):
+class RedisExampleBroker(naz.q.BaseBroker):
     """
     use redis as our queue.
 
@@ -49,7 +49,7 @@ class RedisExampleQueue(naz.q.BaseBroker):
 
 
 loop = asyncio.get_event_loop()
-broker = RedisExampleQueue()
+broker = RedisExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,

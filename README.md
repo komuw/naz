@@ -110,14 +110,14 @@ create a python config file, eg;
 `/tmp/my_config.py`
 ```python
 import naz
-from myfile import ExampleQueue
+from myfile import ExampleBroker
 
 client = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    broker=ExampleQueue()
+    broker=ExampleBroker()
 )
 ```
 and a python file, `myfile.py` (in the current working directory) with the contents:
@@ -126,10 +126,10 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 import asyncio
 import naz
 
-class ExampleQueue(naz.q.BaseBroker):
+class ExampleBroker(naz.q.BaseBroker):
     def __init__(self):
         loop = asyncio.get_event_loop()
-        self.queue = asyncio.Queue(maxsize=1000, loop=loop)
+        self.queue = asyncio.Broker(maxsize=1000, loop=loop)
     async def enqueue(self, item):
         self.queue.put_nowait(item)
     async def dequeue(self):
@@ -271,7 +271,7 @@ As an example, to integrate `naz` with [sentry](https://sentry.io/), all you hav
 `/tmp/my_config.py`
 ```python
 import naz
-from myfile import ExampleQueue
+from myfile import ExampleBroker
 
 import sentry_sdk # import sentry SDK
 sentry_sdk.init("https://<YOUR_SENTRY_PUBLIC_KEY>@sentry.io/<YOUR_SENTRY_PROJECT_ID>")
@@ -281,7 +281,7 @@ my_naz_client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    broker=ExampleQueue()
+    broker=ExampleBroker()
 )
 ```
 
@@ -405,7 +405,7 @@ import asyncio
 import naz
 import aioredis
 
-class RedisExampleQueue(naz.q.BaseBroker):
+class RedisExampleBroker(naz.q.BaseBroker):
     """
     use redis as our queue.
     This implements a basic FIFO queue using redis.
@@ -426,7 +426,7 @@ class RedisExampleQueue(naz.q.BaseBroker):
         return dequed_item
 
 loop = asyncio.get_event_loop()
-broker = RedisExampleQueue()
+broker = RedisExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,

@@ -95,14 +95,14 @@ create a python config file, eg; `/tmp/my_app.py`
 .. code-block:: python
 
     import naz
-    from myfile import ExampleQueue
+    from myfile import ExampleBroker
 
     client = naz.Client(
         smsc_host="127.0.0.1",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        broker=ExampleQueue()
+        broker=ExampleBroker()
     )
 
 
@@ -112,10 +112,10 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 
     import asyncio
     import naz
-    class ExampleQueue(naz.q.BaseBroker):
+    class ExampleBroker(naz.q.BaseBroker):
         def __init__(self):
             loop = asyncio.get_event_loop()
-            self.queue = asyncio.Queue(maxsize=1000, loop=loop)
+            self.queue = asyncio.Broker(maxsize=1000, loop=loop)
         async def enqueue(self, item):
             self.queue.put_nowait(item)
         async def dequeue(self):
@@ -278,7 +278,7 @@ another example is if you want to update a database record whenever you get a de
 .. code-block:: python
 
     import naz
-    from myfile import ExampleQueue
+    from myfile import ExampleBroker
 
     import sentry_sdk # import sentry SDK
     sentry_sdk.init("https://<YOUR_SENTRY_PUBLIC_KEY>@sentry.io/<YOUR_SENTRY_PROJECT_ID>")
@@ -288,7 +288,7 @@ another example is if you want to update a database record whenever you get a de
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        broker=ExampleQueue()
+        broker=ExampleBroker()
     )
 
 

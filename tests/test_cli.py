@@ -8,7 +8,7 @@ import cli
 import naz
 import docker
 
-from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
+from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
 
 
 def AsyncMock(*args, **kwargs):
@@ -40,7 +40,7 @@ NAZ_CLIENT = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    broker=ExampleRedisQueue(),
+    broker=ExampleRedisBroker(),
     encoding="gsm0338",
     sequence_generator=MySeqGen(),
     loglevel="INFO",

@@ -62,12 +62,12 @@ class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
             self.updated_at = now
 
 
-class ExampleQueue(naz.q.BaseBroker):
+class ExampleBroker(naz.q.BaseBroker):
     def __init__(self, maxsize: int = 1000) -> None:
         """
         maxsize is the max number of items(not size) that can be put in the queue.
         """
-        self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize)
+        self.queue: asyncio.queues.Broker = asyncio.Broker(maxsize=maxsize)
 
     async def enqueue(self, item: dict) -> None:
         self.queue.put_nowait(item)
@@ -76,7 +76,7 @@ class ExampleQueue(naz.q.BaseBroker):
         return await self.queue.get()
 
 
-class ExampleRedisQueue(naz.q.BaseBroker):
+class ExampleRedisBroker(naz.q.BaseBroker):
     """
     use redis as our queue.
 
@@ -119,7 +119,7 @@ class ExampleRedisQueue(naz.q.BaseBroker):
 
 
 if __name__ == "__main__":
-    my_queue = ExampleRedisQueue()
+    my_queue = ExampleRedisBroker()
     loop = asyncio.get_event_loop()
     for i in range(0, 4):
         print("submit_sm round:", i)

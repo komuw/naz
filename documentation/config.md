@@ -73,7 +73,7 @@ socket_timeout | duration that `naz` will wait, for socket/connection related ac
 `/tmp/my_config.py` 
 ```python        
 import naz
-from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
+from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
 
 # run as:
 #  naz-cli --client examples.example_config.client
@@ -82,7 +82,7 @@ client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    broker=ExampleRedisQueue(),
+    broker=ExampleRedisBroker(),
     encoding="gsm0338",
     sequence_generator=MySeqGen(),
     loglevel="INFO",
@@ -98,16 +98,16 @@ client = naz.Client(
 import asyncio
 import naz
 
-class ExampleQueue(naz.q.BaseBroker):
+class ExampleBroker(naz.q.BaseBroker):
     def __init__(self):
-        self.queue = asyncio.Queue(maxsize=1000)
+        self.queue = asyncio.Broker(maxsize=1000)
     async def enqueue(self, item):
         self.queue.put_nowait(item)
     async def dequeue(self):
         return await self.queue.get()
 
 
-broker = ExampleQueue()
+broker = ExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
