@@ -35,13 +35,13 @@ naz is in active development and it's API may change in backward incompatible wa
     import naz
 
     loop = asyncio.get_event_loop()
-    outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+    broker = naz.broker.SimpleBroker(maxsize=1000)
     cli = naz.Client(
         smsc_host="127.0.0.1",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=outboundqueue,
+        broker=broker,
     )
 
     # queue messages to send
@@ -82,7 +82,7 @@ NB:
 * (a) For more information about all the parameters that `naz.Client` can take, consult the `docs <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
 * (b) More examples can be `found here <https://github.com/komuw/naz/tree/master/examples>`_ 
 * (c) if you need an SMSC server/gateway to test with, you can use the `docker-compose <https://github.com/komuw/naz/blob/master/docker-compose.yml>`_ file in the ``naz`` repo to bring up an SMSC simulator.
-      That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your `naz.q.BaseOutboundQueue`.
+      That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your `naz.broker.BaseBroker`.
 
 
 
@@ -95,14 +95,14 @@ create a python config file, eg; `/tmp/my_app.py`
 .. code-block:: python
 
     import naz
-    from myfile import ExampleQueue
+    from myfile import ExampleBroker
 
     client = naz.Client(
         smsc_host="127.0.0.1",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=ExampleQueue()
+        broker=ExampleBroker()
     )
 
 
@@ -112,7 +112,7 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 
     import asyncio
     import naz
-    class ExampleQueue(naz.q.BaseOutboundQueue):
+    class ExampleBroker(naz.broker.BaseBroker):
         def __init__(self):
             loop = asyncio.get_event_loop()
             self.queue = asyncio.Queue(maxsize=1000, loop=loop)
@@ -146,13 +146,13 @@ NB:
     import naz
     import asyncio
     loop = asyncio.get_event_loop()
-    outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+    broker = naz.broker.SimpleBroker(maxsize=1000)
     cli = naz.Client(
         smsc_host="127.0.0.1",
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=outboundqueue,
+        broker=broker,
     )
 
 3.2 monitoring and observability
@@ -278,7 +278,7 @@ another example is if you want to update a database record whenever you get a de
 .. code-block:: python
 
     import naz
-    from myfile import ExampleQueue
+    from myfile import ExampleBroker
 
     import sentry_sdk # import sentry SDK
     sentry_sdk.init("https://<YOUR_SENTRY_PUBLIC_KEY>@sentry.io/<YOUR_SENTRY_PROJECT_ID>")
@@ -288,7 +288,7 @@ another example is if you want to update a database record whenever you get a de
         smsc_port=2775,
         system_id="smppclient1",
         password="password",
-        outboundqueue=ExampleQueue()
+        broker=ExampleBroker()
     )
 
 
@@ -342,13 +342,13 @@ As an example if you want to deny outgoing requests if the percentage of throttl
         throttle_handler=throttler,
     )
 
-3.5 Queuing
+3.5 Broker
 =====================
 `How does your application and naz talk with each other?`
 
-It's via a queuing interface. Your application queues messages to a queue, ``naz`` consumes from that queue and then naz sends those messages to SMSC/server.
+It's via a broker interface. Your application queues messages to a broker, ``naz`` consumes from that broker and then naz sends those messages to SMSC/server.
 
-You can implement the queuing mechanism any way you like, so long as it satisfies the `naz.q.BaseOutboundQueue <https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue>`_ interface
+You can implement the broker mechanism any way you like, so long as it satisfies the `naz.broker.BaseBroker <https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker>`_ interface
 
 | Your application should call that class's enqueue method to enqueue messages.
 | Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:
@@ -366,10 +366,10 @@ You can implement the queuing mechanism any way you like, so long as it satisfie
 
 For more information about all the parameters that are needed in the enqueued json object, `consult the documentation <https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol>`_ 
 
-| naz ships with a simple queue implementation called ``naz.q.SimpleOutboundQueue``
-| **NB:** ``naz.q.SimpleOutboundQueue`` should only be used for demo/test purposes.
+| naz ships with a simple broker implementation called ``naz.broker.SimpleBroker``
+| **NB:** ``naz.broker.SimpleBroker`` should only be used for demo/test purposes.
 
-An example of using that queue;
+An example of using that broker;
 
 .. code-block:: python
 
@@ -377,10 +377,10 @@ An example of using that queue;
     import naz
 
     loop = asyncio.get_event_loop()
-    my_queue = naz.q.SimpleOutboundQueue(maxsize=1000) # can hold upto 1000 items
+    my_broker = naz.broker.SimpleBroker(maxsize=1000) # can hold upto 1000 items
     cli = naz.Client(
         ...
-        outboundqueue=my_queue,
+        broker=my_broker,
     )
 
     try:

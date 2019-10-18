@@ -62,7 +62,7 @@ class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
             self.updated_at = now
 
 
-class ExampleQueue(naz.q.BaseOutboundQueue):
+class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self, maxsize: int = 1000) -> None:
         """
         maxsize is the max number of items(not size) that can be put in the queue.
@@ -76,7 +76,7 @@ class ExampleQueue(naz.q.BaseOutboundQueue):
         return await self.queue.get()
 
 
-class ExampleRedisQueue(naz.q.BaseOutboundQueue):
+class ExampleRedisBroker(naz.broker.BaseBroker):
     """
     use redis as our queue.
 
@@ -119,7 +119,7 @@ class ExampleRedisQueue(naz.q.BaseOutboundQueue):
 
 
 if __name__ == "__main__":
-    my_queue = ExampleRedisQueue()
+    my_broker = ExampleRedisBroker()
     loop = asyncio.get_event_loop()
     for i in range(0, 4):
         print("submit_sm round:", i)
@@ -132,4 +132,4 @@ if __name__ == "__main__":
             "destination_addr": "254722999999",
             "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
         }
-        loop.run_until_complete(my_queue.enqueue(item_to_enqueue))
+        loop.run_until_complete(my_broker.enqueue(item_to_enqueue))

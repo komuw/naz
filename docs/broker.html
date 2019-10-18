@@ -8,14 +8,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>queue &mdash; naz v0.7.2 documentation</title>
+  <title>broker &mdash; naz v0.7.3 documentation</title>
   
 
   
   
   
   
-    <link rel="canonical" href="https://komuw.github.io/naz/queue.html"/>
+    <link rel="canonical" href="https://komuw.github.io/naz/broker.html"/>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">queue</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
@@ -146,13 +146,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>queue</li>
+      <li>broker</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/queue.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/broker.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -165,19 +165,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-naz.q">
-<span id="queue"></span><h1>queue<a class="headerlink" href="#module-naz.q" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-naz.broker">
+<span id="broker"></span><h1>broker<a class="headerlink" href="#module-naz.broker" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="naz.q.BaseOutboundQueue">
-<em class="property">class </em><code class="sig-prename descclassname">naz.q.</code><code class="sig-name descname">BaseOutboundQueue</code><a class="reference internal" href="_modules/naz/q.html#BaseOutboundQueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.BaseOutboundQueue" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.broker.BaseBroker">
+<em class="property">class </em><code class="sig-prename descclassname">naz.broker.</code><code class="sig-name descname">BaseBroker</code><a class="reference internal" href="_modules/naz/broker.html#BaseBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.BaseBroker" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>This is the interface that must be implemented to satisfy naz’s outbound queue.
+<p>This is the interface that must be implemented to satisfy naz’s broker.
 User implementations should inherit this class and
-implement the <a class="reference internal" href="#naz.q.BaseOutboundQueue.enqueue" title="naz.q.BaseOutboundQueue.enqueue"><code class="xref py py-func docutils literal notranslate"><span class="pre">enqueue</span></code></a> and <a class="reference internal" href="#naz.q.BaseOutboundQueue.dequeue" title="naz.q.BaseOutboundQueue.dequeue"><code class="xref py py-func docutils literal notranslate"><span class="pre">dequeue</span></code></a> methods with the type signatures shown.</p>
+implement the <a class="reference internal" href="#naz.broker.BaseBroker.enqueue" title="naz.broker.BaseBroker.enqueue"><code class="xref py py-func docutils literal notranslate"><span class="pre">enqueue</span></code></a> and <a class="reference internal" href="#naz.broker.BaseBroker.dequeue" title="naz.broker.BaseBroker.dequeue"><code class="xref py py-func docutils literal notranslate"><span class="pre">dequeue</span></code></a> methods with the type signatures shown.</p>
 <p>naz calls an implementation of this class to enqueue and/or dequeue an item.</p>
 <dl class="method">
-<dt id="naz.q.BaseOutboundQueue.dequeue">
-<em class="property">abstract async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#BaseOutboundQueue.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.BaseOutboundQueue.dequeue" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.broker.BaseBroker.dequeue">
+<em class="property">abstract async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#BaseBroker.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.BaseBroker.dequeue" title="Permalink to this definition">¶</a></dt>
 <dd><p>dequeue an item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -190,8 +190,8 @@ implement the <a class="reference internal" href="#naz.q.BaseOutboundQueue.enque
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.q.BaseOutboundQueue.enqueue">
-<em class="property">abstract async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#BaseOutboundQueue.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.BaseOutboundQueue.enqueue" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.broker.BaseBroker.enqueue">
+<em class="property">abstract async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#BaseBroker.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.BaseBroker.enqueue" title="Permalink to this definition">¶</a></dt>
 <dd><p>enqueue/save an item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -206,14 +206,14 @@ implement the <a class="reference internal" href="#naz.q.BaseOutboundQueue.enque
 </dd></dl>
 
 <dl class="class">
-<dt id="naz.q.SimpleOutboundQueue">
-<em class="property">class </em><code class="sig-prename descclassname">naz.q.</code><code class="sig-name descname">SimpleOutboundQueue</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#naz.q.BaseOutboundQueue" title="naz.q.BaseOutboundQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.q.BaseOutboundQueue</span></code></a></p>
-<p>This is an in-memory implementation of BaseOutboundQueue.</p>
+<dt id="naz.broker.SimpleBroker">
+<em class="property">class </em><code class="sig-prename descclassname">naz.broker.</code><code class="sig-name descname">SimpleBroker</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.broker.BaseBroker" title="naz.broker.BaseBroker"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.broker.BaseBroker</span></code></a></p>
+<p>This is an in-memory implementation of BaseBroker.</p>
 <p>Note: It should only be used for tests and demo purposes.</p>
 <dl class="method">
-<dt id="naz.q.SimpleOutboundQueue.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.broker.SimpleBroker.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>maxsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the maximum number of items(not size) that can be put in the queue.</p>
@@ -225,8 +225,8 @@ implement the <a class="reference internal" href="#naz.q.BaseOutboundQueue.enque
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.q.SimpleOutboundQueue.dequeue">
-<em class="property">async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue.dequeue" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.broker.SimpleBroker.dequeue">
+<em class="property">async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker.dequeue" title="Permalink to this definition">¶</a></dt>
 <dd><p>dequeue an item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -239,8 +239,8 @@ implement the <a class="reference internal" href="#naz.q.BaseOutboundQueue.enque
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.q.SimpleOutboundQueue.enqueue">
-<em class="property">async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/q.html#SimpleOutboundQueue.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.q.SimpleOutboundQueue.enqueue" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.broker.SimpleBroker.enqueue">
+<em class="property">async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker.enqueue" title="Permalink to this definition">¶</a></dt>
 <dd><p>enqueue/save an item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

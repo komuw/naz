@@ -6,9 +6,9 @@ import naz
 import aioredis
 
 
-class RedisExampleQueue(naz.q.BaseOutboundQueue):
+class RedisExampleBroker(naz.broker.BaseBroker):
     """
-    use redis as our queue.
+    use redis as our broker.
 
     This implements a basic FIFO queue using redis.
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
@@ -49,13 +49,13 @@ class RedisExampleQueue(naz.q.BaseOutboundQueue):
 
 
 loop = asyncio.get_event_loop()
-outboundqueue = RedisExampleQueue()
+broker = RedisExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password=os.getenv("password", "password"),
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 
 # queue messages to send
@@ -69,7 +69,7 @@ for i in range(0, 5):
         "source_addr": "254722111111",
         "destination_addr": "254722999999",
     }
-    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+    loop.run_until_complete(broker.enqueue(item_to_enqueue))
 
 
 try:

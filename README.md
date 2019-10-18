@@ -36,7 +36,7 @@ Comprehensive documetion is available -> [Documentation](https://komuw.github.io
     + [integration with bug trackers(eg Sentry )](#23-integration-with-bug-trackers)
   + [Rate limiting](#3-rate-limiting)            
   + [Throttle handling](#4-throttle-handling)            
-  + [Queuing](#5-queuing)      
+  + [Broker](#5-broker)      
       
 [Benchmarks](./benchmarks/README.md)
 
@@ -56,13 +56,13 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+broker = naz.broker.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 
 # queue messages to send
@@ -101,7 +101,7 @@ finally:
 (a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)            
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)         
 (c) if you need a SMSC server/gateway to test with, you can use the [docker-compose file in this repo](https://github.com/komuw/naz/blob/master/docker-compose.yml) to bring up an SMSC simulator.        
-That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your outboundqueue.
+That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your broker.
 
 
 #### 2. As a cli app
@@ -110,14 +110,14 @@ create a python config file, eg;
 `/tmp/my_config.py`
 ```python
 import naz
-from myfile import ExampleQueue
+from myfile import ExampleBroker
 
 client = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleQueue()
+    broker=ExampleBroker()
 )
 ```
 and a python file, `myfile.py` (in the current working directory) with the contents:
@@ -126,7 +126,7 @@ and a python file, `myfile.py` (in the current working directory) with the conte
 import asyncio
 import naz
 
-class ExampleQueue(naz.q.BaseOutboundQueue):
+class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self):
         loop = asyncio.get_event_loop()
         self.queue = asyncio.Queue(maxsize=1000, loop=loop)
@@ -179,13 +179,13 @@ import naz
 import asyncio
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+broker = naz.broker.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 ```
 
@@ -271,7 +271,7 @@ As an example, to integrate `naz` with [sentry](https://sentry.io/), all you hav
 `/tmp/my_config.py`
 ```python
 import naz
-from myfile import ExampleQueue
+from myfile import ExampleBroker
 
 import sentry_sdk # import sentry SDK
 sentry_sdk.init("https://<YOUR_SENTRY_PUBLIC_KEY>@sentry.io/<YOUR_SENTRY_PROJECT_ID>")
@@ -281,7 +281,7 @@ my_naz_client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleQueue()
+    broker=ExampleBroker()
 )
 ```
 
@@ -332,11 +332,11 @@ cli = naz.Client(
 )
 ```
 
-#### 5. Queuing
+#### 5. Broker
 **How does your application and `naz` talk with each other?**         
-It's via a queuing interface. Your application queues messages to a queue, `naz` consumes from that queue and then `naz` sends those messages to SMSC/server.       
-You can implement the queuing mechanism any way you like, so long as it satisfies the `BaseOutboundQueue` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/q.py)             
-Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the queue.         
+It's via a broker interface. Your application queues messages to a broker, `naz` consumes from that broker and then `naz` sends those messages to SMSC/server.       
+You can implement the broker mechanism any way you like, so long as it satisfies the `BaseBroker` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/broker.py)             
+Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the broker.         
 Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:              
 ```bash
 {
@@ -350,17 +350,17 @@ Your application should enqueue a dictionary/json object with any parameters but
 ```  
 For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
 
-`naz` ships with a simple queue implementation called [`naz.q.SimpleOutboundQueue`](https://github.com/komuw/naz/blob/master/naz/q.py).                     
+`naz` ships with a simple broker implementation called [`naz.broker.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/broker.py).                     
 An example of using that;
 ```python
 import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-my_queue = naz.q.SimpleOutboundQueue(maxsize=1000,) # can hold upto 1000 items
+my_broker = naz.broker.SimpleBroker(maxsize=1000,) # can hold upto 1000 items
 cli = naz.Client(
     ...
-    outboundqueue=my_queue,
+    broker=my_broker,
 )
 
 try:
@@ -398,16 +398,16 @@ for i in range(0, 4):
 ```                   
                          
                          
-Here is another example, but where we now use redis for our queue;
+Here is another example, but where we now use redis for our broker;
 ```python
 import json
 import asyncio
 import naz
 import aioredis
 
-class RedisExampleQueue(naz.q.BaseOutboundQueue):
+class RedisExampleBroker(naz.broker.BaseBroker):
     """
-    use redis as our queue.
+    use redis as our broker.
     This implements a basic FIFO queue using redis.
     Basically we use the redis command LPUSH to push messages onto the queue and BRPOP to pull them off.
     https://redis.io/commands/lpush
@@ -426,13 +426,13 @@ class RedisExampleQueue(naz.q.BaseOutboundQueue):
         return dequed_item
 
 loop = asyncio.get_event_loop()
-outboundqueue = RedisExampleQueue()
+broker = RedisExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 
 try:

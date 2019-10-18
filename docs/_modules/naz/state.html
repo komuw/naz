@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.state &mdash; naz v0.7.2 documentation</title>
+  <title>naz.state &mdash; naz v0.7.3 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../throttle.html">throttle</a></li>
@@ -311,7 +311,7 @@
         <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RREPLACEFAIL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000013</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Replace SM Failed&quot;</span>
     <span class="p">)</span>
     <span class="n">ESME_RMSGQFUL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
-        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RMSGQFUL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000014</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Message Queue Full&quot;</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RMSGQFUL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000014</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Message Broker Full&quot;</span>
     <span class="p">)</span>
     <span class="n">ESME_RINVSERTYP</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
         <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSERTYP&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000015</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Service Type&quot;</span>

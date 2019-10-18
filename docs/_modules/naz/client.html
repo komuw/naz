@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.2 documentation</title>
+  <title>naz.client &mdash; naz v0.7.3 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../throttle.html">throttle</a></li>
@@ -172,14 +172,14 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="c1"># pytype: disable=pyi-error</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">q</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">hooks</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">hooks</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nazcodec</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">sequence</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">throttle</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">correlater</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">ratelimiter</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">broker</span> <span class="k">as</span> <span class="n">the_broker</span>
 
 <span class="kn">from</span> <span class="nn">.state</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">SmppCommand</span><span class="p">,</span>
@@ -206,13 +206,13 @@
 <span class="sd">        import asyncio</span>
 <span class="sd">        import naz</span>
 
-<span class="sd">        outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)</span>
+<span class="sd">        broker = naz.broker.SimpleBroker(maxsize=1000)</span>
 <span class="sd">        client = naz.Client(</span>
 <span class="sd">                smsc_host=&quot;127.0.0.1&quot;,</span>
 <span class="sd">                smsc_port=2775,</span>
 <span class="sd">                system_id=&quot;smppclient1&quot;,</span>
 <span class="sd">                password=os.getenv(&quot;password&quot;, &quot;password&quot;),</span>
-<span class="sd">                outboundqueue=outboundqueue,</span>
+<span class="sd">                broker=broker,</span>
 <span class="sd">            )</span>
 
 <span class="sd">        # 1. connect to the SMSC host</span>
@@ -237,7 +237,7 @@
         <span class="n">smsc_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">system_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">outboundqueue</span><span class="p">:</span> <span class="n">q</span><span class="o">.</span><span class="n">BaseOutboundQueue</span><span class="p">,</span>
+        <span class="n">broker</span><span class="p">:</span> <span class="n">the_broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">,</span>
         <span class="n">client_id</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">system_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -305,7 +305,7 @@
 <span class="sd">            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</span>
 <span class="sd">            encoding:	encoding1 used to encode messages been sent to SMSC</span>
 <span class="sd">            sequence_generator:	python class instance used to generate sequence_numbers</span>
-<span class="sd">            outboundqueue:	python class instance implementing some queueing mechanism. \</span>
+<span class="sd">            broker:	python class instance implementing some queueing mechanism. \</span>
 <span class="sd">                messages to be sent to SMSC are queued using the said mechanism before been sent</span>
 <span class="sd">            client_id:	a unique string identifying a naz client class instance</span>
 <span class="sd">            logger: python class instance to be used for logging</span>
@@ -331,7 +331,7 @@
             <span class="n">smsc_port</span><span class="o">=</span><span class="n">smsc_port</span><span class="p">,</span>
             <span class="n">system_id</span><span class="o">=</span><span class="n">system_id</span><span class="p">,</span>
             <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span>
-            <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
+            <span class="n">broker</span><span class="o">=</span><span class="n">broker</span><span class="p">,</span>
             <span class="n">client_id</span><span class="o">=</span><span class="n">client_id</span><span class="p">,</span>
             <span class="n">system_type</span><span class="o">=</span><span class="n">system_type</span><span class="p">,</span>
             <span class="n">addr_ton</span><span class="o">=</span><span class="n">addr_ton</span><span class="p">,</span>
@@ -372,7 +372,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">smsc_port</span> <span class="o">=</span> <span class="n">smsc_port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">system_id</span> <span class="o">=</span> <span class="n">system_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outboundqueue</span> <span class="o">=</span> <span class="n">outboundqueue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">broker</span> <span class="o">=</span> <span class="n">broker</span>
 
         <span class="k">if</span> <span class="n">client_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">client_id</span> <span class="o">=</span> <span class="n">client_id</span>
@@ -537,7 +537,7 @@
         <span class="n">smsc_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">system_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">outboundqueue</span><span class="p">:</span> <span class="n">q</span><span class="o">.</span><span class="n">BaseOutboundQueue</span><span class="p">,</span>
+        <span class="n">broker</span><span class="p">:</span> <span class="n">the_broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">,</span>
         <span class="n">client_id</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">system_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">addr_ton</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -601,11 +601,11 @@
                     <span class="s2">&quot;`password` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">password</span><span class="p">))</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outboundqueue</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">BaseOutboundQueue</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">broker</span><span class="p">,</span> <span class="n">the_broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">):</span>
             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`outboundqueue` should be of type:: `naz.q.BaseOutboundQueue` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">outboundqueue</span><span class="p">)</span>
+                    <span class="s2">&quot;`broker` should be of type:: `naz.broker.BaseBroker` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">broker</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -1194,7 +1194,7 @@
                 <span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span>
             <span class="p">)</span>
             <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
-            <span class="c1"># dont queue enquire_link in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc</span>
+            <span class="c1"># dont queue enquire_link in SimpleBroker since we dont want it to be behind 10k msgs etc</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_data</span><span class="p">(</span><span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
@@ -1246,7 +1246,7 @@
             <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">outboundqueue</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">item_to_enqueue</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">item_to_enqueue</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
@@ -1298,7 +1298,7 @@
         <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
 
         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
-        <span class="c1"># dont queue unbind_resp in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc</span>
+        <span class="c1"># dont queue unbind_resp in SimpleBroker since we dont want it to be behind 10k msgs etc</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_data</span><span class="p">(</span><span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
@@ -1352,7 +1352,7 @@
             <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">outboundqueue</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">item_to_enqueue</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">item_to_enqueue</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
@@ -1380,7 +1380,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">short_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_addr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">destination_addr</span><span class="p">:</span> <span class="nb">str</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        enqueues a SUBMIT_SM pdu to :attr:`outboundqueue &lt;Client.outboundqueue&gt;`</span>
+<span class="sd">        enqueues a SUBMIT_SM pdu to :attr:`broker &lt;Client.broker&gt;`</span>
 <span class="sd">        That PDU will later on be sent to SMSC.</span>
 
 <span class="sd">        Parameters:</span>
@@ -1443,7 +1443,7 @@
             <span class="s2">&quot;destination_addr&quot;</span><span class="p">:</span> <span class="n">destination_addr</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">outboundqueue</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">item_to_enqueue</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">item_to_enqueue</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                 <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
@@ -1826,7 +1826,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">TESTING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        In a loop; dequeues items from the :attr:`outboundqueue &lt;Client.outboundqueue&gt;` and sends them to SMSC.</span>
+<span class="sd">        In a loop; dequeues items from the :attr:`broker &lt;Client.broker&gt;` and sends them to SMSC.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            TESTING: indicates whether this method is been called while running tests.</span>
@@ -1897,7 +1897,7 @@
                     <span class="p">)</span>
 
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">item_to_dequeue</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">outboundqueue</span><span class="o">.</span><span class="n">dequeue</span><span class="p">()</span>
+                    <span class="n">item_to_dequeue</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">dequeue</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">dequeue_retry_count</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">poll_queue_interval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retry_after</span><span class="p">(</span><span class="n">dequeue_retry_count</span><span class="p">)</span>
@@ -2578,7 +2578,7 @@
 
         <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
-        <span class="c1"># dont queue unbind in SimpleOutboundQueue since we dont want it to be behind 10k msgs etc</span>
+        <span class="c1"># dont queue unbind in SimpleBroker since we dont want it to be behind 10k msgs etc</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_data</span><span class="p">(</span><span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>

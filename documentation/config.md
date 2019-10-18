@@ -47,7 +47,7 @@ You are also encouraged to consult any documentation of the SMSC partner that yo
 ---       | ---         | ---     
 encoding | encoding<sup>1</sup> used to encode messages been sent to SMSC | gsm0338
 sequence_generator | python class instance used to generate sequence_numbers| naz.sequence.SimpleSequenceGenerator
-outboundqueue | python class instance implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
+broker | python class instance implementing some queueing mechanism. messages to be sent to SMSC are queued using the said mechanism before been sent | N/A
 client_id | a unique string identifying a naz client class instance | "".join(random.choices(string.ascii_uppercase + string.digits, k=17))   
 logger | python class instance to be used for logging | naz.log.SimpleLogger        
 loglevel | the level at which to log | INFO
@@ -65,7 +65,7 @@ socket_timeout | duration that `naz` will wait, for socket/connection related ac
 `SMSC`: Short Message Service Centre, ie the server               
 `ESME`: External Short Message Entity, ie the client                   
 
-**NB**: the only *mandatory* parameters are the ones marked N/A ie `smsc_host`, `smsc_port`, `system_id`, `password` and `outboundqueue`             
+**NB**: the only *mandatory* parameters are the ones marked N/A ie `smsc_host`, `smsc_port`, `system_id`, `password` and `broker`             
 
 #### Example
 1. An example config file is shown below.         
@@ -73,7 +73,7 @@ socket_timeout | duration that `naz` will wait, for socket/connection related ac
 `/tmp/my_config.py` 
 ```python        
 import naz
-from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
+from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
 
 # run as:
 #  naz-cli --client examples.example_config.client
@@ -82,7 +82,7 @@ client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleRedisQueue(),
+    broker=ExampleRedisBroker(),
     encoding="gsm0338",
     sequence_generator=MySeqGen(),
     loglevel="INFO",
@@ -98,22 +98,22 @@ client = naz.Client(
 import asyncio
 import naz
 
-class ExampleQueue(naz.q.BaseOutboundQueue):
+class ExampleBroker(naz.broker.BaseBroker):
     def __init__(self):
-        self.queue = asyncio.Queue(maxsize=1000)
+        self.queue =  asyncio.Queue(maxsize=1000)
     async def enqueue(self, item):
         self.queue.put_nowait(item)
     async def dequeue(self):
         return await self.queue.get()
 
 
-outboundqueue = ExampleQueue()
+broker = ExampleBroker()
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=outboundqueue,
+    broker=broker,
     log_metadata={"environment": "production",  "release": "canary"},
     loglevel="WARNING",
 )

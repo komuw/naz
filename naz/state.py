@@ -147,7 +147,7 @@ class SmppCommandStatus:
         code="ESME_RREPLACEFAIL", value=0x00000013, description="Replace SM Failed"
     )
     ESME_RMSGQFUL: CommandStatus = CommandStatus(
-        code="ESME_RMSGQFUL", value=0x00000014, description="Message Queue Full"
+        code="ESME_RMSGQFUL", value=0x00000014, description="Message Broker Full"
     )
     ESME_RINVSERTYP: CommandStatus = CommandStatus(
         code="ESME_RINVSERTYP", value=0x00000015, description="Invalid Service Type"

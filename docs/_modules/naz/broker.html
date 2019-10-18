@@ -8,14 +8,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.q &mdash; naz v0.7.2 documentation</title>
+  <title>naz.broker &mdash; naz v0.7.3 documentation</title>
   
 
   
   
   
   
-    <link rel="canonical" href="https://komuw.github.io/naz/_modules/naz/q.html"/>
+    <link rel="canonical" href="https://komuw.github.io/naz/_modules/naz/broker.html"/>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../throttle.html">throttle</a></li>
@@ -146,7 +146,7 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>naz.q</li>
+      <li>naz.broker</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -161,22 +161,22 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for naz.q</h1><div class="highlight"><pre>
+  <h1>Source code for naz.broker</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 
 
-<div class="viewcode-block" id="BaseOutboundQueue"><a class="viewcode-back" href="../../queue.html#naz.q.BaseOutboundQueue">[docs]</a><span class="k">class</span> <span class="nc">BaseOutboundQueue</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseBroker"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker">[docs]</a><span class="k">class</span> <span class="nc">BaseBroker</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is the interface that must be implemented to satisfy naz&#39;s outbound queue.</span>
+<span class="sd">    This is the interface that must be implemented to satisfy naz&#39;s broker.</span>
 <span class="sd">    User implementations should inherit this class and</span>
-<span class="sd">    implement the :func:`enqueue &lt;BaseOutboundQueue.enqueue&gt;` and :func:`dequeue &lt;BaseOutboundQueue.dequeue&gt;` methods with the type signatures shown.</span>
+<span class="sd">    implement the :func:`enqueue &lt;BaseBroker.enqueue&gt;` and :func:`dequeue &lt;BaseBroker.dequeue&gt;` methods with the type signatures shown.</span>
 
 <span class="sd">    naz calls an implementation of this class to enqueue and/or dequeue an item.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseOutboundQueue.enqueue"><a class="viewcode-back" href="../../queue.html#naz.q.BaseOutboundQueue.enqueue">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+<div class="viewcode-block" id="BaseBroker.enqueue"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker.enqueue">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        enqueue/save an item.</span>
@@ -186,7 +186,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;enqueue method must be implemented.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="BaseOutboundQueue.dequeue"><a class="viewcode-back" href="../../queue.html#naz.q.BaseOutboundQueue.dequeue">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+<div class="viewcode-block" id="BaseBroker.dequeue"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker.dequeue">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        dequeue an item.</span>
@@ -197,14 +197,14 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;dequeue method must be implemented.&quot;</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="SimpleOutboundQueue"><a class="viewcode-back" href="../../queue.html#naz.q.SimpleOutboundQueue">[docs]</a><span class="k">class</span> <span class="nc">SimpleOutboundQueue</span><span class="p">(</span><span class="n">BaseOutboundQueue</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleBroker"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker">[docs]</a><span class="k">class</span> <span class="nc">SimpleBroker</span><span class="p">(</span><span class="n">BaseBroker</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is an in-memory implementation of BaseOutboundQueue.</span>
+<span class="sd">    This is an in-memory implementation of BaseBroker.</span>
 
 <span class="sd">    Note: It should only be used for tests and demo purposes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleOutboundQueue.__init__"><a class="viewcode-back" href="../../queue.html#naz.q.SimpleOutboundQueue.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2500</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleBroker.__init__"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2500</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
 <span class="sd">            maxsize: the maximum number of items(not size) that can be put in the queue.</span>
@@ -215,10 +215,10 @@
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">queues</span><span class="o">.</span><span class="n">Queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="n">maxsize</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleOutboundQueue.enqueue"><a class="viewcode-back" href="../../queue.html#naz.q.SimpleOutboundQueue.enqueue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleBroker.enqueue"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.enqueue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleOutboundQueue.dequeue"><a class="viewcode-back" href="../../queue.html#naz.q.SimpleOutboundQueue.dequeue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+<div class="viewcode-block" id="SimpleBroker.dequeue"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.dequeue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div></div>
 </pre></div>
 

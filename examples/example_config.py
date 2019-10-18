@@ -1,5 +1,5 @@
 import naz
-from examples.example_klasses import ExampleRedisQueue, MySeqGen, MyRateLimiter
+from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
 
 
 # run as:
@@ -9,7 +9,7 @@ client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
-    outboundqueue=ExampleRedisQueue(),
+    broker=ExampleRedisBroker(),
     encoding="gsm0338",
     sequence_generator=MySeqGen(),
     loglevel="INFO",

@@ -1,7 +1,7 @@
-queue
+broker
 ---------------
 
-.. automodule:: naz.q
+.. automodule:: naz.broker
     :members:
     :show-inheritance:
 

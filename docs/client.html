@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Client &mdash; naz v0.7.2 documentation</title>
+  <title>Client &mdash; naz v0.7.3 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -95,7 +95,7 @@
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
@@ -169,7 +169,7 @@
 <span id="client"></span><h1>Client<a class="headerlink" href="#module-naz.client" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="naz.client.Client">
-<em class="property">class </em><code class="sig-prename descclassname">naz.client.</code><code class="sig-name descname">Client</code><span class="sig-paren">(</span><em class="sig-param">smsc_host</em>, <em class="sig-param">smsc_port</em>, <em class="sig-param">system_id</em>, <em class="sig-param">password</em>, <em class="sig-param">outboundqueue</em>, <em class="sig-param">client_id=None</em>, <em class="sig-param">system_type=''</em>, <em class="sig-param">addr_ton=0</em>, <em class="sig-param">addr_npi=0</em>, <em class="sig-param">address_range=''</em>, <em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">interface_version=34</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em>, <em class="sig-param">enquire_link_interval=55.0</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">loglevel='INFO'</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">codec_class=None</em>, <em class="sig-param">codec_errors_level='strict'</em>, <em class="sig-param">rateLimiter=None</em>, <em class="sig-param">hook=None</em>, <em class="sig-param">sequence_generator=None</em>, <em class="sig-param">throttle_handler=None</em>, <em class="sig-param">correlation_handler=None</em>, <em class="sig-param">drain_duration=8.0</em>, <em class="sig-param">socket_timeout=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.client.</code><code class="sig-name descname">Client</code><span class="sig-paren">(</span><em class="sig-param">smsc_host</em>, <em class="sig-param">smsc_port</em>, <em class="sig-param">system_id</em>, <em class="sig-param">password</em>, <em class="sig-param">broker</em>, <em class="sig-param">client_id=None</em>, <em class="sig-param">system_type=''</em>, <em class="sig-param">addr_ton=0</em>, <em class="sig-param">addr_npi=0</em>, <em class="sig-param">address_range=''</em>, <em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">interface_version=34</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em>, <em class="sig-param">enquire_link_interval=55.0</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">loglevel='INFO'</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">codec_class=None</em>, <em class="sig-param">codec_errors_level='strict'</em>, <em class="sig-param">rateLimiter=None</em>, <em class="sig-param">hook=None</em>, <em class="sig-param">sequence_generator=None</em>, <em class="sig-param">throttle_handler=None</em>, <em class="sig-param">correlation_handler=None</em>, <em class="sig-param">drain_duration=8.0</em>, <em class="sig-param">socket_timeout=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The SMPP client that will interact with SMSC/server.</p>
 <p>Example declaration:</p>
@@ -177,13 +177,13 @@
 <span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">naz</span>
 
-<span class="n">outboundqueue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">broker</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">SimpleBroker</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
         <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
         <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
         <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
         <span class="n">password</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;password&quot;</span><span class="p">,</span> <span class="s2">&quot;password&quot;</span><span class="p">),</span>
-        <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
+        <span class="n">broker</span><span class="o">=</span><span class="n">broker</span><span class="p">,</span>
     <span class="p">)</span>
 
 <span class="c1"># 1. connect to the SMSC host</span>
@@ -204,7 +204,7 @@
 </div>
 <dl class="method">
 <dt id="naz.client.Client.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">smsc_host</em>, <em class="sig-param">smsc_port</em>, <em class="sig-param">system_id</em>, <em class="sig-param">password</em>, <em class="sig-param">outboundqueue</em>, <em class="sig-param">client_id=None</em>, <em class="sig-param">system_type=''</em>, <em class="sig-param">addr_ton=0</em>, <em class="sig-param">addr_npi=0</em>, <em class="sig-param">address_range=''</em>, <em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">interface_version=34</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em>, <em class="sig-param">enquire_link_interval=55.0</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">loglevel='INFO'</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">codec_class=None</em>, <em class="sig-param">codec_errors_level='strict'</em>, <em class="sig-param">rateLimiter=None</em>, <em class="sig-param">hook=None</em>, <em class="sig-param">sequence_generator=None</em>, <em class="sig-param">throttle_handler=None</em>, <em class="sig-param">correlation_handler=None</em>, <em class="sig-param">drain_duration=8.0</em>, <em class="sig-param">socket_timeout=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">smsc_host</em>, <em class="sig-param">smsc_port</em>, <em class="sig-param">system_id</em>, <em class="sig-param">password</em>, <em class="sig-param">broker</em>, <em class="sig-param">client_id=None</em>, <em class="sig-param">system_type=''</em>, <em class="sig-param">addr_ton=0</em>, <em class="sig-param">addr_npi=0</em>, <em class="sig-param">address_range=''</em>, <em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">interface_version=34</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em>, <em class="sig-param">enquire_link_interval=55.0</em>, <em class="sig-param">logger=None</em>, <em class="sig-param">loglevel='INFO'</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">codec_class=None</em>, <em class="sig-param">codec_errors_level='strict'</em>, <em class="sig-param">rateLimiter=None</em>, <em class="sig-param">hook=None</em>, <em class="sig-param">sequence_generator=None</em>, <em class="sig-param">throttle_handler=None</em>, <em class="sig-param">correlation_handler=None</em>, <em class="sig-param">drain_duration=8.0</em>, <em class="sig-param">socket_timeout=30.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -232,7 +232,7 @@
 <li><p><strong>sm_default_msg_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</p></li>
 <li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – encoding1 used to encode messages been sent to SMSC</p></li>
 <li><p><strong>sequence_generator</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="sequence.html#naz.sequence.BaseSequenceGenerator" title="naz.sequence.BaseSequenceGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSequenceGenerator</span></code></a>]) – python class instance used to generate sequence_numbers</p></li>
-<li><p><strong>outboundqueue</strong> (<a class="reference internal" href="queue.html#naz.q.BaseOutboundQueue" title="naz.q.BaseOutboundQueue"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseOutboundQueue</span></code></a>) – python class instance implementing some queueing mechanism.                 messages to be sent to SMSC are queued using the said mechanism before been sent</p></li>
+<li><p><strong>broker</strong> (<a class="reference internal" href="broker.html#naz.broker.BaseBroker" title="naz.broker.BaseBroker"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBroker</span></code></a>) – python class instance implementing some queueing mechanism.                 messages to be sent to SMSC are queued using the said mechanism before been sent</p></li>
 <li><p><strong>client_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique string identifying a naz client class instance</p></li>
 <li><p><strong>logger</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="log.html#naz.log.BaseLogger" title="naz.log.BaseLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLogger</span></code></a>]) – python class instance to be used for logging</p></li>
 <li><p><strong>loglevel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the level at which to log</p></li>
@@ -307,7 +307,7 @@
 <dl class="method">
 <dt id="naz.client.Client.dequeue_messages">
 <em class="property">async </em><code class="sig-name descname">dequeue_messages</code><span class="sig-paren">(</span><em class="sig-param">TESTING=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.dequeue_messages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.dequeue_messages" title="Permalink to this definition">¶</a></dt>
-<dd><p>In a loop; dequeues items from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">outboundqueue</span></code> and sends them to SMSC.</p>
+<dd><p>In a loop; dequeues items from the <code class="xref py py-attr docutils literal notranslate"><span class="pre">broker</span></code> and sends them to SMSC.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>TESTING</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – indicates whether this method is been called while running tests.</p>
@@ -409,7 +409,7 @@ It also accts as a flow control method that interacts with the IO write buffer.<
 <dl class="method">
 <dt id="naz.client.Client.submit_sm">
 <em class="property">async </em><code class="sig-name descname">submit_sm</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">log_id</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.submit_sm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.submit_sm" title="Permalink to this definition">¶</a></dt>
-<dd><p>enqueues a SUBMIT_SM pdu to <code class="xref py py-attr docutils literal notranslate"><span class="pre">outboundqueue</span></code>
+<dd><p>enqueues a SUBMIT_SM pdu to <code class="xref py py-attr docutils literal notranslate"><span class="pre">broker</span></code>
 That PDU will later on be sent to SMSC.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

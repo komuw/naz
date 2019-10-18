@@ -19,7 +19,7 @@ API reference
     correlater
     hooks
     nazcodec
-    queue
+    broker
     ratelimiter
     sequence
     throttle

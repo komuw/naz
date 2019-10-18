@@ -4,13 +4,13 @@ import asyncio
 import naz
 
 loop = asyncio.get_event_loop()
-outboundqueue = naz.q.SimpleOutboundQueue(maxsize=1000)
+broker = naz.broker.SimpleBroker(maxsize=1000)
 cli = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password=os.getenv("password", "password"),
-    outboundqueue=outboundqueue,
+    broker=broker,
 )
 
 # queue messages to send
@@ -24,7 +24,7 @@ for i in range(0, 4):
         "source_addr": "254722111111",
         "destination_addr": "254722999999",
     }
-    loop.run_until_complete(outboundqueue.enqueue(item_to_enqueue))
+    loop.run_until_complete(broker.enqueue(item_to_enqueue))
 
     # altenatively::
     # loop.run_until_complete(

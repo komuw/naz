@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; naz v0.7.2 documentation</title>
+  <title>Index &mdash; naz v0.7.3 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -94,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
@@ -187,9 +187,11 @@
 <h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="client.html#naz.client.Client.__init__">__init__() (naz.client.Client method)</a>
+      <li><a href="broker.html#naz.broker.SimpleBroker.__init__">__init__() (naz.broker.SimpleBroker method)</a>
 
       <ul>
+        <li><a href="client.html#naz.client.Client.__init__">(naz.client.Client method)</a>
+</li>
         <li><a href="correlater.html#naz.correlater.SimpleCorrelater.__init__">(naz.correlater.SimpleCorrelater method)</a>
 </li>
         <li><a href="hooks.html#naz.hooks.SimpleHook.__init__">(naz.hooks.SimpleHook method)</a>
@@ -197,8 +199,6 @@
         <li><a href="log.html#naz.log.BreachHandler.__init__">(naz.log.BreachHandler method)</a>
 </li>
         <li><a href="log.html#naz.log.SimpleLogger.__init__">(naz.log.SimpleLogger method)</a>
-</li>
-        <li><a href="queue.html#naz.q.SimpleOutboundQueue.__init__">(naz.q.SimpleOutboundQueue method)</a>
 </li>
         <li><a href="ratelimiter.html#naz.ratelimiter.SimpleRateLimiter.__init__">(naz.ratelimiter.SimpleRateLimiter method)</a>
 </li>
@@ -225,6 +225,8 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="broker.html#naz.broker.BaseBroker">BaseBroker (class in naz.broker)</a>
+</li>
       <li><a href="correlater.html#naz.correlater.BaseCorrelater">BaseCorrelater (class in naz.correlater)</a>
 </li>
       <li><a href="hooks.html#naz.hooks.BaseHook">BaseHook (class in naz.hooks)</a>
@@ -232,8 +234,6 @@
       <li><a href="log.html#naz.log.BaseLogger">BaseLogger (class in naz.log)</a>
 </li>
       <li><a href="nazcodec.html#naz.nazcodec.BaseNazCodec">BaseNazCodec (class in naz.nazcodec)</a>
-</li>
-      <li><a href="queue.html#naz.q.BaseOutboundQueue">BaseOutboundQueue (class in naz.q)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -287,16 +287,14 @@
         <li><a href="nazcodec.html#naz.nazcodec.SimpleNazCodec.decode">(naz.nazcodec.SimpleNazCodec method)</a>
 </li>
       </ul></li>
-      <li><a href="correlater.html#naz.correlater.SimpleCorrelater.delete_after_ttl">delete_after_ttl() (naz.correlater.SimpleCorrelater method)</a>
-</li>
       <li><a href="client.html#naz.client.Client.deliver_sm_resp">deliver_sm_resp() (naz.client.Client method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="queue.html#naz.q.BaseOutboundQueue.dequeue">dequeue() (naz.q.BaseOutboundQueue method)</a>
+      <li><a href="broker.html#naz.broker.BaseBroker.dequeue">dequeue() (naz.broker.BaseBroker method)</a>
 
       <ul>
-        <li><a href="queue.html#naz.q.SimpleOutboundQueue.dequeue">(naz.q.SimpleOutboundQueue method)</a>
+        <li><a href="broker.html#naz.broker.SimpleBroker.dequeue">(naz.broker.SimpleBroker method)</a>
 </li>
       </ul></li>
       <li><a href="client.html#naz.client.Client.dequeue_messages">dequeue_messages() (naz.client.Client method)</a>
@@ -323,10 +321,10 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="queue.html#naz.q.BaseOutboundQueue.enqueue">enqueue() (naz.q.BaseOutboundQueue method)</a>
+      <li><a href="broker.html#naz.broker.BaseBroker.enqueue">enqueue() (naz.broker.BaseBroker method)</a>
 
       <ul>
-        <li><a href="queue.html#naz.q.SimpleOutboundQueue.enqueue">(naz.q.SimpleOutboundQueue method)</a>
+        <li><a href="broker.html#naz.broker.SimpleBroker.enqueue">(naz.broker.SimpleBroker method)</a>
 </li>
       </ul></li>
       <li><a href="client.html#naz.client.Client.enquire_link">enquire_link() (naz.client.Client method)</a>
@@ -383,6 +381,8 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="broker.html#module-naz.broker">naz.broker (module)</a>
+</li>
       <li><a href="client.html#module-naz.client">naz.client (module)</a>
 </li>
       <li><a href="correlater.html#module-naz.correlater">naz.correlater (module)</a>
@@ -392,8 +392,6 @@
       <li><a href="log.html#module-naz.log">naz.log (module)</a>
 </li>
       <li><a href="nazcodec.html#module-naz.nazcodec">naz.nazcodec (module)</a>
-</li>
-      <li><a href="queue.html#module-naz.q">naz.q (module)</a>
 </li>
       <li><a href="ratelimiter.html#module-naz.ratelimiter">naz.ratelimiter (module)</a>
 </li>
@@ -455,6 +453,8 @@
 </li>
       <li><a href="client.html#naz.client.Client.shutdown">shutdown() (naz.client.Client method)</a>
 </li>
+      <li><a href="broker.html#naz.broker.SimpleBroker">SimpleBroker (class in naz.broker)</a>
+</li>
       <li><a href="correlater.html#naz.correlater.SimpleCorrelater">SimpleCorrelater (class in naz.correlater)</a>
 </li>
       <li><a href="hooks.html#naz.hooks.SimpleHook">SimpleHook (class in naz.hooks)</a>
@@ -462,8 +462,6 @@
       <li><a href="log.html#naz.log.SimpleLogger">SimpleLogger (class in naz.log)</a>
 </li>
       <li><a href="nazcodec.html#naz.nazcodec.SimpleNazCodec">SimpleNazCodec (class in naz.nazcodec)</a>
-</li>
-      <li><a href="queue.html#naz.q.SimpleOutboundQueue">SimpleOutboundQueue (class in naz.q)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>

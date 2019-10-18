@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction to naz &mdash; naz v0.7.2 documentation</title>
+  <title>Introduction to naz &mdash; naz v0.7.3 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.2
+                v0.7.3
               </div>
             
           
@@ -100,7 +100,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#integration-with-bug-trackers">3.2.3 integration with bug trackers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rate-limiting">3.3 Rate limiting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#throttle-handling">3.4 Throttle handling</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#queuing">3.5 Queuing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#broker">3.5 Broker</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#benchmarks">4 Benchmarks</a></li>
 </ul>
 </li>
@@ -111,7 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
-<li class="toctree-l1"><a class="reference internal" href="queue.html">queue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
 <li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
@@ -207,7 +207,7 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
 <li><p><a class="reference internal" href="#integration-with-bug-trackers" id="id11">3.2.3 integration with bug trackers</a></p></li>
 <li><p><a class="reference internal" href="#rate-limiting" id="id12">3.3 Rate limiting</a></p></li>
 <li><p><a class="reference internal" href="#throttle-handling" id="id13">3.4 Throttle handling</a></p></li>
-<li><p><a class="reference internal" href="#queuing" id="id14">3.5 Queuing</a></p></li>
+<li><p><a class="reference internal" href="#broker" id="id14">3.5 Broker</a></p></li>
 <li><p><a class="reference internal" href="#benchmarks" id="id15">4 Benchmarks</a></p></li>
 </ul>
 </div>
@@ -224,13 +224,13 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
 <span class="kn">import</span> <span class="nn">naz</span>
 
 <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
-<span class="n">outboundqueue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">broker</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">SimpleBroker</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
     <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
     <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
     <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
+    <span class="n">broker</span><span class="o">=</span><span class="n">broker</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># queue messages to send</span>
@@ -278,7 +278,7 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
 </li>
 <li><ol class="loweralpha simple" start="3">
 <li><p>if you need an SMSC server/gateway to test with, you can use the <a class="reference external" href="https://github.com/komuw/naz/blob/master/docker-compose.yml">docker-compose</a> file in the <code class="docutils literal notranslate"><span class="pre">naz</span></code> repo to bring up an SMSC simulator.
-That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your <cite>naz.q.BaseOutboundQueue</cite>.</p></li>
+That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your <cite>naz.broker.BaseBroker</cite>.</p></li>
 </ol>
 </li>
 </ul>
@@ -288,21 +288,21 @@ That docker-compose file also has a redis and rabbitMQ container if you would li
 <p><code class="docutils literal notranslate"><span class="pre">naz</span></code> also ships with a commandline interface app called <code class="docutils literal notranslate"><span class="pre">naz-cli</span></code> (it is also installed by default when you <cite>pip install naz</cite>).</p>
 <p>create a python config file, eg; <cite>/tmp/my_app.py</cite></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
-<span class="kn">from</span> <span class="nn">myfile</span> <span class="kn">import</span> <span class="n">ExampleQueue</span>
+<span class="kn">from</span> <span class="nn">myfile</span> <span class="kn">import</span> <span class="n">ExampleBroker</span>
 
 <span class="n">client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
     <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
     <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
     <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">ExampleQueue</span><span class="p">()</span>
+    <span class="n">broker</span><span class="o">=</span><span class="n">ExampleBroker</span><span class="p">()</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 <p>and a python file, <cite>myfile.py</cite> (in the current working directory) with the contents:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">naz</span>
-<span class="k">class</span> <span class="nc">ExampleQueue</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">BaseOutboundQueue</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ExampleBroker</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
@@ -340,13 +340,13 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
-<span class="n">outboundqueue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<span class="n">broker</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">SimpleBroker</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
     <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
     <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
     <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">outboundqueue</span><span class="p">,</span>
+    <span class="n">broker</span><span class="o">=</span><span class="n">broker</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -470,7 +470,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">/tmp/my_config.py</span></code></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
-<span class="kn">from</span> <span class="nn">myfile</span> <span class="kn">import</span> <span class="n">ExampleQueue</span>
+<span class="kn">from</span> <span class="nn">myfile</span> <span class="kn">import</span> <span class="n">ExampleBroker</span>
 
 <span class="kn">import</span> <span class="nn">sentry_sdk</span> <span class="c1"># import sentry SDK</span>
 <span class="n">sentry_sdk</span><span class="o">.</span><span class="n">init</span><span class="p">(</span><span class="s2">&quot;https://&lt;YOUR_SENTRY_PUBLIC_KEY&gt;@sentry.io/&lt;YOUR_SENTRY_PROJECT_ID&gt;&quot;</span><span class="p">)</span>
@@ -480,7 +480,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
     <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
     <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
     <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
-    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">ExampleQueue</span><span class="p">()</span>
+    <span class="n">broker</span><span class="o">=</span><span class="n">ExampleBroker</span><span class="p">()</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -534,11 +534,11 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 </pre></div>
 </div>
 </div>
-<div class="section" id="queuing">
-<h2><a class="toc-backref" href="#id14">3.5 Queuing</a><a class="headerlink" href="#queuing" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="broker">
+<h2><a class="toc-backref" href="#id14">3.5 Broker</a><a class="headerlink" href="#broker" title="Permalink to this headline">¶</a></h2>
 <p><cite>How does your application and naz talk with each other?</cite></p>
-<p>It’s via a queuing interface. Your application queues messages to a queue, <code class="docutils literal notranslate"><span class="pre">naz</span></code> consumes from that queue and then naz sends those messages to SMSC/server.</p>
-<p>You can implement the queuing mechanism any way you like, so long as it satisfies the <a class="reference external" href="https://komuw.github.io/naz/queue.html#naz.q.BaseOutboundQueue">naz.q.BaseOutboundQueue</a> interface</p>
+<p>It’s via a broker interface. Your application queues messages to a broker, <code class="docutils literal notranslate"><span class="pre">naz</span></code> consumes from that broker and then naz sends those messages to SMSC/server.</p>
+<p>You can implement the broker mechanism any way you like, so long as it satisfies the <a class="reference external" href="https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker">naz.broker.BaseBroker</a> interface</p>
 <div class="line-block">
 <div class="line">Your application should call that class’s enqueue method to enqueue messages.</div>
 <div class="line">Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:</div>
@@ -555,18 +555,18 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 </div>
 <p>For more information about all the parameters that are needed in the enqueued json object, <a class="reference external" href="https://github.com/komuw/naz/blob/master/documentation/config.md#2-naz-enqueued-message-protocol">consult the documentation</a></p>
 <div class="line-block">
-<div class="line">naz ships with a simple queue implementation called <code class="docutils literal notranslate"><span class="pre">naz.q.SimpleOutboundQueue</span></code></div>
-<div class="line"><strong>NB:</strong> <code class="docutils literal notranslate"><span class="pre">naz.q.SimpleOutboundQueue</span></code> should only be used for demo/test purposes.</div>
+<div class="line">naz ships with a simple broker implementation called <code class="docutils literal notranslate"><span class="pre">naz.broker.SimpleBroker</span></code></div>
+<div class="line"><strong>NB:</strong> <code class="docutils literal notranslate"><span class="pre">naz.broker.SimpleBroker</span></code> should only be used for demo/test purposes.</div>
 </div>
-<p>An example of using that queue;</p>
+<p>An example of using that broker;</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">naz</span>
 
 <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
-<span class="n">my_queue</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">SimpleOutboundQueue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="c1"># can hold upto 1000 items</span>
+<span class="n">my_broker</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">SimpleBroker</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="c1"># can hold upto 1000 items</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="o">...</span>
-    <span class="n">outboundqueue</span><span class="o">=</span><span class="n">my_queue</span><span class="p">,</span>
+    <span class="n">broker</span><span class="o">=</span><span class="n">my_broker</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
