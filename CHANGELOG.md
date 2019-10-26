@@ -4,7 +4,7 @@ most recent version is listed first.
 
 ## **version:** v0.7.3
 - make `naz.SimpleCorrelater.delete_after_ttl()` private: https://github.com/komuw/naz/pull/172
-- rename `naz.broker.BaseOutboundBroker` to `naz.broker.BaseBroker`: https://github.com/komuw/naz/pull/174     
+- rename `naz.broker.BaseOutboundQueue` to `naz.broker.BaseBroker`: https://github.com/komuw/naz/pull/174     
   this is the more idiomatic name for what it is.     
 - re-run benchmarks after renmaing Queue to Broker: https://github.com/komuw/naz/pull/176
 
