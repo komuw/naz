@@ -1,5 +1,6 @@
 import os
 import json
+import typing
 import asyncio
 import functools
 import concurrent
@@ -29,7 +30,22 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
         self.properties = pika.BasicProperties(content_type="application/json", type="direct")
 
         self.connection, self.channel = None, None
-        self.loop = asyncio.get_event_loop()
+        self._LOOP: typing.Union[None, asyncio.events.AbstractEventLoop] = None
+
+    def _get_loop(self) -> asyncio.events.AbstractEventLoop:
+        if self._LOOP:
+            return self._LOOP
+
+        try:
+            loop: asyncio.events.AbstractEventLoop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.get_event_loop()
+        except Exception as e:
+            raise e
+
+        # cache event loop
+        self._LOOP = loop
+        return self._LOOP
 
     def connect(self):
         """
@@ -82,7 +98,7 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="naz-rabbitmq-thread-pool"
         ) as executor:
-            await self.loop.run_in_executor(
+            await self._get_loop().run_in_executor(
                 executor, functools.partial(self.blocking_enqueue, item=item)
             )
 
@@ -101,7 +117,7 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
             thread_name_prefix="naz-rabbitmq-thread-pool"
         ) as executor:
             while True:
-                item = await self.loop.run_in_executor(
+                item = await self._get_loop().run_in_executor(
                     executor, functools.partial(self.blocking_dequeue)
                 )
                 if item:

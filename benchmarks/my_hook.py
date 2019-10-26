@@ -1,3 +1,4 @@
+import typing
 import asyncio
 import functools
 import concurrent
@@ -23,7 +24,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
             labelnames=_labels,
             registry=self.registry,
         )
-        self.loop = asyncio.get_event_loop()
+        self._LOOP: typing.Union[None, asyncio.events.AbstractEventLoop] = None
         self.thread_name_prefix = "naz_benchmarks_hook_pool"
 
         # go to prometheus dashboard(http://localhost:9000/) & you can run queries like:
@@ -31,6 +32,21 @@ class BenchmarksHook(naz.hooks.BaseHook):
         # 2. container_memory_rss{name=~"naz_cli|message_producer"}
         # 3. number_of_messages_total{project="naz_benchmarks"}
         # 4. rate(number_of_messages_total{smpp_command="submit_sm",state="request"}[30s])  # msg sending over the past 30seconds
+
+    def _get_loop(self) -> asyncio.events.AbstractEventLoop:
+        if self._LOOP:
+            return self._LOOP
+
+        try:
+            loop: asyncio.events.AbstractEventLoop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.get_event_loop()
+        except Exception as e:
+            raise e
+
+        # cache event loop
+        self._LOOP = loop
+        return self._LOOP
 
     async def to_smsc(self, smpp_command: str, log_id: str, hook_metadata: str, pdu: bytes) -> None:
         self.counter.labels(
@@ -42,7 +58,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
-            await self.loop.run_in_executor(executor, functools.partial(self._publish))
+            await self._get_loop().run_in_executor(executor, functools.partial(self._publish))
 
     async def from_smsc(
         self,
@@ -61,7 +77,7 @@ class BenchmarksHook(naz.hooks.BaseHook):
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix=self.thread_name_prefix
         ) as executor:
-            await self.loop.run_in_executor(executor, functools.partial(self._publish))
+            await self._get_loop().run_in_executor(executor, functools.partial(self._publish))
 
     def _publish(self):
         """
