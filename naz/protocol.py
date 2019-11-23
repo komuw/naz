@@ -141,7 +141,7 @@ class Message:
         return json.dumps(
             {
                 "version": self.version,
-                "smpp_command": self.smpp_command,
+                "smpp_command": self.smpp_command.value,
                 "log_id": self.log_id,
                 "pdu": self.pdu,
                 "short_message": self.short_message,

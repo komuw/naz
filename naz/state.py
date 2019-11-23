@@ -89,6 +89,7 @@ class CommandStatus(typing.NamedTuple):
     description: str
 
 
+# TODO: turn this to enum
 class SmppCommandStatus:
     """
     Represensts the various SMPP commands statuses.
@@ -326,6 +327,7 @@ class DataCoding(typing.NamedTuple):
     description: str
 
 
+# TODO: turn this to enum
 class SmppDataCoding:
     """
     Represensts the various SMPP data encodings.

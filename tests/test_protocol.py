@@ -30,4 +30,5 @@ class TestProtocol(TestCase):
 
     def test_something(self):
         # TODO: rename this.
+        print(self.msg_protocol.json())
         self.assertEqual(8, 9)
