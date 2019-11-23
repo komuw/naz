@@ -1077,9 +1077,9 @@ class Client:
         full_pdu = header + body
         item_to_enqueue = {
             "version": self.naz_message_protocol_version,
+            "smpp_command": smpp_command,
             "log_id": log_id,
             "pdu": full_pdu,
-            "smpp_command": smpp_command,
         }
         try:
             await self.broker.enqueue(item_to_enqueue)
@@ -1183,9 +1183,9 @@ class Client:
         full_pdu = header + body
         item_to_enqueue = {
             "version": self.naz_message_protocol_version,
+            "smpp_command": smpp_command,
             "log_id": log_id,
             "pdu": full_pdu,
-            "smpp_command": smpp_command,
         }
         try:
             await self.broker.enqueue(item_to_enqueue)
