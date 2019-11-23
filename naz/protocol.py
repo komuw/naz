@@ -41,12 +41,25 @@ from . import state
 # "hook_metadata": "{\\"telco\\": \\"verizon\\", \\"customer_id\\": 123456}"
 # }'
 class Protocol:
-    def __init__(self, version: int, smpp_command: state.SmppCommand) -> None:
-        self._validate_protocol_args(version=version, smpp_command=smpp_command)
+    def __init__(
+        self,
+        version: int,
+        smpp_command: state.SmppCommand,
+        log_id: str,
+        pdu: typing.Union[None, bytes],
+    ) -> None:
+        self._validate_protocol_args(version=version, smpp_command=smpp_command, log_id=log_id)
         self.version = version
         self.smpp_command = smpp_command
+        self.log_id = log_id
 
-    def _validate_protocol_args(self, version: int, smpp_command: state.SmppCommand):
+    def _validate_protocol_args(
+        self,
+        version: int,
+        smpp_command: state.SmppCommand,
+        log_id: str,
+        pdu: typing.Union[None, bytes],
+    ):
         if not isinstance(version, int):
             raise ValueError(
                 "`version` should be of type:: `int` You entered: {0}".format(type(version))
@@ -56,6 +69,10 @@ class Protocol:
                 "`smpp_command` should be of type:: `naz.state.SmppCommand` You entered: {0}".format(
                     type(smpp_command)
                 )
+            )
+        if not isinstance(log_id, str):
+            raise ValueError(
+                "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
             )
 
     def json(self) -> str:
