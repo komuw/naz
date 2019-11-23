@@ -16,6 +16,7 @@ API reference
 =============
 .. toctree::
     client
+    protocol
     correlater
     hooks
     nazcodec
