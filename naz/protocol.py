@@ -47,7 +47,7 @@ from . import state
 # - delete config.md
 
 
-class Protocol:
+class Message:
     def __init__(
         self,
         version: int,
@@ -55,9 +55,9 @@ class Protocol:
         log_id: str,
         pdu: typing.Union[None, bytes],
         short_message: typing.Union[None, str],
-        source_addr: str,
-        destination_addr: str,
-        hook_metadata: str,
+        source_addr: typing.Union[None, str],
+        destination_addr: typing.Union[None, str],
+        hook_metadata: typing.Union[None, str],
     ) -> None:
         self._validate_protocol_args(
             version=version,
@@ -85,9 +85,9 @@ class Protocol:
         log_id: str,
         pdu: typing.Union[None, bytes],
         short_message: typing.Union[None, str],
-        source_addr: str,
-        destination_addr: str,
-        hook_metadata: str,
+        source_addr: typing.Union[None, str],
+        destination_addr: typing.Union[None, str],
+        hook_metadata: typing.Union[None, str],
     ):
         if not isinstance(version, int):
             raise ValueError(
@@ -115,19 +115,21 @@ class Protocol:
             )
         if pdu and short_message:
             raise ValueError("You cannot specify both `pdu` and `short_message`")
-        if not isinstance(source_addr, str):
+        if not isinstance(source_addr, (type(None), str)):
             raise ValueError(
-                "`source_addr` should be of type:: `str` You entered: {0}".format(type(source_addr))
+                "`source_addr` should be of type:: `None` or `str` You entered: {0}".format(
+                    type(source_addr)
+                )
             )
-        if not isinstance(destination_addr, str):
+        if not isinstance(destination_addr, (type(None), str)):
             raise ValueError(
-                "`destination_addr` should be of type:: `str` You entered: {0}".format(
+                "`destination_addr` should be of type:: `None` or `str` You entered: {0}".format(
                     type(destination_addr)
                 )
             )
-        if not isinstance(hook_metadata, str):
+        if not isinstance(hook_metadata, (type(None), str)):
             raise ValueError(
-                "`hook_metadata` should be of type:: `str` You entered: {0}".format(
+                "`hook_metadata` should be of type:: `None` or `str` You entered: {0}".format(
                     type(hook_metadata)
                 )
             )
