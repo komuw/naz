@@ -53,11 +53,11 @@ class Message:
         version: int,
         smpp_command: state.SmppCommand,
         log_id: str,
-        pdu: typing.Union[None, bytes],
-        short_message: typing.Union[None, str],
-        source_addr: typing.Union[None, str],
-        destination_addr: typing.Union[None, str],
-        hook_metadata: typing.Union[None, str],
+        pdu: typing.Union[None, bytes] = None,
+        short_message: typing.Union[None, str] = None,
+        source_addr: typing.Union[None, str] = None,
+        destination_addr: typing.Union[None, str] = None,
+        hook_metadata: typing.Union[None, str] = None,
     ) -> None:
         self._validate_protocol_args(
             version=version,

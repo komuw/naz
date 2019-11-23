@@ -16,7 +16,9 @@ class TestProtocol(TestCase):
     """
 
     def setUp(self):
-        self.msg_protocol = naz.protocol.Message()
+        self.msg_protocol = naz.protocol.Message(
+            version=1, smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="some-log-id"
+        )
 
     def tearDown(self):
         pass
