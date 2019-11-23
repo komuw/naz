@@ -106,7 +106,8 @@ class Protocol:
                     type(short_message)
                 )
             )
-        # TODO: validate that short_message and pdu are mutually exclusive
+        if pdu and short_message:
+            raise ValueError("You cannot specify both `pdu` and `short_message`")
         if not isinstance(source_addr, str):
             raise ValueError(
                 "`source_addr` should be of type:: `str` You entered: {0}".format(type(source_addr))
