@@ -40,6 +40,13 @@ from . import state
 # "destination_addr": "254722111111",
 # "hook_metadata": "{\\"telco\\": \\"verizon\\", \\"customer_id\\": 123456}"
 # }'
+
+
+# TODO:
+# - rename protocol to MessageProtocol
+# - delete config.md
+
+
 class Protocol:
     def __init__(
         self,
