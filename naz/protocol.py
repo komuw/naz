@@ -127,4 +127,16 @@ class Protocol:
     def json(self) -> str:
         # because pdu is in bytes, when converting to string; we need to use whatever encoding was passed in
         # to naz.Client
-        return json.dumps({"version": self.version, smpp_command: self.smpp_command})
+
+        return json.dumps(
+            {
+                "version": self.version,
+                "smpp_command": self.smpp_command,
+                "log_id": self.log_id,
+                "pdu": self.pdu,
+                "short_message": self.short_message,
+                "source_addr": self.source_addr,
+                "destination_addr": self.destination_addr,
+                "hook_metadata": self.hook_metadata,
+            }
+        )
