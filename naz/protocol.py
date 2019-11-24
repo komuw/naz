@@ -106,12 +106,11 @@ class Message:
                 )
             )
         if pdu and not codec_class:
+            # because pdu is in bytes, when converting to string; we need to use whatever encoding was passed in
+            # thus one has to supply the codec_class
             raise ValueError("You cannot specify `pdu` and not a `codec_class`")
 
     def json(self) -> str:
-        # because pdu is in bytes, when converting to string; we need to use whatever encoding was passed in
-        # to naz.Client
-
         return json.dumps(
             {
                 "version": self.version,
@@ -124,6 +123,3 @@ class Message:
                 "hook_metadata": self.hook_metadata,
             }
         )
-
-
-# self.codec_class.decode(_message_id, self.encoding, self.codec_errors_level)
