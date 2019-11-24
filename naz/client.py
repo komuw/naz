@@ -1634,7 +1634,7 @@ class Client:
 
     async def dequeue_messages(
         self, TESTING: bool = False
-    ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
+    ) -> typing.Union[protocol.Message, typing.Dict[typing.Any, typing.Any]]:
         """
         In a loop; dequeues items from the :attr:`broker <Client.broker>` and sends them to SMSC.
 
