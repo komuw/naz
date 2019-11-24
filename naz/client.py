@@ -103,8 +103,6 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, log.BaseLogger] = None,
-        loglevel: str = "INFO",
-        log_metadata: typing.Union[None, dict] = None,
         codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
@@ -143,8 +141,6 @@ class Client:
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
             logger: python class instance to be used for logging
-            loglevel:	the level at which to log
-            log_metadata: metadata that will be included in all log statements
             codec_class: python class instance to be used to encode/decode messages
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
@@ -186,8 +182,6 @@ class Client:
             sm_default_msg_id=sm_default_msg_id,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
-            loglevel=loglevel,
-            log_metadata=log_metadata,
             codec_class=codec_class,
             rateLimiter=rateLimiter,
             hook=hook,
@@ -222,24 +216,19 @@ class Client:
             self.sequence_generator = sequence.SimpleSequenceGenerator()
 
         self.max_sequence_number = 0x7FFFFFFF
-        self.loglevel = loglevel.upper()
 
-        if log_metadata is not None:
-            self.log_metadata = log_metadata
-        else:
-            self.log_metadata = {}
-        self.log_metadata.update(
-            {
-                "smsc_host": self.smsc_host,
-                "system_id": system_id,
-                "client_id": self.client_id,
-                "pid": self._PID,
-            }
-        )
         if logger is not None:
             self.logger = logger
         else:
-            self.logger = log.SimpleLogger("naz.client")
+            self.logger = log.SimpleLogger(
+                "naz.client",
+                log_metadata={
+                    "smsc_host": self.smsc_host,
+                    "system_id": system_id,
+                    "client_id": self.client_id,
+                    "pid": self._PID,
+                },
+            )
         self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
         self._sanity_check_logger()
 
@@ -387,8 +376,6 @@ class Client:
         sm_default_msg_id: int,
         enquire_link_interval: float,
         logger: typing.Union[None, log.BaseLogger],
-        loglevel: str,
-        log_metadata: typing.Union[None, dict],
         codec_class: typing.Union[None, nazcodec.BaseNazCodec],
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
@@ -594,28 +581,6 @@ class Client:
                 ValueError(
                     "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
                         type(logger)
-                    )
-                )
-            )
-        if not isinstance(loglevel, str):
-            errors.append(
-                ValueError(
-                    "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
-                )
-            )
-        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            errors.append(
-                ValueError(
-                    """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
-                        loglevel
-                    )
-                )
-            )
-        if not isinstance(log_metadata, (type(None), dict)):
-            errors.append(
-                ValueError(
-                    "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
-                        type(log_metadata)
                     )
                 )
             )

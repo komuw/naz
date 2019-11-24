@@ -59,15 +59,38 @@ class SimpleLogger(BaseLogger):
     """
 
     def __init__(
-        self, logger_name: str, handler: logging.Handler = logging.StreamHandler()
+        self,
+        logger_name: str,
+        loglevel: str = "INFO",
+        log_metadata: typing.Union[None, dict] = None,
+        handler: logging.Handler = logging.StreamHandler(),
     ) -> None:
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
+            loglevel: the level at which to log
+            log_metadata: metadata that will be included in all log statements
+            handler: instance of `logging.Handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_
         """
         if not isinstance(logger_name, str):
             raise ValueError(
                 "`logger_name` should be of type:: `str` You entered: {0}".format(type(logger_name))
+            )
+        if not isinstance(loglevel, str):
+            raise ValueError(
+                "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+            )
+        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            raise ValueError(
+                """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                    loglevel
+                )
+            )
+        if not isinstance(log_metadata, (type(None), dict)):
+            raise ValueError(
+                "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
+                    type(log_metadata)
+                )
             )
         if not isinstance(handler, logging.Handler):
             raise ValueError(
@@ -77,7 +100,14 @@ class SimpleLogger(BaseLogger):
             )
 
         self.logger_name = logger_name
+        self.loglevel = loglevel.upper()
         self.handler = handler
+
+        if log_metadata is not None:
+            self.log_metadata = log_metadata
+        else:
+            self.log_metadata = {}
+
         self.logger: typing.Union[None, logging.LoggerAdapter] = None
 
     def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
