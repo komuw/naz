@@ -131,16 +131,16 @@ class TestBreachHandler(TestCase):
         logger.bind(level="INFO", log_metadata={"name": "JayZ"})
 
         # log at level less than `_handler.trigger_level`
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "two": 2})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "three": 3})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "four": 4})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "five": 5})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "six": 6})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "one": 1})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "two": 2})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "three": 3})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "four": 4})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "five": 5})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "six": 6})
         self.assertEqual("", self._temp_stream.getvalue())  # nothing is logged
 
         # log at level greater than or equal to `_handler.trigger_level`
-        logger.log(level=logging.WARN, log_data={"trace_id": 781125213295, "seven": 7})
+        logger.log(level=logging.WARN, msg={"trace_id": 781125213295, "seven": 7})
 
         # assert that the handler used a circular buffer
         self.assertNotIn("one", self._temp_stream.getvalue())
@@ -189,7 +189,7 @@ class TestBreachHandler(TestCase):
         logger.bind(level="INFO", log_metadata={"artist": "Missy"})
         self.assertEqual("", self._temp_stream.getvalue())
 
-        logger.log(level=logging.INFO, log_data={"song_id": 1234, "name": "The Rain"})
+        logger.log(level=logging.INFO, msg={"song_id": 1234, "name": "The Rain"})
         self.assertNotIn("naz.BreachHandler.heartbeat", self._temp_stream.getvalue())
         self.assertNotIn(str(heartbeatInterval), self._temp_stream.getvalue())
         self.assertEqual("", self._temp_stream.getvalue())
@@ -206,7 +206,7 @@ class TestBreachHandler(TestCase):
         logger.bind(level="INFO", log_metadata={"artist": "Lauryn"})
         self.assertEqual("", self._temp_stream.getvalue())
 
-        logger.log(level=logging.INFO, log_data={"song_id": 543, "name": "Zion"})
+        logger.log(level=logging.INFO, msg={"song_id": 543, "name": "Zion"})
         self.assertIn("naz.BreachHandler.heartbeat", self._temp_stream.getvalue())
         self.assertIn(str(heartbeatInterval), self._temp_stream.getvalue())
 
@@ -218,14 +218,14 @@ class TestBreachHandler(TestCase):
         logger.bind(level="INFO", log_metadata={"name": "JayZ"})
 
         # log at level less than `_handler.trigger_level`
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "one": 1})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "two": 2})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "three": 3})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "one": 1})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "two": 2})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "three": 3})
         # assert buffer has items
         self.assertEqual(len(_handler.buffer), 3)
 
         # log at level greater than or equal to `_handler.trigger_level`
-        logger.log(level=logging.WARN, log_data={"trace_id": 781125213295, "four": 7})
+        logger.log(level=logging.WARN, msg={"trace_id": 781125213295, "four": 7})
 
         # assert everything in the buffer after trigger level is reached
         # is flushed to `_handler.stream`
@@ -248,20 +248,18 @@ class TestBreachHandler(TestCase):
         logger.bind(level="INFO", log_metadata={"name": "JayZ"})
 
         # log at level less than `_handler.targetLevel`
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "my_one": 1})
-        logger.log(level=logging.INFO, log_data={"trace_id": 781125213295, "my_two": 2})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "my_one": 1})
+        logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "my_two": 2})
 
         # assert nothing has been logged or saved in buffer
         self.assertEqual(len(_handler.buffer), 0)
         self.assertEqual("", self._temp_stream.getvalue())
 
-        logger.log(level=logging.WARNING, log_data={"trace_id": 781125213295, "my_three": 3})
+        logger.log(level=logging.WARNING, msg={"trace_id": 781125213295, "my_three": 3})
         self.assertEqual(len(_handler.buffer), 1)
         self.assertEqual("", self._temp_stream.getvalue())
 
-        logger.log(
-            level=logging.CRITICAL, log_data={"trace_id": 781125213295, "error": "bad tings"}
-        )
+        logger.log(level=logging.CRITICAL, msg={"trace_id": 781125213295, "error": "bad tings"})
         self.assertIn("my_three", self._temp_stream.getvalue())
         self.assertIn("bad tings", self._temp_stream.getvalue())
         self.assertNotIn("my_one", self._temp_stream.getvalue())

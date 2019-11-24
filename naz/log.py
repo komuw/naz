@@ -26,34 +26,34 @@ class SimpleLogger(logging.Logger):
     def __init__(
         self,
         logger_name: str,
-        loglevel: str = "INFO",
+        level: typing.Union[str, int] = logging.INFO,
         log_metadata: typing.Union[None, dict] = None,
         handler: typing.Union[None, logging.Handler] = None,
     ) -> None:
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
-            loglevel: the level at which to log
+            level: the level at which to log
             log_metadata: metadata that will be included in all log statements
             handler: python logging `handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ to be attached to this logger.
                      by default, `logging.StreamHandler` is used.
         """
-        super(SimpleLogger, self).__init__(name=logger_name, level=self._nameToLevel(loglevel))
-
+        super(SimpleLogger, self).__init__(name=logger_name, level=self._nameToLevel(level))
         if not isinstance(logger_name, str):
             raise ValueError(
                 "`logger_name` should be of type:: `str` You entered: {0}".format(type(logger_name))
             )
-        if not isinstance(loglevel, str):
+        if not isinstance(level, (int, str)):
             raise ValueError(
-                "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
+                "`level` should be of type:: `str` or `int` You entered: {0}".format(type(level))
             )
-        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            raise ValueError(
-                """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
-                    loglevel
+        if isinstance(level, str):
+            if level.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+                raise ValueError(
+                    """`level` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                        level
+                    )
                 )
-            )
         if not isinstance(log_metadata, (type(None), dict)):
             raise ValueError(
                 "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
@@ -67,7 +67,7 @@ class SimpleLogger(logging.Logger):
                 )
             )
         self.logger_name = logger_name
-        self.loglevel = loglevel.upper()
+        self.level = self._nameToLevel(level)
         if log_metadata is not None:
             self.log_metadata = log_metadata
         else:
@@ -81,7 +81,7 @@ class SimpleLogger(logging.Logger):
         self._set_logger_details()
 
     def _set_logger_details(self) -> None:
-        _level = self._nameToLevel(level=self.loglevel)
+        _level = self.level
         formatter = logging.Formatter("%(message)s")
 
         self.handler.setFormatter(formatter)
