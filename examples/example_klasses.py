@@ -35,9 +35,7 @@ class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
     def __init__(self, send_rate=1, max_tokens=2, delay_for_tokens=10):
         self.send_rate = send_rate  # rate in seconds
         self.max_tokens = max_tokens  # start tokens
-        self.delay_for_tokens = (
-            delay_for_tokens
-        )  # how long(seconds) to wait before checking for token availability after they had finished
+        self.delay_for_tokens = delay_for_tokens  # how long(seconds) to wait before checking for token availability after they had finished
         self.tokens = self.max_tokens
         self.updated_at = time.monotonic()
 

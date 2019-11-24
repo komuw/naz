@@ -725,7 +725,7 @@ class Client:
 
     @staticmethod
     def _search_by_command_status_value(
-        command_status_value: int
+        command_status_value: int,
     ) -> typing.Union[None, CommandStatus]:
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():

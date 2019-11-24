@@ -145,18 +145,23 @@ class Message:
         Serializes the message protocol to json. You can use this method if you would
         like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
         """
-        return json.dumps(
-            {
-                "version": self.version,
-                "smpp_command": self.smpp_command,
-                "log_id": self.log_id,
-                "pdu": self.codec_class.decode(self.pdu) if self.pdu else None,
-                "short_message": self.short_message,
-                "source_addr": self.source_addr,
-                "destination_addr": self.destination_addr,
-                "hook_metadata": self.hook_metadata,
-            }
-        )
+        _item = {
+            "version": self.version,
+            "smpp_command": self.smpp_command,
+            "log_id": self.log_id,
+            "pdu": self.pdu,
+            "short_message": self.short_message,
+            "source_addr": self.source_addr,
+            "destination_addr": self.destination_addr,
+            "hook_metadata": self.hook_metadata,
+        }
+        if self.pdu:
+            if typing.TYPE_CHECKING:
+                # make mypy happy; https://github.com/python/mypy/issues/4805
+                assert isinstance(self.codec_class, nazcodec.BaseNazCodec)
+            _item["pdu"] = self.codec_class.decode(self.pdu)
+
+        return json.dumps(_item)
 
     @staticmethod
     def from_json(
