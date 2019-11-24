@@ -8,7 +8,7 @@ import asyncio
 
 
 # run as:
-#    python tests/fuzz.py msg_to_log
+#    python tests/fuzz.py parse_response_pdu
 client = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
