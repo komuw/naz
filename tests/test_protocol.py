@@ -15,20 +15,32 @@ class TestProtocol(TestCase):
         python -m unittest -v tests.test_protocol.TestProtocol.test_something
     """
 
-    def setUp(self):
-        self.msg_protocol = naz.protocol.Message(
+    def test_success_instanciation(self):
+        proto = naz.protocol.Message(
             version=1, smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="some-log-id"
         )
+        self.assertIsNotNone(proto)
 
-    def tearDown(self):
-        pass
+    def test_pdu_N_shortMsg_exclusive(self):
+        with self.assertRaises(ValueError) as raised_exception:
+            naz.protocol.Message(
+                version=1,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                log_id="some-log-id",
+                pdu=b"some-pdu",
+                short_message="some-msg",
+            )
+        self.assertIsInstance(raised_exception.exception, ValueError)
+        self.assertIn(
+            "You cannot specify both `pdu` and `short_message`", str(raised_exception.exception)
+        )
 
-    @staticmethod
-    def _run(coro):
-        loop = asyncio.get_event_loop()
-        return loop.run_until_complete(coro)
-
-    def test_something(self):
-        # TODO: rename this.
-        print(self.msg_protocol.json())
-        self.assertEqual(8, 9)
+    def test_json_serialization(self):
+        proto = naz.protocol.Message(
+            version=1,
+            smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP,
+            log_id="some-log-id",
+            pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00",
+            codec_class=naz.nazcodec.SimpleNazCodec(),
+        )
+        print(proto.json())
