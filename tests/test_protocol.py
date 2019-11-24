@@ -55,9 +55,12 @@ class TestProtocol(TestCase):
 
         self.assertEqual(type(proto), type(naz.protocol.Message(**_in_dict)))
 
-    def test_json_serialization_II(self):
+    def test_json_serialization_pdu_None(self):
         proto = naz.protocol.Message(
-            version=1, smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP, log_id="some-log-id"
+            version=1,
+            smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP,
+            log_id="some-log-id",
+            pdu=None,
         )
         _in_json = proto.json()
 
