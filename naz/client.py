@@ -102,7 +102,7 @@ class Client:
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
-        logger: typing.Union[None, log.BaseLogger] = None,
+        logger: typing.Union[None, logging.Logger] = None,
         codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
@@ -229,7 +229,6 @@ class Client:
                     "pid": self._PID,
                 },
             )
-        self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
         self._sanity_check_logger()
 
         if codec_class is not None:
@@ -375,7 +374,7 @@ class Client:
         replace_if_present_flag: int,
         sm_default_msg_id: int,
         enquire_link_interval: float,
-        logger: typing.Union[None, log.BaseLogger],
+        logger: typing.Union[None, logging.Logger],
         codec_class: typing.Union[None, nazcodec.BaseNazCodec],
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
@@ -576,10 +575,10 @@ class Client:
                     )
                 )
             )
-        if not isinstance(logger, (type(None), log.BaseLogger)):
+        if not isinstance(logger, (type(None), logging.Logger)):
             errors.append(
                 ValueError(
-                    "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
+                    "`logger` should be of type:: `None` or `logging.Logger` You entered: {0}".format(
                         type(logger)
                     )
                 )
