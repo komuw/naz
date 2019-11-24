@@ -200,7 +200,7 @@ class BaseNazCodec(abc.ABC):
         self.errors_level = errors_level
 
     @abc.abstractmethod
-    def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
+    def encode(self, string_to_encode: str) -> bytes:
         """
         return an encoded version of the string as a bytes object
 
@@ -215,7 +215,7 @@ class BaseNazCodec(abc.ABC):
         raise NotImplementedError("encode method must be implemented.")
 
     @abc.abstractmethod
-    def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
+    def decode(self, byte_string: bytes) -> str:
         """
         return a string decoded from the given bytes.
 
