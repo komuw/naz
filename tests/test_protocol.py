@@ -48,10 +48,17 @@ class TestProtocol(TestCase):
             pdu=b"pdu",
             codec_class=naz.nazcodec.SimpleNazCodec(encoding="utf-8"),
         )
-
         _in_json = proto.json()
         _in_dict = json.loads(_in_json)
         _in_dict["codec_class"] = proto.codec_class
         _in_dict["pdu"] = proto.codec_class.encode(_in_dict["pdu"])
 
         self.assertEqual(type(proto), type(naz.protocol.Message(**_in_dict)))
+
+    def test_json_serialization_II(self):
+        proto = naz.protocol.Message(
+            version=1, smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP, log_id="some-log-id"
+        )
+        _in_json = proto.json()
+
+        self.assertIsNotNone(_in_json)
