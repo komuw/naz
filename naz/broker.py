@@ -1,6 +1,5 @@
 import abc
 import asyncio
-import typing
 
 from . import protocol
 

@@ -184,7 +184,7 @@ class BaseNazCodec(abc.ABC):
         """
         Parameters:
             encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method 
+            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         if not isinstance(encoding, str):
             raise ValueError(
@@ -253,7 +253,7 @@ class SimpleNazCodec(BaseNazCodec):
         """
         Parameters:
             encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method 
+            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         if not isinstance(encoding, str):
             raise ValueError(

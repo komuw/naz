@@ -1,6 +1,5 @@
 import time
 import json
-import typing
 import asyncio
 
 import naz
