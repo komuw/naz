@@ -22,7 +22,7 @@ class BaseBroker(abc.ABC):
             item: The item to be enqueued/saved
                   The item/message is a `naz.protocol.Message` class instance;
                   It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.
-                  `naz.protocol.Message` has a `json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.
+                  `naz.protocol.Message` has a `to_json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.
         """
         raise NotImplementedError("enqueue method must be implemented.")
 

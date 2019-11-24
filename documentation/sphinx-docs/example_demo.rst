@@ -74,7 +74,7 @@
 
         async def enqueue(self, message: naz.protocol.Message):
             _redis = await self._get_redis()
-            await _redis.lpush(self.queue_name, message.json())
+            await _redis.lpush(self.queue_name, message.to_json())
 
         async def dequeue(self):
             _redis = await self._get_redis()

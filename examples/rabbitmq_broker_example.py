@@ -107,7 +107,7 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
         self.channel.publish(
             exchange=self.exchange,
             routing_key=self.queue_name,
-            body=message.json(),
+            body=message.to_json(),
             properties=self.properties,
             mandatory=True,
         )

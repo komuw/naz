@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import typing
 
@@ -138,9 +140,9 @@ class Message:
             # thus one has to supply the codec_class
             raise ValueError("You cannot specify `pdu` and not a `codec_class`")
 
-    def json(self) -> str:
+    def to_json(self) -> str:
         """
-        Serializes the message protocol into json. You can use this method if you would
+        Serializes the message protocol to json. You can use this method if you would
         like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
         """
         return json.dumps(
@@ -155,3 +157,29 @@ class Message:
                 "hook_metadata": self.hook_metadata,
             }
         )
+
+    @staticmethod
+    def from_json(
+        json_message: str, codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None
+    ) -> Message:
+        """
+        Deserializes the message protocol from json. You can use this method if you would
+        like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
+
+        Parameters:
+            json_message: `naz.protocol.Message` in json format.
+            codec_class: python class instance to be used to encode/decode messages. It should be a child class of `naz.nazcodec.BaseNazCodec`.
+                         You should only specify this, if `json_message` has a key called `pdu` and it is not None.
+        """
+        _in_dict = json.loads(json_message)
+        if _in_dict.get("pdu"):
+            if not codec_class:
+                # because pdu is in bytes, when converting to string; we need to use whatever encoding was passed in
+                # thus one has to supply the codec_class
+                raise ValueError("You cannot specify `pdu` and not a `codec_class`")
+
+            # we need to convert pdu to bytes.
+            _in_dict["pdu"] = codec_class.encode(_in_dict["pdu"])
+            _in_dict["codec_class"] = codec_class
+
+        return Message(**_in_dict)

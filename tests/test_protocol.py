@@ -48,7 +48,7 @@ class TestProtocol(TestCase):
             pdu=b"pdu",
             codec_class=naz.nazcodec.SimpleNazCodec(encoding="utf-8"),
         )
-        _in_json = proto.json()
+        _in_json = proto.to_json()
         _in_dict = json.loads(_in_json)
         _in_dict["codec_class"] = proto.codec_class
         _in_dict["pdu"] = proto.codec_class.encode(_in_dict["pdu"])
@@ -62,6 +62,20 @@ class TestProtocol(TestCase):
             log_id="some-log-id",
             pdu=None,
         )
-        _in_json = proto.json()
+        _in_json = proto.to_json()
 
         self.assertIsNotNone(_in_json)
+
+    def test_json_de_serialization(self):
+        x = {
+            "version": 1,
+            "smpp_command": "bind_transceiver_resp",
+            "log_id": "some-log-id",
+            "pdu": "pdu",
+        }
+        _in_json = json.dumps(x)
+        proto = naz.protocol.Message.from_json(
+            _in_json, codec_class=naz.nazcodec.SimpleNazCodec(encoding="utf-8")
+        )
+
+        self.assertIsInstance(proto, naz.protocol.Message)
