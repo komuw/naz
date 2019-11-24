@@ -179,6 +179,9 @@ class Message:
                 raise ValueError("You cannot specify `pdu` and not a `codec_class`")
 
             # we need to convert pdu to bytes.
+            # There's a risk of a message been encoded with an codec_class that it was not decoded with when been saved to broker
+            # ideally, the codec_class should also be saved/serialized as part of the message been sent to broker.
+            # However, this risk is small and we should only consider it if people report it as a bug.
             _in_dict["pdu"] = codec_class.encode(_in_dict["pdu"])
             _in_dict["codec_class"] = codec_class
 
