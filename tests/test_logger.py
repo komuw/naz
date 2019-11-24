@@ -127,8 +127,9 @@ class TestBreachHandler(TestCase):
         _handler = naz.log.BreachHandler(
             capacity=4, target=logging.StreamHandler(stream=self._temp_stream)
         )
-        logger = naz.log.SimpleLogger("test_use_with_naz_logger", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+        logger = naz.log.SimpleLogger(
+            "test_use_with_naz_logger", handler=_handler, log_metadata={"name": "JayZ"}
+        )
 
         # log at level less than `_handler.trigger_level`
         logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "one": 1})
@@ -185,8 +186,9 @@ class TestBreachHandler(TestCase):
             target=logging.StreamHandler(stream=self._temp_stream),
             heartbeatInterval=heartbeatInterval,
         )
-        logger = naz.log.SimpleLogger("test_heartbeat_NOT_exceeded", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"artist": "Missy"})
+        logger = naz.log.SimpleLogger(
+            "test_heartbeat_NOT_exceeded", handler=_handler, log_metadata={"artist": "Missy"}
+        )
         self.assertEqual("", self._temp_stream.getvalue())
 
         logger.log(level=logging.INFO, msg={"song_id": 1234, "name": "The Rain"})
@@ -202,8 +204,9 @@ class TestBreachHandler(TestCase):
             target=logging.StreamHandler(stream=self._temp_stream),
             heartbeatInterval=heartbeatInterval,
         )
-        logger = naz.log.SimpleLogger("test_heartbeat_exceeded", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"artist": "Lauryn"})
+        logger = naz.log.SimpleLogger(
+            "test_heartbeat_exceeded", handler=_handler, log_metadata={"artist": "Lauryn"}
+        )
         self.assertEqual("", self._temp_stream.getvalue())
 
         logger.log(level=logging.INFO, msg={"song_id": 543, "name": "Zion"})
@@ -214,8 +217,9 @@ class TestBreachHandler(TestCase):
         _handler = naz.log.BreachHandler(
             capacity=3, target=logging.StreamHandler(stream=self._temp_stream)
         )
-        logger = naz.log.SimpleLogger("test_after_flush_buffer_is_empty", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+        logger = naz.log.SimpleLogger(
+            "test_after_flush_buffer_is_empty", handler=_handler, log_metadata={"name": "JayZ"}
+        )
 
         # log at level less than `_handler.trigger_level`
         logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "one": 1})
@@ -244,8 +248,9 @@ class TestBreachHandler(TestCase):
             flushLevel=logging.ERROR,
             targetLevel="WARNING",
         )
-        logger = naz.log.SimpleLogger("test_target_level", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"name": "JayZ"})
+        logger = naz.log.SimpleLogger(
+            "test_target_level", handler=_handler, log_metadata={"name": "JayZ"}
+        )
 
         # log at level less than `_handler.targetLevel`
         logger.log(level=logging.INFO, msg={"trace_id": 781125213295, "my_one": 1})
