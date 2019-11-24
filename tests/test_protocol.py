@@ -40,7 +40,7 @@ class TestProtocol(TestCase):
             version=1,
             smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP,
             log_id="some-log-id",
-            pdu=b"\x00\x00\x00\x18\x80\x00\x00\t\x00\x00\x00\x00\x00\x00\x00\x06SMPPSim\x00",
-            codec_class=naz.nazcodec.SimpleNazCodec(),
+            pdu=b"pdu",
+            codec_class=naz.nazcodec.SimpleNazCodec(encoding="utf-8"),
         )
         print(proto.json())
