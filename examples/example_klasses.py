@@ -123,13 +123,16 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     for i in range(0, 4):
         print("submit_sm round:", i)
-        item_to_enqueue = {
-            "version": "1",
-            "smpp_command": naz.SmppCommand.SUBMIT_SM,
-            "short_message": "Hello World-{0}".format(str(i)),
-            "log_id": "myid1234-{0}".format(str(i)),
-            "source_addr": "254722111111",
-            "destination_addr": "254722999999",
-            "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
-        }
-        loop.run_until_complete(my_broker.enqueue(item_to_enqueue))
+        loop.run_until_complete(
+            my_broker.enqueue(
+                naz.protocol.Message(
+                    version=1,
+                    smpp_command=naz.SmppCommand.SUBMIT_SM,
+                    short_message="Hello World-{0}".format(str(i)),
+                    log_id="myid1234-{0}".format(str(i)),
+                    source_addr="254722111111",
+                    destination_addr="254722999999",
+                    hook_metadata='{"telco": "verizon", "customer_id": 123456}',
+                )
+            )
+        )

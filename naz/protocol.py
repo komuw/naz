@@ -4,10 +4,6 @@ import typing
 from . import state
 from . import nazcodec
 
-# TODO:
-# - rename protocol to MessageProtocol
-# - delete config.md
-
 
 class Message:
     """

@@ -98,7 +98,7 @@ finally:
     loop.stop()
 ```
 **NB:**      
-(a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)            
+(a) For more information about all the parameters that `naz.Client` can take, consult the [documentation here](https://komuw.github.io/naz/client.html)            
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples)         
 (c) if you need a SMSC server/gateway to test with, you can use the [docker-compose file in this repo](https://github.com/komuw/naz/blob/master/docker-compose.yml) to bring up an SMSC simulator.        
 That docker-compose file also has a redis and rabbitMQ container if you would like to use those as your broker.
@@ -152,7 +152,7 @@ run:
 ```              
              
 **NB:**      
-(a) For more information about the `naz` config file, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)             
+(a) For more information about the `naz` config file, consult the [documentation here](https://komuw.github.io/naz/client.html)             
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples). As an example, start the SMSC simulator(`docker-compose up`) then in another terminal run, `naz-cli --client examples.example_config.client`
 
 To see help:
@@ -337,18 +337,7 @@ cli = naz.Client(
 It's via a broker interface. Your application queues messages to a broker, `naz` consumes from that broker and then `naz` sends those messages to SMSC/server.       
 You can implement the broker mechanism any way you like, so long as it satisfies the `BaseBroker` interface as [defined here](https://github.com/komuw/naz/blob/master/naz/broker.py)             
 Your application should call that class's `enqueue` method to -you guessed it- enqueue messages to the queue while `naz` will call the class's `dequeue` method to consume from the broker.         
-Your application should enqueue a dictionary/json object with any parameters but the following are mandatory:              
-```bash
-{
-    "version": "1",
-    "smpp_command": naz.SmppCommand.SUBMIT_SM,
-    "short_message": string,
-    "log_id": string,
-    "source_addr": string,
-    "destination_addr": string
-}
-```  
-For more information about all the parameters that are needed in the enqueued json object, consult the [documentation here](https://github.com/komuw/naz/blob/master/documentation/config.md)      
+   
 
 `naz` ships with a simple broker implementation called [`naz.broker.SimpleBroker`](https://github.com/komuw/naz/blob/master/naz/broker.py).                     
 An example of using that;

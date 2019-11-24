@@ -147,15 +147,18 @@ cli = naz.Client(
     enquire_link_interval=17.00,
 )
 
-item_to_enqueue = {
-    "version": "1",
-    "smpp_command": naz.SmppCommand.SUBMIT_SM,
-    "short_message": "Hello World",
-    "log_id": "myid12345",
-    "source_addr": "254722111111",
-    "destination_addr": "254722999999",
-}
-loop.run_until_complete(broker.enqueue(item_to_enqueue))
+loop.run_until_complete(
+    broker.enqueue(
+        naz.protocol.Message(
+            version=1,
+            smpp_command=naz.SmppCommand.SUBMIT_SM,
+            short_message="Hello World",
+            log_id="myid1234",
+            source_addr="254722111111",
+            destination_addr="254722999999",
+        )
+    )
+)
 
 try:
     # 1. connect to the SMSC host
