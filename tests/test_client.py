@@ -380,8 +380,7 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"],
-                naz.SmppCommand.DELIVER_SM_RESP,
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.DELIVER_SM_RESP
             )
 
     def test_unbind(self):
