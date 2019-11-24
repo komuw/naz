@@ -1,5 +1,7 @@
 import typing
 
+# TODO: try and turn these classes to enum
+
 
 class SmppSessionState:
     """

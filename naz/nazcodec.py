@@ -180,8 +180,27 @@ class BaseNazCodec(abc.ABC):
     naz calls an implementation of this class to encode/decode messages.
     """
 
+    def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:
+        """
+        Parameters:
+            encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
+            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+        """
+        if not isinstance(encoding, str):
+            raise ValueError(
+                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+            )
+        if not isinstance(errors_level, str):
+            raise ValueError(
+                "`errors_level` should be of type:: `str` You entered: {0}".format(
+                    type(errors_level)
+                )
+            )
+        self.encoding = encoding
+        self.errors_level = errors_level
+
     @abc.abstractmethod
-    def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
+    def encode(self, string_to_encode: str) -> bytes:
         """
         return an encoded version of the string as a bytes object
 
@@ -196,7 +215,7 @@ class BaseNazCodec(abc.ABC):
         raise NotImplementedError("encode method must be implemented.")
 
     @abc.abstractmethod
-    def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
+    def decode(self, byte_string: bytes) -> str:
         """
         return a string decoded from the given bytes.
 
@@ -230,26 +249,45 @@ class SimpleNazCodec(BaseNazCodec):
        ncodec.decode(b'Zo\xc3\xab', 'utf8')
     """
 
+    def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:
+        """
+        Parameters:
+            encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
+            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+        """
+        if not isinstance(encoding, str):
+            raise ValueError(
+                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+            )
+        if not isinstance(errors_level, str):
+            raise ValueError(
+                "`errors_level` should be of type:: `str` You entered: {0}".format(
+                    type(errors_level)
+                )
+            )
+        self.encoding = encoding
+        self.errors_level = errors_level
+
     custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
 
-    def encode(self, string_to_encode: str, encoding: str, errors: str) -> bytes:
+    def encode(self, string_to_encode: str) -> bytes:
         if not isinstance(string_to_encode, str):
             raise NazCodecException("Only strings accepted for encoding.")
-        encoding = encoding or sys.getdefaultencoding()
+        encoding = self.encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        obj, _ = encoder(string_to_encode, errors)
+        obj, _ = encoder(string_to_encode, self.errors_level)
         return obj
 
-    def decode(self, byte_string: bytes, encoding: str, errors: str) -> str:
+    def decode(self, byte_string: bytes) -> str:
         if not isinstance(byte_string, (bytes, bytearray)):
             raise NazCodecException("Only bytestrings accepted for decoding.")
-        encoding = encoding or sys.getdefaultencoding()
+        encoding = self.encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-        obj, _ = decoder(byte_string, errors)
+        obj, _ = decoder(byte_string, self.errors_level)
         return obj

@@ -1,6 +1,4 @@
 import time
-import json
-import typing
 import asyncio
 
 import naz
@@ -36,9 +34,7 @@ class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
     def __init__(self, send_rate=1, max_tokens=2, delay_for_tokens=10):
         self.send_rate = send_rate  # rate in seconds
         self.max_tokens = max_tokens  # start tokens
-        self.delay_for_tokens = (
-            delay_for_tokens
-        )  # how long(seconds) to wait before checking for token availability after they had finished
+        self.delay_for_tokens = delay_for_tokens  # how long(seconds) to wait before checking for token availability after they had finished
         self.tokens = self.max_tokens
         self.updated_at = time.monotonic()
 
@@ -69,10 +65,10 @@ class ExampleBroker(naz.broker.BaseBroker):
         """
         self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize)
 
-    async def enqueue(self, item: dict) -> None:
-        self.queue.put_nowait(item)
+    async def enqueue(self, message: naz.protocol.Message) -> None:
+        self.queue.put_nowait(message)
 
-    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+    async def dequeue(self) -> naz.protocol.Message:
         return await self.queue.get()
 
 
@@ -102,17 +98,17 @@ class ExampleRedisBroker(naz.broker.BaseBroker):
         )
         return self._redis
 
-    async def enqueue(self, item):
+    async def enqueue(self, message: naz.protocol.Message):
         _redis = await self._get_redis()
-        await _redis.lpush(self.queue_name, json.dumps(item))
+        await _redis.lpush(self.queue_name, message.to_json())
 
-    async def dequeue(self):
+    async def dequeue(self) -> naz.protocol.Message:
         _redis = await self._get_redis()
         while True:
             item = await _redis.brpop(self.queue_name, timeout=self.timeout)
             if item:
-                dequed_item = json.loads(item[1].decode())
-                return dequed_item
+                dequed_item = item[1].decode()
+                return naz.protocol.Message.from_json(dequed_item)
             else:
                 # print("\n\t queue empty. sleeping.\n")
                 await asyncio.sleep(5)
@@ -123,13 +119,16 @@ if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     for i in range(0, 4):
         print("submit_sm round:", i)
-        item_to_enqueue = {
-            "version": "1",
-            "smpp_command": naz.SmppCommand.SUBMIT_SM,
-            "short_message": "Hello World-{0}".format(str(i)),
-            "log_id": "myid1234-{0}".format(str(i)),
-            "source_addr": "254722111111",
-            "destination_addr": "254722999999",
-            "hook_metadata": '{"telco": "verizon", "customer_id": 123456}',
-        }
-        loop.run_until_complete(my_broker.enqueue(item_to_enqueue))
+        loop.run_until_complete(
+            my_broker.enqueue(
+                naz.protocol.Message(
+                    version=1,
+                    smpp_command=naz.SmppCommand.SUBMIT_SM,
+                    short_message="Hello World-{0}".format(str(i)),
+                    log_id="myid1234-{0}".format(str(i)),
+                    source_addr="254722111111",
+                    destination_addr="254722999999",
+                    hook_metadata='{"telco": "verizon", "customer_id": 123456}',
+                )
+            )
+        )

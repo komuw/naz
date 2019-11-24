@@ -1,6 +1,7 @@
 import abc
 import asyncio
-import typing
+
+from . import protocol
 
 
 class BaseBroker(abc.ABC):
@@ -13,22 +14,28 @@ class BaseBroker(abc.ABC):
     """
 
     @abc.abstractmethod
-    async def enqueue(self, item: dict) -> None:
+    async def enqueue(self, message: protocol.Message) -> None:
         """
         enqueue/save an item.
 
         Parameters:
             item: The item to be enqueued/saved
+                  The item/message is a `naz.protocol.Message` class instance;
+                  It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.
+                  `naz.protocol.Message` has a `to_json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.
         """
         raise NotImplementedError("enqueue method must be implemented.")
 
     @abc.abstractmethod
-    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+    async def dequeue(self) -> protocol.Message:
         """
         dequeue an item.
 
         Returns:
-            item that was dequeued
+            item that was dequeued.
+            The item has to be returned as a `naz.protocol.Message` class instance.
+            It is up to the broker implementation to do the de-serialization(if neccesary).
+            `naz.protocol.Message` has a `from_json()` method that you can use to de-serialize a json string into `naz.protocol.Message` class instance.
         """
         raise NotImplementedError("dequeue method must be implemented.")
 
@@ -51,8 +58,8 @@ class SimpleBroker(BaseBroker):
             )
         self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize)
 
-    async def enqueue(self, item: dict) -> None:
-        self.queue.put_nowait(item)
+    async def enqueue(self, message: protocol.Message) -> None:
+        self.queue.put_nowait(message)
 
-    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+    async def dequeue(self) -> protocol.Message:
         return await self.queue.get()

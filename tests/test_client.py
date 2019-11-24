@@ -196,10 +196,8 @@ class TestClient(TestCase):
             "addr_ton": DummyClientArg,
             "addr_npi": DummyClientArg,
             "address_range": DummyClientArg,
-            "encoding": DummyClientArg,
             "sequence_generator": DummyClientArg,
             "log_metadata": DummyClientArg,
-            "codec_errors_level": DummyClientArg,
             "codec_class": DummyClientArg,
             "service_type": DummyClientArg,
             "source_addr_ton": DummyClientArg,
@@ -241,8 +239,8 @@ class TestClient(TestCase):
                 smsc_port=2775,
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
-                encoding=encoding,
                 broker=self.broker,
+                codec_class=naz.nazcodec.SimpleNazCodec(encoding=encoding),
             )
 
         self.assertRaises(ValueError, mock_create_client)
@@ -291,14 +289,14 @@ class TestClient(TestCase):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+            )
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
@@ -382,8 +380,7 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"],
-                naz.SmppCommand.DELIVER_SM_RESP,
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.DELIVER_SM_RESP
             )
 
     def test_unbind(self):
@@ -423,14 +420,14 @@ class TestClient(TestCase):
 
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+            )
             self._run(cli.connect())
             cli.current_session_state = naz.SmppSessionState.BOUND_TRX
             # mock SMSC throttling naz
@@ -508,15 +505,15 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-                "hook_metadata": hook_metadata,
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+                hook_metadata=hook_metadata,
+            )
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
@@ -607,14 +604,14 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+            )
 
             self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
@@ -645,14 +642,14 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+            )
 
             self._run(self.cli.connect())
             self.cli.current_session_state = naz.SmppSessionState.OPEN
@@ -670,14 +667,14 @@ class TestClient(TestCase):
         ) as mock_sleep:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+            )
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_sleep.mock.called)
             self.assertEqual(mock_sleep.mock.call_args[0][0], self.cli.socket_timeout)
@@ -692,15 +689,15 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-                "hook_metadata": hook_metadata,
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+                hook_metadata=hook_metadata,
+            )
 
             self._run(self.cli.connect())
             # hack to allow sending submit_sm even when state is wrong
@@ -774,15 +771,15 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = {
-                "version": "1",
-                "log_id": log_id,
-                "short_message": short_message,
-                "smpp_command": naz.SmppCommand.SUBMIT_SM,
-                "source_addr": "2547000000",
-                "destination_addr": "254711999999",
-                "hook_metadata": hook_metadata,
-            }
+            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+                version=1,
+                log_id=log_id,
+                short_message=short_message,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                source_addr="2547000000",
+                destination_addr="254711999999",
+                hook_metadata=hook_metadata,
+            )
 
             # 1. SEND SUBMIT_SM
             self._run(self.cli.connect())
