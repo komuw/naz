@@ -1,31 +1,31 @@
+import sys
 import naz
 import random
-from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
+from examples.example_klasses import ExampleRedisBroker
 from pythonfuzz.main import PythonFuzz
 
 import asyncio
 
 
 # run as:
-# python tests/fuzz.py
+#    python tests/fuzz.py msg_to_log
 client = naz.Client(
     smsc_host="127.0.0.1",
     smsc_port=2775,
     system_id="smppclient1",
     password="password",
     broker=ExampleRedisBroker(),
-    # sequence_generator=MySeqGen(),
     loglevel="INFO",
     log_metadata={"environment": "staging", "release": "canary"},
     enquire_link_interval=70.00,
-    # rateLimiter=MyRateLimiter(),
-    address_range="^254",  # any msisdns beginning with 254. See Appendix A of SMPP spec doc
 )
+
+FUNCTIONALITIES = ["msg_to_log", "send_data", "parse_response_pdu", "command_handlers"]
+FUNCTIONALITY_TO_FUZZ = None
 
 
 @PythonFuzz
 def fuzz(buf):
-    # try:
     smpp_command = random.choice(
         [
             naz.SmppCommand.BIND_TRANSCEIVER,
@@ -46,37 +46,41 @@ def fuzz(buf):
 
     print("\n\n\t buf: ", buf)
     print("smpp_command: ", smpp_command)
+    print("FUNCTIONALITY_TO_FUZZ: ", FUNCTIONALITY_TO_FUZZ)
     print()
-    asyncio.run(asyncMain(buf=buf, smpp_command=smpp_command))
-    # except UnicodeDecodeError:
-    #     pass
+    asyncio.run(
+        asyncMain(buf=buf, smpp_command=smpp_command, FUNCTIONALITY_TO_FUZZ=FUNCTIONALITY_TO_FUZZ)
+    )
 
 
-async def asyncMain(buf, smpp_command):
+async def asyncMain(buf, smpp_command, FUNCTIONALITY_TO_FUZZ):
     await client.connect()
     client.current_session_state = naz.SmppSessionState.BOUND_TRX
 
-    # 1.
-    _msg_to_log(buf)
-
-    # 2.
-    await send_data(
-        smpp_command=smpp_command, msg=buf, log_id="log_id", hook_metadata="hook_metadata"
-    )
-
-    # 3.
-    await _parse_response_pdu(pdu=buf)
-
-    # 4.
-    await command_handlers(
-        pdu=buf,
-        body_data=buf,
-        smpp_command=smpp_command,
-        command_status_value=5,
-        sequence_number=78,
-        log_id="log_id",
-        hook_metadata="hook_metadata",
-    )
+    if FUNCTIONALITY_TO_FUZZ == "msg_to_log":
+        # 1.msg_to_log
+        _msg_to_log(buf)
+    elif FUNCTIONALITY_TO_FUZZ == "send_data":
+        # 2.send_data
+        await send_data(
+            smpp_command=smpp_command, msg=buf, log_id="log_id", hook_metadata="hook_metadata"
+        )
+    elif FUNCTIONALITY_TO_FUZZ == "parse_response_pdu":
+        # 3.parse_response_pdu
+        await _parse_response_pdu(pdu=buf)
+    elif FUNCTIONALITY_TO_FUZZ == "command_handlers":
+        # 4.command_handlers
+        await command_handlers(
+            pdu=buf,
+            body_data=buf,
+            smpp_command=smpp_command,
+            command_status_value=5,
+            sequence_number=78,
+            log_id="log_id",
+            hook_metadata="hook_metadata",
+        )
+    else:
+        raise ValueError("unknown functionality {0}".format(FUNCTIONALITY_TO_FUZZ))
 
 
 def _msg_to_log(msg: bytes):
@@ -114,4 +118,10 @@ async def command_handlers(
 
 
 if __name__ == "__main__":
+    functionality = sys.argv[1]
+    if functionality not in FUNCTIONALITIES:
+        raise ValueError("unknown functionality. choose on of {0}".format(FUNCTIONALITIES))
+
+    FUNCTIONALITY_TO_FUZZ = functionality
+
     fuzz()
