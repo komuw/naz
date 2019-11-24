@@ -117,7 +117,7 @@ class Message:
                 "version": self.version,
                 "smpp_command": self.smpp_command.value,
                 "log_id": self.log_id,
-                "pdu": str(self.pdu),
+                "pdu": self.codec_class.decode(self.pdu),
                 "short_message": self.short_message,
                 "source_addr": self.source_addr,
                 "destination_addr": self.destination_addr,
