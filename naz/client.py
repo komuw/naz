@@ -11,6 +11,7 @@ import logging
 from . import log
 from . import hooks
 from . import nazcodec
+from . import protocol
 from . import sequence
 from . import throttle
 from . import correlater
@@ -346,7 +347,7 @@ class Client:
         # This version will enable naz to be able to evolve in future;
         # eg a future version of naz could add/remove the number of required items in a message.
         # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
-        self.naz_message_protocol_version = "1"
+        self.naz_message_protocol_version = 1
 
         self.current_session_state = SmppSessionState.CLOSED
         self._header_pdu_length = 16
@@ -1051,14 +1052,16 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        item_to_enqueue = {
-            "version": self.naz_message_protocol_version,
-            "smpp_command": smpp_command,
-            "log_id": log_id,
-            "pdu": full_pdu,
-        }
         try:
-            await self.broker.enqueue(item_to_enqueue)
+            await self.broker.enqueue(
+                protocol.Message(
+                    version=self.naz_message_protocol_version,
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    pdu=full_pdu,
+                    codec_class=self.codec_class,
+                )
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1153,14 +1156,16 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        item_to_enqueue = {
-            "version": self.naz_message_protocol_version,
-            "smpp_command": smpp_command,
-            "log_id": log_id,
-            "pdu": full_pdu,
-        }
         try:
-            await self.broker.enqueue(item_to_enqueue)
+            await self.broker.enqueue(
+                protocol.Message(
+                    version=self.naz_message_protocol_version,
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    pdu=full_pdu,
+                    codec_class=self.codec_class,
+                )
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1242,16 +1247,17 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        item_to_enqueue = {
-            "version": self.naz_message_protocol_version,
-            "smpp_command": smpp_command,
-            "short_message": short_message,
-            "log_id": log_id,
-            "source_addr": source_addr,
-            "destination_addr": destination_addr,
-        }
         try:
-            await self.broker.enqueue(item_to_enqueue)
+            await self.broker.enqueue(
+                protocol.Message(
+                    version=self.naz_message_protocol_version,
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    short_message=short_message,
+                    source_addr=source_addr,
+                    destination_addr=destination_addr,
+                )
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,

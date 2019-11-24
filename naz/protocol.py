@@ -44,7 +44,7 @@ class Message:
     ) -> None:
         """
         Parameters:
-            version: This indicates the current version of the naz message protocol. A future version of `naz` may ship with a different message protocol.
+            version: This indicates the current version of the naz message protocol. This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
             smpp_command: any one of the SMSC commands eg submit_sm
             log_id: a unique identify of this reque
             pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.
