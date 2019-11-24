@@ -116,8 +116,8 @@ and a python file, `myfile.py` (in the current working directory) with the conte
         def __init__(self):
             loop = asyncio.get_event_loop()
             self.queue = asyncio.Queue(maxsize=1000, loop=loop)
-        async def enqueue(self, item):
-            self.queue.put_nowait(item)
+        async def enqueue(self, message):
+            self.queue.put_nowait(message)
         async def dequeue(self):
             return await self.queue.get()
 
@@ -127,7 +127,7 @@ then run:
 
 NB:
 
-* (a) For more information about the naz config file, consult the `documentation <https://github.com/komuw/naz/blob/master/documentation/config.md>`_
+* (a) For more information about the naz config file, consult the `documentation <https://komuw.github.io/naz/client.html>`_
 * (b) More examples can be found; `examples <https://github.com/komuw/naz/tree/master/examples>`_ 
       As an example, start the SMSC simulator(``docker-compose up``) then in another terminal run, 
       ``naz-cli --client examples.example_config.client``
