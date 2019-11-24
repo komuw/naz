@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>sequence &mdash; naz v0.7.3 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/sequence.html"/>
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="throttle" href="throttle.html" />
+    <link rel="prev" title="ratelimiter" href="ratelimiter.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>sequence</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/sequence.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-naz.sequence">
+<span id="sequence"></span><h1>sequence<a class="headerlink" href="#module-naz.sequence" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.sequence.BaseSequenceGenerator">
+<em class="property">class </em><code class="sig-prename descclassname">naz.sequence.</code><code class="sig-name descname">BaseSequenceGenerator</code><a class="reference internal" href="_modules/naz/sequence.html#BaseSequenceGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.BaseSequenceGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>Interface that must be implemented to satisfy naz’s sequence generator.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.sequence.BaseSequenceGenerator.next_sequence" title="naz.sequence.BaseSequenceGenerator.next_sequence"><code class="xref py py-func docutils literal notranslate"><span class="pre">next_sequence</span></code></a> methods with the type signatures shown.</p>
+<p>In SMPP, sequence_number is an Integer which allows SMPP requests and responses to be correlated.
+The sequence_number should increase monotonically and ought to be in the range 1 - 2,147,483,647</p>
+<p>The sequence_number should wrap around when it reaches the maximum allowed by SMPP specification.</p>
+<dl class="method">
+<dt id="naz.sequence.BaseSequenceGenerator.next_sequence">
+<em class="property">abstract </em><code class="sig-name descname">next_sequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/sequence.html#BaseSequenceGenerator.next_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.BaseSequenceGenerator.next_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>method that returns a monotonically increasing Integer in the range 1 - 2,147,483,647</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.sequence.SimpleSequenceGenerator">
+<em class="property">class </em><code class="sig-prename descclassname">naz.sequence.</code><code class="sig-name descname">SimpleSequenceGenerator</code><a class="reference internal" href="_modules/naz/sequence.html#SimpleSequenceGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.SimpleSequenceGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.sequence.BaseSequenceGenerator" title="naz.sequence.BaseSequenceGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.sequence.BaseSequenceGenerator</span></code></a></p>
+<p>This is an implementation of BaseSequenceGenerator.</p>
+<dl class="method">
+<dt id="naz.sequence.SimpleSequenceGenerator.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/sequence.html#SimpleSequenceGenerator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.SimpleSequenceGenerator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.sequence.SimpleSequenceGenerator.next_sequence">
+<code class="sig-name descname">next_sequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/sequence.html#SimpleSequenceGenerator.next_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.SimpleSequenceGenerator.next_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>method that returns a monotonically increasing Integer in the range 1 - 2,147,483,647</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="throttle.html" class="btn btn-neutral float-right" title="throttle" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ratelimiter.html" class="btn btn-neutral float-left" title="ratelimiter" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

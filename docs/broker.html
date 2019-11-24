@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>broker &mdash; naz v0.7.3 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/broker.html"/>
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="ratelimiter" href="ratelimiter.html" />
+    <link rel="prev" title="nazcodec" href="nazcodec.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>broker</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/broker.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-naz.broker">
+<span id="broker"></span><h1>broker<a class="headerlink" href="#module-naz.broker" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.broker.BaseBroker">
+<em class="property">class </em><code class="sig-prename descclassname">naz.broker.</code><code class="sig-name descname">BaseBroker</code><a class="reference internal" href="_modules/naz/broker.html#BaseBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.BaseBroker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>This is the interface that must be implemented to satisfy naz’s broker.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.broker.BaseBroker.enqueue" title="naz.broker.BaseBroker.enqueue"><code class="xref py py-func docutils literal notranslate"><span class="pre">enqueue</span></code></a> and <a class="reference internal" href="#naz.broker.BaseBroker.dequeue" title="naz.broker.BaseBroker.dequeue"><code class="xref py py-func docutils literal notranslate"><span class="pre">dequeue</span></code></a> methods with the type signatures shown.</p>
+<p>naz calls an implementation of this class to enqueue and/or dequeue an item.</p>
+<dl class="method">
+<dt id="naz.broker.BaseBroker.dequeue">
+<em class="property">abstract async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#BaseBroker.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.BaseBroker.dequeue" title="Permalink to this definition">¶</a></dt>
+<dd><p>dequeue an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>item that was dequeued</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.broker.BaseBroker.enqueue">
+<em class="property">abstract async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#BaseBroker.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.BaseBroker.enqueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>enqueue/save an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – The item to be enqueued/saved</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.broker.SimpleBroker">
+<em class="property">class </em><code class="sig-prename descclassname">naz.broker.</code><code class="sig-name descname">SimpleBroker</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.broker.BaseBroker" title="naz.broker.BaseBroker"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.broker.BaseBroker</span></code></a></p>
+<p>This is an in-memory implementation of BaseBroker.</p>
+<p>Note: It should only be used for tests and demo purposes.</p>
+<dl class="method">
+<dt id="naz.broker.SimpleBroker.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">maxsize=2500</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>maxsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the maximum number of items(not size) that can be put in the queue.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.broker.SimpleBroker.dequeue">
+<em class="property">async </em><code class="sig-name descname">dequeue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker.dequeue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker.dequeue" title="Permalink to this definition">¶</a></dt>
+<dd><p>dequeue an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code>]</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>item that was dequeued</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.broker.SimpleBroker.enqueue">
+<em class="property">async </em><code class="sig-name descname">enqueue</code><span class="sig-paren">(</span><em class="sig-param">item</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/broker.html#SimpleBroker.enqueue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.broker.SimpleBroker.enqueue" title="Permalink to this definition">¶</a></dt>
+<dd><p>enqueue/save an item.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>item</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – The item to be enqueued/saved</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="ratelimiter.html" class="btn btn-neutral float-right" title="ratelimiter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nazcodec.html" class="btn btn-neutral float-left" title="nazcodec" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,657 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>naz.state &mdash; naz v0.7.3 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/_modules/naz/state.html"/>
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_demo.html">Example demo of using naz</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>naz.state</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for naz.state</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+
+<div class="viewcode-block" id="SmppSessionState"><a class="viewcode-back" href="../../state.html#naz.state.SmppSessionState">[docs]</a><span class="k">class</span> <span class="nc">SmppSessionState</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represensts the states in which an SMPP session can be in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># see section 2.2 of SMPP spec document v3.4</span>
+    <span class="c1"># we are ignoring the other states since we are only concerning ourselves with an ESME in Transceiver mode.</span>
+
+    <span class="c1"># An ESME has established a network connection to the SMSC but has not yet issued a Bind request.</span>
+    <span class="n">OPEN</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;OPEN&quot;</span>
+    <span class="c1"># A connected ESME has requested to bind as an ESME Transceiver (by issuing a bind_transceiver PDU)</span>
+    <span class="c1"># and has received a response from the SMSC authorising its Bind request.</span>
+    <span class="n">BOUND_TRX</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;BOUND_TRX&quot;</span>
+    <span class="c1"># An ESME has unbound from the SMSC and has closed the network connection. The SMSC may also unbind from the ESME.</span>
+    <span class="n">CLOSED</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;CLOSED&quot;</span></div>
+
+
+<div class="viewcode-block" id="SmppCommand"><a class="viewcode-back" href="../../state.html#naz.state.SmppCommand">[docs]</a><span class="k">class</span> <span class="nc">SmppCommand</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represensts the various SMPP commands.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># see section 4 of SMPP spec document v3.4</span>
+    <span class="n">BIND_TRANSCEIVER</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bind_transceiver&quot;</span>
+    <span class="n">BIND_TRANSCEIVER_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bind_transceiver_resp&quot;</span>
+    <span class="n">BIND_TRANSMITTER</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bind_transmitter&quot;</span>
+    <span class="n">BIND_RECEIVER</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bind_receiver&quot;</span>
+    <span class="n">UNBIND</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unbind&quot;</span>
+    <span class="n">UNBIND_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unbind_resp&quot;</span>
+    <span class="n">SUBMIT_SM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;submit_sm&quot;</span>
+    <span class="n">SUBMIT_SM_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;submit_sm_resp&quot;</span>
+    <span class="n">DELIVER_SM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;deliver_sm&quot;</span>
+    <span class="n">DELIVER_SM_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;deliver_sm_resp&quot;</span>
+    <span class="n">ENQUIRE_LINK</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;enquire_link&quot;</span>
+    <span class="n">ENQUIRE_LINK_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;enquire_link_resp&quot;</span>
+    <span class="n">GENERIC_NACK</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;generic_nack&quot;</span>
+
+    <span class="c1"># naz currently does not handle the following smpp commands.</span>
+    <span class="c1"># open a github issue if you use naz and require support of a command in this list</span>
+    <span class="n">BIND_RECEIVER_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bind_receiver_resp&quot;</span>
+    <span class="n">BIND_TRANSMITTER_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;bind_transmitter_resp&quot;</span>
+    <span class="n">QUERY_SM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;query_sm&quot;</span>
+    <span class="n">QUERY_SM_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;query_sm_resp&quot;</span>
+    <span class="n">REPLACE_SM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;replace_sm&quot;</span>
+    <span class="n">REPLACE_SM_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;replace_sm_resp&quot;</span>
+    <span class="n">CANCEL_SM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cancel_sm&quot;</span>
+    <span class="n">CANCEL_SM_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cancel_sm_resp&quot;</span>
+    <span class="n">SUBMIT_MULTI</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;submit_multi&quot;</span>
+    <span class="n">SUBMIT_MULTI_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;submit_multi_resp&quot;</span>
+    <span class="n">OUTBIND</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;outbind&quot;</span>
+    <span class="n">ALERT_NOTIFICATION</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;alert_notification&quot;</span>
+    <span class="n">DATA_SM</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;data_sm&quot;</span>
+    <span class="n">DATA_SM_RESP</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;data_sm_resp&quot;</span>
+    <span class="n">RESERVED_A</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_a&quot;</span>
+    <span class="n">RESERVED_B</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_b&quot;</span>
+    <span class="n">RESERVED_C</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_c&quot;</span>
+    <span class="n">RESERVED_D</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_d&quot;</span>
+    <span class="n">RESERVED_E</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_e&quot;</span>
+    <span class="n">RESERVED_F</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_f&quot;</span>
+    <span class="n">RESERVED_G</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_g&quot;</span>
+    <span class="n">RESERVED_LIST_A</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_a&quot;</span>
+    <span class="n">RESERVED_LIST_B</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_b&quot;</span>
+    <span class="n">RESERVED_LIST_C</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_c&quot;</span>
+    <span class="n">RESERVED_LIST_D</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_d&quot;</span>
+    <span class="n">RESERVED_LIST_E</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_e&quot;</span>
+    <span class="n">RESERVED_LIST_F</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_f&quot;</span>
+    <span class="n">RESERVED_LIST_G</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_g&quot;</span>
+    <span class="n">RESERVED_LIST_H</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_h&quot;</span>
+    <span class="n">RESERVED_LIST_I</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_list_i&quot;</span>
+    <span class="n">RESERVED_FOR_SMPP_EXTENSION_A</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_for_smpp_extension_a&quot;</span>
+    <span class="n">RESERVED_FOR_SMPP_EXTENSION_B</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_for_smpp_extension_b&quot;</span>
+    <span class="n">RESERVED_FOR_SMSC_VENDOR_A</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_for_smsc_vendor_a&quot;</span>
+    <span class="n">RESERVED_FOR_SMSC_VENDOR_B</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reserved_for_smsc_vendor_b&quot;</span></div>
+
+
+<div class="viewcode-block" id="CommandStatus"><a class="viewcode-back" href="../../state.html#naz.state.CommandStatus">[docs]</a><span class="k">class</span> <span class="nc">CommandStatus</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An SMPP command status</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="SmppCommandStatus"><a class="viewcode-back" href="../../state.html#naz.state.SmppCommandStatus">[docs]</a><span class="k">class</span> <span class="nc">SmppCommandStatus</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represensts the various SMPP commands statuses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># see section 5.1.3 of smpp ver 3.4 spec document</span>
+
+    <span class="n">ESME_ROK</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_ROK&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000000</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Success&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVMSGLEN</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVMSGLEN&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000001</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Message Length is invalid&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVCMDLEN</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVCMDLEN&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000002</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Command Length is invalid&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVCMDID</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVCMDID&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000003</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Command ID&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVBNDSTS</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVBNDSTS&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000004</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Incorrect BIND Status for given command&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RALYBND</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RALYBND&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000005</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ESME Already in Bound State&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVPRTFLG</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVPRTFLG&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000006</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Priority Flag&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVREGDLVFLG</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVREGDLVFLG&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000007</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Registered Delivery Flag&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RSYSERR</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RSYSERR&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000008</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;System Error&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSRCADR</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSRCADR&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x0000000A</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Source Address&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVDSTADR</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVDSTADR&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x0000000B</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Dest Addr&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVMSGID</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVMSGID&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x0000000C</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Message ID is invalid&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RBINDFAIL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RBINDFAIL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x0000000D</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Bind Failed&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVPASWD</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVPASWD&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x0000000E</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Password&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSYSID</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSYSID&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x0000000F</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid System ID&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RCANCELFAIL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RCANCELFAIL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000011</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Cancel SM Failed&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RREPLACEFAIL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RREPLACEFAIL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000013</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Replace SM Failed&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RMSGQFUL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RMSGQFUL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000014</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Message Broker Full&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSERTYP</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSERTYP&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000015</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Service Type&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVNUMDESTS</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVNUMDESTS&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000033</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid number of destinations&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVDLNAME</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVNUMDESTS&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000034</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Distribution List name&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVDESTFLAG</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVDESTFLAG&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000040</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Destination flag is invalid (submit_multi)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSUBREP</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSUBREP&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000042</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid (submit with replace) request(i.e. submit_sm with replace_if_present_flag set)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVESMCLASS</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVESMCLASS&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000043</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid esm_class field data&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RCNTSUBDL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RCNTSUBDL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000044</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Cannot Submit to Distribution List&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RSUBMITFAIL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RSUBMITFAIL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000045</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Submit_sm or submit_multi failed&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSRCTON</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSRCTON&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000048</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Source address TON&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSRCNPI</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSRCNPI&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000049</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Source address NPI&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVDSTTON</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVDSTTON&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000050</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Destination address TON&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVDSTNPI</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVDSTNPI&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000051</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Destination address NPI&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSYSTYP</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSYSTYP&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000053</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid system_type field&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVREPFLAG</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVREPFLAG&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000054</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid replace_if_present flag&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVNUMMSGS</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVNUMMSGS&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000055</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid number of messages&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RTHROTTLED</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RTHROTTLED&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000058</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Throttling error (ESME has exceeded allowed message limits)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVSCHED</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVSCHED&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000061</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Scheduled Delivery Time&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVEXPIRY</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVEXPIRY&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000062</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid message validity period (Expiry time)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVDFTMSGID</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVDFTMSGID&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000063</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Predefined Message Invalid or Not Found&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RX_T_APPN</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RX_T_APPN&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000064</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ESME Receiver Temporary App Error Code&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RX_P_APPN</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RX_P_APPN&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000065</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ESME Receiver Permanent App Error Code&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RX_R_APPN</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RX_R_APPN&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x00000066</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ESME Receiver Reject Message Error Code&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RQUERYFAIL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RQUERYFAIL&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000067</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;query_sm request failed&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVOPTPARSTREAM</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVOPTPARSTREAM&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x000000C0</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Error in the optional part of the PDU Body.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_ROPTPARNOTALLWD</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_ROPTPARNOTALLWD&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x000000C1</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Optional Parameter not allowed&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVPARLEN</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVPARLEN&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x000000C2</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Parameter Length.&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RMISSINGOPTPARAM</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RMISSINGOPTPARAM&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x000000C3</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Expected Optional Parameter missing&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RINVOPTPARAMVAL</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RINVOPTPARAMVAL&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x000000C4</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Invalid Optional Parameter Value&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">ESME_RDELIVERYFAILURE</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RDELIVERYFAILURE&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mh">0x000000FE</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Delivery Failure (used for data_sm_resp)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">ESME_RUNKNOWNERR</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ESME_RUNKNOWNERR&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x000000FF</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Unknown Error&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_A</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000009</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_B</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000010</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_C</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000012</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_D</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000041</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_E</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mh">0x00000052</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_A</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000016</span><span class="p">,</span> <span class="mh">0x00000032</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_B</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000035</span><span class="p">,</span> <span class="mh">0x0000003F</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_C</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000046</span><span class="p">,</span> <span class="mh">0x00000047</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_D</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000056</span><span class="p">,</span> <span class="mh">0x00000057</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_E</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000059</span><span class="p">,</span> <span class="mh">0x00000060</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_F</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000068</span><span class="p">,</span> <span class="mh">0x000000BF</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_G</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x000000C5</span><span class="p">,</span> <span class="mh">0x000000FD</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_H</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000100</span><span class="p">,</span> <span class="mh">0x000003FF</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved for SMPP extension&quot;</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_I</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000400</span><span class="p">,</span> <span class="mh">0x000004FF</span><span class="p">],</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved for SMSC vendor specific errors&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">RESERVED_LIST_J</span><span class="p">:</span> <span class="n">CommandStatus</span> <span class="o">=</span> <span class="n">CommandStatus</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="mh">0x00000500</span><span class="p">,</span> <span class="mh">0xFFFFFFFF</span><span class="p">],</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Reserved&quot;</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="DataCoding"><a class="viewcode-back" href="../../state.html#naz.state.DataCoding">[docs]</a><span class="k">class</span> <span class="nc">DataCoding</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An SMPP data encoding.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">code</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="SmppDataCoding"><a class="viewcode-back" href="../../state.html#naz.state.SmppDataCoding">[docs]</a><span class="k">class</span> <span class="nc">SmppDataCoding</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represensts the various SMPP data encodings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># see section 5.2.19 of smpp ver 3.4 spec document.</span>
+    <span class="c1"># also see:</span>
+    <span class="c1">#   1. https://github.com/praekelt/vumi/blob/767eac623c81cc4b2e6ea9fbd6a3645f121ef0aa/vumi/transports/smpp/processors/default.py#L260</span>
+    <span class="c1">#   2. https://docs.python.org/3/library/codecs.html</span>
+    <span class="c1">#   3. https://docs.python.org/3/library/codecs.html#standard-encodings</span>
+
+    <span class="c1"># The attributes of this class are equivalent to some of the names found in the python standard-encodings documentation</span>
+    <span class="c1"># ie; https://docs.python.org/3/library/codecs.html#standard-encodings</span>
+
+    <span class="n">gsm0338</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000000</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;SMSC Default Alphabet&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ascii</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000001</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;IA5(CCITT T.50) / ASCII(ANSI X3.4)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">octet_unspecified_I</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;octet_unspecified_I&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mb">0b00000010</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Octet unspecified(8 - bit binary)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">latin_1</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;latin_1&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000011</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Latin 1 (ISO - 8859 - 1)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">octet_unspecified_II</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;octet_unspecified_II&quot;</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mb">0b00000100</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Octet unspecified(8 - bit binary)&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># iso2022_jp, iso2022jp and iso-2022-jp are aliases</span>
+    <span class="c1"># see: https://stackoverflow.com/a/43240579/2768067</span>
+    <span class="n">iso2022_jp</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;iso2022_jp&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000101</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;JIS(X 0208 - 1990)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">iso8859_5</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;iso8859_5&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000110</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Cyrllic(ISO - 8859 - 5)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">iso8859_8</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;iso8859_8&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000111</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Latin / Hebrew(ISO - 8859 - 8)&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># see: https://stackoverflow.com/a/14488478/2768067</span>
+    <span class="n">utf_16_be</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;utf_16_be&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001000</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;UCS2(ISO / IEC - 10646)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">ucs2</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;ucs2&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001000</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;UCS2(ISO / IEC - 10646)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">shift_jis</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;shift_jis&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001001</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Pictogram Encoding&quot;</span>
+    <span class="p">)</span>
+    <span class="n">iso2022jp</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
+        <span class="n">code</span><span class="o">=</span><span class="s2">&quot;iso2022jp&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001010</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;ISO - 2022 - JP(Music Codes)&quot;</span>
+    <span class="p">)</span>
+    <span class="c1"># reservedI= DataCoding(code=&quot;reservedI&quot;, value=0b00001011, description= &quot;reserved&quot;)</span>
+    <span class="c1"># reservedII= DataCoding(code=&quot;reservedII&quot;, value=0b00001100, description= &quot;reserved&quot;)</span>
+    <span class="n">euc_kr</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;euc_kr&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001110</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;KS C 5601&quot;</span><span class="p">)</span></div>
+
+    <span class="c1"># not the same as iso2022_jp but ... ¯\_(ツ)_/¯</span>
+    <span class="c1"># iso-2022-jp=DataCoding(code=&quot;iso-2022-jp&quot;, value=0b00001101, description=&quot;Extended Kanji JIS(X 0212 - 1990)&quot;)</span>
+
+    <span class="c1"># 00001111 - 10111111 reserved</span>
+    <span class="c1"># 0b1100xxxx GSM MWI control - see [GSM 03.38]</span>
+    <span class="c1"># 0b1101xxxx GSM MWI control - see [GSM 03.38]</span>
+    <span class="c1"># 0b1110xxxx reserved</span>
+    <span class="c1"># 0b1111xxxx GSM message class control - see [GSM 03.38]</span>
+
+
+<div class="viewcode-block" id="SmppOptionalTag"><a class="viewcode-back" href="../../state.html#naz.state.SmppOptionalTag">[docs]</a><span class="k">class</span> <span class="nc">SmppOptionalTag</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represensts the various SMPP Optional Parameter Tags.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># see section 5.3.2 of smpp ver 3.4 spec document.</span>
+    <span class="c1"># All optional parameters have the following general TLV (Tag, Length, Value) format.</span>
+    <span class="c1"># Tag, Integer, 2octets</span>
+    <span class="c1"># Length, Integer, 2octets</span>
+    <span class="c1"># Value, type varies, size varies. eg receipted_message_id is of type c-octet string of size 1-65</span>
+
+    <span class="n">dest_addr_subunit</span> <span class="o">=</span> <span class="mh">0x0005</span>
+    <span class="n">dest_network_type</span> <span class="o">=</span> <span class="mh">0x0006</span>
+    <span class="n">dest_bearer_type</span> <span class="o">=</span> <span class="mh">0x0007</span>
+    <span class="n">dest_telematics_id</span> <span class="o">=</span> <span class="mh">0x0008</span>
+    <span class="n">source_addr_subunit</span> <span class="o">=</span> <span class="mh">0x000D</span>
+    <span class="n">source_network_type</span> <span class="o">=</span> <span class="mh">0x000E</span>
+    <span class="n">source_bearer_type</span> <span class="o">=</span> <span class="mh">0x000F</span>
+    <span class="n">source_telematics_id</span> <span class="o">=</span> <span class="mh">0x0010</span>
+    <span class="n">qos_time_to_live</span> <span class="o">=</span> <span class="mh">0x0017</span>
+    <span class="n">payload_type</span> <span class="o">=</span> <span class="mh">0x0019</span>
+    <span class="n">additional_status_info_text</span> <span class="o">=</span> <span class="mh">0x001D</span>
+    <span class="n">receipted_message_id</span> <span class="o">=</span> <span class="mh">0x001E</span>
+    <span class="n">ms_msg_wait_facilities</span> <span class="o">=</span> <span class="mh">0x0030</span>
+    <span class="n">privacy_indicator</span> <span class="o">=</span> <span class="mh">0x0201</span>
+    <span class="n">source_subaddress</span> <span class="o">=</span> <span class="mh">0x0202</span>
+    <span class="n">dest_subaddress</span> <span class="o">=</span> <span class="mh">0x0203</span>
+    <span class="n">user_message_reference</span> <span class="o">=</span> <span class="mh">0x0204</span>
+    <span class="n">user_response_code</span> <span class="o">=</span> <span class="mh">0x0205</span>
+    <span class="n">source_port</span> <span class="o">=</span> <span class="mh">0x020A</span>
+    <span class="n">destination_port</span> <span class="o">=</span> <span class="mh">0x020B</span>
+    <span class="n">sar_msg_ref_num</span> <span class="o">=</span> <span class="mh">0x020C</span>
+    <span class="n">language_indicator</span> <span class="o">=</span> <span class="mh">0x020D</span>
+    <span class="n">sar_total_segments</span> <span class="o">=</span> <span class="mh">0x020E</span>
+    <span class="n">sar_segment_seqnum</span> <span class="o">=</span> <span class="mh">0x020F</span>
+    <span class="n">SC_interface_version</span> <span class="o">=</span> <span class="mh">0x0210</span>
+    <span class="n">callback_num_pres_ind</span> <span class="o">=</span> <span class="mh">0x0302</span>
+    <span class="n">callback_num_atag</span> <span class="o">=</span> <span class="mh">0x0303</span>
+    <span class="n">number_of_messages</span> <span class="o">=</span> <span class="mh">0x0304</span>
+    <span class="n">callback_num</span> <span class="o">=</span> <span class="mh">0x0381</span>
+    <span class="n">dpf_result</span> <span class="o">=</span> <span class="mh">0x0420</span>
+    <span class="n">set_dpf</span> <span class="o">=</span> <span class="mh">0x0421</span>
+    <span class="n">ms_availability_status</span> <span class="o">=</span> <span class="mh">0x0422</span>
+    <span class="n">network_error_code</span> <span class="o">=</span> <span class="mh">0x0423</span>
+    <span class="n">message_payload</span> <span class="o">=</span> <span class="mh">0x0424</span>
+    <span class="n">delivery_failure_reason</span> <span class="o">=</span> <span class="mh">0x0425</span>
+    <span class="n">more_messages_to_send</span> <span class="o">=</span> <span class="mh">0x0426</span>
+    <span class="n">message_state</span> <span class="o">=</span> <span class="mh">0x0427</span>
+    <span class="n">ussd_service_op</span> <span class="o">=</span> <span class="mh">0x0501</span>
+    <span class="n">display_time</span> <span class="o">=</span> <span class="mh">0x1201</span>
+    <span class="n">sms_signal</span> <span class="o">=</span> <span class="mh">0x1203</span>
+    <span class="n">ms_validity</span> <span class="o">=</span> <span class="mh">0x1204</span>
+    <span class="n">alert_on_message_delivery</span> <span class="o">=</span> <span class="mh">0x130C</span>
+    <span class="n">its_reply_type</span> <span class="o">=</span> <span class="mh">0x1380</span>
+    <span class="n">its_session_info</span> <span class="o">=</span> <span class="mh">0x1383</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
