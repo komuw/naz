@@ -2190,7 +2190,7 @@ class Client:
                 # This field contains the SMSC message_id of the submitted message.
                 # It may be used at a later stage to query the status of a message, cancel
                 # or replace the message.
-                message_id = body_data.replace(chr(0).encode(), b"")
+                _message_id = body_data.replace(chr(0).encode(), b"")
                 smsc_message_id = self.codec_class.decode(_message_id)
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
