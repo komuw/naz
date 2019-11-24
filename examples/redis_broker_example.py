@@ -32,17 +32,17 @@ class RedisExampleBroker(naz.broker.BaseBroker):
         )
         return self._redis
 
-    async def enqueue(self, item):
+    async def enqueue(self, message: naz.protocol.Message) -> None:
         _redis = await self._get_redis()
-        await _redis.lpush(self.queue_name, json.dumps(item))
+        await _redis.lpush(self.queue_name, message.json())
 
-    async def dequeue(self):
+    async def dequeue(self) -> naz.protocol.Message:
         _redis = await self._get_redis()
         while True:
             item = await _redis.brpop(self.queue_name, timeout=self.timeout)
             if item:
                 dequed_item = json.loads(item[1].decode())
-                return dequed_item
+                return naz.protocol.Message(**dequed_item)
             else:
                 # print("\n\t queue empty. sleeping.\n")
                 await asyncio.sleep(5)

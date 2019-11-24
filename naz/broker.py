@@ -2,6 +2,8 @@ import abc
 import asyncio
 import typing
 
+from . import protocol
+
 
 class BaseBroker(abc.ABC):
     """
@@ -13,7 +15,7 @@ class BaseBroker(abc.ABC):
     """
 
     @abc.abstractmethod
-    async def enqueue(self, item: dict) -> None:
+    async def enqueue(self, message: protocol.Message) -> None:
         """
         enqueue/save an item.
 
@@ -23,7 +25,7 @@ class BaseBroker(abc.ABC):
         raise NotImplementedError("enqueue method must be implemented.")
 
     @abc.abstractmethod
-    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+    async def dequeue(self) -> protocol.Message:
         """
         dequeue an item.
 
@@ -51,8 +53,8 @@ class SimpleBroker(BaseBroker):
             )
         self.queue: asyncio.queues.Queue = asyncio.Queue(maxsize=maxsize)
 
-    async def enqueue(self, item: dict) -> None:
-        self.queue.put_nowait(item)
+    async def enqueue(self, message: protocol.Message) -> None:
+        self.queue.put_nowait(message)
 
-    async def dequeue(self) -> typing.Dict[typing.Any, typing.Any]:
+    async def dequeue(self) -> protocol.Message:
         return await self.queue.get()

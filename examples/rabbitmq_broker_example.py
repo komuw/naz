@@ -94,25 +94,25 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
             setattr(self, "connection", connection)
             setattr(self, "channel", channel)
 
-    async def enqueue(self, item):
+    async def enqueue(self, message: naz.protocol.Message) -> None:
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="naz-rabbitmq-thread-pool"
         ) as executor:
             await self._get_loop().run_in_executor(
-                executor, functools.partial(self.blocking_enqueue, item=item)
+                executor, functools.partial(self.blocking_enqueue, message=message)
             )
 
-    def blocking_enqueue(self, item):
+    def blocking_enqueue(self, message):
         self.connect()
         self.channel.publish(
             exchange=self.exchange,
             routing_key=self.queue_name,
-            body=json.dumps(item),
+            body=message.json(),
             properties=self.properties,
             mandatory=True,
         )
 
-    async def dequeue(self):
+    async def dequeue(self) -> naz.protocol.Message:
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="naz-rabbitmq-thread-pool"
         ) as executor:
@@ -125,13 +125,13 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
                 else:
                     await asyncio.sleep(5)
 
-    def blocking_dequeue(self):
+    def blocking_dequeue(self) -> naz.protocol.Message:
         self.connect()
         method_frame, _, body = self.channel.basic_get(self.queue_name)
         if body and method_frame:
             self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
             item = json.loads(body.decode())
-            return item
+            return naz.protocol.Message(**item)
         else:
             return None
 

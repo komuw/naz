@@ -1707,7 +1707,7 @@ class Client:
                     )
 
                 try:
-                    item_to_dequeue = await self.broker.dequeue()
+                    proto_msg = await self.broker.dequeue()
                 except Exception as e:
                     dequeue_retry_count += 1
                     poll_queue_interval = self._retry_after(dequeue_retry_count)
@@ -1734,19 +1734,19 @@ class Client:
                 # we didn't fail to dequeue a message
                 dequeue_retry_count = 0
                 try:
-                    log_id = item_to_dequeue["log_id"]
-                    item_to_dequeue["version"]  # version is a required field
-                    smpp_command = item_to_dequeue["smpp_command"]
-                    hook_metadata = item_to_dequeue.get("hook_metadata", "")
+                    log_id = proto_msg.log_id
+                    proto_msg.version  # version is a required field
+                    smpp_command = proto_msg.smpp_command
+                    hook_metadata = proto_msg.hook_metadata if proto_msg.hook_metadata else ""
                     if smpp_command == SmppCommand.SUBMIT_SM:
-                        short_message = item_to_dequeue["short_message"]
-                        source_addr = item_to_dequeue["source_addr"]
-                        destination_addr = item_to_dequeue["destination_addr"]
+                        short_message = proto_msg.short_message
+                        source_addr = proto_msg.source_addr
+                        destination_addr = proto_msg.destination_addr
                         full_pdu = await self._build_submit_sm_pdu(
                             short_message, log_id, hook_metadata, source_addr, destination_addr
                         )
                     else:
-                        full_pdu = item_to_dequeue["pdu"]
+                        full_pdu = self.codec_class.encode(proto_msg.pdu)
                 except KeyError as e:
                     e = KeyError(
                         "enqueued message/object is missing required field: {}".format(str(e))
@@ -1780,7 +1780,7 @@ class Client:
                 )
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
-                    return item_to_dequeue
+                    return proto_msg
             else:
                 # throttle_handler didn't allow us to send request.
                 self._log(
