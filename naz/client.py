@@ -236,6 +236,12 @@ class Client:
                 "pid": self._PID,
             }
         )
+        if logger is not None:
+            self.logger = logger
+        else:
+            self.logger = log.SimpleLogger("naz.client")
+        self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
+        self._sanity_check_logger()
 
         if codec_class is not None:
             self.codec_class = codec_class
@@ -312,13 +318,6 @@ class Client:
 
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
-
-        if logger is not None:
-            self.logger = logger
-        else:
-            self.logger = log.SimpleLogger("naz.client")
-        self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
-        self._sanity_check_logger()
 
         if rateLimiter is not None:
             self.rateLimiter = rateLimiter
