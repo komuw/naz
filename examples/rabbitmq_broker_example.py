@@ -1,5 +1,4 @@
 import os
-import json
 import typing
 import asyncio
 import functools
@@ -130,7 +129,7 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
         method_frame, _, body = self.channel.basic_get(self.queue_name)
         if body and method_frame:
             self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
-            item = json.loads(body.decode())
+            item = body.decode()
             return naz.protocol.Message.from_json(item)
         else:
             return None
