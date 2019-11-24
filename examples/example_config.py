@@ -1,4 +1,5 @@
 import naz
+import random
 from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
 from pythonfuzz.main import PythonFuzz
 
@@ -25,13 +26,33 @@ client = naz.Client(
 @PythonFuzz
 def fuzz(buf):
     # try:
-    print("\n\n\t buf   ", buf)
-    asyncio.run(asyncMain(buf=buf))
+    smpp_command = random.choice(
+        [
+            naz.SmppCommand.BIND_TRANSCEIVER,
+            naz.SmppCommand.BIND_TRANSCEIVER_RESP,
+            naz.SmppCommand.BIND_TRANSMITTER,
+            naz.SmppCommand.BIND_RECEIVER,
+            naz.SmppCommand.naz.SmppCommand.UNBIND,
+            naz.SmppCommand.naz.SmppCommand.UNBIND_RESP,
+            naz.SmppCommand.naz.SmppCommand.SUBMIT_SM,
+            naz.SmppCommand.SUBMIT_SM_RESP,
+            naz.SmppCommand.DELIVER_SM,
+            naz.SmppCommand.DELIVER_SM_RESP,
+            naz.SmppCommand.ENQUIRE_LINK,
+            naz.SmppCommand.ENQUIRE_LINK_RESP,
+            naz.SmppCommand.GENERIC_NACK,
+        ]
+    )
+
+    print("\n\n\t buf: ", buf)
+    print("smpp_command: ", smpp_command)
+    print()
+    asyncio.run(asyncMain(buf=buf, smpp_command=smpp_command))
     # except UnicodeDecodeError:
     #     pass
 
 
-async def asyncMain(buf):
+async def asyncMain(buf, smpp_command):
     # _string = "zz"
 
     # zzz = buf.decode()
@@ -43,7 +64,7 @@ async def asyncMain(buf):
 
     # 2.
     await send_data(
-        smpp_command="smpp_command", msg=buf, log_id="log_id", hook_metadata="hook_metadata"
+        smpp_command=smpp_command, msg=buf, log_id="log_id", hook_metadata="hook_metadata"
     )
 
     # 3.
@@ -52,7 +73,7 @@ async def asyncMain(buf):
     # 4.
     await command_handlers(
         pdu=buf,
-        body_data=body_data,
+        body_data=buf,
         smpp_command=smpp_command,
         command_status_value=5,
         sequence_number=78,
