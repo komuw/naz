@@ -1,7 +1,6 @@
 import json
 import typing
 
-from . import state
 from . import nazcodec
 
 
