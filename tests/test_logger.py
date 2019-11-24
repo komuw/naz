@@ -66,28 +66,28 @@ class TestLogger(TestCase):
             self.assertIn("JayZ", content)
 
 
-class KVlogger(naz.log.BaseLogger):
+class KVlogger(logging.Logger):
     """
     A simple implementation of a key=value
     log renderer.
     """
 
-    def __init__(self):
-        self.logger = logging.getLogger("myKVlogger")
+    def __init__(self, name, level=logging.NOTSET):
+        super(KVlogger, self).__init__(name, level)
         handler = logging.StreamHandler()
         formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
-        self.logger.setLevel("DEBUG")
+        self.addHandler(handler)
+        self.setLevel("DEBUG")
 
-    def bind(self, level, log_metadata):
-        pass
+    def log(self, level, msg, *args, **kwargs):
+        new_msg = self._process_msg(msg)
+        return super(KVlogger, self).log(level, new_msg, *args, **kwargs)
 
-    def log(self, level, log_data):
+    def _process_msg(self, message):
         # implementation of key=value log renderer
-        message = ", ".join("{0}={1}".format(k, v) for k, v in log_data.items())
-        self.logger.log(level, message)
+        new_msg = ", ".join("{0}={1}".format(k, v) for k, v in message.items())
+        return new_msg
 
 
 class TestCustomLogger(TestCase):
@@ -99,20 +99,17 @@ class TestCustomLogger(TestCase):
     """
 
     def setUp(self):
-        self.kvLog = KVlogger()
+        self.kvLog = KVlogger("TestCustomLogger")
 
     def tearDown(self):
         pass
-
-    def test_can_bind(self):
-        self.kvLog.bind(level="INFO", log_metadata={"customer_id": "34541"})
 
     def test_can_log_dict(self):
         log_id = 234_255
         now = datetime.datetime.now()
         self.kvLog.log(
             level=logging.WARN,
-            log_data={"event": "myEvent", "stage": "start", "log_id": log_id, "now": now},
+            msg={"event": "myEvent", "stage": "start", "log_id": log_id, "now": now},
         )
 
 

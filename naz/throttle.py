@@ -74,7 +74,7 @@ class SimpleThrottleHandler(BaseThrottleHandler):
         sample_size: float = 50.00,
         deny_request_at: float = 1.00,
         throttle_wait: float = 3.00,
-        logger: typing.Union[None, log.BaseLogger] = None,
+        logger: typing.Union[None, logging.Logger] = None,
     ) -> None:
         """
         Parameters:
@@ -107,9 +107,9 @@ class SimpleThrottleHandler(BaseThrottleHandler):
                     type(throttle_wait)
                 )
             )
-        if not isinstance(logger, (type(None), log.BaseLogger)):
+        if not isinstance(logger, (type(None), logging.Logger)):
             raise ValueError(
-                "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
+                "`logger` should be of type:: `None` or `logging.Logger` You entered: {0}".format(
                     type(logger)
                 )
             )
