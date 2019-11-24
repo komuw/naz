@@ -1,9 +1,9 @@
-import enum
 import typing
 
+# TODO: try and turn these classes to enum
 
-@enum.unique
-class SmppSessionState(enum.Enum):
+
+class SmppSessionState:
     """
     Represensts the states in which an SMPP session can be in.
     """
@@ -20,8 +20,7 @@ class SmppSessionState(enum.Enum):
     CLOSED: str = "CLOSED"
 
 
-@enum.unique
-class SmppCommand(enum.Enum):
+class SmppCommand:
     """
     Represensts the various SMPP commands.
     """
@@ -89,7 +88,6 @@ class CommandStatus(typing.NamedTuple):
     description: str
 
 
-# TODO: turn this to enum
 class SmppCommandStatus:
     """
     Represensts the various SMPP commands statuses.
@@ -327,7 +325,6 @@ class DataCoding(typing.NamedTuple):
     description: str
 
 
-# TODO: turn this to enum
 class SmppDataCoding:
     """
     Represensts the various SMPP data encodings.
@@ -399,8 +396,7 @@ class SmppDataCoding:
     # 0b1111xxxx GSM message class control - see [GSM 03.38]
 
 
-@enum.unique
-class SmppOptionalTag(enum.Enum):
+class SmppOptionalTag:
     """
     Represensts the various SMPP Optional Parameter Tags.
     """

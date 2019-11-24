@@ -29,7 +29,7 @@ class Message:
     def __init__(
         self,
         version: int,
-        smpp_command: state.SmppCommand,
+        smpp_command: str,
         log_id: str,
         pdu: typing.Union[None, bytes] = None,
         codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
@@ -75,7 +75,7 @@ class Message:
     def _validate_protocol_args(
         self,
         version: int,
-        smpp_command: state.SmppCommand,
+        smpp_command: str,
         log_id: str,
         pdu: typing.Union[None, bytes],
         codec_class: typing.Union[None, nazcodec.BaseNazCodec],
@@ -88,9 +88,9 @@ class Message:
             raise ValueError(
                 "`version` should be of type:: `int` You entered: {0}".format(type(version))
             )
-        if not isinstance(smpp_command, state.SmppCommand):
+        if not isinstance(smpp_command, str):
             raise ValueError(
-                "`smpp_command` should be of type:: `naz.state.SmppCommand` You entered: {0}".format(
+                "`smpp_command` should be of type:: `str` You entered: {0}".format(
                     type(smpp_command)
                 )
             )
@@ -147,7 +147,7 @@ class Message:
         return json.dumps(
             {
                 "version": self.version,
-                "smpp_command": self.smpp_command.value,
+                "smpp_command": self.smpp_command,
                 "log_id": self.log_id,
                 "pdu": self.codec_class.decode(self.pdu),
                 "short_message": self.short_message,

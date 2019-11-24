@@ -1,6 +1,7 @@
 # do not to pollute the global namespace.
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
+import json
 from unittest import TestCase
 
 import naz
@@ -47,4 +48,10 @@ class TestProtocol(TestCase):
             pdu=b"pdu",
             codec_class=naz.nazcodec.SimpleNazCodec(encoding="utf-8"),
         )
-        print(proto.json())
+
+        _in_json = proto.json()
+        _in_dict = json.loads(_in_json)
+        _in_dict["codec_class"] = proto.codec_class
+        _in_dict["pdu"] = proto.codec_class.encode(_in_dict["pdu"])
+
+        self.assertEqual(type(proto), type(naz.protocol.Message(**_in_dict)))
