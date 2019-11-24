@@ -239,8 +239,8 @@ class TestClient(TestCase):
                 smsc_port=2775,
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
-                encoding=encoding,
                 broker=self.broker,
+                codec_class=naz.nazcodec.SimpleNazCodec(encoding=encoding),
             )
 
         self.assertRaises(ValueError, mock_create_client)
