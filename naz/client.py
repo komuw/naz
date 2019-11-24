@@ -1746,7 +1746,10 @@ class Client:
                             short_message, log_id, hook_metadata, source_addr, destination_addr
                         )
                     else:
-                        full_pdu = self.codec_class.encode(proto_msg.pdu)
+                        if typing.TYPE_CHECKING:
+                            # make mypy happy; https://github.com/python/mypy/issues/4805
+                            assert isinstance(proto_msg.pdu, bytes)
+                        full_pdu = proto_msg.pdu
                 except KeyError as e:
                     e = KeyError(
                         "enqueued message/object is missing required field: {}".format(str(e))
