@@ -94,7 +94,7 @@ class ExampleRedisBroker(naz.broker.BaseBroker):
             return self._redis
         # cache
         self._redis = await aioredis.create_redis_pool(
-            address=("localhost", 6379), db=0, minsize=1, maxsize=1000, timeout=self.timeout
+            address=("localhost", 6379), db=0, minsize=1, maxsize=10, timeout=self.timeout
         )
         return self._redis
 
