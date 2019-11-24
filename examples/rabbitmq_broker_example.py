@@ -1,5 +1,4 @@
 import os
-import json
 import typing
 import asyncio
 import functools
@@ -94,25 +93,25 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
             setattr(self, "connection", connection)
             setattr(self, "channel", channel)
 
-    async def enqueue(self, item):
+    async def enqueue(self, message: naz.protocol.Message) -> None:
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="naz-rabbitmq-thread-pool"
         ) as executor:
             await self._get_loop().run_in_executor(
-                executor, functools.partial(self.blocking_enqueue, item=item)
+                executor, functools.partial(self.blocking_enqueue, message=message)
             )
 
-    def blocking_enqueue(self, item):
+    def blocking_enqueue(self, message):
         self.connect()
         self.channel.publish(
             exchange=self.exchange,
             routing_key=self.queue_name,
-            body=json.dumps(item),
+            body=message.to_json(),
             properties=self.properties,
             mandatory=True,
         )
 
-    async def dequeue(self):
+    async def dequeue(self) -> naz.protocol.Message:
         with concurrent.futures.ThreadPoolExecutor(
             thread_name_prefix="naz-rabbitmq-thread-pool"
         ) as executor:
@@ -125,13 +124,13 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
                 else:
                     await asyncio.sleep(5)
 
-    def blocking_dequeue(self):
+    def blocking_dequeue(self) -> naz.protocol.Message:
         self.connect()
         method_frame, _, body = self.channel.basic_get(self.queue_name)
         if body and method_frame:
             self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
-            item = json.loads(body.decode())
-            return item
+            item = body.decode()
+            return naz.protocol.Message.from_json(item)
         else:
             return None
 
@@ -147,15 +146,18 @@ cli = naz.Client(
     enquire_link_interval=17.00,
 )
 
-item_to_enqueue = {
-    "version": "1",
-    "smpp_command": naz.SmppCommand.SUBMIT_SM,
-    "short_message": "Hello World",
-    "log_id": "myid12345",
-    "source_addr": "254722111111",
-    "destination_addr": "254722999999",
-}
-loop.run_until_complete(broker.enqueue(item_to_enqueue))
+loop.run_until_complete(
+    broker.enqueue(
+        naz.protocol.Message(
+            version=1,
+            smpp_command=naz.SmppCommand.SUBMIT_SM,
+            short_message="Hello World",
+            log_id="myid1234",
+            source_addr="254722111111",
+            destination_addr="254722999999",
+        )
+    )
+)
 
 try:
     # 1. connect to the SMSC host

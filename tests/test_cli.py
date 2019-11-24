@@ -41,13 +41,12 @@ NAZ_CLIENT = naz.Client(
     system_id="smppclient1",
     password="password",
     broker=ExampleRedisBroker(),
-    encoding="gsm0338",
     sequence_generator=MySeqGen(),
     loglevel="INFO",
     log_metadata={"environment": "production", "release": "canary"},
-    codec_errors_level="ignore",
     enquire_link_interval=30.00,
     rateLimiter=MyRateLimiter(),
+    codec_class=naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="ignore"),
 )
 
 BAD_NAZ_CLIENT = MySeqGen()

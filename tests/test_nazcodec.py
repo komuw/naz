@@ -43,81 +43,86 @@ class TestNazCodec(TestCase):
         python -m unittest -v tests.test_nazcodec.TestNazCodec.test_something
     """
 
-    def setUp(self):
-        self.codec = naz.nazcodec.SimpleNazCodec()
-
     def test_byte_encode_guard(self):
-        self.assertRaises(
-            naz.nazcodec.NazCodecException, self.codec.encode, b"some bytes", "utf-8", "strict"
-        )
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-8", errors_level="strict")
+        self.assertRaises(naz.nazcodec.NazCodecException, codec.encode, b"some bytes")
 
     def test_string_decode_guard(self):
-        self.assertRaises(
-            naz.nazcodec.NazCodecException, self.codec.decode, "unicode", "utf-8", "strict"
-        )
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-8", errors_level="strict")
+        self.assertRaises(naz.nazcodec.NazCodecException, codec.decode, "unicode")
 
     def test_default_encoding(self):
-        self.assertEqual(self.codec.encode("a", "utf-8", "strict"), b"a")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-8", errors_level="strict")
+        self.assertEqual(codec.encode("a"), b"a")
 
     def test_default_decoding(self):
-        self.assertEqual(self.codec.decode(b"a", "utf-8", "strict"), "a")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-8", errors_level="strict")
+        self.assertEqual(codec.decode(b"a"), "a")
 
     def test_encode_utf8(self):
-        self.assertEqual(self.codec.encode("Zoë", "utf-8", "strict"), b"Zo\xc3\xab")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-8", errors_level="strict")
+        self.assertEqual(codec.encode("Zoë"), b"Zo\xc3\xab")
 
     def test_decode_utf8(self):
-        self.assertEqual(self.codec.decode(b"Zo\xc3\xab", "utf-8", "strict"), "Zoë")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-8", errors_level="strict")
+        self.assertEqual(codec.decode(b"Zo\xc3\xab"), "Zoë")
 
     def test_encode_utf16be(self):
-        self.assertEqual(self.codec.encode("Zoë", "utf-16be", "strict"), b"\x00Z\x00o\x00\xeb")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-16be", errors_level="strict")
+        self.assertEqual(codec.encode("Zoë"), b"\x00Z\x00o\x00\xeb")
 
     def test_decode_utf16be(self):
-        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "utf-16be", "strict"), "Zoë")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="utf-16be", errors_level="strict")
+        self.assertEqual(codec.decode(b"\x00Z\x00o\x00\xeb"), "Zoë")
 
     def test_encode_ucs2(self):
-        self.assertEqual(self.codec.encode("Zoë", "ucs2", "strict"), b"\x00Z\x00o\x00\xeb")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="ucs2", errors_level="strict")
+        self.assertEqual(codec.encode("Zoë"), b"\x00Z\x00o\x00\xeb")
 
     def test_decode_ucs2(self):
-        self.assertEqual(self.codec.decode(b"\x00Z\x00o\x00\xeb", "ucs2", "strict"), "Zoë")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="ucs2", errors_level="strict")
+        self.assertEqual(codec.decode(b"\x00Z\x00o\x00\xeb"), "Zoë")
 
     def test_encode_gsm0338(self):
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="strict")
         self.assertEqual(
-            self.codec.encode("HÜLK", "gsm0338", "strict"),
-            "".join([chr(code) for code in [72, 94, 76, 75]]).encode(),
+            codec.encode("HÜLK"), "".join([chr(code) for code in [72, 94, 76, 75]]).encode()
         )
 
     def test_encode_gsm0338_extended(self):
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="strict")
         self.assertEqual(
-            self.codec.encode("foo €", "gsm0338", "strict"),
+            codec.encode("foo €"),
             "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(),
         )
 
     def test_decode_gsm0338_extended(self):
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="strict")
         self.assertEqual(
-            self.codec.decode(
-                "".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode(),
-                "gsm0338",
-                "strict",
-            ),
+            codec.decode("".join([chr(code) for code in [102, 111, 111, 32, 27, 101]]).encode()),
             "foo €",
         )
 
     def test_encode_gsm0338_strict(self):
-        self.assertRaises(UnicodeEncodeError, self.codec.encode, "Zoë", "gsm0338", "strict")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="strict")
+        self.assertRaises(UnicodeEncodeError, codec.encode, "Zoë")
 
     def test_encode_gsm0338_ignore(self):
-        self.assertEqual(self.codec.encode("Zoë", "gsm0338", "ignore"), b"Zo")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="ignore")
+        self.assertEqual(codec.encode("Zoë"), b"Zo")
 
     def test_encode_gsm0338_replace(self):
-        self.assertEqual(self.codec.encode("Zoë", "gsm0338", "replace"), b"Zo?")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="replace")
+        self.assertEqual(codec.encode("Zoë"), b"Zo?")
 
     def test_decode_gsm0338_strict(self):
-        self.assertRaises(
-            UnicodeDecodeError, self.codec.decode, "Zoë".encode("utf-8"), "gsm0338", "strict"
-        )
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="strict")
+        self.assertRaises(UnicodeDecodeError, codec.decode, "Zoë".encode("utf-8"))
 
     def test_decode_gsm0338_ignore(self):
-        self.assertEqual(self.codec.decode("Zoë".encode("utf-8"), "gsm0338", "ignore"), "Zo")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="ignore")
+        self.assertEqual(codec.decode("Zoë".encode("utf-8")), "Zo")
 
     def test_decode_gsm0338_replace(self):
-        self.assertEqual(self.codec.decode("Zoë".encode("utf-8"), "gsm0338", "replace"), "Zo??")
+        codec = naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="replace")
+        self.assertEqual(codec.decode("Zoë".encode("utf-8")), "Zo??")

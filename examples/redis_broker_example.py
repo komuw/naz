@@ -1,5 +1,4 @@
 import os
-import json
 import asyncio
 
 import naz
@@ -32,17 +31,17 @@ class RedisExampleBroker(naz.broker.BaseBroker):
         )
         return self._redis
 
-    async def enqueue(self, item):
+    async def enqueue(self, message: naz.protocol.Message) -> None:
         _redis = await self._get_redis()
-        await _redis.lpush(self.queue_name, json.dumps(item))
+        await _redis.lpush(self.queue_name, message.to_json())
 
-    async def dequeue(self):
+    async def dequeue(self) -> naz.protocol.Message:
         _redis = await self._get_redis()
         while True:
             item = await _redis.brpop(self.queue_name, timeout=self.timeout)
             if item:
-                dequed_item = json.loads(item[1].decode())
-                return dequed_item
+                dequed_item = item[1].decode()
+                return naz.protocol.Message.from_json(dequed_item)
             else:
                 # print("\n\t queue empty. sleeping.\n")
                 await asyncio.sleep(5)
@@ -61,15 +60,18 @@ cli = naz.Client(
 # queue messages to send
 for i in range(0, 5):
     print("submit_sm round:", i)
-    item_to_enqueue = {
-        "version": "1",
-        "smpp_command": naz.SmppCommand.SUBMIT_SM,
-        "short_message": "Hello World-{0}".format(str(i)),
-        "log_id": "myid12345",
-        "source_addr": "254722111111",
-        "destination_addr": "254722999999",
-    }
-    loop.run_until_complete(broker.enqueue(item_to_enqueue))
+    loop.run_until_complete(
+        broker.enqueue(
+            naz.protocol.Message(
+                version=1,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                short_message="Hello World-{0}".format(str(i)),
+                log_id="myid1234-{0}".format(str(i)),
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
+        )
+    )
 
 
 try:

@@ -16,15 +16,18 @@ cli = naz.Client(
 # queue messages to send
 for i in range(0, 4):
     print("submit_sm round:", i)
-    item_to_enqueue = {
-        "version": "1",
-        "smpp_command": naz.SmppCommand.SUBMIT_SM,
-        "short_message": "Hello World-{0}".format(str(i)),
-        "log_id": "myid12345",
-        "source_addr": "254722111111",
-        "destination_addr": "254722999999",
-    }
-    loop.run_until_complete(broker.enqueue(item_to_enqueue))
+    loop.run_until_complete(
+        broker.enqueue(
+            naz.protocol.Message(
+                version=1,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                short_message="Hello World-{0}".format(str(i)),
+                log_id="myid1234-{0}".format(str(i)),
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
+        )
+    )
 
     # altenatively::
     # loop.run_until_complete(

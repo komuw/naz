@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.broker &mdash; naz v0.7.3 documentation</title>
+  <title>naz.broker &mdash; naz v0.7.4 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.3
+                v0.7.4
               </div>
             
           
@@ -90,6 +90,7 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
@@ -164,7 +165,8 @@
   <h1>Source code for naz.broker</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">protocol</span>
 
 
 <div class="viewcode-block" id="BaseBroker"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker">[docs]</a><span class="k">class</span> <span class="nc">BaseBroker</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
@@ -177,22 +179,28 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="BaseBroker.enqueue"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker.enqueue">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        enqueue/save an item.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            item: The item to be enqueued/saved</span>
+<span class="sd">                  The item/message is a `naz.protocol.Message` class instance;</span>
+<span class="sd">                  It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.</span>
+<span class="sd">                  `naz.protocol.Message` has a `to_json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;enqueue method must be implemented.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="BaseBroker.dequeue"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker.dequeue">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        dequeue an item.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            item that was dequeued</span>
+<span class="sd">            item that was dequeued.</span>
+<span class="sd">            The item has to be returned as a `naz.protocol.Message` class instance.</span>
+<span class="sd">            It is up to the broker implementation to do the de-serialization(if neccesary).</span>
+<span class="sd">            `naz.protocol.Message` has a `from_json()` method that you can use to de-serialize a json string into `naz.protocol.Message` class instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;dequeue method must be implemented.&quot;</span><span class="p">)</span></div></div>
 
@@ -215,10 +223,10 @@
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">queues</span><span class="o">.</span><span class="n">Queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="n">maxsize</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleBroker.enqueue"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.enqueue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+<div class="viewcode-block" id="SimpleBroker.enqueue"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.enqueue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleBroker.dequeue"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.dequeue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+<div class="viewcode-block" id="SimpleBroker.dequeue"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.dequeue">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">:</span>
         <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span></div></div>
 </pre></div>
 

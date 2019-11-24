@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Example demo of using naz &mdash; naz v0.7.3 documentation</title>
+  <title>Example demo of using naz &mdash; naz v0.7.4 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.3
+                v0.7.4
               </div>
             
           
@@ -92,6 +92,7 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
@@ -202,7 +203,6 @@ naz-cli --version
 <div class="line">Let’s do that, we’ll create a file called <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_broker.py</span></code></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 
 <span class="kn">import</span> <span class="nn">naz</span>
@@ -236,17 +236,17 @@ naz-cli --version
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
 
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">):</span>
         <span class="n">_redis</span> <span class="o">=</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
-        <span class="n">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">lpush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+        <span class="n">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">lpush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 
     <span class="n">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">_redis</span> <span class="o">=</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
         <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
             <span class="n">item</span> <span class="o">=</span> <span class="n">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">brpop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
-                <span class="n">dequed_item</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-                <span class="k">return</span> <span class="n">dequed_item</span>
+                <span class="n">dequed_item</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">dequed_item</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>

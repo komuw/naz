@@ -11,6 +11,7 @@ import logging
 from . import log
 from . import hooks
 from . import nazcodec
+from . import protocol
 from . import sequence
 from . import throttle
 from . import correlater
@@ -79,7 +80,6 @@ class Client:
         addr_ton: int = 0,
         addr_npi: int = 0,
         address_range: str = "",
-        encoding: str = "gsm0338",
         interface_version: int = 34,
         service_type: str = "CMT",  # section 5.2.11
         source_addr_ton: int = 0x00000001,  # section 5.2.5
@@ -106,7 +106,6 @@ class Client:
         loglevel: str = "INFO",
         log_metadata: typing.Union[None, dict] = None,
         codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
-        codec_errors_level: str = "strict",
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
@@ -139,7 +138,6 @@ class Client:
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
             sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
-            encoding:	encoding1 used to encode messages been sent to SMSC
             sequence_generator:	python class instance used to generate sequence_numbers
             broker:	python class instance implementing some queueing mechanism. \
                 messages to be sent to SMSC are queued using the said mechanism before been sent
@@ -148,7 +146,6 @@ class Client:
             loglevel:	the level at which to log
             log_metadata: metadata that will be included in all log statements
             codec_class: python class instance to be used to encode/decode messages
-            codec_errors_level:	same meaning as the errors argument to pythons' encode method as defined here
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
@@ -173,7 +170,6 @@ class Client:
             addr_ton=addr_ton,
             addr_npi=addr_npi,
             address_range=address_range,
-            encoding=encoding,
             interface_version=interface_version,
             service_type=service_type,
             source_addr_ton=source_addr_ton,
@@ -193,7 +189,6 @@ class Client:
             loglevel=loglevel,
             log_metadata=log_metadata,
             codec_class=codec_class,
-            codec_errors_level=codec_errors_level,
             rateLimiter=rateLimiter,
             hook=hook,
             sequence_generator=sequence_generator,
@@ -220,7 +215,6 @@ class Client:
         self.addr_ton = addr_ton
         self.addr_npi = addr_npi
         self.address_range = address_range
-        self.encoding = encoding
 
         if sequence_generator is not None:
             self.sequence_generator = sequence_generator
@@ -243,7 +237,6 @@ class Client:
             }
         )
 
-        self.codec_errors_level = codec_errors_level
         if codec_class is not None:
             self.codec_class = codec_class
         else:
@@ -315,7 +308,7 @@ class Client:
             SmppCommand.RESERVED_FOR_SMSC_VENDOR_B: [0x80010200, 0x800102FF],
         }
 
-        self.data_coding = self._find_data_coding(self.encoding)
+        self.data_coding = self._find_data_coding(self.codec_class.encoding)
 
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
@@ -354,7 +347,7 @@ class Client:
         # This version will enable naz to be able to evolve in future;
         # eg a future version of naz could add/remove the number of required items in a message.
         # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
-        self.naz_message_protocol_version = "1"
+        self.naz_message_protocol_version = 1
 
         self.current_session_state = SmppSessionState.CLOSED
         self._header_pdu_length = 16
@@ -379,7 +372,6 @@ class Client:
         addr_ton: int,
         addr_npi: int,
         address_range: str,
-        encoding: str,
         interface_version: int,
         service_type: str,
         source_addr_ton: int,
@@ -399,7 +391,6 @@ class Client:
         loglevel: str,
         log_metadata: typing.Union[None, dict],
         codec_class: typing.Union[None, nazcodec.BaseNazCodec],
-        codec_errors_level: str,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
@@ -479,12 +470,6 @@ class Client:
                     "`address_range` should be of type:: `str` You entered: {0}".format(
                         type(address_range)
                     )
-                )
-            )
-        if not isinstance(encoding, str):
-            errors.append(
-                ValueError(
-                    "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
                 )
             )
         if not isinstance(interface_version, int):
@@ -643,14 +628,6 @@ class Client:
                     )
                 )
             )
-        if not isinstance(codec_errors_level, str):
-            errors.append(
-                ValueError(
-                    "`codec_errors_level` should be of type:: `str` You entered: {0}".format(
-                        type(codec_errors_level)
-                    )
-                )
-            )
         if not isinstance(rateLimiter, (type(None), ratelimiter.BaseRateLimiter)):
             errors.append(
                 ValueError(
@@ -748,7 +725,7 @@ class Client:
 
     @staticmethod
     def _search_by_command_status_value(
-        command_status_value: int
+        command_status_value: int,
     ) -> typing.Union[None, CommandStatus]:
         # TODO: find a cheaper(better) way of doing this
         for key, val in SmppCommandStatus.__dict__.items():
@@ -784,7 +761,7 @@ class Client:
         the returned string is safe to log.
         """
         try:
-            log_msg = self.codec_class.decode(msg, self.encoding, self.codec_errors_level)
+            log_msg = self.codec_class.decode(msg)
             if self.password in log_msg:
                 # do not log password, redact it from logs.
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
@@ -855,16 +832,16 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.system_id, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(self.system_id)
             + chr(0).encode()
-            + self.codec_class.encode(self.password, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(self.password)
             + chr(0).encode()
-            + self.codec_class.encode(self.system_type, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(self.system_type)
             + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
-            + self.codec_class.encode(self.address_range, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(self.address_range)
             + chr(0).encode()
         )
 
@@ -1075,14 +1052,16 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        item_to_enqueue = {
-            "version": self.naz_message_protocol_version,
-            "log_id": log_id,
-            "pdu": full_pdu,
-            "smpp_command": smpp_command,
-        }
         try:
-            await self.broker.enqueue(item_to_enqueue)
+            await self.broker.enqueue(
+                protocol.Message(
+                    version=self.naz_message_protocol_version,
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    pdu=full_pdu,
+                    codec_class=self.codec_class,
+                )
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1167,11 +1146,7 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = (
-            body
-            + self.codec_class.encode(message_id, self.encoding, self.codec_errors_level)
-            + chr(0).encode()
-        )
+        body = body + self.codec_class.encode(message_id) + chr(0).encode()
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
@@ -1181,14 +1156,16 @@ class Client:
         header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
 
         full_pdu = header + body
-        item_to_enqueue = {
-            "version": self.naz_message_protocol_version,
-            "log_id": log_id,
-            "pdu": full_pdu,
-            "smpp_command": smpp_command,
-        }
         try:
-            await self.broker.enqueue(item_to_enqueue)
+            await self.broker.enqueue(
+                protocol.Message(
+                    version=self.naz_message_protocol_version,
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    pdu=full_pdu,
+                    codec_class=self.codec_class,
+                )
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1270,16 +1247,17 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        item_to_enqueue = {
-            "version": self.naz_message_protocol_version,
-            "smpp_command": smpp_command,
-            "short_message": short_message,
-            "log_id": log_id,
-            "source_addr": source_addr,
-            "destination_addr": destination_addr,
-        }
         try:
-            await self.broker.enqueue(item_to_enqueue)
+            await self.broker.enqueue(
+                protocol.Message(
+                    version=self.naz_message_protocol_version,
+                    smpp_command=smpp_command,
+                    log_id=log_id,
+                    short_message=short_message,
+                    source_addr=source_addr,
+                    destination_addr=destination_addr,
+                )
+            )
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -1330,40 +1308,36 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        encoded_short_message = self.codec_class.encode(
-            short_message, self.encoding, self.codec_errors_level
-        )
+        encoded_short_message = self.codec_class.encode(short_message)
         sm_length = len(encoded_short_message)
 
         # body
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.service_type, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(self.service_type)
             + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
-            + self.codec_class.encode(source_addr, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(source_addr)
             + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
-            + self.codec_class.encode(destination_addr, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(destination_addr)
             + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
-            + self.codec_class.encode(
-                self.schedule_delivery_time, self.encoding, self.codec_errors_level
-            )
+            + self.codec_class.encode(self.schedule_delivery_time)
             + chr(0).encode()
-            + self.codec_class.encode(self.validity_period, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(self.validity_period)
             + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
             + struct.pack(">B", self.sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec_class.encode(short_message, self.encoding, self.codec_errors_level)
+            + self.codec_class.encode(short_message)
         )
 
         # header
@@ -1500,7 +1474,7 @@ class Client:
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
 
         if isinstance(msg, str):
-            msg = self.codec_class.encode(msg, self.encoding, self.codec_errors_level)
+            msg = self.codec_class.encode(msg)
         log_msg = self._msg_to_log(msg=msg)
         self._log(
             logging.INFO,
@@ -1660,7 +1634,7 @@ class Client:
 
     async def dequeue_messages(
         self, TESTING: bool = False
-    ) -> typing.Union[str, typing.Dict[typing.Any, typing.Any]]:
+    ) -> typing.Union[protocol.Message, typing.Dict[typing.Any, typing.Any]]:
         """
         In a loop; dequeues items from the :attr:`broker <Client.broker>` and sends them to SMSC.
 
@@ -1733,7 +1707,7 @@ class Client:
                     )
 
                 try:
-                    item_to_dequeue = await self.broker.dequeue()
+                    proto_msg = await self.broker.dequeue()
                 except Exception as e:
                     dequeue_retry_count += 1
                     poll_queue_interval = self._retry_after(dequeue_retry_count)
@@ -1760,19 +1734,22 @@ class Client:
                 # we didn't fail to dequeue a message
                 dequeue_retry_count = 0
                 try:
-                    log_id = item_to_dequeue["log_id"]
-                    item_to_dequeue["version"]  # version is a required field
-                    smpp_command = item_to_dequeue["smpp_command"]
-                    hook_metadata = item_to_dequeue.get("hook_metadata", "")
+                    log_id = proto_msg.log_id
+                    proto_msg.version  # version is a required field
+                    smpp_command = proto_msg.smpp_command
+                    hook_metadata = proto_msg.hook_metadata if proto_msg.hook_metadata else ""
                     if smpp_command == SmppCommand.SUBMIT_SM:
-                        short_message = item_to_dequeue["short_message"]
-                        source_addr = item_to_dequeue["source_addr"]
-                        destination_addr = item_to_dequeue["destination_addr"]
+                        short_message = proto_msg.short_message
+                        source_addr = proto_msg.source_addr
+                        destination_addr = proto_msg.destination_addr
                         full_pdu = await self._build_submit_sm_pdu(
                             short_message, log_id, hook_metadata, source_addr, destination_addr
                         )
                     else:
-                        full_pdu = item_to_dequeue["pdu"]
+                        if typing.TYPE_CHECKING:
+                            # make mypy happy; https://github.com/python/mypy/issues/4805
+                            assert isinstance(proto_msg.pdu, bytes)
+                        full_pdu = proto_msg.pdu
                 except KeyError as e:
                     e = KeyError(
                         "enqueued message/object is missing required field: {}".format(str(e))
@@ -1806,7 +1783,7 @@ class Client:
                 )
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
-                    return item_to_dequeue
+                    return proto_msg
             else:
                 # throttle_handler didn't allow us to send request.
                 self._log(
@@ -2213,9 +2190,7 @@ class Client:
             # It may be used at a later stage to query the status of a message, cancel
             # or replace the message.
             _message_id = body_data.replace(chr(0).encode(), b"")
-            smsc_message_id = self.codec_class.decode(
-                _message_id, self.encoding, self.codec_errors_level
-            )
+            smsc_message_id = self.codec_class.decode(_message_id)
             try:
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
@@ -2287,9 +2262,7 @@ class Client:
                     _tag_value = tag_value.replace(
                         chr(0).encode(), b""
                     )  # change variable names to make mypy happy
-                    t_value = self.codec_class.decode(
-                        _tag_value, self.encoding, self.codec_errors_level
-                    )
+                    t_value = self.codec_class.decode(_tag_value)
                     log_id, hook_metadata = await self.correlation_handler.get(
                         smpp_command=smpp_command,
                         sequence_number=sequence_number,
