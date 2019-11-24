@@ -24,42 +24,37 @@ class TestLogger(TestCase):
     def tearDown(self):
         pass
 
-    def test_can_bind(self):
-        self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
-
     def test_can_log_string(self):
-        self.logger.log(level=logging.WARN, log_data="can log string")
+        self.logger.log(level=logging.WARN, msg="can log string")
 
     def test_can_log_dict(self):
         log_id = 234_255
         now = datetime.datetime.now()
         self.logger.log(
             level=logging.WARN,
-            log_data={"event": "myEvent", "stage": "start", "log_id": log_id, "now": now},
+            msg={"event": "myEvent", "stage": "start", "log_id": log_id, "now": now},
         )
 
-    def test_bind_and_log_string(self):
-        self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
-        self.logger.log(level=logging.WARN, log_data="can log string")
+    def test_log_metadata(self):
+        logger = naz.log.SimpleLogger("myLogger", log_metadata={"customer_id": "34541"})
+        logger.log(level=logging.WARN, msg="can log string")
 
-    def test_bind_and_log_dict(self):
-        self.logger.bind(level="INFO", log_metadata={"customer_id": "34541"})
-        self.logger.log(level=logging.WARN, log_data={"name": "Magic Johnson"})
+    def test_metadata_and_log_dict(self):
+        logger = naz.log.SimpleLogger("myLogger", log_metadata={"customer_id": "34541"})
+        logger.log(level=logging.WARN, msg={"name": "Magic Johnson"})
 
     def test_custom_handler(self):
         with io.StringIO() as _temp_stream:
             _handler = logging.StreamHandler(stream=_temp_stream)
-            logger = naz.log.SimpleLogger("yo", handler=_handler)
-            logger.bind(level="INFO", log_metadata={"name": "JayZ"})
-            logger.log(level=logging.WARN, log_data={"someKey": "someValue"})
+            logger = naz.log.SimpleLogger("yo", handler=_handler, log_metadata={"name": "JayZ"})
+            logger.log(level=logging.WARN, msg={"someKey": "someValue"})
 
             self.assertIn("JayZ", _temp_stream.getvalue())
 
         _file_name = "/{0}/naz_test_custom_handler".format("tmp")  # fool bandit
         _handler = logging.FileHandler(filename=_file_name)
-        logger = naz.log.SimpleLogger("yolo", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"name": "JayZ"})
-        logger.log(level=logging.WARN, log_data={"someKey": "someValue"})
+        logger = naz.log.SimpleLogger("yolo", handler=_handler, log_metadata={"name": "JayZ"})
+        logger.log(level=logging.WARN, msg={"someKey": "someValue"})
 
         with open(_file_name) as f:
             content = f.read()
