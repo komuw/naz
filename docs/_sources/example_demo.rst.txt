@@ -38,7 +38,6 @@
 .. code-block:: python
 
     import os
-    import json
     import asyncio
 
     import naz
@@ -72,17 +71,17 @@
             )
             return self._redis
 
-        async def enqueue(self, item):
+        async def enqueue(self, message: naz.protocol.Message):
             _redis = await self._get_redis()
-            await _redis.lpush(self.queue_name, json.dumps(item))
+            await _redis.lpush(self.queue_name, message.to_json())
 
         async def dequeue(self):
             _redis = await self._get_redis()
             while True:
                 item = await _redis.brpop(self.queue_name, timeout=self.timeout)
                 if item:
-                    dequed_item = json.loads(item[1].decode())
-                    return dequed_item
+                    dequed_item = item[1].decode()
+                    return naz.protocol.Message.from_json(dequed_item)
                 else:
                     await asyncio.sleep(5)
 
