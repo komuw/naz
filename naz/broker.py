@@ -35,6 +35,7 @@ class BaseBroker(abc.ABC):
             item that was dequeued.
             The item has to be returned as a `naz.protocol.Message` class instance.
             It is up to the broker implementation to do the de-serialization(if neccesary).
+            `naz.protocol.Message` has a `from_json()` method that you can use to de-serialize a json string into `naz.protocol.Message` class instance.
         """
         raise NotImplementedError("dequeue method must be implemented.")
 
