@@ -17,7 +17,12 @@ class TestProtocol(TestCase):
 
     def test_success_instanciation(self):
         proto = naz.protocol.Message(
-            version=1, smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="some-log-id"
+            version=1,
+            smpp_command=naz.SmppCommand.SUBMIT_SM,
+            log_id="some-log-id",
+            short_message="Hello, thanks for shopping with us.",
+            source_addr="254722111111",
+            destination_addr="254722999999",
         )
         self.assertIsNotNone(proto)
 

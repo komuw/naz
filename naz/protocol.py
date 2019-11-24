@@ -10,6 +10,26 @@ from . import nazcodec
 
 
 class Message:
+    """
+    The message protocol for `naz`. It is the code representation of what
+    gets queued into a naz broker.
+
+    Usage:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        import naz
+        msg = naz.protocol.Message(
+            version=1,
+            smpp_command=naz.SmppCommand.SUBMIT_SM,
+            log_id="some-log-id",
+            short_message="Hello, thanks for shopping with us.",
+            source_addr="254722111111",
+            destination_addr="254722999999",
+        )
+    """
+
     def __init__(
         self,
         version: int,
@@ -22,6 +42,19 @@ class Message:
         destination_addr: typing.Union[None, str] = None,
         hook_metadata: typing.Union[None, str] = None,
     ) -> None:
+        """
+        Parameters:
+            version: This indicates the current version of the naz message protocol. A future version of `naz` may ship with a different message protocol.
+            smpp_command: any one of the SMSC commands eg submit_sm
+            log_id: a unique identify of this reque
+            pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.
+            codec_class: python class instance to be used to encode/decode messages. It should be a child class of `naz.nazcodec.BaseNazCodec`.
+                         You should only specify this, if you also specified `pdu` else you can leave it as None.
+            short_message: message to send to SMSC. It is mutually exclusive with `pdu`
+            source_addr: the identifier(eg msisdn) of the message sender.
+            destination_addr: the identifier(eg msisdn) of the message sender.
+            hook_metadata: a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.
+        """
         self._validate_protocol_args(
             version=version,
             smpp_command=smpp_command,
@@ -111,6 +144,10 @@ class Message:
             raise ValueError("You cannot specify `pdu` and not a `codec_class`")
 
     def json(self) -> str:
+        """
+        Serializes the message protocol into json. You can use this method if you would
+        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
+        """
         return json.dumps(
             {
                 "version": self.version,
