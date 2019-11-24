@@ -8,7 +8,6 @@ from logging import handlers
 
 class SimpleLogger(logging.Logger):
     """
-    This is an implementation of BaseLogger.
     It implements a structured logger that renders logs as a dict.
 
     example usage:
@@ -17,8 +16,6 @@ class SimpleLogger(logging.Logger):
     .. code-block:: python
 
         logger = SimpleLogger("myLogger")
-        logger.bind(level="INFO",
-                    log_metadata={"customer_id": "34541"})
         logger.log(logging.INFO,
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
@@ -171,8 +168,7 @@ class BreachHandler(handlers.MemoryHandler):
         import naz, logging
 
         _handler = naz.log.BreachHandler()
-        logger = naz.log.SimpleLogger("aha", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"id": "123"})
+        logger = naz.log.SimpleLogger("aha", handler=_handler, log_metadata={"id": "123"})
 
         logger.log(logging.INFO, {"name": "Jayz"})
         logger.log(logging.ERROR, {"msg": "Houston, we got 99 problems."})
