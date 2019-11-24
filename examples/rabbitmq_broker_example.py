@@ -131,7 +131,7 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
         if body and method_frame:
             self.channel.basic_ack(delivery_tag=method_frame.delivery_tag)
             item = json.loads(body.decode())
-            return naz.protocol.Message(**item)
+            return naz.protocol.Message.from_json(item)
         else:
             return None
 

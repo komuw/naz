@@ -42,7 +42,7 @@ class RedisExampleBroker(naz.broker.BaseBroker):
             item = await _redis.brpop(self.queue_name, timeout=self.timeout)
             if item:
                 dequed_item = json.loads(item[1].decode())
-                return naz.protocol.Message(**dequed_item)
+                return naz.protocol.Message.from_json(dequed_item)
             else:
                 # print("\n\t queue empty. sleeping.\n")
                 await asyncio.sleep(5)
