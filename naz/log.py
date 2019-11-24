@@ -28,12 +28,15 @@ class SimpleLogger(logging.Logger):
         logger_name: str,
         loglevel: str = "INFO",
         log_metadata: typing.Union[None, dict] = None,
+        handler: typing.Union[None, logging.Handler] = None,
     ) -> None:
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
             loglevel: the level at which to log
             log_metadata: metadata that will be included in all log statements
+            handler: python logging `handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ to be attached to this logger.
+                     by default, `logging.StreamHandler` is used.
         """
         super(SimpleLogger, self).__init__(name=logger_name, level=self._nameToLevel(loglevel))
 
@@ -57,13 +60,24 @@ class SimpleLogger(logging.Logger):
                     type(log_metadata)
                 )
             )
+        if not isinstance(handler, (type(None), logging.Handler)):
+            raise ValueError(
+                "`log_metadata` should be of type:: `None` or `logging.Handler` You entered: {0}".format(
+                    type(handler)
+                )
+            )
         self.logger_name = logger_name
         self.loglevel = loglevel.upper()
         if log_metadata is not None:
             self.log_metadata = log_metadata
         else:
             self.log_metadata = {}
-        self.handler = logging.StreamHandler()
+
+        if handler is not None:
+            self.handler = handler
+        else:
+            self.handler = logging.StreamHandler()
+
         self._set_logger_details()
 
     def _set_logger_details(self) -> None:

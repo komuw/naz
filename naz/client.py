@@ -140,7 +140,7 @@ class Client:
             broker:	python class instance implementing some queueing mechanism. \
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
-            logger: python class instance to be used for logging
+            logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
             codec_class: python class instance to be used to encode/decode messages
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
