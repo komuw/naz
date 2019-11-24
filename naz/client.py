@@ -2185,13 +2185,13 @@ class Client:
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number)
         elif smpp_command == SmppCommand.SUBMIT_SM_RESP:
-            # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
-            # This field contains the SMSC message_id of the submitted message.
-            # It may be used at a later stage to query the status of a message, cancel
-            # or replace the message.
-            _message_id = body_data.replace(chr(0).encode(), b"")
-            smsc_message_id = self.codec_class.decode(_message_id)
             try:
+                # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
+                # This field contains the SMSC message_id of the submitted message.
+                # It may be used at a later stage to query the status of a message, cancel
+                # or replace the message.
+                _message_id = body_data.replace(chr(0).encode(), b"")
+                smsc_message_id = self.codec_class.decode(_message_id)
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
                     sequence_number=sequence_number,
