@@ -102,9 +102,7 @@ class Client:
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
-        logger: typing.Union[None, log.BaseLogger] = None,
-        loglevel: str = "INFO",
-        log_metadata: typing.Union[None, dict] = None,
+        logger: typing.Union[None, logging.Logger] = None,
         codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
@@ -142,9 +140,7 @@ class Client:
             broker:	python class instance implementing some queueing mechanism. \
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
-            logger: python class instance to be used for logging
-            loglevel:	the level at which to log
-            log_metadata: metadata that will be included in all log statements
+            logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
             codec_class: python class instance to be used to encode/decode messages
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
@@ -186,8 +182,6 @@ class Client:
             sm_default_msg_id=sm_default_msg_id,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
-            loglevel=loglevel,
-            log_metadata=log_metadata,
             codec_class=codec_class,
             rateLimiter=rateLimiter,
             hook=hook,
@@ -222,20 +216,20 @@ class Client:
             self.sequence_generator = sequence.SimpleSequenceGenerator()
 
         self.max_sequence_number = 0x7FFFFFFF
-        self.loglevel = loglevel.upper()
 
-        if log_metadata is not None:
-            self.log_metadata = log_metadata
+        if logger is not None:
+            self.logger = logger
         else:
-            self.log_metadata = {}
-        self.log_metadata.update(
-            {
-                "smsc_host": self.smsc_host,
-                "system_id": system_id,
-                "client_id": self.client_id,
-                "pid": self._PID,
-            }
-        )
+            self.logger = log.SimpleLogger(
+                "naz.client",
+                log_metadata={
+                    "smsc_host": self.smsc_host,
+                    "system_id": system_id,
+                    "client_id": self.client_id,
+                    "pid": self._PID,
+                },
+            )
+        self._sanity_check_logger()
 
         if codec_class is not None:
             self.codec_class = codec_class
@@ -313,13 +307,6 @@ class Client:
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
-        if logger is not None:
-            self.logger = logger
-        else:
-            self.logger = log.SimpleLogger("naz.client")
-        self.logger.bind(level=self.loglevel, log_metadata=self.log_metadata)
-        self._sanity_check_logger()
-
         if rateLimiter is not None:
             self.rateLimiter = rateLimiter
         else:
@@ -387,9 +374,7 @@ class Client:
         replace_if_present_flag: int,
         sm_default_msg_id: int,
         enquire_link_interval: float,
-        logger: typing.Union[None, log.BaseLogger],
-        loglevel: str,
-        log_metadata: typing.Union[None, dict],
+        logger: typing.Union[None, logging.Logger],
         codec_class: typing.Union[None, nazcodec.BaseNazCodec],
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
@@ -590,33 +575,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(logger, (type(None), log.BaseLogger)):
+        if not isinstance(logger, (type(None), logging.Logger)):
             errors.append(
                 ValueError(
-                    "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
+                    "`logger` should be of type:: `None` or `logging.Logger` You entered: {0}".format(
                         type(logger)
-                    )
-                )
-            )
-        if not isinstance(loglevel, str):
-            errors.append(
-                ValueError(
-                    "`loglevel` should be of type:: `str` You entered: {0}".format(type(loglevel))
-                )
-            )
-        if loglevel.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            errors.append(
-                ValueError(
-                    """`loglevel` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
-                        loglevel
-                    )
-                )
-            )
-        if not isinstance(log_metadata, (type(None), dict)):
-            errors.append(
-                ValueError(
-                    "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
-                        type(log_metadata)
                     )
                 )
             )
@@ -1460,7 +1423,7 @@ class Client:
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
     ) -> None:
         """
-        Sends PDU's to SMSC through/over a network connection(down the wire).
+        Sends PDU's to SMSC over a network connection.
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         It also accts as a flow control method that interacts with the IO write buffer.
 
@@ -1814,7 +1777,7 @@ class Client:
 
     async def receive_data(self, TESTING: bool = False) -> typing.Union[None, bytes]:
         """
-        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
+        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`_parse_response_pdu <Client._parse_response_pdu>` method for parsing.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
@@ -2094,7 +2057,7 @@ class Client:
         Parameters:
             pdu: the full PDU as received from SMSC
             body_data: PDU body as received from SMSC
-            smpp_command: type of PDU been sent. eg bind_transceiver
+            smpp_command: type of PDU been received. eg bind_transceiver_resp
             command_status_value: the response code from SMSC for a specific PDU
             sequence_number: SMPP sequence_number
             log_id: a unique identify of this request
@@ -2185,13 +2148,13 @@ class Client:
             # it has no body
             await self.unbind_resp(sequence_number=sequence_number)
         elif smpp_command == SmppCommand.SUBMIT_SM_RESP:
-            # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
-            # This field contains the SMSC message_id of the submitted message.
-            # It may be used at a later stage to query the status of a message, cancel
-            # or replace the message.
-            _message_id = body_data.replace(chr(0).encode(), b"")
-            smsc_message_id = self.codec_class.decode(_message_id)
             try:
+                # the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.
+                # This field contains the SMSC message_id of the submitted message.
+                # It may be used at a later stage to query the status of a message, cancel
+                # or replace the message.
+                _message_id = body_data.replace(chr(0).encode(), b"")
+                smsc_message_id = self.codec_class.decode(_message_id)
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
                     sequence_number=sequence_number,

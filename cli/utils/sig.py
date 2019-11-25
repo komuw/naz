@@ -6,7 +6,7 @@ import functools
 import naz
 
 
-async def _signal_handling(logger: naz.log.BaseLogger, client: naz.Client) -> None:
+async def _signal_handling(logger: logging.Logger, client: naz.Client) -> None:
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:
@@ -34,7 +34,7 @@ async def _signal_handling(logger: naz.log.BaseLogger, client: naz.Client) -> No
 
 
 async def _handle_termination_signal(
-    logger: naz.log.BaseLogger, _signal: "signal.Signals", client: naz.Client
+    logger: logging.Logger, _signal: "signal.Signals", client: naz.Client
 ) -> None:
     logger.log(
         logging.INFO,

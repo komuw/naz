@@ -318,7 +318,7 @@ That docker-compose file also has a redis and rabbitMQ container if you would li
 <p>NB:</p>
 <ul class="simple">
 <li><ol class="loweralpha simple">
-<li><p>For more information about the naz config file, consult the <a class="reference external" href="https://komuw.github.io/naz/client.html">documentation</a></p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">naz</span></code> config file(ie, the dotted path we pass in to <code class="docutils literal notranslate"><span class="pre">naz-cli</span> <span class="pre">--client</span></code>) is any python file that has a <a class="reference external" href="https://komuw.github.io/naz/client.html">naz.Client instance</a> declared in it.</p></li>
 </ol>
 </li>
 <li><ol class="loweralpha simple" start="2">
@@ -362,9 +362,13 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <div class="line">So, for example if you wanted to annotate all log-events with a release version and your app’s running environment.</div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span>
+            <span class="s2">&quot;naz.client&quot;</span><span class="p">,</span>
+            <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span> <span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="s2">&quot;v5.6.8&quot;</span><span class="p">}</span>
+        <span class="p">)</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="o">...</span>
-    <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span> <span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="s2">&quot;canary&quot;</span><span class="p">},</span>
+    <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -373,26 +377,34 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <div class="line">by default, naz annotates all log events with smsc_host, system_id and client_id</div>
 </div>
 <div class="line-block">
-<div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> also gives you the ability to supply your own logger. All you have to do is satisfy the <a class="reference external" href="https://komuw.github.io/naz/logger.html#naz.log.BaseLogger">naz.log.BaseLogger</a> interface</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> also gives you the ability to supply your own logger. All you have to do is pass in a python <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger">logging.Logger</a></div>
 <div class="line">For example if you wanted <code class="docutils literal notranslate"><span class="pre">naz</span></code> to use key=value style of logging, then just create a logger that does just that:</div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
 
-<span class="k">class</span> <span class="nc">KVlogger</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;myKVlogger&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">KVlogger</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple implementation of a key=value</span>
+<span class="sd">    log renderer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">KVlogger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="n">handler</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">()</span>
         <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loglevel</span><span class="p">,</span> <span class="n">log_metadata</span><span class="p">):</span>
-        <span class="k">pass</span>
-    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">log_data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="s2">&quot;DEBUG&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">new_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_msg</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">KVlogger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">new_msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="c1"># implementation of key=value log renderer</span>
-        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">log_data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="n">new_msg</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">new_msg</span>
+
 
 <span class="n">kvLog</span> <span class="o">=</span> <span class="n">KVlogger</span><span class="p">()</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>

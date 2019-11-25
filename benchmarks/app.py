@@ -16,11 +16,11 @@ my_naz_client = naz.Client(
     smsc_port=2775,
     system_id="smppclient1",
     password=os.environ["SMSC_PASSWORD"],
-    loglevel="DEBUG",
-    log_metadata={"project": "naz_benchmarks"},
     broker=MyRedisBroker(),
     hook=BenchmarksHook(),
-    logger=BenchmarksLogger("naz.client"),
+    logger=BenchmarksLogger(
+        logger_name="naz.benchmarks", level="DEBUG", log_metadata={"project": "naz_benchmarks"},
+    ),
     socket_timeout=15.00,
     enquire_link_interval=80.00,
     address_range="^{0}".format(

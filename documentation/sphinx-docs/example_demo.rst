@@ -18,12 +18,12 @@
 
     pip install naz && \
     naz-cli --version
-      naz v0.6.1
+      naz v0.7.4
 
 | In order to use ``naz``, we need to have a place where messages are going to be stored before been submitted to the SMSC.
 | Messages are stored in a broker in ``naz``. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), ``naz`` is broker agnostic.
 | ``naz`` will happily use any queue/broker so long as its implementation in software satisfies ``naz``'s `broker interface <https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker>`_
-| For this demo we will use redis as our broker of choice. So lets start a redis server, we will use docker for that;
+| For this demo we will use redis as our broker of choice. We will use docker to start a redis server;
 
 .. code-block:: bash
 
@@ -31,7 +31,7 @@
       Redis is starting
       Ready to accept connections
 
-| redis server is running a docker container and it is available for connection on the host at ``localhost:6379``
+| redis server is running inside a docker container and it is available for connection on the host at ``localhost:6379``
 | Now we need a way for ``naz`` to be able to communicate with the redis server, ie we need to implemnet ``naz``'s `broker interface <https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker>`_ for our redis server.
 | Let's do that, we'll create a file called ``/tmp/demo_naz/my_broker.py``
 
@@ -71,7 +71,7 @@
             )
             return self._redis
 
-        async def enqueue(self, message: naz.protocol.Message):
+        async def enqueue(self, message):
             _redis = await self._get_redis()
             await _redis.lpush(self.queue_name, message.to_json())
 

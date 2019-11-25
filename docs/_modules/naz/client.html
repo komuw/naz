@@ -267,9 +267,7 @@
         <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
         <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">55.00</span><span class="p">,</span>
-        <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">loglevel</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
-        <span class="n">log_metadata</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">nazcodec</span><span class="o">.</span><span class="n">BaseNazCodec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rateLimiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">hook</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -307,9 +305,7 @@
 <span class="sd">            broker:	python class instance implementing some queueing mechanism. \</span>
 <span class="sd">                messages to be sent to SMSC are queued using the said mechanism before been sent</span>
 <span class="sd">            client_id:	a unique string identifying a naz client class instance</span>
-<span class="sd">            logger: python class instance to be used for logging</span>
-<span class="sd">            loglevel:	the level at which to log</span>
-<span class="sd">            log_metadata: metadata that will be included in all log statements</span>
+<span class="sd">            logger: python `logger &lt;https://docs.python.org/3/library/logging.html#logging.Logger&gt;`_ instance to be used for logging</span>
 <span class="sd">            codec_class: python class instance to be used to encode/decode messages</span>
 <span class="sd">            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status</span>
 <span class="sd">            rateLimiter: python class instance implementing rate limitation</span>
@@ -351,8 +347,6 @@
             <span class="n">sm_default_msg_id</span><span class="o">=</span><span class="n">sm_default_msg_id</span><span class="p">,</span>
             <span class="n">enquire_link_interval</span><span class="o">=</span><span class="n">enquire_link_interval</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-            <span class="n">loglevel</span><span class="o">=</span><span class="n">loglevel</span><span class="p">,</span>
-            <span class="n">log_metadata</span><span class="o">=</span><span class="n">log_metadata</span><span class="p">,</span>
             <span class="n">codec_class</span><span class="o">=</span><span class="n">codec_class</span><span class="p">,</span>
             <span class="n">rateLimiter</span><span class="o">=</span><span class="n">rateLimiter</span><span class="p">,</span>
             <span class="n">hook</span><span class="o">=</span><span class="n">hook</span><span class="p">,</span>
@@ -387,20 +381,20 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">sequence_generator</span> <span class="o">=</span> <span class="n">sequence</span><span class="o">.</span><span class="n">SimpleSequenceGenerator</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">max_sequence_number</span> <span class="o">=</span> <span class="mh">0x7FFFFFFF</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loglevel</span> <span class="o">=</span> <span class="n">loglevel</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-        <span class="k">if</span> <span class="n">log_metadata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">log_metadata</span> <span class="o">=</span> <span class="n">log_metadata</span>
+        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">log_metadata</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_metadata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;smsc_host&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">smsc_host</span><span class="p">,</span>
-                <span class="s2">&quot;system_id&quot;</span><span class="p">:</span> <span class="n">system_id</span><span class="p">,</span>
-                <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
-                <span class="s2">&quot;pid&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PID</span><span class="p">,</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span>
+                <span class="s2">&quot;naz.client&quot;</span><span class="p">,</span>
+                <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;smsc_host&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">smsc_host</span><span class="p">,</span>
+                    <span class="s2">&quot;system_id&quot;</span><span class="p">:</span> <span class="n">system_id</span><span class="p">,</span>
+                    <span class="s2">&quot;client_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_id</span><span class="p">,</span>
+                    <span class="s2">&quot;pid&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PID</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sanity_check_logger</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">codec_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span> <span class="o">=</span> <span class="n">codec_class</span>
@@ -478,13 +472,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logger</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;naz.client&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loglevel</span><span class="p">,</span> <span class="n">log_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_metadata</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_sanity_check_logger</span><span class="p">()</span>
-
         <span class="k">if</span> <span class="n">rateLimiter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">rateLimiter</span>
         <span class="k">else</span><span class="p">:</span>
@@ -552,9 +539,7 @@
         <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">],</span>
-        <span class="n">loglevel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">log_metadata</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+        <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">],</span>
         <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">nazcodec</span><span class="o">.</span><span class="n">BaseNazCodec</span><span class="p">],</span>
         <span class="n">rateLimiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">],</span>
         <span class="n">hook</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">],</span>
@@ -755,33 +740,11 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">log</span><span class="o">.</span><span class="n">BaseLogger</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">)):</span>
             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="s2">&quot;`logger` should be of type:: `None` or `logging.Logger` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="nb">type</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loglevel</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`loglevel` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">loglevel</span><span class="p">))</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="n">loglevel</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NOTSET&quot;</span><span class="p">,</span> <span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">,</span> <span class="s2">&quot;WARNING&quot;</span><span class="p">,</span> <span class="s2">&quot;ERROR&quot;</span><span class="p">,</span> <span class="s2">&quot;CRITICAL&quot;</span><span class="p">]:</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sd">&quot;&quot;&quot;`loglevel` should be one of; &#39;NOTSET&#39;, &#39;DEBUG&#39;, &#39;INFO&#39;, &#39;WARNING&#39;, &#39;ERROR&#39; or &#39;CRITICAL&#39;. You entered: {0}&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="n">loglevel</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_metadata</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">dict</span><span class="p">)):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`log_metadata` should be of type:: `None` or `dict` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">log_metadata</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -1625,7 +1588,7 @@
         <span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">msg</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sends PDU&#39;s to SMSC through/over a network connection(down the wire).</span>
+<span class="sd">        Sends PDU&#39;s to SMSC over a network connection.</span>
 <span class="sd">        This method does not block; it buffers the data and arranges for it to be sent out asynchronously.</span>
 <span class="sd">        It also accts as a flow control method that interacts with the IO write buffer.</span>
 
@@ -1979,7 +1942,7 @@
 
 <div class="viewcode-block" id="Client.receive_data"><a class="viewcode-back" href="../../client.html#naz.client.Client.receive_data">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">receive_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TESTING</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled &lt;Client._parse_response_pdu&gt;`.</span>
+<span class="sd">        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`_parse_response_pdu &lt;Client._parse_response_pdu&gt;` method for parsing.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            TESTING: indicates whether this method is been called while running tests.</span>
@@ -2259,7 +2222,7 @@
 <span class="sd">        Parameters:</span>
 <span class="sd">            pdu: the full PDU as received from SMSC</span>
 <span class="sd">            body_data: PDU body as received from SMSC</span>
-<span class="sd">            smpp_command: type of PDU been sent. eg bind_transceiver</span>
+<span class="sd">            smpp_command: type of PDU been received. eg bind_transceiver_resp</span>
 <span class="sd">            command_status_value: the response code from SMSC for a specific PDU</span>
 <span class="sd">            sequence_number: SMPP sequence_number</span>
 <span class="sd">            log_id: a unique identify of this request</span>
@@ -2350,13 +2313,13 @@
             <span class="c1"># it has no body</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">unbind_resp</span><span class="p">(</span><span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">smpp_command</span> <span class="o">==</span> <span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM_RESP</span><span class="p">:</span>
-            <span class="c1"># the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.</span>
-            <span class="c1"># This field contains the SMSC message_id of the submitted message.</span>
-            <span class="c1"># It may be used at a later stage to query the status of a message, cancel</span>
-            <span class="c1"># or replace the message.</span>
-            <span class="n">_message_id</span> <span class="o">=</span> <span class="n">body_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-            <span class="n">smsc_message_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">_message_id</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># the body of this only has `message_id` which is a C-Octet String of variable length upto 65 octets.</span>
+                <span class="c1"># This field contains the SMSC message_id of the submitted message.</span>
+                <span class="c1"># It may be used at a later stage to query the status of a message, cancel</span>
+                <span class="c1"># or replace the message.</span>
+                <span class="n">_message_id</span> <span class="o">=</span> <span class="n">body_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">smsc_message_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">_message_id</span><span class="p">)</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_handler</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
