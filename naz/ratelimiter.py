@@ -42,7 +42,7 @@ class SimpleRateLimiter(BaseRateLimiter):
     """
 
     def __init__(
-        self, send_rate: float = 100_000.00, logger: typing.Union[None, log.BaseLogger] = None
+        self, send_rate: float = 100_000.00, logger: typing.Union[None, logging.Logger] = None
     ) -> None:
         """
         Parameters:
@@ -52,9 +52,9 @@ class SimpleRateLimiter(BaseRateLimiter):
             raise ValueError(
                 "`send_rate` should be of type:: `float` You entered: {0}".format(type(send_rate))
             )
-        if not isinstance(logger, (type(None), log.BaseLogger)):
+        if not isinstance(logger, (type(None), logging.Logger)):
             raise ValueError(
-                "`logger` should be of type:: `None` or `naz.log.BaseLogger` You entered: {0}".format(
+                "`logger` should be of type:: `None` or `logging.Logger` You entered: {0}".format(
                     type(logger)
                 )
             )

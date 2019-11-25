@@ -176,12 +176,12 @@
 User implementations should inherit this class and
 implement the <a class="reference internal" href="#naz.sequence.BaseSequenceGenerator.next_sequence" title="naz.sequence.BaseSequenceGenerator.next_sequence"><code class="xref py py-func docutils literal notranslate"><span class="pre">next_sequence</span></code></a> methods with the type signatures shown.</p>
 <p>In SMPP, sequence_number is an Integer which allows SMPP requests and responses to be correlated.
-The sequence_number should increase monotonically and ought to be in the range 1 - 2,147,483,647</p>
+The sequence_number should increase monotonically and ought to be in the range <cite>1</cite> to <cite>2,147,483,647</cite></p>
 <p>The sequence_number should wrap around when it reaches the maximum allowed by SMPP specification.</p>
 <dl class="method">
 <dt id="naz.sequence.BaseSequenceGenerator.next_sequence">
 <em class="property">abstract </em><code class="sig-name descname">next_sequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/sequence.html#BaseSequenceGenerator.next_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.BaseSequenceGenerator.next_sequence" title="Permalink to this definition">¶</a></dt>
-<dd><p>method that returns a monotonically increasing Integer in the range 1 - 2,147,483,647</p>
+<dd><p>method that returns a monotonically increasing Integer in the range <cite>1</cite> to <cite>2,147,483,647</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
@@ -210,7 +210,7 @@ The sequence_number should increase monotonically and ought to be in the range 1
 <dl class="method">
 <dt id="naz.sequence.SimpleSequenceGenerator.next_sequence">
 <code class="sig-name descname">next_sequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/sequence.html#SimpleSequenceGenerator.next_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.sequence.SimpleSequenceGenerator.next_sequence" title="Permalink to this definition">¶</a></dt>
-<dd><p>method that returns a monotonically increasing Integer in the range 1 - 2,147,483,647</p>
+<dd><p>method that returns a monotonically increasing Integer in the range <cite>1</cite> to <cite>2,147,483,647</cite></p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>

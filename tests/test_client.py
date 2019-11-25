@@ -123,8 +123,9 @@ class TestClient(TestCase):
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             broker=self.broker,
-            loglevel="DEBUG",  # run tests with debug so as to debug what is going on
-            logger=naz.log.SimpleLogger("TestClient", handler=naz.log.BreachHandler(capacity=200)),
+            logger=naz.log.SimpleLogger(
+                "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+            ),  # run tests with debug so as to debug what is going on
             socket_timeout=0.0000001,
         )
 
@@ -168,24 +169,20 @@ class TestClient(TestCase):
                 smsc_port=2775,
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
-                log_metadata="bad-Type",
-                broker=self.broker,
+                broker="bad-Type",
             )
 
         self.assertRaises(naz.client.NazClientError, mock_create_client)
         with self.assertRaises(naz.client.NazClientError) as raised_exception:
             mock_create_client()
         self.assertIsInstance(raised_exception.exception.args[0][0], ValueError)
-        self.assertIn(
-            "`log_metadata` should be of type", str(raised_exception.exception.args[0][0])
-        )
+        self.assertIn("`broker` should be of type", str(raised_exception.exception.args[0][0]))
 
     def test_all_bad_args(self):
         class DummyClientArg:
             pass
 
         client_args = {
-            "loglevel": "SomeBadLogLevel",
             "smsc_host": DummyClientArg,
             "smsc_port": DummyClientArg,
             "system_id": DummyClientArg,
@@ -197,7 +194,6 @@ class TestClient(TestCase):
             "addr_npi": DummyClientArg,
             "address_range": DummyClientArg,
             "sequence_generator": DummyClientArg,
-            "log_metadata": DummyClientArg,
             "codec_class": DummyClientArg,
             "service_type": DummyClientArg,
             "source_addr_ton": DummyClientArg,
@@ -415,7 +411,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 broker=self.broker,
                 throttle_handler=throttle_handler,
-                loglevel="DEBUG",
+                logger=naz.log.SimpleLogger("naz.test_no_sending_if_throttler", level="DEBUG"),
             )
 
             log_id = "12345"

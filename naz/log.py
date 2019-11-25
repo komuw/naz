@@ -1,50 +1,14 @@
-import abc
 import time
+import json
 import typing
 import logging
 import collections
 from logging import handlers
 
 
-class BaseLogger(abc.ABC):
+class SimpleLogger(logging.Logger):
     """
-    Interface that must be implemented to satisfy naz's logger.
-    User implementations should inherit this class and
-    implement the :func:`bind <BaseLogger.bind>` and :func:`log <BaseLogger.log>` methods with the type signatures shown.
-
-    A logger is class with methods that are called whenever naz wants to log something.
-    This enables developers to implement logging in any way that they want.
-    """
-
-    @abc.abstractmethod
-    def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
-        """
-        called when a naz client is been instantiated so that the logger can be
-        notified of loglevel & log_metadata that a user supplied to a naz client.
-        The logger can choose to bind these log_metadata to itself.
-
-        Parameters:
-            loglevel: logging level eg DEBUG
-            log_metadata: log metadata that can be included in all log statements
-        """
-        raise NotImplementedError("`bind` method must be implemented.")
-
-    @abc.abstractmethod
-    def log(self, level: typing.Union[str, int], log_data: dict) -> None:
-        """
-        called by naz everytime it wants to log something.
-
-        Parameters:
-            level: logging level eg `logging.INFO`
-            log_data: the message to log
-        """
-        raise NotImplementedError("`log` method must be implemented.")
-
-
-class SimpleLogger(BaseLogger):
-    """
-    This is an implementation of BaseLogger.
-    It implements a structured logger that renders logs as a dict.
+    It implements a structured logger that renders logs as json.
 
     example usage:
 
@@ -52,59 +16,85 @@ class SimpleLogger(BaseLogger):
     .. code-block:: python
 
         logger = SimpleLogger("myLogger")
-        logger.bind(level="INFO",
-                    log_metadata={"customer_id": "34541"})
         logger.log(logging.INFO,
                    {"event": "web_request", "url": "https://www.google.com/"})
     """
 
     def __init__(
-        self, logger_name: str, handler: logging.Handler = logging.StreamHandler()
+        self,
+        logger_name: str,
+        level: typing.Union[str, int] = logging.INFO,
+        log_metadata: typing.Union[None, dict] = None,
+        handler: typing.Union[None, logging.Handler] = None,
     ) -> None:
         """
         Parameters:
             logger_name: name of the logger. it should be unique per logger.
+            level: the level at which to log
+            log_metadata: metadata that will be included in all log statements
+            handler: python logging `handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ to be attached to this logger.
+                     By default, `logging.StreamHandler` is used.
         """
+        super(SimpleLogger, self).__init__(name=logger_name, level=self._nameToLevel(level))
         if not isinstance(logger_name, str):
             raise ValueError(
                 "`logger_name` should be of type:: `str` You entered: {0}".format(type(logger_name))
             )
-        if not isinstance(handler, logging.Handler):
+        if not isinstance(level, (int, str)):
             raise ValueError(
-                "`handler` should be of type:: `logging.Handler` You entered: {0}".format(
+                "`level` should be of type:: `str` or `int` You entered: {0}".format(type(level))
+            )
+        if isinstance(level, str):
+            if level.upper() not in ["NOTSET", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+                raise ValueError(
+                    """`level` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR' or 'CRITICAL'. You entered: {0}""".format(
+                        level
+                    )
+                )
+        if not isinstance(log_metadata, (type(None), dict)):
+            raise ValueError(
+                "`log_metadata` should be of type:: `None` or `dict` You entered: {0}".format(
+                    type(log_metadata)
+                )
+            )
+        if not isinstance(handler, (type(None), logging.Handler)):
+            raise ValueError(
+                "`log_metadata` should be of type:: `None` or `logging.Handler` You entered: {0}".format(
                     type(handler)
                 )
             )
-
         self.logger_name = logger_name
-        self.handler = handler
-        self.logger: typing.Union[None, logging.LoggerAdapter] = None
+        self.level = self._nameToLevel(level)
+        if log_metadata is not None:
+            self.log_metadata = log_metadata
+        else:
+            self.log_metadata = {}
 
-    def bind(self, level: typing.Union[str, int], log_metadata: dict) -> None:
-        level = self._nameToLevel(level=level)
+        if handler is not None:
+            self.handler = handler
+        else:
+            self.handler = logging.StreamHandler()
 
-        self._logger = logging.getLogger(self.logger_name)
+        self._set_logger_details()
+
+    def _set_logger_details(self) -> None:
         formatter = logging.Formatter("%(message)s")
         self.handler.setFormatter(formatter)
-        self.handler.setLevel(level)
-        if not self._logger.handlers:
-            self._logger.addHandler(self.handler)
-        self._logger.setLevel(level)
-        self.logger = _NazLoggingAdapter(self._logger, log_metadata)
+        self.handler.setLevel(self.level)
+        self.addHandler(self.handler)
+        self.setLevel(self.level)
 
-    def log(self, level: typing.Union[str, int], log_data: typing.Union[str, dict]) -> None:
-        level = self._nameToLevel(level=level)
+    def log(self, level, msg, *args, **kwargs):
+        """
+        Log 'msg % args' with the integer severity 'level'.
 
-        if not self.logger:
-            self.bind(level=level, log_metadata={})
-        if typing.TYPE_CHECKING:
-            # make mypy happy; https://github.com/python/mypy/issues/4805
-            assert isinstance(self.logger, logging.LoggerAdapter)
+        To pass exception information, use the keyword argument exc_info with
+        a true value, e.g.
 
-        if level >= logging.ERROR:
-            self.logger.log(level, log_data, exc_info=True)
-        else:
-            self.logger.log(level, log_data)
+        logger.log(level, "We have a %s", "mysterious problem", exc_info=1)
+        """
+        new_msg = self._process_msg(msg)
+        return super(SimpleLogger, self).log(level, new_msg, *args, **kwargs)
 
     @staticmethod
     def _nameToLevel(level: typing.Union[str, int]) -> int:
@@ -120,28 +110,20 @@ class SimpleLogger(BaseLogger):
                 "`level` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'"
             ) from e
 
-
-class _NazLoggingAdapter(logging.LoggerAdapter):
-    _converter = time.localtime
-    _formatter = logging.Formatter()
-
-    def process(
-        self, msg: typing.Union[str, dict], kwargs: typing.MutableMapping[str, typing.Any]
-    ) -> typing.Tuple[str, typing.MutableMapping[str, typing.Any]]:
-        timestamp = self.formatTime()
-
-        if isinstance(msg, str):
-            str_merged_msg = "{0} {1} {2}".format(timestamp, msg, self.extra)
-            if self.extra == {}:
-                str_merged_msg = "{0} {1}".format(timestamp, msg)
-            return str_merged_msg, kwargs
-        else:
+    def _process_msg(self, msg: typing.Union[str, dict]) -> str:
+        timestamp = self._formatTime()
+        if isinstance(msg, dict):
             _timestamp = {"timestamp": timestamp}
             # _timestamp should appear first in resulting dict
-            dict_merged_msg = {**_timestamp, **msg, **self.extra}
-            return "{0}".format(dict_merged_msg), kwargs
+            dict_merged_msg = {**_timestamp, **msg, **self.log_metadata}
+            return self._to_json(dict_merged_msg)
+        else:
+            str_merged_msg = "{0} {1} {2}".format(timestamp, msg, self.log_metadata)
+            if self.log_metadata == {}:
+                str_merged_msg = "{0} {1}".format(timestamp, msg)
+            return self._to_json(str_merged_msg)
 
-    def formatTime(self) -> str:
+    def _formatTime(self) -> str:
         """
         Return the creation time of the specified log event as formatted text.
 
@@ -151,13 +133,28 @@ class _NazLoggingAdapter(logging.LoggerAdapter):
         The basic behaviour is as follows: an ISO8601-like (or RFC 3339-like) format is used.
         This function uses `time.localtime()` to convert the creation time to a tuple.
         """
+        _converter = time.localtime
+        _formatter = logging.Formatter()
+
         now = time.time()
         msecs = (now - int(now)) * 1000
 
-        ct = self._converter(now)  # type: ignore
-        t = time.strftime(self._formatter.default_time_format, ct)
-        s = self._formatter.default_msec_format % (t, msecs)
+        ct = _converter(now)  # type: ignore
+        t = time.strftime(_formatter.default_time_format, ct)
+        s = _formatter.default_msec_format % (t, msecs)
         return s
+
+    def _to_json(self, input_msg):
+        """
+        tries to convert the input message to json and returns it.
+        if it fails, it returns the error in string(not json) format
+        """
+        msg = ""
+        try:
+            msg = json.dumps(input_msg)
+        except Exception as e:
+            msg = "naz.SimpleLogger error: {0}".format(str(e))
+        return msg
 
 
 class BreachHandler(handlers.MemoryHandler):
@@ -181,8 +178,7 @@ class BreachHandler(handlers.MemoryHandler):
         import naz, logging
 
         _handler = naz.log.BreachHandler()
-        logger = naz.log.SimpleLogger("aha", handler=_handler)
-        logger.bind(level="INFO", log_metadata={"id": "123"})
+        logger = naz.log.SimpleLogger("aha", handler=_handler, log_metadata={"id": "123"})
 
         logger.log(logging.INFO, {"name": "Jayz"})
         logger.log(logging.ERROR, {"msg": "Houston, we got 99 problems."})
@@ -205,7 +201,7 @@ class BreachHandler(handlers.MemoryHandler):
         self,
         flushLevel: int = logging.WARNING,
         capacity: int = 1_000,
-        target: logging.Handler = logging.StreamHandler(),
+        target: typing.Union[None, logging.Handler] = None,
         flushOnClose: bool = False,
         heartbeatInterval: typing.Union[None, float] = None,
         targetLevel: str = "DEBUG",
@@ -214,7 +210,7 @@ class BreachHandler(handlers.MemoryHandler):
         Parameters:
             flushLevel: the log level that will trigger this handler to flush logs to :py:attr:`~target`
             capacity: the maximum number of log records to store in the ring buffer
-            target: the ultimate `log handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ that will be used.
+            target: the `log handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ that will be used.
             flushOnClose: whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded
             heartbeatInterval: can be a float or None. If it is a float, then a heartbeat log record will be emitted every :py:attr:`~heartbeatInterval` seconds.
                                If it is None(the default), then no heartbeat log record is emitted.
@@ -229,6 +225,9 @@ class BreachHandler(handlers.MemoryHandler):
             heartbeatInterval=heartbeatInterval,
             targetLevel=targetLevel,
         )
+        if target is None:
+            target = logging.StreamHandler()
+
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(  # type: ignore
             capacity=capacity,
@@ -301,7 +300,7 @@ class BreachHandler(handlers.MemoryHandler):
     def _validate_args(
         flushLevel: int,
         capacity: int,
-        target: logging.Handler,
+        target: typing.Union[None, logging.Handler],
         flushOnClose: bool,
         heartbeatInterval: typing.Union[None, float],
         targetLevel: str,
@@ -314,10 +313,9 @@ class BreachHandler(handlers.MemoryHandler):
             raise ValueError(
                 "`capacity` should be of type:: `int` You entered: {0}".format(type(capacity))
             )
-
-        if not isinstance(target, logging.Handler):
+        if not isinstance(target, (type(None), logging.Handler)):
             raise ValueError(
-                "`target` should be of type:: `logging.Handler` You entered: {0}".format(
+                "`target` should be of type:: `None` or `logging.Handler` You entered: {0}".format(
                     type(target)
                 )
             )

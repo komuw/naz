@@ -183,14 +183,14 @@
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install naz <span class="o">&amp;&amp;</span> <span class="se">\</span>
 naz-cli --version
-  naz v0.6.1
+  naz v0.7.4
 </pre></div>
 </div>
 <div class="line-block">
 <div class="line">In order to use <code class="docutils literal notranslate"><span class="pre">naz</span></code>, we need to have a place where messages are going to be stored before been submitted to the SMSC.</div>
 <div class="line">Messages are stored in a broker in <code class="docutils literal notranslate"><span class="pre">naz</span></code>. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), <code class="docutils literal notranslate"><span class="pre">naz</span></code> is broker agnostic.</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> will happily use any queue/broker so long as its implementation in software satisfies <code class="docutils literal notranslate"><span class="pre">naz</span></code>’s <a class="reference external" href="https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker">broker interface</a></div>
-<div class="line">For this demo we will use redis as our broker of choice. So lets start a redis server, we will use docker for that;</div>
+<div class="line">For this demo we will use redis as our broker of choice. We will use docker to start a redis server;</div>
 </div>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -p <span class="m">6379</span>:6379 redis:5.0-alpine
   Redis is starting
@@ -198,7 +198,7 @@ naz-cli --version
 </pre></div>
 </div>
 <div class="line-block">
-<div class="line">redis server is running a docker container and it is available for connection on the host at <code class="docutils literal notranslate"><span class="pre">localhost:6379</span></code></div>
+<div class="line">redis server is running inside a docker container and it is available for connection on the host at <code class="docutils literal notranslate"><span class="pre">localhost:6379</span></code></div>
 <div class="line">Now we need a way for <code class="docutils literal notranslate"><span class="pre">naz</span></code> to be able to communicate with the redis server, ie we need to implemnet <code class="docutils literal notranslate"><span class="pre">naz</span></code>’s <a class="reference external" href="https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker">broker interface</a> for our redis server.</div>
 <div class="line">Let’s do that, we’ll create a file called <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_broker.py</span></code></div>
 </div>
@@ -236,7 +236,7 @@ naz-cli --version
         <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
 
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">):</span>
+    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="n">_redis</span> <span class="o">=</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
         <span class="n">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">lpush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
 

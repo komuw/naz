@@ -8,7 +8,7 @@ class BaseSequenceGenerator(abc.ABC):
     implement the :func:`next_sequence <BaseSequenceGenerator.next_sequence>` methods with the type signatures shown.
 
     In SMPP, sequence_number is an Integer which allows SMPP requests and responses to be correlated.
-    The sequence_number should increase monotonically and ought to be in the range 1 - 2,147,483,647
+    The sequence_number should increase monotonically and ought to be in the range `1` to `2,147,483,647`
 
     The sequence_number should wrap around when it reaches the maximum allowed by SMPP specification.
     """
@@ -16,7 +16,7 @@ class BaseSequenceGenerator(abc.ABC):
     @abc.abstractmethod
     def next_sequence(self) -> int:
         """
-        method that returns a monotonically increasing Integer in the range 1 - 2,147,483,647
+        method that returns a monotonically increasing Integer in the range `1` to `2,147,483,647`
         """
         raise NotImplementedError("next_sequence method must be implemented.")
 

@@ -152,7 +152,7 @@ run:
 ```              
              
 **NB:**      
-(a) For more information about the `naz` config file, consult the [documentation here](https://komuw.github.io/naz/client.html)             
+(a) The ```naz`` config file(ie, the dotted path we pass in to ``naz-cli --client``) is any python file that has a `naz.Client instance <https://komuw.github.io/naz/client.html>`_ declared in it.                
 (b) More [examples can be found here](https://github.com/komuw/naz/tree/master/examples). As an example, start the SMSC simulator(`docker-compose up`) then in another terminal run, `naz-cli --client examples.example_config.client`
 
 To see help:
@@ -198,9 +198,13 @@ So, for example if you wanted to annotate all log-events with a release version 
 ```python
 import naz
 
+logger = naz.log.SimpleLogger(
+                "naz.client",
+                log_metadata={ "environment": "production", "release": "v5.6.8"}
+            )
 cli = naz.Client(
     ...
-    log_metadata={ "environment": "production", "release": "canary"},
+    logger=logger,
 )
 ```
 and then these will show up in all log events.             

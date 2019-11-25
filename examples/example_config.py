@@ -11,8 +11,9 @@ client = naz.Client(
     password="password",
     broker=ExampleRedisBroker(),
     sequence_generator=MySeqGen(),
-    loglevel="INFO",
-    log_metadata={"environment": "staging", "release": "canary"},
+    logger=naz.log.SimpleLogger(
+        "naz.client", level="INFO", log_metadata={"environment": "staging", "release": "canary"}
+    ),
     enquire_link_interval=70.00,
     rateLimiter=MyRateLimiter(),
     address_range="^254",  # any msisdns beginning with 254. See Appendix A of SMPP spec doc
