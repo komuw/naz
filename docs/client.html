@@ -360,7 +360,7 @@
 <dl class="method">
 <dt id="naz.client.Client.receive_data">
 <em class="property">async </em><code class="sig-name descname">receive_data</code><span class="sig-paren">(</span><em class="sig-param">TESTING=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.receive_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.receive_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>In a loop; read bytes from the network connected to SMSC and hand them over to the <code class="xref py py-func docutils literal notranslate"><span class="pre">throparserttled</span></code>.</p>
+<dd><p>In a loop; read bytes from the network connected to SMSC and hand them over to the <code class="xref py py-func docutils literal notranslate"><span class="pre">_parse_response_pdu</span></code> method for parsing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>TESTING</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – indicates whether this method is been called while running tests.</p>

@@ -1777,7 +1777,7 @@ class Client:
 
     async def receive_data(self, TESTING: bool = False) -> typing.Union[None, bytes]:
         """
-        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`throparserttled <Client._parse_response_pdu>`.
+        In a loop; read bytes from the network connected to SMSC and hand them over to the :func:`_parse_response_pdu <Client._parse_response_pdu>` method for parsing.
 
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
