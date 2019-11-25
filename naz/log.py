@@ -300,7 +300,7 @@ class BreachHandler(handlers.MemoryHandler):
     def _validate_args(
         flushLevel: int,
         capacity: int,
-        target: logging.Handler,
+        target: typing.Union[None, logging.Handler],
         flushOnClose: bool,
         heartbeatInterval: typing.Union[None, float],
         targetLevel: str,
