@@ -123,8 +123,9 @@ class TestClient(TestCase):
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             broker=self.broker,
-            loglevel="DEBUG",  # run tests with debug so as to debug what is going on
-            logger=naz.log.SimpleLogger("TestClient", handler=naz.log.BreachHandler(capacity=200)),
+            logger=naz.log.SimpleLogger(
+                "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+            ),  # run tests with debug so as to debug what is going on
             socket_timeout=0.0000001,
         )
 
@@ -182,7 +183,6 @@ class TestClient(TestCase):
             pass
 
         client_args = {
-            "loglevel": "SomeBadLogLevel",
             "smsc_host": DummyClientArg,
             "smsc_port": DummyClientArg,
             "system_id": DummyClientArg,
@@ -411,7 +411,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 broker=self.broker,
                 throttle_handler=throttle_handler,
-                loglevel="DEBUG",
+                logger=naz.log.SimpleLogger("naz.test_no_sending_if_throttler", level="DEBUG"),
             )
 
             log_id = "12345"
