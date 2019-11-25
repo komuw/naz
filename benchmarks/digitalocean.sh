@@ -12,6 +12,8 @@ export DEBIAN_FRONTEND=noninteractive && \
 apt -y update && \
 apt -y install python3.7 && \
 apt -y install python-pip python3-pip nano wget unzip curl screen
+apt -y install python3-dev
+apt -y install python3.7-dev
 
 # NB: do not install docker from snap; it is broken
 # https://github.com/docker/for-linux/issues/290
