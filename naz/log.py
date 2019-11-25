@@ -1,4 +1,5 @@
 import time
+import json
 import typing
 import logging
 import collections
@@ -7,7 +8,7 @@ from logging import handlers
 
 class SimpleLogger(logging.Logger):
     """
-    It implements a structured logger that renders logs as a dict.
+    It implements a structured logger that renders logs as json.
 
     example usage:
 
@@ -113,16 +114,16 @@ class SimpleLogger(logging.Logger):
 
     def _process_msg(self, msg: typing.Union[str, dict]) -> str:
         timestamp = self._formatTime()
-        if isinstance(msg, str):
-            str_merged_msg = "{0} {1} {2}".format(timestamp, msg, self.log_metadata)
-            if self.log_metadata == {}:
-                str_merged_msg = "{0} {1}".format(timestamp, msg)
-            return str_merged_msg
-        else:
+        if isinstance(msg, dict):
             _timestamp = {"timestamp": timestamp}
             # _timestamp should appear first in resulting dict
             dict_merged_msg = {**_timestamp, **msg, **self.log_metadata}
-            return "{0}".format(dict_merged_msg)
+            return self._to_json(dict_merged_msg)
+        else:
+            str_merged_msg = "{0} {1} {2}".format(timestamp, msg, self.log_metadata)
+            if self.log_metadata == {}:
+                str_merged_msg = "{0} {1}".format(timestamp, msg)
+            return self._to_json(str_merged_msg)
 
     def _formatTime(self) -> str:
         """
@@ -144,6 +145,18 @@ class SimpleLogger(logging.Logger):
         t = time.strftime(_formatter.default_time_format, ct)
         s = _formatter.default_msec_format % (t, msecs)
         return s
+
+    def _to_json(self, input_msg):
+        """
+        tries to convert the input message to json and returns it.
+        if it fails, it returns the error in string(not json) format
+        """
+        msg = ""
+        try:
+            msg = json.dumps(input_msg)
+        except Exception as e:
+            msg = "naz.SimpleLogger error: {0}".format(str(e))
+        return msg
 
 
 class BreachHandler(handlers.MemoryHandler):
