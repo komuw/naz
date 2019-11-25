@@ -125,4 +125,4 @@ if __name__ == "__main__":
 
     FUNCTIONALITY_TO_FUZZ = functionality
 
-    fuzz()
+    fuzz()  # pylint: disable=E1120
