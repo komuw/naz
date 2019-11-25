@@ -168,7 +168,7 @@ NB:
     import naz
     logger = naz.log.SimpleLogger(
                 "naz.client",
-                log_metadata={ "environment": "production", "release": "canary"}
+                log_metadata={ "environment": "production", "release": "v5.6.8"}
             )
     cli = naz.Client(
         ...
