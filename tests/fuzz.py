@@ -15,9 +15,10 @@ client = naz.Client(
     system_id="smppclient1",
     password="password",
     broker=ExampleRedisBroker(),
-    loglevel="INFO",
-    log_metadata={"environment": "staging", "release": "canary"},
     enquire_link_interval=70.00,
+    logger=naz.log.SimpleLogger(
+        "naz.fuzz", level="INFO", log_metadata={"environment": "staging", "release": "canary"},
+    ),
 )
 
 FUNCTIONALITIES = ["msg_to_log", "send_data", "parse_response_pdu", "command_handlers"]
