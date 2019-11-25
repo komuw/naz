@@ -198,7 +198,7 @@
 <span class="sd">            level: the level at which to log</span>
 <span class="sd">            log_metadata: metadata that will be included in all log statements</span>
 <span class="sd">            handler: python logging `handler &lt;https://docs.python.org/3/library/logging.html#logging.Handler&gt;`_ to be attached to this logger.</span>
-<span class="sd">                     by default, `logging.StreamHandler` is used.</span>
+<span class="sd">                     By default, `logging.StreamHandler` is used.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">SimpleLogger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">logger_name</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nameToLevel</span><span class="p">(</span><span class="n">level</span><span class="p">))</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">logger_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>

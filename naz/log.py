@@ -33,7 +33,7 @@ class SimpleLogger(logging.Logger):
             level: the level at which to log
             log_metadata: metadata that will be included in all log statements
             handler: python logging `handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ to be attached to this logger.
-                     by default, `logging.StreamHandler` is used.
+                     By default, `logging.StreamHandler` is used.
         """
         super(SimpleLogger, self).__init__(name=logger_name, level=self._nameToLevel(level))
         if not isinstance(logger_name, str):
