@@ -2057,7 +2057,7 @@ class Client:
         Parameters:
             pdu: the full PDU as received from SMSC
             body_data: PDU body as received from SMSC
-            smpp_command: type of PDU been sent. eg bind_transceiver
+            smpp_command: type of PDU been received. eg bind_transceiver_resp
             command_status_value: the response code from SMSC for a specific PDU
             sequence_number: SMPP sequence_number
             log_id: a unique identify of this request
