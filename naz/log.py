@@ -203,7 +203,7 @@ class BreachHandler(handlers.MemoryHandler):
         self,
         flushLevel: int = logging.WARNING,
         capacity: int = 1_000,
-        target: logging.Handler = logging.StreamHandler(),
+        target: typing.Union[None, logging.Handler] = None,
         flushOnClose: bool = False,
         heartbeatInterval: typing.Union[None, float] = None,
         targetLevel: str = "DEBUG",
@@ -227,6 +227,9 @@ class BreachHandler(handlers.MemoryHandler):
             heartbeatInterval=heartbeatInterval,
             targetLevel=targetLevel,
         )
+        if target is None:
+            target = logging.StreamHandler()
+
         # call `logging.handlers.MemoryHandler` init
         super(BreachHandler, self).__init__(  # type: ignore
             capacity=capacity,
@@ -312,10 +315,9 @@ class BreachHandler(handlers.MemoryHandler):
             raise ValueError(
                 "`capacity` should be of type:: `int` You entered: {0}".format(type(capacity))
             )
-
-        if not isinstance(target, logging.Handler):
+        if not isinstance(target, (type(None), logging.Handler)):
             raise ValueError(
-                "`target` should be of type:: `logging.Handler` You entered: {0}".format(
+                "`target` should be of type:: `None` or `logging.Handler` You entered: {0}".format(
                     type(target)
                 )
             )
