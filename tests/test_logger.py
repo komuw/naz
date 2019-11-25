@@ -10,12 +10,12 @@ from unittest import TestCase
 import naz
 
 
-class TestLogger(TestCase):
+class TestSimpleLogger(TestCase):
     """
     run tests as:
         python -m unittest discover -v -s .
     run one testcase as:
-        python -m unittest -v tests.test_logger.TestLogger.test_something
+        python -m unittest -v tests.test_logger.TestSimpleLogger.test_something
     """
 
     def setUp(self):

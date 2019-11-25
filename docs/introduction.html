@@ -362,9 +362,9 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <div class="line">So, for example if you wanted to annotate all log-events with a release version and your app’s running environment.</div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
-<span class="n">logger</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span>
             <span class="s2">&quot;naz.client&quot;</span><span class="p">,</span>
-            <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span> <span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="s2">&quot;canary&quot;</span><span class="p">}</span>
+            <span class="n">log_metadata</span><span class="o">=</span><span class="p">{</span> <span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="s2">&quot;production&quot;</span><span class="p">,</span> <span class="s2">&quot;release&quot;</span><span class="p">:</span> <span class="s2">&quot;v5.6.8&quot;</span><span class="p">}</span>
         <span class="p">)</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="o">...</span>

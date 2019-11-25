@@ -171,7 +171,7 @@
 <dt id="naz.log.SimpleLogger">
 <em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">SimpleLogger</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em>, <em class="sig-param">level=20</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#SimpleLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.SimpleLogger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code></p>
-<p>It implements a structured logger that renders logs as a dict.</p>
+<p>It implements a structured logger that renders logs as json.</p>
 <p>example usage:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;myLogger&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
