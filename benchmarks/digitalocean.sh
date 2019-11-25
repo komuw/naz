@@ -14,10 +14,11 @@ apt -y install python && \
 apt -y install python-pip python3-pip nano wget unzip curl screen
 
 # NB: do not install docker from snap; it is broken
-apt -y remove docker docker-engine docker.io containerd runc docker-ce docker-ce-cli && \
+# https://github.com/docker/for-linux/issues/290
+apt -y remove docker docker-engine docker.io containerd runc docker-ce docker-ce-cli; \
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 apt-key fingerprint 0EBFCD88 && \
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) test" && \
 apt -y update; apt -y autoremove && \
 apt -y install docker-ce && \
 usermod -aG docker $(whoami) && \
