@@ -26,6 +26,7 @@ class TestSimpleLogger(TestCase):
 
     def test_can_log_string(self):
         self.logger.log(level=logging.WARN, msg="can log string")
+        self.logger.log(logging.WARN, "some other string")
 
     def test_can_log_dict(self):
         log_id = 234_255
