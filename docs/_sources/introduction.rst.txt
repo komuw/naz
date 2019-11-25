@@ -166,36 +166,48 @@ NB:
 .. code-block:: python
 
     import naz
+    logger = log.SimpleLogger(
+                "naz.client",
+                log_metadata={ "environment": "production", "release": "canary"}
+            )
     cli = naz.Client(
         ...
-        log_metadata={ "environment": "production", "release": "canary"},
+        logger=logger,
     )
 
 | and then these will show up in all log events.
 | by default, naz annotates all log events with smsc_host, system_id and client_id
 
-| ``naz`` also gives you the ability to supply your own logger. All you have to do is satisfy the `naz.log.BaseLogger <https://komuw.github.io/naz/logger.html#naz.log.BaseLogger>`_ interface
+| ``naz`` also gives you the ability to supply your own logger. All you have to do is pass in a python `logging.Logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ 
 | For example if you wanted ``naz`` to use key=value style of logging, then just create a logger that does just that:
 
 .. code-block:: python
 
     import naz
+    
+    class KVlogger(logging.Logger):
+        """
+        A simple implementation of a key=value
+        log renderer.
+        """
 
-    class KVlogger(naz.log.BaseLogger):
-        def __init__(self):
-            self.logger = logging.getLogger("myKVlogger")
+        def __init__(self, name, level=logging.INFO):
+            super(KVlogger, self).__init__(name, level)
             handler = logging.StreamHandler()
             formatter = logging.Formatter("%(message)s")
             handler.setFormatter(formatter)
-            if not self.logger.handlers:
-                self.logger.addHandler(handler)
-            self.logger.setLevel("DEBUG")
-        def bind(self, loglevel, log_metadata):
-            pass
-        def log(self, level, log_data):
+            self.addHandler(handler)
+            self.setLevel("DEBUG")
+
+        def log(self, level, msg, *args, **kwargs):
+            new_msg = self._process_msg(msg)
+            return super(KVlogger, self).log(level, new_msg, *args, **kwargs)
+
+        def _process_msg(self, message):
             # implementation of key=value log renderer
-            message = ", ".join("{0}={1}".format(k, v) for k, v in log_data.items())
-            self.logger.log(level, message)
+            new_msg = ", ".join("{0}={1}".format(k, v) for k, v in message.items())
+            return new_msg
+
 
     kvLog = KVlogger()
     cli = naz.Client(
