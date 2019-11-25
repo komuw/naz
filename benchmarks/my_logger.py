@@ -41,9 +41,8 @@ class BenchmarksLogger(logging.Logger):
         handler: typing.Union[None, logging.Handler] = None,
     ) -> None:
         super(BenchmarksLogger, self).__init__(logger_name, level, log_metadata, handler)
-        level = self._nameToLevel(level=level)
         formatter = logging.Formatter("%(message)s")
         handler2 = logging.FileHandler(filename=log_file)
         handler2.setFormatter(formatter)
-        handler2.setLevel(logging.DEBUG)
+        handler2.setLevel(self.level)
         self.addHandler(handler2)
