@@ -465,7 +465,7 @@
     <span class="k">def</span> <span class="nf">_validate_args</span><span class="p">(</span>
         <span class="n">flushLevel</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">target</span><span class="p">:</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Handler</span><span class="p">],</span>
         <span class="n">flushOnClose</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">heartbeatInterval</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">targetLevel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
