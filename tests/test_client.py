@@ -168,17 +168,14 @@ class TestClient(TestCase):
                 smsc_port=2775,
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
-                log_metadata="bad-Type",
-                broker=self.broker,
+                broker="bad-Type",
             )
 
         self.assertRaises(naz.client.NazClientError, mock_create_client)
         with self.assertRaises(naz.client.NazClientError) as raised_exception:
             mock_create_client()
         self.assertIsInstance(raised_exception.exception.args[0][0], ValueError)
-        self.assertIn(
-            "`log_metadata` should be of type", str(raised_exception.exception.args[0][0])
-        )
+        self.assertIn("`broker` should be of type", str(raised_exception.exception.args[0][0]))
 
     def test_all_bad_args(self):
         class DummyClientArg:
@@ -197,7 +194,6 @@ class TestClient(TestCase):
             "addr_npi": DummyClientArg,
             "address_range": DummyClientArg,
             "sequence_generator": DummyClientArg,
-            "log_metadata": DummyClientArg,
             "codec_class": DummyClientArg,
             "service_type": DummyClientArg,
             "source_addr_ton": DummyClientArg,

@@ -166,7 +166,7 @@ NB:
 .. code-block:: python
 
     import naz
-    logger = log.SimpleLogger(
+    logger = naz.log.SimpleLogger(
                 "naz.client",
                 log_metadata={ "environment": "production", "release": "canary"}
             )

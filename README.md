@@ -198,9 +198,13 @@ So, for example if you wanted to annotate all log-events with a release version 
 ```python
 import naz
 
+logger = naz.log.SimpleLogger(
+                "naz.client",
+                log_metadata={ "environment": "production", "release": "canary"}
+            )
 cli = naz.Client(
     ...
-    log_metadata={ "environment": "production", "release": "canary"},
+    logger=logger,
 )
 ```
 and then these will show up in all log events.             
