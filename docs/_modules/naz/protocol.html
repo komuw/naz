@@ -211,11 +211,11 @@
 <span class="sd">            log_id: a unique identify of this reque</span>
 <span class="sd">            pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.</span>
 <span class="sd">            codec_class: python class instance to be used to encode/decode messages. It should be a child class of `naz.nazcodec.BaseNazCodec`.</span>
-<span class="sd">                         You should only specify this, if you also specified `pdu` else you can leave it as None.</span>
+<span class="sd">                         You should only specify this, if you also specified `pdu`, else you can leave it as None.</span>
 <span class="sd">            short_message: message to send to SMSC. It is mutually exclusive with `pdu`</span>
 <span class="sd">            source_addr: the identifier(eg msisdn) of the message sender.</span>
-<span class="sd">            destination_addr: the identifier(eg msisdn) of the message sender.</span>
-<span class="sd">            hook_metadata: a string that a user&#39;s application had previously supplied to naz that it may want to be correlated with the log_id.</span>
+<span class="sd">            destination_addr: the identifier(eg msisdn) of the message receiver.</span>
+<span class="sd">            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_validate_protocol_args</span><span class="p">(</span>
             <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>

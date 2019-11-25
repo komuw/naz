@@ -1423,7 +1423,7 @@ class Client:
         self, smpp_command: str, msg: bytes, log_id: str, hook_metadata: str = ""
     ) -> None:
         """
-        Sends PDU's to SMSC through/over a network connection(down the wire).
+        Sends PDU's to SMSC over a network connection.
         This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
         It also accts as a flow control method that interacts with the IO write buffer.
 
