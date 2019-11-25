@@ -10,7 +10,7 @@ shopt -s nullglob globstar
 
 export DEBIAN_FRONTEND=noninteractive && \
 apt -y update && \
-apt -y install python && \
+apt -y install python3.7 && \
 apt -y install python-pip python3-pip nano wget unzip curl screen
 
 # NB: do not install docker from snap; it is broken
@@ -32,8 +32,8 @@ cd naz/benchmarks
 
 # A. SMSC SERVER
 # 1. start screen
-pip3 install -e ..[benchmarks]
-export REDIS_PASSWORD=hey_NSA && python3 smpp_n_broker_servers.py &>/dev/null &
+python3.7 -m pip install -e ..[dev,test,benchmarks]
+export REDIS_PASSWORD=hey_NSA && python3.7 smpp_n_broker_servers.py &>/dev/null &
 disown
 
 # A. NAZ-CLI
