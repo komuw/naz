@@ -127,7 +127,7 @@ then run:
 
 NB:
 
-* (a) The ```naz`` config file(ie, the dotted path we pass in to ``naz-cli --client``) is any python file that has a `naz.Client instance <https://komuw.github.io/naz/client.html>`_ declared in it.
+* (a) The ``naz`` config file(ie, the dotted path we pass in to ``naz-cli --client``) is any python file that has a `naz.Client instance <https://komuw.github.io/naz/client.html>`_ declared in it.
 * (b) More examples can be found; `examples <https://github.com/komuw/naz/tree/master/examples>`_ 
       As an example, start the SMSC simulator(``docker-compose up``) then in another terminal run, 
       ``naz-cli --client examples.example_config.client``
