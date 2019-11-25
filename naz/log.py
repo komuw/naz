@@ -78,13 +78,11 @@ class SimpleLogger(logging.Logger):
         self._set_logger_details()
 
     def _set_logger_details(self) -> None:
-        _level = self.level
         formatter = logging.Formatter("%(message)s")
-
         self.handler.setFormatter(formatter)
-        self.handler.setLevel(_level)
+        self.handler.setLevel(self.level)
         self.addHandler(self.handler)
-        self.setLevel(_level)
+        self.setLevel(self.level)
 
     def log(self, level, msg, *args, **kwargs):
         """
