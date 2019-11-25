@@ -1,10 +1,7 @@
 import os
 import errno
-import json
 import typing
 import logging
-
-import naz
 
 
 def makelog(log_directory="/usr/src/nazLog", log_file="naz_log_file"):
