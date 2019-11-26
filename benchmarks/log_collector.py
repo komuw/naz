@@ -82,7 +82,7 @@ async def send_log_to_remote_storage(logs):
 
 
 async def read_log_file():
-    with open("/tmp/nazLog/naz_log_file", "r+") as log_file:
+    with open("/usr/src/nazLog/naz_log_file", "r+") as log_file:
         for line in log_file:
             logger.log(logging.INFO, {"event": "log_collector.data", "line": line})
 
