@@ -404,14 +404,10 @@
 <span class="sd">    .. highlight:: python</span>
 <span class="sd">    .. code-block:: python</span>
 
-<span class="sd">       ncodec = SimpleNazCodec()</span>
+<span class="sd">       ncodec = SimpleNazCodec(encoding=&quot;utf-16be&quot;)</span>
 
-<span class="sd">       ncodec.encode(&quot;Zoë&quot;, &quot;utf-16be&quot;)</span>
-<span class="sd">       ncodec.encode(&quot;Zoë&quot;, &quot;utf-8&quot;)</span>
-<span class="sd">       ncodec.encode(&quot;HÜLK&quot;, &#39;gsm0338&#39;)</span>
-
-<span class="sd">       ncodec.decode(b&#39;Zo\xc3\xab&#39;, &#39;gsm0338&#39;, &#39;ignore&#39;)</span>
-<span class="sd">       ncodec.decode(b&#39;Zo\xc3\xab&#39;, &#39;utf8&#39;)</span>
+<span class="sd">       ncodec.encode(&quot;Zoë&quot;)</span>
+<span class="sd">       ncodec.decode(b&#39;Zo\xc3\xab&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SimpleNazCodec.__init__"><a class="viewcode-back" href="../../nazcodec.html#naz.nazcodec.SimpleNazCodec.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span> <span class="n">errors_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;strict&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
