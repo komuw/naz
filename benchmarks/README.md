@@ -36,7 +36,7 @@ The benchmark was run this way:
 - During the running of these benchmarks, a number of bugs were identified in `naz`. Those bugs were fixed in [PR127](https://github.com/komuw/naz/pull/127). Eventually the benchmarks were re-ran with the fixed `naz` version.
 
 ##### B:
-TODO:
+- Fuzzy testing uncovered a number of bugs which have since been fixed. After their fixes, fuzz testing ran overnight without any further failures.
 
 
 
