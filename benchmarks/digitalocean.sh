@@ -10,14 +10,17 @@ shopt -s nullglob globstar
 
 export DEBIAN_FRONTEND=noninteractive && \
 apt -y update && \
-apt -y install python && \
-apt -y install python-pip python3-pip nano wget unzip curl screen
+apt -y install python3.7 && \
+apt -y install python-pip python3-pip nano wget unzip curl screen pandoc
+apt -y install python3-dev
+apt -y install python3.7-dev
 
 # NB: do not install docker from snap; it is broken
-apt -y remove docker docker-engine docker.io containerd runc docker-ce docker-ce-cli && \
+# https://github.com/docker/for-linux/issues/290
+apt -y remove docker docker-engine docker.io containerd runc docker-ce docker-ce-cli; \
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
 apt-key fingerprint 0EBFCD88 && \
-add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" && \
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) test" && \
 apt -y update; apt -y autoremove && \
 apt -y install docker-ce && \
 usermod -aG docker $(whoami) && \
@@ -31,8 +34,8 @@ cd naz/benchmarks
 
 # A. SMSC SERVER
 # 1. start screen
-pip3 install -e ..[benchmarks]
-export REDIS_PASSWORD=hey_NSA && python3 smpp_n_broker_servers.py &>/dev/null &
+python3.7 -m pip install -e ..[dev,test,benchmarks]
+export REDIS_PASSWORD=hey_NSA && python3.7 smpp_n_broker_servers.py &>/dev/null &
 disown
 
 # A. NAZ-CLI

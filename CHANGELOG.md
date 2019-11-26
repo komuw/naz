@@ -4,8 +4,9 @@ most recent version is listed first.
 
 ## **version:** v0.7.4
 - Fix a bug that prevented `enquire_link` and `deliver_sm` from been sent: https://github.com/komuw/naz/pull/179  
-- Enforce `naz` message protocol in code : https://github.com/komuw/naz/pull/179
+- Enforce `naz` message protocol in code: https://github.com/komuw/naz/pull/179
 - make make `naz.Client.logger` to be a python `logging.Handler`: https://github.com/komuw/naz/pull/181
+- carry out fuzzy testing: https://github.com/komuw/naz/pull/178
 
 
 ## **version:** v0.7.3

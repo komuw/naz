@@ -103,6 +103,7 @@ setup(
             "docker==4.0.1",
             "prometheus_client==0.6.0",
             "aioredis==1.2.0",
+            "pythonfuzz==1.0.3",
         ],
     },
     # If there are data files included in your packages that need to be
