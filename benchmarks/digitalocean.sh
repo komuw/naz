@@ -33,13 +33,15 @@ cd naz/benchmarks
 
 
 # A. SMSC SERVER
-# 1. start screen
+# 1. Add firewall to the server that has these ports open: 22, 2775, 6379, 9000
+# 2. start screen
 python3.7 -m pip install -e ..[dev,test,benchmarks]
 export REDIS_PASSWORD=hey_NSA && python3.7 smpp_n_broker_servers.py &>/dev/null &
 disown
 
 # A. NAZ-CLI
-# 1. start screen
-# 2. edit `compose.env`(if neccesary)
+# 1. Add firewall to the server that has these ports open: 22, 2775, 6379, 9000
+# 2. start screen
+# 3. edit `compose.env`(if neccesary)
 docker-compose up --build &>/dev/null &
 disown
