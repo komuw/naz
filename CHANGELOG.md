@@ -2,6 +2,10 @@
 most recent version is listed first.
 
 
+## **version:** v0.7.5
+support python version 3.8: https://github.com/komuw/naz/pull/186
+
+
 ## **version:** v0.7.4
 - Fix a bug that prevented `enquire_link` and `deliver_sm` from been sent: https://github.com/komuw/naz/pull/179  
 - Enforce `naz` message protocol in code: https://github.com/komuw/naz/pull/179
