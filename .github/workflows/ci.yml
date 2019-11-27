@@ -1,23 +1,27 @@
 # DOCS: https://help.github.com/en/articles/workflow-syntax-for-github-actions
 
+
+
 name: naz ci
 on: [pull_request, push]
 
 jobs:
 
   static_analysis:
-    name: static_analysis
+    name: static_analysis ${{ matrix.python-version }}
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [ '3.7', '3.8' ]
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v1
+
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Check out code
-        uses: actions/checkout@v1
-  
       # TODO: fix this, for master branch it fails
       - name: check if changes have release notes
         if: github.ref != 'refs/heads/master'
@@ -63,19 +67,22 @@ jobs:
           PYTHONASYNCIODEBUG: '1'
           NAZ_DEBUG: 'NAZ_DEBUG'
 
+
   tests:
-    name: tests
+    name: tests ${{ matrix.python-version }}
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [ '3.7', '3.8' ]
     timeout-minutes: 6
     steps:
+      - uses: actions/checkout@v1
+
       - name: Set up python
         uses: actions/setup-python@v1
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python-version }}
 
-      - name: Check out code
-        uses: actions/checkout@v1
-  
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
@@ -100,14 +107,13 @@ jobs:
     runs-on: ubuntu-18.04
     timeout-minutes: 3
     steps:
+      - uses: actions/checkout@v1
+
       - name: Set up python
         uses: actions/setup-python@v1
         with:
           python-version: '3.7'
 
-      - name: Check out code
-        uses: actions/checkout@v1
-  
       - name: install apt and pip deps
         run: |
           pwd; ls -lsha
