@@ -93,6 +93,9 @@ class SimpleLogger(logging.Logger):
 
         logger.log(level, "We have a %s", "mysterious problem", exc_info=1)
         """
+        if self._nameToLevel(level) >= logging.ERROR:
+            kwargs.update(dict(exc_info=True))
+
         new_msg = self._process_msg(msg)
         return super(SimpleLogger, self).log(level, new_msg, *args, **kwargs)
 

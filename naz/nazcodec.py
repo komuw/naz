@@ -239,14 +239,10 @@ class SimpleNazCodec(BaseNazCodec):
     .. highlight:: python
     .. code-block:: python
 
-       ncodec = SimpleNazCodec()
+       ncodec = SimpleNazCodec(encoding="utf-16be")
 
-       ncodec.encode("Zoë", "utf-16be")
-       ncodec.encode("Zoë", "utf-8")
-       ncodec.encode("HÜLK", 'gsm0338')
-
-       ncodec.decode(b'Zo\xc3\xab', 'gsm0338', 'ignore')
-       ncodec.decode(b'Zo\xc3\xab', 'utf8')
+       ncodec.encode("Zoë")
+       ncodec.decode(b'Zo\xc3\xab')
     """
 
     def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:

@@ -3,6 +3,8 @@ import errno
 import typing
 import logging
 
+import naz
+
 
 def makelog(log_directory="/usr/src/nazLog", log_file="naz_log_file"):
     log_file = os.path.join(log_directory, log_file)
@@ -32,7 +34,7 @@ def makelog(log_directory="/usr/src/nazLog", log_file="naz_log_file"):
 log_file = makelog()
 
 
-class BenchmarksLogger(logging.Logger):
+class BenchmarksLogger(naz.log.SimpleLogger):
     def __init__(
         self,
         logger_name: str,

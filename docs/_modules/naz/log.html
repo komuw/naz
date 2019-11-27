@@ -258,6 +258,9 @@
 
 <span class="sd">        logger.log(level, &quot;We have a %s&quot;, &quot;mysterious problem&quot;, exc_info=1)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nameToLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+
         <span class="n">new_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_msg</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">SimpleLogger</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">new_msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 

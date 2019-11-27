@@ -29,7 +29,7 @@ The benchmark was run this way:
 ### Results:   
 
 ##### A:
-- `naz-cli` used a near constant amount of memory(19MB) throughout the whole benchmarking period. There was no indication of memory leaks.
+- `naz-cli` used a near constant amount of memory(16MB) throughout the whole benchmarking period. There was no indication of memory leaks.
 ![naz-cli memory usage](./static/naz_mem_usage.png "naz-cli memory usage")   
 - `naz-cli` was able to stay up during the whole period. This is despite the fact that the redis server and SMSC servers would 'go down' every 15minutes or so.     
    `naz-cli` was able to reconnect and re-bind whenever the SMSC came back up again
@@ -56,7 +56,11 @@ SELECT * FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC;
 ```
 
 ```sql
-SELECT event,log_id,error FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC;
+SELECT * FROM logs WHERE log_id='some-log-id';
+```
+
+```sql
+SELECT timestamp,event,log_id,error FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC;
 Copy (SELECT * FROM logs WHERE length(logs.error) > 0 ORDER BY timestamp DESC) To '/tmp/errors.csv' With CSV DELIMITER ',';
 cp /tmp/errors.csv /usr/src/app/
 ```

@@ -243,14 +243,10 @@ implement the <a class="reference internal" href="#naz.nazcodec.BaseNazCodec.enc
 <p>SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
 This class can also be used with the usual <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">python standard encodings</a></p>
 <p>example usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncodec</span> <span class="o">=</span> <span class="n">SimpleNazCodec</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncodec</span> <span class="o">=</span> <span class="n">SimpleNazCodec</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-16be&quot;</span><span class="p">)</span>
 
-<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">,</span> <span class="s2">&quot;utf-16be&quot;</span><span class="p">)</span>
-<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">,</span> <span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
-<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;HÜLK&quot;</span><span class="p">,</span> <span class="s1">&#39;gsm0338&#39;</span><span class="p">)</span>
-
-<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">,</span> <span class="s1">&#39;gsm0338&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">,</span> <span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">)</span>
+<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="method">
