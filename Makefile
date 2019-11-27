@@ -9,8 +9,7 @@ upload:
 
 
 VERSION_STRING=$$(cat naz/__version__.py | grep "__version__" | sed -e 's/"__version__"://' | sed -e 's/,//g' | sed -e 's/"//g' | sed -e 's/ //g')
-uploadprod:
-	@printf "\n building sphinx documentation \n" && sphinx-build -a -E documentation/sphinx-docs/ docs/
+uploadprod: sphinx
 	@printf "\n git commit docs/ \n" && git add docs/ && git commit -m 'update docs/' | echo
 	@rm -rf build
 	@rm -rf dist
@@ -45,5 +44,6 @@ test:
 # note `.nojekyll` file is important inside `docs/` folder
 # without it, css styling for docs in https://komuw.github.io/naz/ is broken
 sphinx:
+	@printf "\n building sphinx documentation \n"
 	@touch docs/.nojekyll
 	@sphinx-build -a -E documentation/sphinx-docs/ docs/
