@@ -3,7 +3,7 @@ most recent version is listed first.
 
 
 ## **version:** v0.7.5
-support python version 3.8: https://github.com/komuw/naz/pull/186
+- support python version 3.8: https://github.com/komuw/naz/pull/186
 
 
 ## **version:** v0.7.4
