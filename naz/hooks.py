@@ -80,6 +80,7 @@ class SimpleHook(BaseHook):
                 "smpp_command": smpp_command,
                 "log_id": log_id,
                 "hook_metadata": hook_metadata,
+                # SimpleLogger cant log bytes(pdu)
             },
         )
 
