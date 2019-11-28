@@ -2125,6 +2125,27 @@ class Client:
                     "state": commandStatus.description,
                 },
             )
+        try:
+            # call user's hook for responses
+            await self.hook.from_smsc(
+                smpp_command=smpp_command,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                status=commandStatus,
+                pdu=pdu,
+            )
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.command_handlers",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "from_smsc hook error",
+                    "error": str(e),
+                },
+            )
 
         if smpp_command in [
             SmppCommand.BIND_TRANSCEIVER,
@@ -2260,28 +2281,6 @@ class Client:
                     "error": "the smpp_command: `{0}` has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
-                },
-            )
-
-        # call user's hook for responses
-        try:
-            await self.hook.from_smsc(
-                smpp_command=smpp_command,
-                log_id=log_id,
-                hook_metadata=hook_metadata,
-                status=commandStatus,
-                pdu=pdu,
-            )
-        except Exception as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.command_handlers",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "from_smsc hook error",
-                    "error": str(e),
                 },
             )
 
