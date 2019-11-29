@@ -242,7 +242,7 @@ class BreachHandler(handlers.MemoryHandler):
             maxlen=self.capacity  # type: ignore
         )  # pytype: disable=attribute-error
         # assuming each log record is 250 bytes, then the maximum
-        # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
+        # memory used by `buffer` will always be == 250*1_000/(1000*1000) == 0.25MB
 
         self.heartbeatInterval = heartbeatInterval
         if self.heartbeatInterval:
