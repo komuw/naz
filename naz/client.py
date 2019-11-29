@@ -723,15 +723,17 @@ class Client:
         returns decoded string from bytes with any password removed.
         the returned string is safe to log.
         """
+        log_msg = "unable to decode msg"
         try:
             log_msg = self.codec_class.decode(msg)
             if self.password in log_msg:
                 # do not log password, redact it from logs.
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
-        except (UnicodeDecodeError, UnicodeError):
-            log_msg = str(msg)
-        except Exception:
-            log_msg = ""
+        except (UnicodeDecodeError, UnicodeError) as e:
+            # in future we may want to do something custom
+            _ = e
+        except Exception as e:
+            _ = e
         return log_msg
 
     async def connect(self, log_id: str = "") -> None:
