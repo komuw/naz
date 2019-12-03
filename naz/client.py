@@ -3,9 +3,11 @@ import struct
 import random
 import socket
 import string
+import codecs
 import typing
 import asyncio
 import logging
+
 
 # pytype: disable=pyi-error
 from . import log
@@ -103,7 +105,7 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
-        codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
+        codec_class: typing.Union[None, codecs.Codec] = None,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
@@ -141,7 +143,7 @@ class Client:
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
-            codec_class: python class instance to be used to encode/decode messages
+            codec_class: python class instance, that is a child class of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_ to be used to encode/decode messages. 
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
@@ -375,7 +377,7 @@ class Client:
         sm_default_msg_id: int,
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
-        codec_class: typing.Union[None, nazcodec.BaseNazCodec],
+        codec_class: typing.Union[None, codecs.Codec],
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
@@ -583,10 +585,10 @@ class Client:
                     )
                 )
             )
-        if not isinstance(codec_class, (type(None), nazcodec.BaseNazCodec)):
+        if not isinstance(codec_class, (type(None), codecs.Codec)):
             errors.append(
                 ValueError(
-                    "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
+                    "`codec_class` should be of type:: `None` or `codecs.Codec` You entered: {0}".format(
                         type(codec_class)
                     )
                 )
