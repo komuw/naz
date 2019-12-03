@@ -183,7 +183,7 @@ class SimpleCodec(codecs.Codec):
     .. highlight:: python
     .. code-block:: python
 
-       ncodec = SimpleCodec(encoding="utf-16be")
+       ncodec = SimpleCodec(encoding="ucs2")
 
        ncodec.encode("Zoë")
        ncodec.decode(b'Zo\xc3\xab')
@@ -191,43 +191,36 @@ class SimpleCodec(codecs.Codec):
 
     custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
 
-    def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:
+    def __init__(self, encoding: str = "gsm0338") -> None:
         """
         Parameters:
-            encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
+                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
         """
         if not isinstance(encoding, str):
             raise ValueError(
                 "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
             )
-        if not isinstance(errors_level, str):
-            raise ValueError(
-                "`errors_level` should be of type:: `str` You entered: {0}".format(
-                    type(errors_level)
-                )
-            )
         self.encoding = encoding
-        self.errors_level = errors_level
 
-    def encode(self, string_to_encode: str) -> bytes:
-        if not isinstance(string_to_encode, str):
+    def encode(self, input: str, errors: str = "strict") -> typing.Tuple[bytes, int]:
+        if not isinstance(input, str):
             raise NazCodecException("Only strings accepted for encoding.")
         encoding = self.encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        obj, _ = encoder(string_to_encode, self.errors_level)
-        return obj
 
-    def decode(self, byte_string: bytes) -> str:
-        if not isinstance(byte_string, (bytes, bytearray)):
+        return encoder(input, errors)
+
+    def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
+        if not isinstance(input, (bytes, bytearray)):
             raise NazCodecException("Only bytestrings accepted for decoding.")
         encoding = self.encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-        obj, _ = decoder(byte_string, self.errors_level)
-        return obj
+
+        return decoder(input, errors)
