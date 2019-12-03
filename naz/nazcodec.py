@@ -173,7 +173,7 @@ class UCS2Codec(codecs.Codec):
 
 class SimpleNazCodec(codecs.Codec):
     """
-    This is an implementation of BaseNazCodec.
+    This is an implementation of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_
 
     SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
     This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_
