@@ -10,11 +10,6 @@ client = naz.Client(
     system_id="smppclient1",
     password="password",
     broker=ExampleRedisBroker(),
-    sequence_generator=MySeqGen(),
-    logger=naz.log.SimpleLogger(
-        "naz.client", level="INFO", log_metadata={"environment": "staging", "release": "canary"}
-    ),
-    enquire_link_interval=70.00,
-    rateLimiter=MyRateLimiter(),
-    address_range="^254",  # any msisdns beginning with 254. See Appendix A of SMPP spec doc
+    codec_class=naz.nazcodec.SimpleNazCodec(encoding="ucs2"),
+    socket_timeout=4.00,
 )
