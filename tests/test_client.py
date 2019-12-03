@@ -236,7 +236,7 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 broker=self.broker,
-                codec_class=naz.nazcodec.SimpleNazCodec(encoding=encoding),
+                codec_class=naz.nazcodec.SimpleCodec(encoding=encoding),
             )
 
         self.assertRaises(ValueError, mock_create_client)
@@ -1075,7 +1075,7 @@ class TestClient(TestCase):
                     "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
                 ),
                 socket_timeout=0.0000001,
-                codec_class=naz.nazcodec.SimpleNazCodec(encoding=encoding),
+                codec_class=naz.nazcodec.SimpleCodec(encoding=encoding),
             )
             self._run(cli.connect())
             self.assertTrue(hasattr(cli.reader, "read"))

@@ -171,7 +171,7 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
 
-class SimpleNazCodec(codecs.Codec):
+class SimpleCodec(codecs.Codec):
     """
     This is an implementation of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_
 
@@ -183,7 +183,7 @@ class SimpleNazCodec(codecs.Codec):
     .. highlight:: python
     .. code-block:: python
 
-       ncodec = SimpleNazCodec(encoding="utf-16be")
+       ncodec = SimpleCodec(encoding="utf-16be")
 
        ncodec.encode("Zoë")
        ncodec.decode(b'Zo\xc3\xab')

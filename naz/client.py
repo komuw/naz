@@ -236,7 +236,7 @@ class Client:
         if codec_class is not None:
             self.codec_class = codec_class
         else:
-            self.codec_class = nazcodec.SimpleNazCodec()
+            self.codec_class = nazcodec.SimpleCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
