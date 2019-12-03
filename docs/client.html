@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Client &mdash; naz v0.7.4 documentation</title>
+  <title>Client &mdash; naz v0.7.5 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.4
+                v0.7.5
               </div>
             
           
@@ -235,7 +235,7 @@
 <li><p><strong>broker</strong> (<a class="reference internal" href="broker.html#naz.broker.BaseBroker" title="naz.broker.BaseBroker"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseBroker</span></code></a>) – python class instance implementing some queueing mechanism.                 messages to be sent to SMSC are queued using the said mechanism before been sent</p></li>
 <li><p><strong>client_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique string identifying a naz client class instance</p></li>
 <li><p><strong>logger</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code>]) – python <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger">logger</a> instance to be used for logging</p></li>
-<li><p><strong>codec_class</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="nazcodec.html#naz.nazcodec.BaseNazCodec" title="naz.nazcodec.BaseNazCodec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNazCodec</span></code></a>]) – python class instance to be used to encode/decode messages</p></li>
+<li><p><strong>codec_class</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Codec</span></code>]) – python class instance, that is a child class of <a class="reference external" href="https://docs.python.org/3/library/codecs.html">codecs.Codec</a> to be used to encode/decode messages.</p></li>
 <li><p><strong>enquire_link_interval</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – time in seconds to wait before sending an enquire_link request to SMSC to check on its status</p></li>
 <li><p><strong>rateLimiter</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="ratelimiter.html#naz.ratelimiter.BaseRateLimiter" title="naz.ratelimiter.BaseRateLimiter"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseRateLimiter</span></code></a>]) – python class instance implementing rate limitation</p></li>
 <li><p><strong>hook</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="hooks.html#naz.hooks.BaseHook" title="naz.hooks.BaseHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHook</span></code></a>]) – python class instance implemeting functionality/hooks to be called by naz                 just before sending request to SMSC and just after getting response from SMSC</p></li>
