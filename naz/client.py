@@ -673,7 +673,8 @@ class Client:
             if not key.startswith("__"):
                 if encoding == val.code:
                     return val.value
-        raise ValueError("That encoding:{0} is not recognised.".format(encoding))
+
+        raise ValueError("That encoding: `{0}` is not recognised.".format(encoding))
 
     def _search_by_command_id_code(self, command_id_code: int) -> typing.Union[None, str]:
         for key, val in self.command_ids.items():
