@@ -3,7 +3,8 @@ most recent version is listed first.
 
 
 ## **version:** v0.7.5
-- BugFix, `data_coding` should not be applied to all fields that are of type C-octet string: https://github.com/komuw/naz/pull/190
+- BugFix, `data_coding` should not be applied to all fields that are of type C-octet string: https://github.com/komuw/naz/pull/190   
+- Make `naz.Client.codec_class` accept any child class implementation of python's `codecs.Codec`: https://github.com/komuw/naz/pull/190  
 
 
 ## **version:** v0.7.4
