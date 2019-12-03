@@ -212,7 +212,6 @@ class SimpleCodec(codecs.Codec):
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-
         return encoder(input, errors)
 
     def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
@@ -223,5 +222,4 @@ class SimpleCodec(codecs.Codec):
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-
         return decoder(input, errors)
