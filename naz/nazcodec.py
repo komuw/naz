@@ -31,9 +31,10 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import abc
+
 import sys
 import codecs
+import typing
 
 
 # An alternative to using this codec module is to use: https://github.com/dsch/gsm0338

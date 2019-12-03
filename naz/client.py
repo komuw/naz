@@ -143,7 +143,7 @@ class Client:
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
-            codec_class: python class instance, that is a child class of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_ to be used to encode/decode messages. 
+            codec_class: python class instance, that is a child class of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_ to be used to encode/decode messages.
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
