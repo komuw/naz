@@ -245,6 +245,8 @@ class SimpleNazCodec(BaseNazCodec):
        ncodec.decode(b'Zo\xc3\xab')
     """
 
+    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
+
     def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:
         """
         Parameters:
@@ -263,8 +265,6 @@ class SimpleNazCodec(BaseNazCodec):
             )
         self.encoding = encoding
         self.errors_level = errors_level
-
-    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
 
     def encode(self, string_to_encode: str) -> bytes:
         if not isinstance(string_to_encode, str):
