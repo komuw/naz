@@ -39,7 +39,7 @@ test:
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C naz/ tests/ cli/ documentation/ examples/ benchmarks/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
 	@printf "\n run mypy::\n" && mypy --show-column-numbers --ignore-missing-imports cli/ naz/ tests/ examples/ benchmarks/
-	@printf "\n run pytype::\n" && pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ tests/ documentation/ examples/ benchmarks/
+	@printf "\n run pytype::\n" && pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ examples/ benchmarks/
 
 # note `.nojekyll` file is important inside `docs/` folder
 # without it, css styling for docs in https://komuw.github.io/naz/ is broken

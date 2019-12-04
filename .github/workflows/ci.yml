@@ -64,7 +64,7 @@ jobs:
           printf "\n\t running mypy:\n"
           mypy --show-column-numbers --ignore-missing-imports cli/ naz/ tests/ examples/ benchmarks/ #--strict
           printf "\n\t running pytype:\n"
-          pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ tests/ documentation/ examples/ benchmarks/
+          pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ examples/ benchmarks/
         env:
           PYTHONASYNCIODEBUG: '1'
           NAZ_DEBUG: 'NAZ_DEBUG'
