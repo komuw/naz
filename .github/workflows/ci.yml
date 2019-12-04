@@ -57,7 +57,7 @@ jobs:
           bandit -r --exclude .venv -ll .
           # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
           # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
-          mypy --show-column-numbers --ignore-missing-imports -p cli -p naz #--strict
+          mypy --show-column-numbers --ignore-missing-imports -p cli -p naz -p tests -p examples -p benchmarks #--strict
           pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/
         env:
           PYTHONASYNCIODEBUG: '1'
