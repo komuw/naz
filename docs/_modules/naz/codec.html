@@ -425,7 +425,9 @@
             <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getencoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+        <span class="n">obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
 
 <div class="viewcode-block" id="SimpleCodec.decode"><a class="viewcode-back" href="../../codec.html#naz.codec.SimpleCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
@@ -435,7 +437,9 @@
             <span class="n">decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">decoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getdecoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">decoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div></div>
+
+        <span class="n">obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div></div>
 </pre></div>
 
            </div>

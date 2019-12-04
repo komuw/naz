@@ -260,7 +260,9 @@ class SimpleCodec(BaseCodec):
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        return encoder(input, self.errors)[0]
+
+        obj, _ = encoder(input, self.errors)
+        return obj
 
     def decode(self, input: bytes) -> str:
         if not isinstance(input, (bytes, bytearray)):
@@ -270,4 +272,6 @@ class SimpleCodec(BaseCodec):
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-        return decoder(input, self.errors)[0]
+
+        obj, _ = decoder(input, self.errors)
+        return obj
