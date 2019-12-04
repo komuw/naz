@@ -6,6 +6,8 @@ most recent version is listed first.
 - BugFix, `data_coding` should not be applied to all fields that are of type C-octet string: https://github.com/komuw/naz/pull/190   
 - Rename `naz.nazcodec.BaseNazCodec` to `naz.codec.BaseCodec`: https://github.com/komuw/naz/pull/190  
 - Rename `naz.Client.codec_class` to `naz.Client.codec`: https://github.com/komuw/naz/pull/190  
+- Add ability for `naz.log.SimpleLogger` to render logs as a python dictionary: https://github.com/komuw/naz/pull/190  
+
 
 
 ## **version:** v0.7.4
