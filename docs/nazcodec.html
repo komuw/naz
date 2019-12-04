@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>nazcodec &mdash; naz v0.7.5 documentation</title>
+  <title>codec &mdash; naz v0.7.5 documentation</title>
   
 
   
@@ -36,9 +36,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="broker" href="broker.html" />
-    <link rel="prev" title="hooks" href="hooks.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -90,12 +88,11 @@
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
 <li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
 </ul>
-<ul class="current">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">nazcodec</a></li>
 <li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
@@ -147,7 +144,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>nazcodec</li>
+      <li>codec</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -166,11 +163,11 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-naz.nazcodec">
-<span id="nazcodec"></span><h1>nazcodec<a class="headerlink" href="#module-naz.nazcodec" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-naz.codec">
+<span id="codec"></span><h1>codec<a class="headerlink" href="#module-naz.codec" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="naz.nazcodec.SimpleCodec">
-<em class="property">class </em><code class="sig-prename descclassname">naz.nazcodec.</code><code class="sig-name descname">SimpleCodec</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleCodec" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.codec.SimpleCodec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">SimpleCodec</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">codecs.Codec</span></code></p>
 <p>This is an implementation of <a class="reference external" href="https://docs.python.org/3/library/codecs.html">codecs.Codec</a></p>
 <p>SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
@@ -183,8 +180,8 @@ This class can also be used with the usual <a class="reference external" href="h
 </pre></div>
 </div>
 <dl class="method">
-<dt id="naz.nazcodec.SimpleCodec.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleCodec.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleCodec.__init__" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.codec.SimpleCodec.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC
@@ -197,8 +194,8 @@ The encoding should be one of the encodings recognised by the SMPP specification
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.nazcodec.SimpleCodec.decode">
-<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleCodec.decode" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.codec.SimpleCodec.decode">
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.decode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decodes the object input and returns a tuple (output
 object, length consumed).</p>
 <p>input must be an object which provides the bf_getreadbuf
@@ -220,8 +217,8 @@ situation.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.nazcodec.SimpleCodec.encode">
-<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/nazcodec.html#SimpleCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.nazcodec.SimpleCodec.encode" title="Permalink to this definition">¶</a></dt>
+<dt id="naz.codec.SimpleCodec.encode">
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.encode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Encodes the object input and returns a tuple (output
 object, length consumed).</p>
 <p>errors defines the error handling to apply. It defaults to
@@ -248,15 +245,6 @@ situation.</p>
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="broker.html" class="btn btn-neutral float-right" title="broker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="hooks.html" class="btn btn-neutral float-left" title="hooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

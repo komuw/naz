@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>naz.codec &mdash; naz v0.7.5 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/_modules/naz/codec.html"/>
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../example_demo.html">Example demo of using naz</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../protocol.html">protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>naz.codec</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for naz.codec</h1><div class="highlight"><pre>
+<span></span><span class="c1"># The code in this file is copied from https://github.com/praekelt/vumi/blob/master/vumi/codecs/vumi_codecs.py</span>
+<span class="c1"># which is in turn largely copied from http://stackoverflow.com/questions/13130935/decode-7-bit-gsm</span>
+<span class="c1"># Vumi&#39;s license is included below:</span>
+
+<span class="c1"># Copyright (c) Praekelt Foundation and individual contributors.</span>
+<span class="c1"># All rights reserved.</span>
+
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following conditions are met:</span>
+
+<span class="c1">#     1.  Redistributions of source code must retain the above copyright notice,</span>
+<span class="c1">#         this list of conditions and the following disclaimer.</span>
+
+<span class="c1">#     2.  Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#         notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#         documentation and/or other materials provided with the distribution.</span>
+
+<span class="c1">#     3.  Neither the name of the Praekelt Foundation nor the names of its</span>
+<span class="c1">#         contributors may be used to endorse or promote products derived from</span>
+<span class="c1">#         this software without specific prior written permission.</span>
+
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &quot;AS IS&quot;</span>
+<span class="c1"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE</span>
+<span class="c1"># IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<span class="c1"># ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE</span>
+<span class="c1"># LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR</span>
+<span class="c1"># CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF</span>
+<span class="c1"># SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS</span>
+<span class="c1"># INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN</span>
+<span class="c1"># CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)</span>
+<span class="c1"># ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE</span>
+<span class="c1"># POSSIBILITY OF SUCH DAMAGE.</span>
+
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+
+<span class="c1"># An alternative to using this codec module is to use: https://github.com/dsch/gsm0338</span>
+<span class="c1"># however, I&#39;m guessing that vumi has been in use longer and we should thus go with it.</span>
+
+
+<span class="k">class</span> <span class="nc">NazCodecException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">GSM7BitCodec</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gsm_basic_charset</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;@£$¥èéùìòÇ</span><span class="se">\n</span><span class="s2">Øø</span><span class="se">\r</span><span class="s2">ÅåΔ_ΦΓΛΩΠΨΣΘΞ</span><span class="se">\x1b</span><span class="s2">ÆæßÉ !</span><span class="se">\&quot;</span><span class="s2">#¤%&amp;&#39;()*+,-./0123456789:;&quot;</span>
+        <span class="s2">&quot;&lt;=&gt;?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ`¿abcdefghijklmnopqrstuvwxyzäö&quot;</span>
+        <span class="s2">&quot;ñüà&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">gsm_basic_charset_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gsm_basic_charset</span><span class="p">))</span>
+
+    <span class="n">gsm_extension</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;````````````````````^```````````````````</span><span class="si">{}</span><span class="s2">`````</span><span class="se">\\</span><span class="s2">````````````[~]`&quot;</span>
+        <span class="s2">&quot;|````````````````````````````````````€``````````````````````````&quot;</span>
+    <span class="p">)</span>
+
+    <span class="n">gsm_extension_map</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gsm_extension</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;</span>
+<span class="sd">        eg:</span>
+<span class="sd">            xcodec.encode(&quot;Zoë&quot;,&quot;gsm0338&quot;) will fail with UnicodeEncodeError</span>
+<span class="sd">            but</span>
+<span class="sd">            xcodec.encode(&quot;Zoë&quot;,&quot;gsm0338&quot;, &#39;replace&#39;) will return b&#39;Zo?&#39;</span>
+<span class="sd">            and</span>
+<span class="sd">            xcodec.encode(&quot;Zoë&quot;,&quot;gsm0338&quot;, &#39;ignore&#39;) will return b&#39;Zo&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsm_basic_charset_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+                <span class="k">continue</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gsm_extension_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">27</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_encode_error</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="nb">input</span><span class="p">))</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="c1"># this is equivalent to;</span>
+        <span class="c1"># import six; six.b(&#39;someString&#39;)</span>
+        <span class="c1"># see:</span>
+        <span class="c1"># https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin-1&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">handle_encode_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">handler_type</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;handle_encode_</span><span class="si">%s</span><span class="s2">_error&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">handler_type</span><span class="p">,),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NazCodecException</span><span class="p">(</span><span class="s2">&quot;Invalid errors type </span><span class="si">%s</span><span class="s2"> for GSM7BitCodec&quot;</span><span class="p">,</span> <span class="n">handler_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_encode_strict_error</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">UnicodeEncodeError</span><span class="p">(</span><span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_encode_ignore_error</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">handle_encode_replace_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">chr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gsm_basic_charset_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        errors can be &#39;strict&#39;, &#39;replace&#39; or &#39;ignore&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="mi">27</span><span class="p">:</span>
+                    <span class="n">c</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gsm_extension</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gsm_basic_charset</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+            <span class="k">except</span> <span class="ne">IndexError</span> <span class="k">as</span> <span class="n">indexErrorException</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">handle_decode_error</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">)</span>
+                <span class="p">)</span>
+
+        <span class="n">obj</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">handle_decode_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char</span><span class="p">,</span> <span class="n">handler_type</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">):</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;handle_decode_</span><span class="si">%s</span><span class="s2">_error&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">handler_type</span><span class="p">,),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NazCodecException</span><span class="p">(</span><span class="s2">&quot;Invalid errors type </span><span class="si">%s</span><span class="s2"> for GSM7BitCodec&quot;</span><span class="p">,</span> <span class="n">handler_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">handler</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_decode_strict_error</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">):</span>
+        <span class="c1"># https://github.com/google/pytype/issues/349</span>
+        <span class="k">raise</span> <span class="ne">UnicodeDecodeError</span><span class="p">(</span>
+            <span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span>
+            <span class="nb">chr</span><span class="p">(</span><span class="n">char</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;latin-1&quot;</span><span class="p">),</span>
+            <span class="n">position</span><span class="p">,</span>
+            <span class="n">position</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="nb">repr</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span>  <span class="c1"># pytype: disable=wrong-arg-types</span>
+        <span class="p">)</span> <span class="kn">from</span> <span class="nn">indexErrorException</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_decode_ignore_error</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_decode_replace_error</span><span class="p">(</span><span class="n">char</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">indexErrorException</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;?&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">UCS2Codec</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    UCS2 is for all intents &amp; purposes assumed to be the same as</span>
+<span class="sd">    big endian UTF16.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
+        <span class="c1"># https://github.com/google/pytype/issues/348</span>
+        <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_encode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>  <span class="c1"># pytype: disable=module-attr</span>
+
+    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s2">&quot;strict&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_decode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>  <span class="c1"># pytype: disable=module-attr</span>
+
+
+<div class="viewcode-block" id="SimpleCodec"><a class="viewcode-back" href="../../nazcodec.html#naz.codec.SimpleCodec">[docs]</a><span class="k">class</span> <span class="nc">SimpleCodec</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is an implementation of `codecs.Codec &lt;https://docs.python.org/3/library/codecs.html&gt;`_</span>
+
+<span class="sd">    SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.</span>
+<span class="sd">    This class can also be used with the usual `python standard encodings &lt;https://docs.python.org/3/library/codecs.html#standard-encodings&gt;`_</span>
+
+<span class="sd">    example usage:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">       ncodec = SimpleCodec(encoding=&quot;ucs2&quot;)</span>
+
+<span class="sd">       ncodec.encode(&quot;Zoë&quot;)</span>
+<span class="sd">       ncodec.decode(b&#39;Zo\xc3\xab&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">custom_codecs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gsm0338&quot;</span><span class="p">:</span> <span class="n">GSM7BitCodec</span><span class="p">(),</span> <span class="s2">&quot;ucs2&quot;</span><span class="p">:</span> <span class="n">UCS2Codec</span><span class="p">()}</span>
+
+<div class="viewcode-block" id="SimpleCodec.__init__"><a class="viewcode-back" href="../../nazcodec.html#naz.codec.SimpleCodec.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsm0338&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            encoding: `encoding &lt;https://docs.python.org/3/library/codecs.html#standard-encodings&gt;`_ used to encode messages been sent to SMSC</span>
+<span class="sd">                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`encoding` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">encoding</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span></div>
+
+<div class="viewcode-block" id="SimpleCodec.encode"><a class="viewcode-back" href="../../nazcodec.html#naz.codec.SimpleCodec.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;strict&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">NazCodecException</span><span class="p">(</span><span class="s2">&quot;Only strings accepted for encoding.&quot;</span><span class="p">)</span>
+        <span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">encoding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">encoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getencoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SimpleCodec.decode"><a class="viewcode-back" href="../../nazcodec.html#naz.codec.SimpleCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;strict&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">NazCodecException</span><span class="p">(</span><span class="s2">&quot;Only bytestrings accepted for decoding.&quot;</span><span class="p">)</span>
+        <span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">encoding</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">:</span>
+            <span class="n">decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">decoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getdecoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">decoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

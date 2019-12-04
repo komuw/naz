@@ -93,7 +93,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
@@ -177,7 +176,7 @@
 <span class="c1"># pytype: disable=pyi-error</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">hooks</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">nazcodec</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">codec</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">protocol</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">sequence</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">throttle</span>
@@ -401,7 +400,7 @@
         <span class="k">if</span> <span class="n">codec_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span> <span class="o">=</span> <span class="n">codec_class</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span> <span class="o">=</span> <span class="n">nazcodec</span><span class="o">.</span><span class="n">SimpleCodec</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span> <span class="o">=</span> <span class="n">codec</span><span class="o">.</span><span class="n">SimpleCodec</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">service_type</span> <span class="o">=</span> <span class="n">service_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_ton</span> <span class="o">=</span> <span class="n">source_addr_ton</span>
@@ -868,6 +867,9 @@
                 <span class="k">if</span> <span class="n">command_status_value</span> <span class="o">==</span> <span class="n">val</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">val</span>
         <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_easy_encode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">service_type</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_retry_after</span><span class="p">(</span><span class="n">current_retries</span><span class="p">):</span>
