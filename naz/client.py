@@ -105,7 +105,7 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
-        codec_class: typing.Union[None, codecs.Codec] = None,
+        codec: typing.Union[None, codecs.Codec] = None,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
@@ -143,7 +143,7 @@ class Client:
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
-            codec_class: python class instance, that is a child class of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_ to be used to encode/decode messages.
+            codec: python class instance, that is a child class of `codecs.Codec <https://docs.python.org/3/library/codecs.html>`_ to be used to encode/decode messages.
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
@@ -184,7 +184,7 @@ class Client:
             sm_default_msg_id=sm_default_msg_id,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
-            codec_class=codec_class,
+            codec=codec,
             rateLimiter=rateLimiter,
             hook=hook,
             sequence_generator=sequence_generator,
@@ -233,10 +233,10 @@ class Client:
             )
         self._sanity_check_logger()
 
-        if codec_class is not None:
-            self.codec_class = codec_class
+        if codec is not None:
+            self.codec = codec
         else:
-            self.codec_class = codec.SimpleCodec()
+            self.codec = codec.SimpleCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -304,7 +304,7 @@ class Client:
             SmppCommand.RESERVED_FOR_SMSC_VENDOR_B: [0x80010200, 0x800102FF],
         }
 
-        self.data_coding = self._find_data_coding(self.codec_class.encoding)
+        self.data_coding = self._find_data_coding(self.codec.encoding)
 
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
@@ -377,7 +377,7 @@ class Client:
         sm_default_msg_id: int,
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
-        codec_class: typing.Union[None, codecs.Codec],
+        codec: typing.Union[None, codecs.Codec],
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
@@ -585,11 +585,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(codec_class, (type(None), codecs.Codec)):
+        if not isinstance(codec, (type(None), codecs.Codec)):
             errors.append(
                 ValueError(
-                    "`codec_class` should be of type:: `None` or `codecs.Codec` You entered: {0}".format(
-                        type(codec_class)
+                    "`codec` should be of type:: `None` or `codecs.Codec` You entered: {0}".format(
+                        type(codec)
                     )
                 )
             )
@@ -705,7 +705,7 @@ class Client:
         return None
 
     def _easy_encode(self):
-        self.codec_class.encode(self.service_type)
+        self.codec.encode(self.service_type)
 
     @staticmethod
     def _retry_after(current_retries):
@@ -731,7 +731,7 @@ class Client:
         """
         log_msg = "unable to decode msg"
         try:
-            log_msg = self.codec_class.decode(msg)
+            log_msg = self.codec.decode(msg)
             if self.password in log_msg:
                 # do not log password, redact it from logs.
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
@@ -803,16 +803,16 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.system_id)
+            + self.codec.encode(self.system_id)
             + chr(0).encode()
-            + self.codec_class.encode(self.password)
+            + self.codec.encode(self.password)
             + chr(0).encode()
-            + self.codec_class.encode(self.system_type)
+            + self.codec.encode(self.system_type)
             + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
-            + self.codec_class.encode(self.address_range)
+            + self.codec.encode(self.address_range)
             + chr(0).encode()
         )
 
@@ -1030,7 +1030,7 @@ class Client:
                     smpp_command=smpp_command,
                     log_id=log_id,
                     pdu=full_pdu,
-                    codec_class=self.codec_class,
+                    codec=self.codec,
                 )
             )
         except Exception as e:
@@ -1117,7 +1117,7 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + self.codec_class.encode(message_id) + chr(0).encode()
+        body = body + self.codec.encode(message_id) + chr(0).encode()
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
@@ -1134,7 +1134,7 @@ class Client:
                     smpp_command=smpp_command,
                     log_id=log_id,
                     pdu=full_pdu,
-                    codec_class=self.codec_class,
+                    codec=self.codec,
                 )
             )
         except Exception as e:
@@ -1279,36 +1279,36 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        encoded_short_message = self.codec_class.encode(short_message)
+        encoded_short_message = self.codec.encode(short_message)
         sm_length = len(encoded_short_message)
 
         # body
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.service_type)
+            + self.codec.encode(self.service_type)
             + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
-            + self.codec_class.encode(source_addr)
+            + self.codec.encode(source_addr)
             + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
-            + self.codec_class.encode(destination_addr)
+            + self.codec.encode(destination_addr)
             + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
-            + self.codec_class.encode(self.schedule_delivery_time)
+            + self.codec.encode(self.schedule_delivery_time)
             + chr(0).encode()
-            + self.codec_class.encode(self.validity_period)
+            + self.codec.encode(self.validity_period)
             + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
             + struct.pack(">B", self.sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec_class.encode(short_message)
+            + self.codec.encode(short_message)
         )
 
         # header
@@ -1445,7 +1445,7 @@ class Client:
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
 
         if isinstance(msg, str):
-            msg = self.codec_class.encode(msg)
+            msg = self.codec.encode(msg)
         log_msg = self._msg_to_log(msg=msg)
         self._log(
             logging.INFO,
@@ -2183,7 +2183,7 @@ class Client:
                 # It may be used at a later stage to query the status of a message, cancel
                 # or replace the message.
                 _message_id = body_data.replace(chr(0).encode(), b"")
-                smsc_message_id = self.codec_class.decode(_message_id)
+                smsc_message_id = self.codec.decode(_message_id)
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
                     sequence_number=sequence_number,
@@ -2254,7 +2254,7 @@ class Client:
                     _tag_value = tag_value.replace(
                         chr(0).encode(), b""
                     )  # change variable names to make mypy happy
-                    t_value = self.codec_class.decode(_tag_value)
+                    t_value = self.codec.decode(_tag_value)
                     log_id, hook_metadata = await self.correlation_handler.get(
                         smpp_command=smpp_command,
                         sequence_number=sequence_number,

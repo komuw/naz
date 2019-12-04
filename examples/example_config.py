@@ -10,6 +10,6 @@ client = naz.Client(
     system_id="smppclient1",
     password="password",
     broker=ExampleRedisBroker(),
-    codec_class=naz.codec.SimpleCodec(encoding="ucs2"),
+    codec=naz.codec.SimpleCodec(encoding="ucs2"),
     socket_timeout=4.00,
 )

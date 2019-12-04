@@ -93,6 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../codec.html">codec</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
@@ -196,7 +197,7 @@
         <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">pdu</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">short_message</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">source_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">destination_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -208,7 +209,7 @@
 <span class="sd">            smpp_command: any one of the SMSC commands eg submit_sm</span>
 <span class="sd">            log_id: a unique identify of this reque</span>
 <span class="sd">            pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.</span>
-<span class="sd">            codec_class: python class instance to be used to encode/decode messages. It should be a child class of `codecs.Codec`.</span>
+<span class="sd">            codec: python class instance to be used to encode/decode messages. It should be a child class of `codecs.Codec`.</span>
 <span class="sd">                         You should only specify this, if you also specified `pdu`, else you can leave it as None.</span>
 <span class="sd">            short_message: message to send to SMSC. It is mutually exclusive with `pdu`</span>
 <span class="sd">            source_addr: the identifier(eg msisdn) of the message sender.</span>
@@ -220,7 +221,7 @@
             <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
             <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
             <span class="n">pdu</span><span class="o">=</span><span class="n">pdu</span><span class="p">,</span>
-            <span class="n">codec_class</span><span class="o">=</span><span class="n">codec_class</span><span class="p">,</span>
+            <span class="n">codec</span><span class="o">=</span><span class="n">codec</span><span class="p">,</span>
             <span class="n">short_message</span><span class="o">=</span><span class="n">short_message</span><span class="p">,</span>
             <span class="n">source_addr</span><span class="o">=</span><span class="n">source_addr</span><span class="p">,</span>
             <span class="n">destination_addr</span><span class="o">=</span><span class="n">destination_addr</span><span class="p">,</span>
@@ -230,7 +231,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">smpp_command</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span> <span class="o">=</span> <span class="n">pdu</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span> <span class="o">=</span> <span class="n">codec_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codec</span> <span class="o">=</span> <span class="n">codec</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">short_message</span> <span class="o">=</span> <span class="n">short_message</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source_addr</span> <span class="o">=</span> <span class="n">source_addr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">destination_addr</span> <span class="o">=</span> <span class="n">destination_addr</span>
@@ -242,7 +243,7 @@
         <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">pdu</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span>
-        <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">],</span>
+        <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">],</span>
         <span class="n">short_message</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">source_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
         <span class="n">destination_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
@@ -292,16 +293,16 @@
                     <span class="nb">type</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">codec_class</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">codec</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`codec_class` should be of type:: `None` or `codecs.Codec` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="p">(</span><span class="n">codec_class</span><span class="p">)</span>
+                <span class="s2">&quot;`codec` should be of type:: `None` or `codecs.Codec` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">codec</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="n">pdu</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">codec_class</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pdu</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">codec</span><span class="p">:</span>
             <span class="c1"># because pdu is in bytes, when converting to string; we need to use whatever encoding was passed in</span>
-            <span class="c1"># thus one has to supply the codec_class</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot specify `pdu` and not a `codec_class`&quot;</span><span class="p">)</span>
+            <span class="c1"># thus one has to supply the codec</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot specify `pdu` and not a `codec`&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Message.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -321,37 +322,35 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
                 <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">)</span>
-            <span class="n">_item</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec_class</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">)</span>
+            <span class="n">_item</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Message.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span>
-        <span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">codec_class</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Deserializes the message protocol from json. You can use this method if you would</span>
 <span class="sd">        like to return the `Message` from a broker like redis/rabbitmq/postgres etc.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            json_message: `naz.protocol.Message` in json format.</span>
-<span class="sd">            codec_class: python class instance to be used to encode/decode messages. It should be a child class of `codecs.Codec`.</span>
+<span class="sd">            codec: python class instance to be used to encode/decode messages. It should be a child class of `codecs.Codec`.</span>
 <span class="sd">                         You should only specify this, if `json_message` has a key called `pdu` and it is not None.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">_in_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pdu&quot;</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">codec_class</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">codec</span><span class="p">:</span>
                 <span class="c1"># because pdu is in bytes, when converting to string; we need to use whatever encoding was passed in</span>
-                <span class="c1"># thus one has to supply the codec_class</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot specify `pdu` and not a `codec_class`&quot;</span><span class="p">)</span>
+                <span class="c1"># thus one has to supply the codec</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot specify `pdu` and not a `codec`&quot;</span><span class="p">)</span>
 
             <span class="c1"># we need to convert pdu to bytes.</span>
-            <span class="c1"># There&#39;s a risk of a message been encoded with an codec_class that it was not decoded with when been saved to broker</span>
-            <span class="c1"># ideally, the codec_class should also be saved/serialized as part of the message been sent to broker.</span>
+            <span class="c1"># There&#39;s a risk of a message been encoded with an codec that it was not decoded with when been saved to broker</span>
+            <span class="c1"># ideally, the codec should also be saved/serialized as part of the message been sent to broker.</span>
             <span class="c1"># However, this risk is small and we should only consider it if people report it as a bug.</span>
-            <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">codec_class</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">])</span>
-            <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;codec_class&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">codec_class</span>
+            <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">codec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">])</span>
+            <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;codec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">codec</span>
 
         <span class="k">return</span> <span class="n">Message</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
 </pre></div>
