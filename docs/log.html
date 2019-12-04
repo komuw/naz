@@ -169,9 +169,9 @@
 <span id="log"></span><h1>log<a class="headerlink" href="#module-naz.log" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="naz.log.SimpleLogger">
-<em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">SimpleLogger</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em>, <em class="sig-param">level=20</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#SimpleLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.SimpleLogger" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.log.</code><code class="sig-name descname">SimpleLogger</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em>, <em class="sig-param">level=20</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">handler=None</em>, <em class="sig-param">render_as_json=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#SimpleLogger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.SimpleLogger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code></p>
-<p>It implements a structured logger that renders logs as json.</p>
+<p>It implements a structured logger that renders logs as either json(default) or python dictionary.</p>
 <p>example usage:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">logger</span> <span class="o">=</span> <span class="n">SimpleLogger</span><span class="p">(</span><span class="s2">&quot;myLogger&quot;</span><span class="p">)</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
@@ -180,7 +180,7 @@
 </div>
 <dl class="method">
 <dt id="naz.log.SimpleLogger.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em>, <em class="sig-param">level=20</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">handler=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#SimpleLogger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.SimpleLogger.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">logger_name</em>, <em class="sig-param">level=20</em>, <em class="sig-param">log_metadata=None</em>, <em class="sig-param">handler=None</em>, <em class="sig-param">render_as_json=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#SimpleLogger.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.SimpleLogger.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -189,6 +189,7 @@
 <li><p><strong>log_metadata</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>]) – metadata that will be included in all log statements</p></li>
 <li><p><strong>handler</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Handler</span></code>]) – python logging <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Handler">handler</a> to be attached to this logger.
 By default, <cite>logging.StreamHandler</cite> is used.</p></li>
+<li><p><strong>render_as_json</strong> – whether to render logs as json or dictionary. By default it renders as json.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
