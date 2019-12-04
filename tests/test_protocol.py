@@ -46,7 +46,7 @@ class TestProtocol(TestCase):
             smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP,
             log_id="some-log-id",
             pdu=b"pdu",
-            codec_class=naz.nazcodec.SimpleCodec(encoding="utf-8"),
+            codec_class=naz.codec.SimpleCodec(encoding="utf-8"),
         )
         _in_json = proto.to_json()
         _in_dict = json.loads(_in_json)
@@ -75,7 +75,7 @@ class TestProtocol(TestCase):
         }
         _in_json = json.dumps(x)
         proto = naz.protocol.Message.from_json(
-            _in_json, codec_class=naz.nazcodec.SimpleCodec(encoding="utf-8")
+            _in_json, codec_class=naz.codec.SimpleCodec(encoding="utf-8")
         )
 
         self.assertIsInstance(proto, naz.protocol.Message)

@@ -1,7 +1,7 @@
-nazcodec
+codec
 ---------------
 
-.. automodule:: naz.nazcodec
+.. automodule:: naz.codec
     :members: SimpleCodec
     :show-inheritance:
 

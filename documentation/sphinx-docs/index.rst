@@ -19,7 +19,7 @@ API reference
     protocol
     correlater
     hooks
-    nazcodec
+    codec
     broker
     ratelimiter
     sequence

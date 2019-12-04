@@ -12,7 +12,7 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
-from . import nazcodec
+from . import codec
 from . import protocol
 from . import sequence
 from . import throttle
@@ -236,7 +236,7 @@ class Client:
         if codec_class is not None:
             self.codec_class = codec_class
         else:
-            self.codec_class = nazcodec.SimpleCodec()
+            self.codec_class = codec.SimpleCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -703,6 +703,9 @@ class Client:
                 if command_status_value == val.value:
                     return val
         return None
+
+    def _easy_encode(self):
+        self.codec_class.encode(self.service_type)
 
     @staticmethod
     def _retry_after(current_retries):
