@@ -1,5 +1,5 @@
 import naz
-from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
+from examples.example_klasses import ExampleRedisBroker  # , MySeqGen, MyRateLimiter
 
 
 # run as:
