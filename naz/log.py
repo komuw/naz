@@ -253,11 +253,12 @@ class BreachHandler(handlers.MemoryHandler):
             target=target,
             flushOnClose=flushOnClose,  # pytype: disable=wrong-keyword-args
         )
-        self.buffer: collections.deque = collections.deque(
-            maxlen=self.capacity  # type: ignore
-        )  # pytype: disable=attribute-error
+
         # assuming each log record is 250 bytes, then the maximum
         # memory used by `buffer` will always be == 250*1_000/(1000*1000) == 0.25MB
+        self.buffer: typing.Deque[logging.LogRecord] = collections.deque(  # type: ignore
+            maxlen=self.capacity
+        )  # pytype: disable=attribute-error
 
         self.heartbeatInterval = heartbeatInterval
         if self.heartbeatInterval:
