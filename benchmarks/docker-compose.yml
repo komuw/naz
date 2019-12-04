@@ -61,7 +61,7 @@ services:
     build:
       context: .
       args:
-        - NAZ_BRANCH=master
+        - NAZ_BRANCH=issues/188
     container_name: log_collector
     volumes:
       - log-file-volume:/usr/src/nazLog
@@ -76,7 +76,7 @@ services:
     build:
       context: .
       args:
-        - NAZ_BRANCH=master
+        - NAZ_BRANCH=issues/188
     container_name: message_producer
     volumes:
       - ./:/usr/src/app
@@ -91,7 +91,7 @@ services:
     build:
       context: .
       args:
-        - NAZ_BRANCH=master
+        - NAZ_BRANCH=issues/188
     container_name: naz_cli
     volumes:
       - ./:/usr/src/app
