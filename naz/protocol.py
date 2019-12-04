@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import json
 import typing
-import codecs
+
+from . import codec
 
 
 class Message:
@@ -32,7 +33,7 @@ class Message:
         smpp_command: str,
         log_id: str,
         pdu: typing.Union[None, bytes] = None,
-        codec: typing.Union[None, codecs.Codec] = None,
+        codec: typing.Union[None, codec.BaseCodec] = None,
         short_message: typing.Union[None, str] = None,
         source_addr: typing.Union[None, str] = None,
         destination_addr: typing.Union[None, str] = None,
@@ -44,7 +45,7 @@ class Message:
             smpp_command: any one of the SMSC commands eg submit_sm
             log_id: a unique identify of this reque
             pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.
-            codec: python class instance to be used to encode/decode messages. It should be a child class of `codecs.Codec`.
+            codec: python class instance to be used to encode/decode messages. It should be a child class of `naz.codec.BaseCodec`.
                          You should only specify this, if you also specified `pdu`, else you can leave it as None.
             short_message: message to send to SMSC. It is mutually exclusive with `pdu`
             source_addr: the identifier(eg msisdn) of the message sender.
@@ -78,7 +79,7 @@ class Message:
         smpp_command: str,
         log_id: str,
         pdu: typing.Union[None, bytes],
-        codec: typing.Union[None, codecs.Codec],
+        codec: typing.Union[None, codec.BaseCodec],
         short_message: typing.Union[None, str],
         source_addr: typing.Union[None, str],
         destination_addr: typing.Union[None, str],
@@ -128,9 +129,9 @@ class Message:
                     type(hook_metadata)
                 )
             )
-        if not isinstance(codec, (type(None), codecs.Codec)):
+        if not isinstance(codec, (type(None), codec.BaseCodec)):
             raise ValueError(
-                "`codec` should be of type:: `None` or `codecs.Codec` You entered: {0}".format(
+                "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
                     type(codec)
                 )
             )
@@ -157,20 +158,20 @@ class Message:
         if self.pdu:
             if typing.TYPE_CHECKING:
                 # make mypy happy; https://github.com/python/mypy/issues/4805
-                assert isinstance(self.codec, codecs.Codec)
+                assert isinstance(self.codec, codec.BaseCodec)
             _item["pdu"] = self.codec.decode(self.pdu)
 
         return json.dumps(_item)
 
     @staticmethod
-    def from_json(json_message: str, codec: typing.Union[None, codecs.Codec] = None) -> Message:
+    def from_json(json_message: str, codec: typing.Union[None, codec.BaseCodec] = None) -> Message:
         """
         Deserializes the message protocol from json. You can use this method if you would
         like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
 
         Parameters:
             json_message: `naz.protocol.Message` in json format.
-            codec: python class instance to be used to encode/decode messages. It should be a child class of `codecs.Codec`.
+            codec: python class instance to be used to encode/decode messages. It should be a child class of `naz.codec.BaseCodec`.
                          You should only specify this, if `json_message` has a key called `pdu` and it is not None.
         """
         _in_dict = json.loads(json_message)
