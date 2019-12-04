@@ -38,7 +38,7 @@ test:
 	@printf "\n run flake8::\n" && flake8 .
 	@printf "\n run pylint::\n" && pylint --enable=E --disable=W,R,C naz/ tests/ cli/ documentation/ examples/ benchmarks/
 	@printf "\n run bandit::\n" && bandit -r --exclude .venv -ll .
-	@printf "\n run mypy::\n" && mypy --show-column-numbers --ignore-missing-imports -p cli -p naz -p tests -p examples -p benchmarks
+	@printf "\n run mypy::\n" && mypy --show-column-numbers --ignore-missing-imports cli/ naz/ tests/ examples/ benchmarks/
 	@printf "\n run pytype::\n" && pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ tests/ documentation/ examples/ benchmarks/
 
 # note `.nojekyll` file is important inside `docs/` folder

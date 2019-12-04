@@ -62,7 +62,7 @@ jobs:
           # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
           # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
           printf "\n\t running mypy:\n"
-          mypy --show-column-numbers --ignore-missing-imports -p cli -p naz -p tests -p examples -p benchmarks #--strict
+          mypy --show-column-numbers --ignore-missing-imports cli/ naz/ tests/ examples/ benchmarks/ #--strict
           printf "\n\t running pytype:\n"
           pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ tests/ documentation/ examples/ benchmarks/
         env:
