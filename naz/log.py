@@ -122,7 +122,7 @@ class SimpleLogger(logging.Logger):
                 "`level` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'"
             ) from e
 
-    def _process_msg(self, msg: typing.Union[str, dict]) -> str:
+    def _process_msg(self, msg: typing.Union[str, dict]) -> typing.Union[str, dict]:
         timestamp = self._formatTime()
         if isinstance(msg, dict):
             _timestamp = {"timestamp": timestamp}
