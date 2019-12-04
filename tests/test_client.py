@@ -117,9 +117,11 @@ class TestClient(TestCase):
 
     def setUp(self):
         self.broker = naz.broker.SimpleBroker(maxsize=1000)
+
+        smsc_port = 2775
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
-            smsc_port=2775,
+            smsc_port=smsc_port,
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             broker=self.broker,
@@ -141,7 +143,7 @@ class TestClient(TestCase):
             detach=True,
             auto_remove=True,
             labels={"name": "smpp_server", "use": "running_naz_tets"},
-            ports={"2775/tcp": 2775, "8884/tcp": 8884},
+            ports={"{0}/tcp".format(smsc_port): smsc_port, "8884/tcp": 8884},
             stdout=True,
             stderr=True,
         )
