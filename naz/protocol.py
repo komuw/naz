@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import typing
 
-from . import codec
+from . import codec as the_codec
 
 
 class Message:
@@ -33,7 +33,7 @@ class Message:
         smpp_command: str,
         log_id: str,
         pdu: typing.Union[None, bytes] = None,
-        codec: typing.Union[None, codec.BaseCodec] = None,
+        codec: typing.Union[None, the_codec.BaseCodec] = None,
         short_message: typing.Union[None, str] = None,
         source_addr: typing.Union[None, str] = None,
         destination_addr: typing.Union[None, str] = None,
@@ -79,7 +79,7 @@ class Message:
         smpp_command: str,
         log_id: str,
         pdu: typing.Union[None, bytes],
-        codec: typing.Union[None, codec.BaseCodec],
+        codec: typing.Union[None, the_codec.BaseCodec],
         short_message: typing.Union[None, str],
         source_addr: typing.Union[None, str],
         destination_addr: typing.Union[None, str],
@@ -129,7 +129,7 @@ class Message:
                     type(hook_metadata)
                 )
             )
-        if not isinstance(codec, (type(None), codec.BaseCodec)):
+        if not isinstance(codec, (type(None), the_codec.BaseCodec)):
             raise ValueError(
                 "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
                     type(codec)
@@ -158,13 +158,15 @@ class Message:
         if self.pdu:
             if typing.TYPE_CHECKING:
                 # make mypy happy; https://github.com/python/mypy/issues/4805
-                assert isinstance(self.codec, codec.BaseCodec)
+                assert isinstance(self.codec, the_codec.BaseCodec)
             _item["pdu"] = self.codec.decode(self.pdu)
 
         return json.dumps(_item)
 
     @staticmethod
-    def from_json(json_message: str, codec: typing.Union[None, codec.BaseCodec] = None) -> Message:
+    def from_json(
+        json_message: str, codec: typing.Union[None, the_codec.BaseCodec] = None
+    ) -> Message:
         """
         Deserializes the message protocol from json. You can use this method if you would
         like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
