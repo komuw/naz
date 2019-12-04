@@ -704,9 +704,6 @@ class Client:
                     return val
         return None
 
-    def _easy_encode(self):
-        self.codec.encode(self.service_type)
-
     @staticmethod
     def _retry_after(current_retries):
         """
