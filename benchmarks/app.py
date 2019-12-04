@@ -2,9 +2,9 @@ import os
 
 import naz
 
-from .my_hook import BenchmarksHook
-from .redis_broker import MyRedisBroker
-from .my_logger import BenchmarksLogger
+from my_hook import BenchmarksHook
+from redis_broker import MyRedisBroker
+from my_logger import BenchmarksLogger
 
 # run as:
 #   naz-cli --client benchmarks.app.my_naz_client
