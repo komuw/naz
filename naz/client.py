@@ -12,13 +12,14 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
-from . import codec
 from . import protocol
 from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
+from . import codec as the_codec
 from . import broker as the_broker
+
 
 from .state import (
     SmppCommand,
@@ -236,7 +237,7 @@ class Client:
         if codec is not None:
             self.codec = codec
         else:
-            self.codec = codec.SimpleCodec()
+            self.codec = the_codec.SimpleCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
