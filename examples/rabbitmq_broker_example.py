@@ -124,7 +124,7 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
                 else:
                     await asyncio.sleep(5)
 
-    def blocking_dequeue(self) -> naz.protocol.Message:
+    def blocking_dequeue(self) -> typing.Union[None, naz.protocol.Message]:
         self.connect()
         method_frame, _, body = self.channel.basic_get(self.queue_name)
         if body and method_frame:
