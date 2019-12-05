@@ -418,11 +418,12 @@
             <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
             <span class="n">flushOnClose</span><span class="o">=</span><span class="n">flushOnClose</span><span class="p">,</span>  <span class="c1"># pytype: disable=wrong-keyword-args</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span>
-            <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span>  <span class="c1"># type: ignore</span>
-        <span class="p">)</span>  <span class="c1"># pytype: disable=attribute-error</span>
+
         <span class="c1"># assuming each log record is 250 bytes, then the maximum</span>
         <span class="c1"># memory used by `buffer` will always be == 250*1_000/(1000*1000) == 0.25MB</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Deque</span><span class="p">[</span><span class="n">logging</span><span class="o">.</span><span class="n">LogRecord</span><span class="p">]</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+            <span class="n">maxlen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">capacity</span>  <span class="c1"># pytype: disable=attribute-error</span>
+        <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">heartbeatInterval</span> <span class="o">=</span> <span class="n">heartbeatInterval</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">heartbeatInterval</span><span class="p">:</span>
