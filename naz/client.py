@@ -728,7 +728,7 @@ class Client:
         """
         log_msg = "unable to decode msg"
         try:
-            log_msg = self.codec.decode(msg)
+            log_msg = msg.decode("ascii")
             if self.password in log_msg:
                 # do not log password, redact it from logs.
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
@@ -2180,7 +2180,7 @@ class Client:
                 # It may be used at a later stage to query the status of a message, cancel
                 # or replace the message.
                 _message_id = body_data.replace(chr(0).encode(), b"")
-                smsc_message_id = self.codec.decode(_message_id)
+                smsc_message_id = _message_id.decode("ascii")
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
                     sequence_number=sequence_number,
@@ -2251,7 +2251,7 @@ class Client:
                     _tag_value = tag_value.replace(
                         chr(0).encode(), b""
                     )  # change variable names to make mypy happy
-                    t_value = self.codec.decode(_tag_value)
+                    t_value = _tag_value.decode("ascii")
                     log_id, hook_metadata = await self.correlation_handler.get(
                         smpp_command=smpp_command,
                         sequence_number=sequence_number,
