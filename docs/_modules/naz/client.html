@@ -1002,25 +1002,13 @@
                 <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-
-        <span class="c1"># body</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
-
-        <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
-        <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
-        <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
-
-        <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span>
                 <span class="n">protocol</span><span class="o">.</span><span class="n">EnquireLinkResp</span><span class="p">(</span>
                     <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span><span class="p">,</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
-                    <span class="n">pdu</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span>
+                    <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1104,26 +1092,15 @@
                 <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="c1"># body</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
-        <span class="n">message_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="n">message_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
 
-        <span class="c1"># header</span>
-        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
-        <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
-        <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
-        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
-        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
-
-        <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span>
                 <span class="n">protocol</span><span class="o">.</span><span class="n">DeliverSmResp</span><span class="p">(</span>
                     <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span><span class="p">,</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
-                    <span class="n">pdu</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span>
+                    <span class="n">message_id</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1205,6 +1182,81 @@
 <span class="sd">            TODO: docs</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">proto_msg</span><span class="o">=</span><span class="n">proto_msg</span><span class="p">)</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_build_enquire_link_resp_pdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto_msg</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">EnquireLinkResp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">SmppCommand</span><span class="o">.</span><span class="n">ENQUIRE_LINK_RESP</span>
+        <span class="n">log_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span>
+        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">sequence_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._build_enquire_link_resp_pdu&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+        <span class="c1"># body</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+
+        <span class="c1"># header</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
+        <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
+
+        <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._build_enquire_link_resp_pdu&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">full_pdu</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_build_deliver_sm_pdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto_msg</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">DeliverSmResp</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM_RESP</span>
+        <span class="n">log_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span>
+        <span class="n">message_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">message_id</span>
+        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">sequence_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._build_deliver_sm_pdu&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+
+        <span class="c1"># body</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+        <span class="n">message_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="n">message_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+
+        <span class="c1"># header</span>
+        <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
+        <span class="n">command_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="p">[</span><span class="n">smpp_command</span><span class="p">]</span>
+        <span class="n">command_status</span> <span class="o">=</span> <span class="n">SmppCommandStatus</span><span class="o">.</span><span class="n">ESME_ROK</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
+
+        <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client._build_deliver_sm_pdu&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">full_pdu</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">_build_submit_sm_pdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto_msg</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1710,10 +1762,12 @@
                         <span class="n">source_addr</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr</span>
                         <span class="n">destination_addr</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">destination_addr</span>
                         <span class="n">full_pdu</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_submit_sm_pdu</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="n">DeliverSmResp</span><span class="p">):</span>
+                        <span class="n">full_pdu</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_deliver_sm_pdu</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="n">EnquireLinkResp</span><span class="p">):</span>
+                        <span class="n">full_pdu</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_enquire_link_resp_pdu</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
-                            <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
-                            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto_msg</span><span class="o">.</span><span class="n">pdu</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span>
+                        <span class="c1"># TODO: raise error</span>
                         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">pdu</span>
                 <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">e</span> <span class="o">=</span> <span class="ne">AttributeError</span><span class="p">(</span>

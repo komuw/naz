@@ -177,11 +177,6 @@
 <span class="sd">    TODO: doc</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># all messages in `naz` protocol are encoded as `utf8`.</span>
-    <span class="c1"># This is even though the `pdu` passed into this class is a byte that may contain different SMSC fields that are encoded using different schemes.</span>
-    <span class="c1"># Some fields may be `struct.pack(&quot;&gt;I&quot;)` others `.encode(&quot;ascii&quot;)` and still others `codec.encode(&quot;ucs2&quot;)`</span>
-    <span class="n">ENCODING</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;utf8&quot;</span>
-
 <div class="viewcode-block" id="Message.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.__init__">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -490,14 +485,16 @@
 <div class="viewcode-block" id="EnquireLinkResp.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">pdu</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">ENQUIRE_LINK_RESP</span><span class="p">,</span>
+        <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">ENQUIRE_LINK_RESP</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span> <span class="o">=</span> <span class="n">pdu</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span></div>
 
 <div class="viewcode-block" id="EnquireLinkResp.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -508,18 +505,14 @@
             <span class="n">smpp_command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
             <span class="n">log_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
-            <span class="n">pdu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">),</span>
+            <span class="n">sequence_number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+            <span class="n">hook_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="EnquireLinkResp.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">EnquireLinkResp</span><span class="p">:</span>
         <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
-        <span class="c1"># we need to convert pdu to bytes.</span>
-        <span class="c1"># all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.</span>
-        <span class="c1"># There&#39;s a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker</span>
-        <span class="c1"># However, this risk is small and we should only consider it if people report it as a bug.</span>
-        <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">Message</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">EnquireLinkResp</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
 
 
@@ -527,14 +520,18 @@
 <div class="viewcode-block" id="DeliverSmResp.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">pdu</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span>
+        <span class="n">message_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM_RESP</span><span class="p">,</span>
+        <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM_RESP</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span> <span class="o">=</span> <span class="n">pdu</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_id</span> <span class="o">=</span> <span class="n">message_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span></div>
 
 <div class="viewcode-block" id="DeliverSmResp.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -545,18 +542,15 @@
             <span class="n">smpp_command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
             <span class="n">log_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
-            <span class="n">pdu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">),</span>
+            <span class="n">message_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">message_id</span><span class="p">,</span>
+            <span class="n">sequence_number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+            <span class="n">hook_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DeliverSmResp.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DeliverSmResp</span><span class="p">:</span>
         <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
-        <span class="c1"># we need to convert pdu to bytes.</span>
-        <span class="c1"># all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.</span>
-        <span class="c1"># There&#39;s a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker</span>
-        <span class="c1"># However, this risk is small and we should only consider it if people report it as a bug.</span>
-        <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">Message</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">DeliverSmResp</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
 
 
