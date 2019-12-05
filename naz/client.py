@@ -1082,6 +1082,7 @@ class Client:
 
         smpp_command = SmppCommand.SUBMIT_SM
         log_id = proto_msg.log_id
+        hook_metadata = proto_msg.hook_metadata
         short_message = proto_msg.short_message
         source_addr = proto_msg.source_addr
         destination_addr = proto_msg.destination_addr
