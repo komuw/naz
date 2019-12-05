@@ -13,5 +13,5 @@ client = naz.Client(
     # codec=naz.codec.SimpleCodec(encoding="ucs2"),
     socket_timeout=4.00,
     logger=naz.log.SimpleLogger("example_config.client", render_as_json=False),
-    enquire_link_interval=15.00,
+    enquire_link_interval=55.00,
 )

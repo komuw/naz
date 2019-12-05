@@ -362,14 +362,18 @@ class DeliverSmResp(Message):
     def __init__(
         self,
         log_id: str,
-        pdu: bytes,
+        message_id: str,
+        sequence_number: int,
         version: int = 1,
         smpp_command: str = state.SmppCommand.DELIVER_SM_RESP,
+        hook_metadata: str = "",
     ) -> None:
         self.log_id = log_id
         self.version = version
         self.smpp_command = state.SmppCommand.DELIVER_SM_RESP
-        self.pdu = pdu
+        self.message_id = message_id
+        self.sequence_number = sequence_number
+        self.hook_metadata = hook_metadata
 
     def to_json(self) -> str:
         """
@@ -380,18 +384,15 @@ class DeliverSmResp(Message):
             smpp_command=self.smpp_command,
             version=self.version,
             log_id=self.log_id,
-            pdu=self.pdu.decode(self.ENCODING),
+            message_id=self.message_id,
+            sequence_number=self.sequence_number,
+            hook_metadata=self.hook_metadata,
         )
         return json.dumps(_item)
 
     @staticmethod
     def from_json(json_message: str) -> DeliverSmResp:
         _in_dict = json.loads(json_message)
-        # we need to convert pdu to bytes.
-        # all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.
-        # There's a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker
-        # However, this risk is small and we should only consider it if people report it as a bug.
-        _in_dict["pdu"] = _in_dict["pdu"].encode(Message.ENCODING)
         return DeliverSmResp(**_in_dict)
 
 

@@ -939,26 +939,15 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        # body
-        body = b""
-        message_id = ""
-        body = body + message_id.encode("ascii") + chr(0).encode()
 
-        # header
-        command_length = self._header_pdu_length + len(body)  # 16 is for headers
-        command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
-        sequence_number = sequence_number
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
-
-        full_pdu = header + body
         try:
             await self.broker.enqueue(
                 protocol.DeliverSmResp(
                     version=self.naz_message_protocol_version,
                     smpp_command=smpp_command,
                     log_id=log_id,
-                    pdu=full_pdu,
+                    message_id="",
+                    sequence_number=sequence_number,
                 )
             )
         except Exception as e:
@@ -1040,6 +1029,45 @@ class Client:
             TODO: docs
         """
         await self.submit_message(proto_msg=proto_msg)
+
+    async def _build_deliver_sm_pdu(self, proto_msg: protocol.SubmitSM) -> bytes:
+        smpp_command = SmppCommand.DELIVER_SM_RESP
+        log_id = proto_msg.log_id
+        message_id = proto_msg.message_id
+        sequence_number = proto_msg.sequence_number
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client._build_deliver_sm_pdu",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+
+        # body
+        body = b""
+        message_id = ""
+        body = body + message_id.encode("ascii") + chr(0).encode()
+
+        # header
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
+        command_id = self.command_ids[smpp_command]
+        command_status = SmppCommandStatus.ESME_ROK.value
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client._build_deliver_sm_pdu",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+        return full_pdu
 
     async def _build_submit_sm_pdu(self, proto_msg: protocol.SubmitSM) -> bytes:
         """
@@ -1545,6 +1573,8 @@ class Client:
                         source_addr = proto_msg.source_addr
                         destination_addr = proto_msg.destination_addr
                         full_pdu = await self._build_submit_sm_pdu(proto_msg)
+                    elif isinstance(proto_msg, protocol.DeliverSmResp):
+                        full_pdu = await self._build_deliver_sm_pdu(proto_msg)
                     else:
                         if typing.TYPE_CHECKING:
                             # make mypy happy; https://github.com/python/mypy/issues/4805
