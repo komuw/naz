@@ -1030,7 +1030,6 @@ class Client:
                     smpp_command=smpp_command,
                     log_id=log_id,
                     pdu=full_pdu,
-                    codec=self.codec,
                 )
             )
         except Exception as e:
@@ -1134,7 +1133,6 @@ class Client:
                     smpp_command=smpp_command,
                     log_id=log_id,
                     pdu=full_pdu,
-                    codec=self.codec,
                 )
             )
         except Exception as e:
