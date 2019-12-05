@@ -47,7 +47,7 @@ NAZ_CLIENT = naz.Client(
     ),
     enquire_link_interval=30.00,
     rateLimiter=MyRateLimiter(),
-    codec_class=naz.nazcodec.SimpleNazCodec(encoding="gsm0338", errors_level="ignore"),
+    codec=naz.codec.SimpleCodec(encoding="gsm0338", errors="ignore"),
 )
 
 BAD_NAZ_CLIENT = MySeqGen()

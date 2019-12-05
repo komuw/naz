@@ -117,9 +117,11 @@ class TestClient(TestCase):
 
     def setUp(self):
         self.broker = naz.broker.SimpleBroker(maxsize=1000)
+
+        smsc_port = 2775
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
-            smsc_port=2775,
+            smsc_port=smsc_port,
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             broker=self.broker,
@@ -141,7 +143,7 @@ class TestClient(TestCase):
             detach=True,
             auto_remove=True,
             labels={"name": "smpp_server", "use": "running_naz_tets"},
-            ports={"2775/tcp": 2775, "8884/tcp": 8884},
+            ports={"{0}/tcp".format(smsc_port): smsc_port, "8884/tcp": 8884},
             stdout=True,
             stderr=True,
         )
@@ -194,7 +196,7 @@ class TestClient(TestCase):
             "addr_npi": DummyClientArg,
             "address_range": DummyClientArg,
             "sequence_generator": DummyClientArg,
-            "codec_class": DummyClientArg,
+            "codec": DummyClientArg,
             "service_type": DummyClientArg,
             "source_addr_ton": DummyClientArg,
             "source_addr_npi": DummyClientArg,
@@ -236,7 +238,7 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 broker=self.broker,
-                codec_class=naz.nazcodec.SimpleNazCodec(encoding=encoding),
+                codec=naz.codec.SimpleCodec(encoding=encoding),
             )
 
         self.assertRaises(ValueError, mock_create_client)
@@ -1057,3 +1059,26 @@ class TestClient(TestCase):
         ) as mock_naz_unbind_and_disconnect:
             self._run(self.cli._parse_response_pdu(pdu=b"\x00\x00\x00\x15\x80"))
             self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)
+
+    def test_custom_encodings(self):
+        """
+        tests that any of the encodings allowed by SMPP spec[1] can be used.
+        1. https://github.com/komuw/naz/blob/c47f5030b720f3bac400dd6bd457b4415b0d5b7b/naz/state.py#L328
+        2. Also see section 5.2.19 of SMPP spec
+        """
+        for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
+            cli = naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                broker=self.broker,
+                logger=naz.log.SimpleLogger(
+                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                ),
+                socket_timeout=0.0000001,
+                codec=naz.codec.SimpleCodec(encoding=encoding),
+            )
+            self._run(cli.connect())
+            self.assertTrue(hasattr(cli.reader, "read"))
+            self.assertTrue(hasattr(cli.writer, "write"))

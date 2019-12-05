@@ -7,16 +7,18 @@ import typing
 import asyncio
 import logging
 
+
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
-from . import nazcodec
 from . import protocol
 from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
+from . import codec as the_codec
 from . import broker as the_broker
+
 
 from .state import (
     SmppCommand,
@@ -103,7 +105,7 @@ class Client:
         sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
-        codec_class: typing.Union[None, nazcodec.BaseNazCodec] = None,
+        codec: typing.Union[None, the_codec.BaseCodec] = None,
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
@@ -141,7 +143,7 @@ class Client:
                 messages to be sent to SMSC are queued using the said mechanism before been sent
             client_id:	a unique string identifying a naz client class instance
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
-            codec_class: python class instance to be used to encode/decode messages
+            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
@@ -182,7 +184,7 @@ class Client:
             sm_default_msg_id=sm_default_msg_id,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
-            codec_class=codec_class,
+            codec=codec,
             rateLimiter=rateLimiter,
             hook=hook,
             sequence_generator=sequence_generator,
@@ -231,10 +233,10 @@ class Client:
             )
         self._sanity_check_logger()
 
-        if codec_class is not None:
-            self.codec_class = codec_class
+        if codec is not None:
+            self.codec = codec
         else:
-            self.codec_class = nazcodec.SimpleNazCodec()
+            self.codec = the_codec.SimpleCodec()
 
         self.service_type = service_type
         self.source_addr_ton = source_addr_ton
@@ -302,7 +304,7 @@ class Client:
             SmppCommand.RESERVED_FOR_SMSC_VENDOR_B: [0x80010200, 0x800102FF],
         }
 
-        self.data_coding = self._find_data_coding(self.codec_class.encoding)
+        self.data_coding = self._find_data_coding(self.codec.encoding)
 
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
@@ -375,7 +377,7 @@ class Client:
         sm_default_msg_id: int,
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
-        codec_class: typing.Union[None, nazcodec.BaseNazCodec],
+        codec: typing.Union[None, the_codec.BaseCodec],
         rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
@@ -583,11 +585,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(codec_class, (type(None), nazcodec.BaseNazCodec)):
+        if not isinstance(codec, (type(None), the_codec.BaseCodec)):
             errors.append(
                 ValueError(
-                    "`codec_class` should be of type:: `None` or `naz.nazcodec.BaseNazCodec` You entered: {0}".format(
-                        type(codec_class)
+                    "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
+                        type(codec)
                     )
                 )
             )
@@ -673,7 +675,8 @@ class Client:
             if not key.startswith("__"):
                 if encoding == val.code:
                     return val.value
-        raise ValueError("That encoding:{0} is not recognised.".format(encoding))
+
+        raise ValueError("That encoding: `{0}` is not recognised.".format(encoding))
 
     def _search_by_command_id_code(self, command_id_code: int) -> typing.Union[None, str]:
         for key, val in self.command_ids.items():
@@ -723,15 +726,17 @@ class Client:
         returns decoded string from bytes with any password removed.
         the returned string is safe to log.
         """
+        log_msg = "unable to decode msg"
         try:
-            log_msg = self.codec_class.decode(msg)
+            log_msg = msg.decode("ascii")
             if self.password in log_msg:
                 # do not log password, redact it from logs.
                 log_msg = log_msg.replace(self.password, "{REDACTED}")
-        except (UnicodeDecodeError, UnicodeError):
-            log_msg = str(msg)
-        except Exception:
-            log_msg = ""
+        except (UnicodeDecodeError, UnicodeError) as e:
+            # in future we may want to do something custom
+            _ = e
+        except Exception as e:
+            _ = e
         return log_msg
 
     async def connect(self, log_id: str = "") -> None:
@@ -777,7 +782,7 @@ class Client:
 
     async def tranceiver_bind(self, log_id: str = "") -> None:
         """
-        send a BIND_RECEIVER pdu to SMSC.
+        send a BIND_TRANSCEIVER pdu to SMSC.
         """
         smpp_command = SmppCommand.BIND_TRANSCEIVER
         if log_id == "":
@@ -795,16 +800,19 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.system_id)
+            # system_id is a C-Octet string, which is a series of ASCII characters terminated with the NULL character.
+            # see; section 3.1 of SMPP spec
+            # Thus we need to encode C-Octet strings as ascii and also terminate them with NULL char(chr(0).encode())
+            + self.system_id.encode("ascii")
             + chr(0).encode()
-            + self.codec_class.encode(self.password)
+            + self.password.encode("ascii")
             + chr(0).encode()
-            + self.codec_class.encode(self.system_type)
+            + self.system_type.encode("ascii")
             + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
-            + self.codec_class.encode(self.address_range)
+            + self.address_range.encode("ascii")
             + chr(0).encode()
         )
 
@@ -1022,7 +1030,6 @@ class Client:
                     smpp_command=smpp_command,
                     log_id=log_id,
                     pdu=full_pdu,
-                    codec_class=self.codec_class,
                 )
             )
         except Exception as e:
@@ -1109,7 +1116,7 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + self.codec_class.encode(message_id) + chr(0).encode()
+        body = body + message_id.encode("ascii") + chr(0).encode()
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
@@ -1126,7 +1133,6 @@ class Client:
                     smpp_command=smpp_command,
                     log_id=log_id,
                     pdu=full_pdu,
-                    codec_class=self.codec_class,
                 )
             )
         except Exception as e:
@@ -1271,36 +1277,36 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        encoded_short_message = self.codec_class.encode(short_message)
+        encoded_short_message = self.codec.encode(short_message)
         sm_length = len(encoded_short_message)
 
         # body
         body = b""
         body = (
             body
-            + self.codec_class.encode(self.service_type)
+            + self.service_type.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
-            + self.codec_class.encode(source_addr)
+            + source_addr.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
-            + self.codec_class.encode(destination_addr)
+            + destination_addr.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
-            + self.codec_class.encode(self.schedule_delivery_time)
+            + self.schedule_delivery_time.encode("ascii")
             + chr(0).encode()
-            + self.codec_class.encode(self.validity_period)
+            + self.validity_period.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
             + struct.pack(">B", self.sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec_class.encode(short_message)
+            + self.codec.encode(short_message)
         )
 
         # header
@@ -1435,9 +1441,6 @@ class Client:
         """
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
-
-        if isinstance(msg, str):
-            msg = self.codec_class.encode(msg)
         log_msg = self._msg_to_log(msg=msg)
         self._log(
             logging.INFO,
@@ -2106,13 +2109,13 @@ class Client:
 
         try:
             # call throttling handler
-            if commandStatus.value == SmppCommandStatus.ESME_ROK.value:
-                await self.throttle_handler.not_throttled()
-            elif commandStatus.value in [
+            if commandStatus.value in [
                 SmppCommandStatus.ESME_RTHROTTLED.value,
                 SmppCommandStatus.ESME_RMSGQFUL.value,
             ]:
                 await self.throttle_handler.throttled()
+            else:
+                await self.throttle_handler.not_throttled()
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -2123,6 +2126,27 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": commandStatus.description,
+                },
+            )
+        try:
+            # call user's hook for responses
+            await self.hook.from_smsc(
+                smpp_command=smpp_command,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                status=commandStatus,
+                pdu=pdu,
+            )
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.command_handlers",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "from_smsc hook error",
+                    "error": str(e),
                 },
             )
 
@@ -2154,7 +2178,7 @@ class Client:
                 # It may be used at a later stage to query the status of a message, cancel
                 # or replace the message.
                 _message_id = body_data.replace(chr(0).encode(), b"")
-                smsc_message_id = self.codec_class.decode(_message_id)
+                smsc_message_id = _message_id.decode("ascii")
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
                     sequence_number=sequence_number,
@@ -2225,7 +2249,7 @@ class Client:
                     _tag_value = tag_value.replace(
                         chr(0).encode(), b""
                     )  # change variable names to make mypy happy
-                    t_value = self.codec_class.decode(_tag_value)
+                    t_value = _tag_value.decode("ascii")
                     log_id, hook_metadata = await self.correlation_handler.get(
                         smpp_command=smpp_command,
                         sequence_number=sequence_number,
@@ -2260,28 +2284,6 @@ class Client:
                     "error": "the smpp_command: `{0}` has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
-                },
-            )
-
-        # call user's hook for responses
-        try:
-            await self.hook.from_smsc(
-                smpp_command=smpp_command,
-                log_id=log_id,
-                hook_metadata=hook_metadata,
-                status=commandStatus,
-                pdu=pdu,
-            )
-        except Exception as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.command_handlers",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "from_smsc hook error",
-                    "error": str(e),
                 },
             )
 

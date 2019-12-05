@@ -119,12 +119,12 @@ class RabbitmqExampleBroker(naz.broker.BaseBroker):
                 item = await self._get_loop().run_in_executor(
                     executor, functools.partial(self.blocking_dequeue)
                 )
-                if item:
-                    return item
+                if item:  # pytype: disable=name-error
+                    return item  # pytype: disable=name-error
                 else:
                     await asyncio.sleep(5)
 
-    def blocking_dequeue(self) -> naz.protocol.Message:
+    def blocking_dequeue(self) -> typing.Union[None, naz.protocol.Message]:
         self.connect()
         method_frame, _, body = self.channel.basic_get(self.queue_name)
         if body and method_frame:

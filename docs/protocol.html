@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>protocol &mdash; naz v0.7.4 documentation</title>
+  <title>protocol &mdash; naz v0.7.5 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.4
+                v0.7.5
               </div>
             
           
@@ -95,7 +95,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codec.html">codec</a></li>
 <li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
@@ -170,7 +170,7 @@
 <span id="protocol"></span><h1>protocol<a class="headerlink" href="#module-naz.protocol" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="naz.protocol.Message">
-<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">Message</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">pdu=None</em>, <em class="sig-param">codec_class=None</em>, <em class="sig-param">short_message=None</em>, <em class="sig-param">source_addr=None</em>, <em class="sig-param">destination_addr=None</em>, <em class="sig-param">hook_metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">Message</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">pdu=None</em>, <em class="sig-param">short_message=None</em>, <em class="sig-param">source_addr=None</em>, <em class="sig-param">destination_addr=None</em>, <em class="sig-param">hook_metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>The message protocol for <cite>naz</cite>. It is the code representation of what
 gets queued into a naz broker.</p>
@@ -188,16 +188,16 @@ gets queued into a naz broker.</p>
 </div>
 <dl class="method">
 <dt id="naz.protocol.Message.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">pdu=None</em>, <em class="sig-param">codec_class=None</em>, <em class="sig-param">short_message=None</em>, <em class="sig-param">source_addr=None</em>, <em class="sig-param">destination_addr=None</em>, <em class="sig-param">hook_metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">pdu=None</em>, <em class="sig-param">short_message=None</em>, <em class="sig-param">source_addr=None</em>, <em class="sig-param">destination_addr=None</em>, <em class="sig-param">hook_metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol. This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this reque</p></li>
-<li><p><strong>pdu</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]) – the full PDU as sent to SMSC. It is mutually exclusive with <cite>short_message</cite>.</p></li>
-<li><p><strong>codec_class</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="nazcodec.html#naz.nazcodec.BaseNazCodec" title="naz.nazcodec.BaseNazCodec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNazCodec</span></code></a>]) – python class instance to be used to encode/decode messages. It should be a child class of <cite>naz.nazcodec.BaseNazCodec</cite>.
-You should only specify this, if you also specified <cite>pdu</cite>, else you can leave it as None.</p></li>
+<li><p><strong>pdu</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]) – the full PDU as sent to SMSC. It is mutually exclusive with <cite>short_message</cite>.
+Note that the pdu is a byte that may contain different SMSC fields that are encoded using different schemes.
+Some fields may be <cite>struct.pack(“&gt;I”)</cite> others <cite>.encode(“ascii”)</cite> and still others <cite>codec.encode(“ucs2”)</cite></p></li>
 <li><p><strong>short_message</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – message to send to SMSC. It is mutually exclusive with <cite>pdu</cite></p></li>
 <li><p><strong>source_addr</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the identifier(eg msisdn) of the message sender.</p></li>
 <li><p><strong>destination_addr</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the identifier(eg msisdn) of the message receiver.</p></li>
@@ -212,16 +212,12 @@ You should only specify this, if you also specified <cite>pdu</cite>, else you c
 
 <dl class="method">
 <dt id="naz.protocol.Message.from_json">
-<em class="property">static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em>, <em class="sig-param">codec_class=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.from_json" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Deserializes the message protocol from json. You can use this method if you would
 like to return the <cite>Message</cite> from a broker like redis/rabbitmq/postgres etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p></li>
-<li><p><strong>codec_class</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="nazcodec.html#naz.nazcodec.BaseNazCodec" title="naz.nazcodec.BaseNazCodec"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseNazCodec</span></code></a>]) – python class instance to be used to encode/decode messages. It should be a child class of <cite>naz.nazcodec.BaseNazCodec</cite>.
-You should only specify this, if <cite>json_message</cite> has a key called <cite>pdu</cite> and it is not None.</p></li>
-</ul>
+<dd class="field-odd"><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a></p>
