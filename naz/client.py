@@ -984,6 +984,53 @@ class Client:
         )
 
     # this method just enqueues a submit_sm msg to queue
+    async def submit_message(self, proto_msg: protocol.Mesagetype) -> None:
+        """
+        enqueues any kind of pdu to :attr:`broker <Client.broker>`
+        That PDU will later on be sent to SMSC.
+
+        Parameters:
+            TODO: docs
+        """
+        smpp_command = proto_msg.smpp_command
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.submit_message",
+                "stage": "start",
+                "log_id": proto_msg.log_id,
+                "short_message": proto_msg.short_message,
+                "source_addr": proto_msg.source_addr,
+                "destination_addr": proto_msg.destination_addr,
+                "smpp_command": smpp_command,
+            },
+        )
+        try:
+            await self.broker.enqueue(protocol.Message(message_type=proto_msg))
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.submit_message",
+                    "stage": "end",
+                    "error": str(e),
+                    "log_id": proto_msg.log_id,
+                    "smpp_command": smpp_command,
+                },
+            )
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.submit_message",
+                "stage": "end",
+                "log_id": proto_msg.log_id,
+                "short_message": proto_msg.short_message,
+                "source_addr": proto_msg.source_addr,
+                "destination_addr": proto_msg.destination_addr,
+                "smpp_command": smpp_command,
+            },
+        )
+
     async def submit_sm(self, proto_msg: protocol.SubmitSM) -> None:
         """
         enqueues a SUBMIT_SM pdu to :attr:`broker <Client.broker>`
@@ -991,6 +1038,15 @@ class Client:
 
         Parameters:
             TODO: docs
+        """
+        await self.submit_message(proto_msg=proto_msg)
+
+    async def _build_submit_sm_pdu(self, proto_msg: protocol.SubmitSM) -> bytes:
+        """
+        builds a SUBMIT_SM pdu.
+
+        Parameters:
+            proto_msg: an instance of `naz.protocol.SubmitSM`
         """
         # HEADER::
         # submit_sm has the following pdu header:
@@ -1024,52 +1080,6 @@ class Client:
         #        u cant use both `short_message` and `message_payload`
         #     2. Octet String - A series of octets, not necessarily NULL terminated.
 
-        smpp_command = SmppCommand.SUBMIT_SM
-        self._log(
-            logging.INFO,
-            {
-                "event": "naz.Client.submit_sm",
-                "stage": "start",
-                "log_id": proto_msg.log_id,
-                "short_message": proto_msg.short_message,
-                "source_addr": proto_msg.source_addr,
-                "destination_addr": proto_msg.destination_addr,
-                "smpp_command": smpp_command,
-            },
-        )
-        try:
-            await self.broker.enqueue(protocol.Message(message_type=proto_msg))
-        except Exception as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.submit_sm",
-                    "stage": "end",
-                    "error": str(e),
-                    "log_id": proto_msg.log_id,
-                    "smpp_command": smpp_command,
-                },
-            )
-        self._log(
-            logging.INFO,
-            {
-                "event": "naz.Client.submit_sm",
-                "stage": "end",
-                "log_id": proto_msg.log_id,
-                "short_message": proto_msg.short_message,
-                "source_addr": proto_msg.source_addr,
-                "destination_addr": proto_msg.destination_addr,
-                "smpp_command": smpp_command,
-            },
-        )
-
-    async def _build_submit_sm_pdu(self, proto_msg: protocol.SubmitSM) -> bytes:
-        """
-        builds a SUBMIT_SM pdu.
-
-        Parameters:
-            proto_msg: an instance of `naz.protocol.SubmitSM`
-        """
         smpp_command = SmppCommand.SUBMIT_SM
         log_id = proto_msg.log_id
         short_message = proto_msg.short_message
