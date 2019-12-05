@@ -7,7 +7,7 @@ import typing
 from . import state
 
 
-class Mesagetype(abc.ABC):
+class Message(abc.ABC):
     """
     TODO: doc
     """
@@ -56,7 +56,7 @@ class Mesagetype(abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def from_json(json_message: str) -> Mesagetype:
+    def from_json(json_message: str) -> Message:
         """
         Deserializes the message protocol from json.
 
@@ -66,13 +66,15 @@ class Mesagetype(abc.ABC):
         raise NotImplementedError("from_json method must be implemented.")
 
 
-class SubmitSM(Mesagetype):
+class SubmitSM(Message):
     def __init__(
         self,
         short_message: str,
         source_addr: str,
         destination_addr: str,
         log_id: str,
+        version: int = 1,
+        smpp_command: str = state.SmppCommand.SUBMIT_SM,
         hook_metadata: str = "",
         service_type: str = "CMT",  # section 5.2.11
         source_addr_ton: int = 0x00000001,  # section 5.2.5
@@ -94,8 +96,6 @@ class SubmitSM(Mesagetype):
         registered_delivery: int = 0b00000001,  # see section 5.2.17
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
-        smpp_command: str = state.SmppCommand.SUBMIT_SM,
-        version: int = 1,
     ) -> None:
         """
         Parameters:
@@ -103,6 +103,9 @@ class SubmitSM(Mesagetype):
             source_addr: the identifier(eg msisdn) of the message sender
             destination_addr: the identifier(eg msisdn) of the message recipient
             log_id: a unique identify of this request
+            version: This indicates the current version of the naz message protocol.
+                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
+            smpp_command: any one of the SMSC commands eg submit_sm
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
             service_type:	Indicates the SMS Application service associated with the message
             source_addr_ton:	Type of Number of message originator.
@@ -116,7 +119,7 @@ class SubmitSM(Mesagetype):
             validity_period:	The validity period of this message.
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
-            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC       
+            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC      
         """
         self._validate_msg_type_args(
             short_message=short_message,
@@ -140,7 +143,7 @@ class SubmitSM(Mesagetype):
         )
 
         self.smpp_command: str = state.SmppCommand.SUBMIT_SM
-        self.version = 1
+        self.version = version
 
         self.short_message = short_message
         self.source_addr = source_addr
@@ -318,56 +321,20 @@ class SubmitSM(Mesagetype):
         return SubmitSM(**_in_dict)
 
 
-class Message:
+def json_to_Message(json_message: str) -> Message:
     """
-    The message protocol for `naz`. It is the code representation of what
-    gets queued into a naz broker.
+    Deserializes the message protocol from json. You can use this method if you would
+    like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
 
-    Usage:
-
-    .. highlight:: python
-    .. code-block:: python
-
-        import naz
-        TODO: Usage
+    Parameters:
+        json_message: `naz.protocol.Message` in json format.
     """
-
-    def __init__(self, message_type: Mesagetype,) -> None:
-        """
-        Parameters:
-            message_type: the kind of message.
-        """
-        if not isinstance(message_type, Mesagetype):
-            raise ValueError(
-                "`message_type` should be of type:: `naz.protocol.Mesagetype` You entered: {0}".format(
-                    type(message_type)
-                )
+    _item = json.loads(json_message)
+    if _item["smpp_command"] == state.SmppCommand.SUBMIT_SM:
+        return SubmitSM.from_json(json_message=json_message)
+    else:
+        raise NotImplementedError(
+            "The `from_json` method for smpp_command: `{0}` has not been implemented.".format(
+                smpp_command
             )
-        self.message_type = message_type
-
-    def to_json(self) -> str:
-        """
-        Serializes the message protocol to json. You can use this method if you would
-        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
-        """
-        return self.message_type.to_json()
-
-    @staticmethod
-    def from_json(json_message: str) -> Message:
-        """
-        Deserializes the message protocol from json. You can use this method if you would
-        like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
-
-        Parameters:
-            smpp_command: any one of the SMSC commands eg submit_sm
-            json_message: `naz.protocol.Message` in json format.
-        """
-        _item = json.loads(json_message)
-        if _item["smpp_command"] == state.SmppCommand.SUBMIT_SM:
-            return SubmitSM.from_json(json_message=json_message)
-        else:
-            raise NotImplementedError(
-                "The `from_json` method for smpp_command: `{0}` has not been implemented.".format(
-                    smpp_command
-                )
-            )
+        )

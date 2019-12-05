@@ -984,7 +984,7 @@ class Client:
         )
 
     # this method just enqueues a submit_sm msg to queue
-    async def submit_message(self, proto_msg: protocol.Mesagetype) -> None:
+    async def submit_message(self, proto_msg: protocol.Message) -> None:
         """
         enqueues any kind of pdu to :attr:`broker <Client.broker>`
         That PDU will later on be sent to SMSC.
@@ -1006,7 +1006,7 @@ class Client:
             },
         )
         try:
-            await self.broker.enqueue(protocol.Message(message_type=proto_msg))
+            await self.broker.enqueue(proto_msg)
         except Exception as e:
             self._log(
                 logging.ERROR,
@@ -2061,7 +2061,6 @@ class Client:
             # sm_default_msg_id, Int, 1 octet, must be set to NULL.
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
-
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
                 # get associated user supplied log_id if any
