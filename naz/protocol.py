@@ -364,12 +364,6 @@ class Message:
         """
         _item = json.loads(json_message)
         if _item["smpp_command"] == state.SmppCommand.SUBMIT_SM:
-            # import pdb
-
-            # pdb.set_trace()
-            print("sfs")
-            print("sfs")
-            print("sfs")
             return SubmitSM.from_json(json_message=json_message)
         else:
             raise NotImplementedError(
@@ -377,14 +371,3 @@ class Message:
                     smpp_command
                 )
             )
-
-        return self.message_type.from_json(json_message=json_message)
-        _in_dict = json.loads(json_message)
-        if _in_dict.get("pdu"):
-            # we need to convert pdu to bytes.
-            # all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.
-            # There's a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker
-            # However, this risk is small and we should only consider it if people report it as a bug.
-            _in_dict["pdu"] = _in_dict["pdu"].encode(Message.ENCODING)
-
-        return Message(**_in_dict)
