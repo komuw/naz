@@ -782,7 +782,7 @@ class Client:
 
     async def tranceiver_bind(self, log_id: str = "") -> None:
         """
-        send a BIND_RECEIVER pdu to SMSC.
+        send a BIND_TRANSCEIVER pdu to SMSC.
         """
         smpp_command = SmppCommand.BIND_TRANSCEIVER
         if log_id == "":
@@ -800,16 +800,19 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec.encode(self.system_id)
+            # system_id is a C-Octet string, which is a series of ASCII characters terminated with the NULL character.
+            # see; section 3.1 of SMPP spec
+            # Thus we need to encode C-Octet strings as ascii and also terminate them with NULL char(chr(0).encode())
+            + self.system_id.encode("ascii")
             + chr(0).encode()
-            + self.codec.encode(self.password)
+            + self.password.encode("ascii")
             + chr(0).encode()
-            + self.codec.encode(self.system_type)
+            + self.system_type.encode("ascii")
             + chr(0).encode()
             + struct.pack(">I", self.interface_version)
             + struct.pack(">I", self.addr_ton)
             + struct.pack(">I", self.addr_npi)
-            + self.codec.encode(self.address_range)
+            + self.address_range.encode("ascii")
             + chr(0).encode()
         )
 
@@ -1114,7 +1117,7 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + self.codec.encode(message_id) + chr(0).encode()
+        body = body + message_id.encode("ascii") + chr(0).encode()
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
@@ -1283,22 +1286,22 @@ class Client:
         body = b""
         body = (
             body
-            + self.codec.encode(self.service_type)
+            + self.service_type.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.source_addr_ton)
             + struct.pack(">B", self.source_addr_npi)
-            + self.codec.encode(source_addr)
+            + source_addr.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.dest_addr_ton)
             + struct.pack(">B", self.dest_addr_npi)
-            + self.codec.encode(destination_addr)
+            + destination_addr.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.esm_class)
             + struct.pack(">B", self.protocol_id)
             + struct.pack(">B", self.priority_flag)
-            + self.codec.encode(self.schedule_delivery_time)
+            + self.schedule_delivery_time.encode("ascii")
             + chr(0).encode()
-            + self.codec.encode(self.validity_period)
+            + self.validity_period.encode("ascii")
             + chr(0).encode()
             + struct.pack(">B", self.registered_delivery)
             + struct.pack(">B", self.replace_if_present_flag)
@@ -1440,9 +1443,6 @@ class Client:
         """
         # todo: look at `set_write_buffer_limits` and `get_write_buffer_limits` methods
         # print("get_write_buffer_limits:", writer.transport.get_write_buffer_limits())
-
-        if isinstance(msg, str):
-            msg = self.codec.encode(msg)
         log_msg = self._msg_to_log(msg=msg)
         self._log(
             logging.INFO,
