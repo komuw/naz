@@ -837,25 +837,13 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-
-        # body
-        body = b""
-
-        # header
-        command_length = self._header_pdu_length + len(body)  # 16 is for headers
-        command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
-        sequence_number = sequence_number
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
-
-        full_pdu = header + body
         try:
             await self.broker.enqueue(
                 protocol.EnquireLinkResp(
                     version=self.naz_message_protocol_version,
                     smpp_command=smpp_command,
                     log_id=log_id,
-                    pdu=full_pdu,
+                    sequence_number=sequence_number,
                 )
             )
         except Exception as e:
@@ -1030,7 +1018,43 @@ class Client:
         """
         await self.submit_message(proto_msg=proto_msg)
 
-    async def _build_deliver_sm_pdu(self, proto_msg: protocol.SubmitSM) -> bytes:
+    async def _build_enquire_link_resp_pdu(self, proto_msg: protocol.EnquireLinkResp) -> bytes:
+        smpp_command = SmppCommand.ENQUIRE_LINK_RESP
+        log_id = proto_msg.log_id
+        sequence_number = proto_msg.sequence_number
+        self._log(
+            logging.DEBUG,
+            {
+                "event": "naz.Client._build_enquire_link_resp_pdu",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+
+        # body
+        body = b""
+
+        # header
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
+        command_id = self.command_ids[smpp_command]
+        command_status = SmppCommandStatus.ESME_ROK.value
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        self._log(
+            logging.DEBUG,
+            {
+                "event": "naz.Client._build_enquire_link_resp_pdu",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+        return full_pdu
+
+    async def _build_deliver_sm_pdu(self, proto_msg: protocol.DeliverSmResp) -> bytes:
         smpp_command = SmppCommand.DELIVER_SM_RESP
         log_id = proto_msg.log_id
         message_id = proto_msg.message_id
@@ -1575,10 +1599,10 @@ class Client:
                         full_pdu = await self._build_submit_sm_pdu(proto_msg)
                     elif isinstance(proto_msg, protocol.DeliverSmResp):
                         full_pdu = await self._build_deliver_sm_pdu(proto_msg)
+                    elif isinstance(proto_msg, protocol.EnquireLinkResp):
+                        full_pdu = await self._build_enquire_link_resp_pdu(proto_msg)
                     else:
-                        if typing.TYPE_CHECKING:
-                            # make mypy happy; https://github.com/python/mypy/issues/4805
-                            assert isinstance(proto_msg.pdu, bytes)
+                        # TODO: raise error
                         full_pdu = proto_msg.pdu
                 except AttributeError as e:
                     e = AttributeError(
