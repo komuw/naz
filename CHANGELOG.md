@@ -2,6 +2,10 @@
 most recent version is listed first.
 
 
+## **version:** v0.7.6
+- Add ability to supply more `submit_sm` parameters when enquiuing `submit_sm`: https://github.com/komuw/naz/pull/193
+
+
 ## **version:** v0.7.5
 - Rename `naz.nazcodec.BaseNazCodec` to `naz.codec.BaseCodec`: https://github.com/komuw/naz/pull/191  
 - Rename `naz.Client.codec_class` to `naz.Client.codec`: https://github.com/komuw/naz/pull/191  
