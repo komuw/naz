@@ -97,7 +97,15 @@ interface_version = 34
 struct.pack('>B', interface_version) # here we use `B` because has size 1 see; https://docs.python.org/3/library/struct.html#format-characters
 ```
 
-- C-Octet String - A series of **ASCII characters** terminated with the **NULL** character. eg `system_id` is a C-Octet String.            
+- C-Octet String - A series of **ASCII characters** terminated with the **NULL** character. eg `system_id` is a C-Octet String.   
+
+- C-Octet String(Decimal) - A series of **ASCII characters**, each character representing a decimal digit (0 - 9) and terminated with the NULL character.     
+
+- C-Octet String(Hex) - A series of **ASCII characters**, each character representing a hexadecimal digit (0 - F) and terminated with the NULL character.    
+
+- Octet String - A series of octets, not necessarily NULL terminated
+
+    
 **NB:** in python;
 ```python
 import six
