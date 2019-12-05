@@ -893,7 +893,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">log_msg</span> <span class="o">=</span> <span class="s2">&quot;unable to decode msg&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">log_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">log_msg</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="ow">in</span> <span class="n">log_msg</span><span class="p">:</span>
                 <span class="c1"># do not log password, redact it from logs.</span>
                 <span class="n">log_msg</span> <span class="o">=</span> <span class="n">log_msg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{REDACTED}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -1195,7 +1195,6 @@
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
                     <span class="n">pdu</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span>
-                    <span class="n">codec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1299,7 +1298,6 @@
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
                     <span class="n">pdu</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span>
-                    <span class="n">codec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -2345,7 +2343,7 @@
                 <span class="c1"># It may be used at a later stage to query the status of a message, cancel</span>
                 <span class="c1"># or replace the message.</span>
                 <span class="n">_message_id</span> <span class="o">=</span> <span class="n">body_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-                <span class="n">smsc_message_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">_message_id</span><span class="p">)</span>
+                <span class="n">smsc_message_id</span> <span class="o">=</span> <span class="n">_message_id</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_handler</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
@@ -2416,7 +2414,7 @@
                     <span class="n">_tag_value</span> <span class="o">=</span> <span class="n">tag_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                         <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
                     <span class="p">)</span>  <span class="c1"># change variable names to make mypy happy</span>
-                    <span class="n">t_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">_tag_value</span><span class="p">)</span>
+                    <span class="n">t_value</span> <span class="o">=</span> <span class="n">_tag_value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
                     <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_handler</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                         <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                         <span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">,</span>
