@@ -19,7 +19,7 @@ my_naz_client = naz.Client(
     broker=MyRedisBroker(),
     hook=BenchmarksHook(),
     logger=BenchmarksLogger(
-        logger_name="naz.benchmarks", level="DEBUG", log_metadata={"project": "naz_benchmarks"},
+        logger_name="naz.benchmarks", level="DEBUG", log_metadata={"project": "naz_benchmarks"}
     ),
     socket_timeout=15.00,
     enquire_link_interval=80.00,

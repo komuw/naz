@@ -92,7 +92,7 @@ class TestProtocol(TestCase):
         )
 
         proto = naz.protocol.Message(
-            version=1, smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="some-log-id", pdu=full_pdu,
+            version=1, smpp_command=naz.SmppCommand.SUBMIT_SM, log_id="some-log-id", pdu=full_pdu
         )
         _in_json = proto.to_json()
         self.assertIsNotNone(_in_json)
