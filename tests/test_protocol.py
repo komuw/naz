@@ -79,7 +79,7 @@ class TestProtocol(TestCase):
     def test_protocol_message_ENCODING(self):
         """
         test that even though `naz.protocol.Message.pdu` make contain smpp fields that are encoded
-        using different encoding schemes(ascii, ucs2 etc);
+        using different encoding schemes(ascii, ucs2, struct.pack etc);
         it is still okay to use the `naz.protocol.Message.ENCODING` on them.
         And that when you encode and decode them using `naz.protocol.Message.ENCODING`, they will come out alright.
         """
