@@ -8,14 +8,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.nazcodec &mdash; naz v0.7.5 documentation</title>
+  <title>naz.codec &mdash; naz v0.7.5 documentation</title>
   
 
   
   
   
   
-    <link rel="canonical" href="https://komuw.github.io/naz/_modules/naz/nazcodec.html"/>
+    <link rel="canonical" href="https://komuw.github.io/naz/_modules/naz/codec.html"/>
   
 
   
@@ -93,7 +93,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../hooks.html">hooks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../codec.html">codec</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../sequence.html">sequence</a></li>
@@ -147,7 +147,7 @@
         
           <li><a href="../index.html">Module code</a> &raquo;</li>
         
-      <li>naz.nazcodec</li>
+      <li>naz.codec</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -162,7 +162,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for naz.nazcodec</h1><div class="highlight"><pre>
+  <h1>Source code for naz.codec</h1><div class="highlight"><pre>
 <span></span><span class="c1"># The code in this file is copied from https://github.com/praekelt/vumi/blob/master/vumi/codecs/vumi_codecs.py</span>
 <span class="c1"># which is in turn largely copied from http://stackoverflow.com/questions/13130935/decode-7-bit-gsm</span>
 <span class="c1"># Vumi&#39;s license is included below:</span>
@@ -198,8 +198,8 @@
 
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">codecs</span>
-<span class="kn">import</span> <span class="nn">typing</span>
 
 
 <span class="c1"># An alternative to using this codec module is to use: https://github.com/dsch/gsm0338</span>
@@ -337,9 +337,51 @@
         <span class="k">return</span> <span class="n">codecs</span><span class="o">.</span><span class="n">utf_16_be_decode</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span>  <span class="c1"># pytype: disable=module-attr</span>
 
 
-<div class="viewcode-block" id="SimpleCodec"><a class="viewcode-back" href="../../nazcodec.html#naz.nazcodec.SimpleCodec">[docs]</a><span class="k">class</span> <span class="nc">SimpleCodec</span><span class="p">(</span><span class="n">codecs</span><span class="o">.</span><span class="n">Codec</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseCodec"><a class="viewcode-back" href="../../codec.html#naz.codec.BaseCodec">[docs]</a><span class="k">class</span> <span class="nc">BaseCodec</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This is an implementation of `codecs.Codec &lt;https://docs.python.org/3/library/codecs.html&gt;`_</span>
+<span class="sd">    This is the interface that must be implemented to satisfy naz&#39;s encoding/decoding.</span>
+<span class="sd">    User implementations should inherit this class and</span>
+<span class="sd">    implement the :func:`__init__ &lt;BaseCodec.__init__&gt;`, :func:`encode &lt;BaseCodec.encode&gt;` and :func:`decode &lt;BaseCodec.decode&gt;`</span>
+<span class="sd">    methods with the type signatures shown.</span>
+
+<span class="sd">    naz calls an implementation of this class to encode/decode messages.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseCodec.__init__"><a class="viewcode-back" href="../../codec.html#naz.codec.BaseCodec.__init__">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            encoding: `encoding &lt;https://docs.python.org/3/library/codecs.html#standard-encodings&gt;`_ used to encode messages been sent to SMSC</span>
+<span class="sd">                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec</span>
+<span class="sd">                      eg gsm0338, ucs2 etc</span>
+<span class="sd">            errors:	same meaning as the errors argument to pythons&#39; `encode &lt;https://docs.python.org/3/library/codecs.html#codecs.encode&gt;`_ method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">errors</span></div>
+
+<div class="viewcode-block" id="BaseCodec.encode"><a class="viewcode-back" href="../../codec.html#naz.codec.BaseCodec.encode">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return an encoded version of the string as a bytes object</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            input: the string to encode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;encode method must be implemented.&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BaseCodec.decode"><a class="viewcode-back" href="../../codec.html#naz.codec.BaseCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return a string decoded from the given bytes.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            input: the bytes to decode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;decode method must be implemented.&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SimpleCodec"><a class="viewcode-back" href="../../codec.html#naz.codec.SimpleCodec">[docs]</a><span class="k">class</span> <span class="nc">SimpleCodec</span><span class="p">(</span><span class="n">BaseCodec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is an implementation of `BaseCodec`</span>
 
 <span class="sd">    SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.</span>
 <span class="sd">    This class can also be used with the usual `python standard encodings &lt;https://docs.python.org/3/library/codecs.html#standard-encodings&gt;`_</span>
@@ -357,19 +399,25 @@
 
     <span class="n">custom_codecs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gsm0338&quot;</span><span class="p">:</span> <span class="n">GSM7BitCodec</span><span class="p">(),</span> <span class="s2">&quot;ucs2&quot;</span><span class="p">:</span> <span class="n">UCS2Codec</span><span class="p">()}</span>
 
-<div class="viewcode-block" id="SimpleCodec.__init__"><a class="viewcode-back" href="../../nazcodec.html#naz.nazcodec.SimpleCodec.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsm0338&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleCodec.__init__"><a class="viewcode-back" href="../../codec.html#naz.codec.SimpleCodec.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;strict&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
 <span class="sd">            encoding: `encoding &lt;https://docs.python.org/3/library/codecs.html#standard-encodings&gt;`_ used to encode messages been sent to SMSC</span>
 <span class="sd">                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec</span>
+<span class="sd">            errors:	same meaning as the errors argument to pythons&#39; `encode &lt;https://docs.python.org/3/library/codecs.html#codecs.encode&gt;`_ method</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">encoding</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`encoding` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">encoding</span><span class="p">))</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span></div>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">errors</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`errors` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">errors</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errors</span> <span class="o">=</span> <span class="n">errors</span></div>
 
-<div class="viewcode-block" id="SimpleCodec.encode"><a class="viewcode-back" href="../../nazcodec.html#naz.nazcodec.SimpleCodec.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;strict&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<div class="viewcode-block" id="SimpleCodec.encode"><a class="viewcode-back" href="../../codec.html#naz.codec.SimpleCodec.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">NazCodecException</span><span class="p">(</span><span class="s2">&quot;Only strings accepted for encoding.&quot;</span><span class="p">)</span>
         <span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
@@ -377,9 +425,11 @@
             <span class="n">encoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">encoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getencoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="SimpleCodec.decode"><a class="viewcode-back" href="../../nazcodec.html#naz.nazcodec.SimpleCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">errors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;strict&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="n">obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+<div class="viewcode-block" id="SimpleCodec.decode"><a class="viewcode-back" href="../../codec.html#naz.codec.SimpleCodec.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
             <span class="k">raise</span> <span class="n">NazCodecException</span><span class="p">(</span><span class="s2">&quot;Only bytestrings accepted for decoding.&quot;</span><span class="p">)</span>
         <span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">getdefaultencoding</span><span class="p">()</span>
@@ -387,7 +437,9 @@
             <span class="n">decoder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">custom_codecs</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">decoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getdecoder</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">decoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">errors</span><span class="p">)</span></div></div>
+
+        <span class="n">obj</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">decoder</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div></div>
 </pre></div>
 
            </div>

@@ -51,14 +51,20 @@ jobs:
 
       - name: run them analyzers
         run: |
+          printf "\n\t running black:\n"
           black --line-length=100 --check . ||  { printf "\\n\\t please use black to format your code."; exit 77; }
+          printf "\n\t running flake8:\n"
           flake8 .
+          printf "\n\t running pylint:\n"
           pylint --enable=E --disable=W,R,C naz/ tests/ cli/ documentation/ examples/ benchmarks/
+          printf "\n\t running bandit:\n"
           bandit -r --exclude .venv -ll .
           # to find types, use reveal_type eg: reveal_type(asyncio.get_event_loop())
           # see: http://mypy.readthedocs.io/en/latest/common_issues.html#displaying-the-type-of-an-expression
-          mypy --show-column-numbers --ignore-missing-imports -p cli -p naz #--strict
-          pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/
+          printf "\n\t running mypy:\n"
+          mypy --show-column-numbers --ignore-missing-imports cli/ naz/ tests/ examples/ benchmarks/ #--strict
+          printf "\n\t running pytype:\n"
+          pytype --verbosity 0 --python-version 3.7 --protocols --strict-import --keep-going naz/ cli/ examples/ benchmarks/
         env:
           PYTHONASYNCIODEBUG: '1'
           NAZ_DEBUG: 'NAZ_DEBUG'

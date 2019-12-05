@@ -8,7 +8,7 @@ from logging import handlers
 
 class SimpleLogger(logging.Logger):
     """
-    It implements a structured logger that renders logs as json.
+    It implements a structured logger that renders logs as either json(default) or python dictionary.
 
     example usage:
 
@@ -26,6 +26,7 @@ class SimpleLogger(logging.Logger):
         level: typing.Union[str, int] = logging.INFO,
         log_metadata: typing.Union[None, dict] = None,
         handler: typing.Union[None, logging.Handler] = None,
+        render_as_json=True,
     ) -> None:
         """
         Parameters:
@@ -34,6 +35,7 @@ class SimpleLogger(logging.Logger):
             log_metadata: metadata that will be included in all log statements
             handler: python logging `handler <https://docs.python.org/3/library/logging.html#logging.Handler>`_ to be attached to this logger.
                      By default, `logging.StreamHandler` is used.
+            render_as_json: whether to render logs as json or dictionary. By default it renders as json.
         """
         super(SimpleLogger, self).__init__(name=logger_name, level=self._nameToLevel(level))
         if not isinstance(logger_name, str):
@@ -63,6 +65,12 @@ class SimpleLogger(logging.Logger):
                     type(handler)
                 )
             )
+        if not isinstance(render_as_json, bool):
+            raise ValueError(
+                "`render_as_json` should be of type:: `bool` You entered: {0}".format(
+                    type(render_as_json)
+                )
+            )
         self.logger_name = logger_name
         self.level = self._nameToLevel(level)
         if log_metadata is not None:
@@ -75,6 +83,7 @@ class SimpleLogger(logging.Logger):
         else:
             self.handler = logging.StreamHandler()
 
+        self.render_as_json = render_as_json
         self._set_logger_details()
 
     def _set_logger_details(self) -> None:
@@ -113,18 +122,24 @@ class SimpleLogger(logging.Logger):
                 "`level` should be one of; 'NOTSET', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'"
             ) from e
 
-    def _process_msg(self, msg: typing.Union[str, dict]) -> str:
+    def _process_msg(self, msg: typing.Union[str, dict]) -> typing.Union[str, dict]:
         timestamp = self._formatTime()
         if isinstance(msg, dict):
             _timestamp = {"timestamp": timestamp}
             # _timestamp should appear first in resulting dict
             dict_merged_msg = {**_timestamp, **msg, **self.log_metadata}
-            return self._to_json(dict_merged_msg)
+            if self.render_as_json:
+                return self._to_json(dict_merged_msg)
+            else:
+                return dict_merged_msg
         else:
             str_merged_msg = "{0} {1} {2}".format(timestamp, msg, self.log_metadata)
             if self.log_metadata == {}:
                 str_merged_msg = "{0} {1}".format(timestamp, msg)
-            return self._to_json(str_merged_msg)
+            if self.render_as_json:
+                return self._to_json(str_merged_msg)
+            else:
+                return str_merged_msg
 
     def _formatTime(self) -> str:
         """
@@ -238,11 +253,12 @@ class BreachHandler(handlers.MemoryHandler):
             target=target,
             flushOnClose=flushOnClose,  # pytype: disable=wrong-keyword-args
         )
-        self.buffer: collections.deque = collections.deque(
-            maxlen=self.capacity  # type: ignore
-        )  # pytype: disable=attribute-error
+
         # assuming each log record is 250 bytes, then the maximum
-        # memory used by `buffer` will always be == 250*10_000/(1000*1000) == 2.5MB
+        # memory used by `buffer` will always be == 250*1_000/(1000*1000) == 0.25MB
+        self.buffer: typing.Deque[logging.LogRecord] = collections.deque(  # type: ignore
+            maxlen=self.capacity  # pytype: disable=attribute-error
+        )
 
         self.heartbeatInterval = heartbeatInterval
         if self.heartbeatInterval:

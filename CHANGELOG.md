@@ -2,6 +2,12 @@
 most recent version is listed first.
 
 
+## **version:** v0.7.5
+- Rename `naz.nazcodec.BaseNazCodec` to `naz.codec.BaseCodec`: https://github.com/komuw/naz/pull/191  
+- Rename `naz.Client.codec_class` to `naz.Client.codec`: https://github.com/komuw/naz/pull/191  
+- Add ability for `naz.log.SimpleLogger` to render logs as a python dictionary: https://github.com/komuw/naz/pull/191  
+
+
 ## **version:** v0.7.4
 - Fix a bug that prevented `enquire_link` and `deliver_sm` from been sent: https://github.com/komuw/naz/pull/179  
 - Enforce `naz` message protocol in code: https://github.com/komuw/naz/pull/179

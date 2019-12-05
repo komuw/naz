@@ -1,0 +1,342 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>codec &mdash; naz v0.7.5 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/codec.html"/>
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="broker" href="broker.html" />
+    <link rel="prev" title="hooks" href="hooks.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">codec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>codec</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/codec.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-naz.codec">
+<span id="codec"></span><h1>codec<a class="headerlink" href="#module-naz.codec" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="naz.codec.BaseCodec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">BaseCodec</code><span class="sig-paren">(</span><em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>This is the interface that must be implemented to satisfy naz’s encoding/decoding.
+User implementations should inherit this class and
+implement the <a class="reference internal" href="#naz.codec.BaseCodec.__init__" title="naz.codec.BaseCodec.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__</span></code></a>, <a class="reference internal" href="#naz.codec.BaseCodec.encode" title="naz.codec.BaseCodec.encode"><code class="xref py py-func docutils literal notranslate"><span class="pre">encode</span></code></a> and <a class="reference internal" href="#naz.codec.BaseCodec.decode" title="naz.codec.BaseCodec.decode"><code class="xref py py-func docutils literal notranslate"><span class="pre">decode</span></code></a>
+methods with the type signatures shown.</p>
+<p>naz calls an implementation of this class to encode/decode messages.</p>
+<dl class="method">
+<dt id="naz.codec.BaseCodec.__init__">
+<em class="property">abstract </em><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC
+The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
+eg gsm0338, ucs2 etc</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.codec.BaseCodec.decode">
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a string decoded from the given bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.codec.BaseCodec.encode">
+<em class="property">abstract </em><code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an encoded version of the string as a bytes object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.codec.SimpleCodec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">SimpleCodec</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.codec.BaseCodec" title="naz.codec.BaseCodec"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.codec.BaseCodec</span></code></a></p>
+<p>This is an implementation of <cite>BaseCodec</cite></p>
+<p>SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
+This class can also be used with the usual <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">python standard encodings</a></p>
+<p>example usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncodec</span> <span class="o">=</span> <span class="n">SimpleCodec</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;ucs2&quot;</span><span class="p">)</span>
+
+<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">)</span>
+<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="naz.codec.SimpleCodec.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p><a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC
+The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec</p>
+</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.codec.SimpleCodec.decode">
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a string decoded from the given bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.codec.SimpleCodec.encode">
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an encoded version of the string as a bytes object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="broker.html" class="btn btn-neutral float-right" title="broker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="hooks.html" class="btn btn-neutral float-left" title="hooks" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

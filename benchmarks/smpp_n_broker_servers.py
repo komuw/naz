@@ -40,11 +40,11 @@ class Server:
             log_metadata={"container_name": self.container_name, "chaos": self.chaos},
         )
 
-        self.container_max_run_duration: float = 16.00  # mins
-        self.container_min_run_duration: float = 13.00  # mins
+        self.container_max_run_duration: int = 16  # mins
+        self.container_min_run_duration: int = 13  # mins
 
-        self.container_max_stop_duration: float = 3.00  # mins
-        self.container_min_stop_duration: float = 1.00  # mins
+        self.container_max_stop_duration: int = 3  # mins
+        self.container_min_stop_duration: int = 1  # mins
 
     def start(self):
         self.stop()

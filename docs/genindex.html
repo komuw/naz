@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; naz v0.7.4 documentation</title>
+  <title>Index &mdash; naz v0.7.5 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                v0.7.4
+                v0.7.5
               </div>
             
           
@@ -94,7 +94,7 @@
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="nazcodec.html">nazcodec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codec.html">codec</a></li>
 <li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
@@ -194,6 +194,10 @@
       <ul>
         <li><a href="client.html#naz.client.Client.__init__">(naz.client.Client method)</a>
 </li>
+        <li><a href="codec.html#naz.codec.BaseCodec.__init__">(naz.codec.BaseCodec method)</a>
+</li>
+        <li><a href="codec.html#naz.codec.SimpleCodec.__init__">(naz.codec.SimpleCodec method)</a>
+</li>
         <li><a href="correlater.html#naz.correlater.SimpleCorrelater.__init__">(naz.correlater.SimpleCorrelater method)</a>
 </li>
         <li><a href="hooks.html#naz.hooks.SimpleHook.__init__">(naz.hooks.SimpleHook method)</a>
@@ -201,10 +205,6 @@
         <li><a href="log.html#naz.log.BreachHandler.__init__">(naz.log.BreachHandler method)</a>
 </li>
         <li><a href="log.html#naz.log.SimpleLogger.__init__">(naz.log.SimpleLogger method)</a>
-</li>
-        <li><a href="nazcodec.html#naz.nazcodec.BaseNazCodec.__init__">(naz.nazcodec.BaseNazCodec method)</a>
-</li>
-        <li><a href="nazcodec.html#naz.nazcodec.SimpleNazCodec.__init__">(naz.nazcodec.SimpleNazCodec method)</a>
 </li>
         <li><a href="protocol.html#naz.protocol.Message.__init__">(naz.protocol.Message method)</a>
 </li>
@@ -235,11 +235,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="broker.html#naz.broker.BaseBroker">BaseBroker (class in naz.broker)</a>
 </li>
+      <li><a href="codec.html#naz.codec.BaseCodec">BaseCodec (class in naz.codec)</a>
+</li>
       <li><a href="correlater.html#naz.correlater.BaseCorrelater">BaseCorrelater (class in naz.correlater)</a>
 </li>
       <li><a href="hooks.html#naz.hooks.BaseHook">BaseHook (class in naz.hooks)</a>
-</li>
-      <li><a href="nazcodec.html#naz.nazcodec.BaseNazCodec">BaseNazCodec (class in naz.nazcodec)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -281,10 +281,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="state.html#naz.state.DataCoding">DataCoding (class in naz.state)</a>
 </li>
-      <li><a href="nazcodec.html#naz.nazcodec.BaseNazCodec.decode">decode() (naz.nazcodec.BaseNazCodec method)</a>
+      <li><a href="codec.html#naz.codec.BaseCodec.decode">decode() (naz.codec.BaseCodec method)</a>
 
       <ul>
-        <li><a href="nazcodec.html#naz.nazcodec.SimpleNazCodec.decode">(naz.nazcodec.SimpleNazCodec method)</a>
+        <li><a href="codec.html#naz.codec.SimpleCodec.decode">(naz.codec.SimpleCodec method)</a>
 </li>
       </ul></li>
       <li><a href="client.html#naz.client.Client.deliver_sm_resp">deliver_sm_resp() (naz.client.Client method)</a>
@@ -313,10 +313,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="log.html#naz.log.BreachHandler.emit">emit() (naz.log.BreachHandler method)</a>
 </li>
-      <li><a href="nazcodec.html#naz.nazcodec.BaseNazCodec.encode">encode() (naz.nazcodec.BaseNazCodec method)</a>
+      <li><a href="codec.html#naz.codec.BaseCodec.encode">encode() (naz.codec.BaseCodec method)</a>
 
       <ul>
-        <li><a href="nazcodec.html#naz.nazcodec.SimpleNazCodec.encode">(naz.nazcodec.SimpleNazCodec method)</a>
+        <li><a href="codec.html#naz.codec.SimpleCodec.encode">(naz.codec.SimpleCodec method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -393,13 +393,13 @@
 </li>
       <li><a href="client.html#module-naz.client">naz.client (module)</a>
 </li>
+      <li><a href="codec.html#module-naz.codec">naz.codec (module)</a>
+</li>
       <li><a href="correlater.html#module-naz.correlater">naz.correlater (module)</a>
 </li>
       <li><a href="hooks.html#module-naz.hooks">naz.hooks (module)</a>
 </li>
       <li><a href="log.html#module-naz.log">naz.log (module)</a>
-</li>
-      <li><a href="nazcodec.html#module-naz.nazcodec">naz.nazcodec (module)</a>
 </li>
       <li><a href="protocol.html#module-naz.protocol">naz.protocol (module)</a>
 </li>
@@ -465,13 +465,13 @@
 </li>
       <li><a href="broker.html#naz.broker.SimpleBroker">SimpleBroker (class in naz.broker)</a>
 </li>
+      <li><a href="codec.html#naz.codec.SimpleCodec">SimpleCodec (class in naz.codec)</a>
+</li>
       <li><a href="correlater.html#naz.correlater.SimpleCorrelater">SimpleCorrelater (class in naz.correlater)</a>
 </li>
       <li><a href="hooks.html#naz.hooks.SimpleHook">SimpleHook (class in naz.hooks)</a>
 </li>
       <li><a href="log.html#naz.log.SimpleLogger">SimpleLogger (class in naz.log)</a>
-</li>
-      <li><a href="nazcodec.html#naz.nazcodec.SimpleNazCodec">SimpleNazCodec (class in naz.nazcodec)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>

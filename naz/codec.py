@@ -31,8 +31,9 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import abc
+
 import sys
+import abc
 import codecs
 
 
@@ -171,65 +172,51 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
 
-class BaseNazCodec(abc.ABC):
+class BaseCodec(abc.ABC):
     """
     This is the interface that must be implemented to satisfy naz's encoding/decoding.
     User implementations should inherit this class and
-    implement the :func:`encode <BaseNazCodec.encode>` and :func:`decode <BaseNazCodec.decode>` methods with the type signatures shown.
+    implement the :func:`__init__ <BaseCodec.__init__>`, :func:`encode <BaseCodec.encode>` and :func:`decode <BaseCodec.decode>`
+    methods with the type signatures shown.
 
     naz calls an implementation of this class to encode/decode messages.
     """
 
-    def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:
+    @abc.abstractmethod
+    def __init__(self, encoding: str, errors: str) -> None:
         """
         Parameters:
-            encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
+                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
+                      eg gsm0338, ucs2 etc
+            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
-        if not isinstance(encoding, str):
-            raise ValueError(
-                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
-            )
-        if not isinstance(errors_level, str):
-            raise ValueError(
-                "`errors_level` should be of type:: `str` You entered: {0}".format(
-                    type(errors_level)
-                )
-            )
         self.encoding = encoding
-        self.errors_level = errors_level
+        self.errors = errors
 
     @abc.abstractmethod
-    def encode(self, string_to_encode: str) -> bytes:
+    def encode(self, input: str) -> bytes:
         """
         return an encoded version of the string as a bytes object
 
         Parameters:
-            string_to_encode: the string to encode
-            encoding: encoding scheme. eg utf-8, gsm0338 etc
-            errors: `same as defined in pythons codec.encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_
-
-        Returns:
-            encoded version of input string
+            input: the string to encode
         """
         raise NotImplementedError("encode method must be implemented.")
 
-    @abc.abstractmethod
-    def decode(self, byte_string: bytes) -> str:
+    def decode(self, input: bytes) -> str:
         """
         return a string decoded from the given bytes.
 
-       Parameters:
-            byte_string: the bytes to decode
-            encoding: encoding scheme. eg utf-8, gsm0338 etc
-            errors: `same as defined in pythons codec.decode <https://docs.python.org/3/library/codecs.html#codecs.decode>`_
+        Parameters:
+            input: the bytes to decode
         """
         raise NotImplementedError("decode method must be implemented.")
 
 
-class SimpleNazCodec(BaseNazCodec):
+class SimpleCodec(BaseCodec):
     """
-    This is an implementation of BaseNazCodec.
+    This is an implementation of `BaseCodec`
 
     SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
     This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_
@@ -239,51 +226,52 @@ class SimpleNazCodec(BaseNazCodec):
     .. highlight:: python
     .. code-block:: python
 
-       ncodec = SimpleNazCodec(encoding="utf-16be")
+       ncodec = SimpleCodec(encoding="ucs2")
 
        ncodec.encode("Zoë")
        ncodec.decode(b'Zo\xc3\xab')
     """
 
-    def __init__(self, encoding: str = "gsm0338", errors_level: str = "strict") -> None:
+    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
+
+    def __init__(self, encoding: str = "gsm0338", errors: str = "strict") -> None:
         """
         Parameters:
-            encoding:  `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-            errors_level:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
+                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
+            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         if not isinstance(encoding, str):
             raise ValueError(
                 "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
             )
-        if not isinstance(errors_level, str):
+        if not isinstance(errors, str):
             raise ValueError(
-                "`errors_level` should be of type:: `str` You entered: {0}".format(
-                    type(errors_level)
-                )
+                "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
             )
         self.encoding = encoding
-        self.errors_level = errors_level
+        self.errors = errors
 
-    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
-
-    def encode(self, string_to_encode: str) -> bytes:
-        if not isinstance(string_to_encode, str):
+    def encode(self, input: str) -> bytes:
+        if not isinstance(input, str):
             raise NazCodecException("Only strings accepted for encoding.")
         encoding = self.encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             encoder = self.custom_codecs[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
-        obj, _ = encoder(string_to_encode, self.errors_level)
+
+        obj, _ = encoder(input, self.errors)
         return obj
 
-    def decode(self, byte_string: bytes) -> str:
-        if not isinstance(byte_string, (bytes, bytearray)):
+    def decode(self, input: bytes) -> str:
+        if not isinstance(input, (bytes, bytearray)):
             raise NazCodecException("Only bytestrings accepted for decoding.")
         encoding = self.encoding or sys.getdefaultencoding()
         if encoding in self.custom_codecs:
             decoder = self.custom_codecs[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
-        obj, _ = decoder(byte_string, self.errors_level)
+
+        obj, _ = decoder(input, self.errors)
         return obj

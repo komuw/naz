@@ -3,7 +3,7 @@ FROM python:3.7
 ARG NAZ_BRANCH=master
 
 WORKDIR /usr/src/app
-COPY ./ /usr/src/app
+COPY . /usr/src/app
 
 ENV PYTHONPATH="/usr/src/app"
 
