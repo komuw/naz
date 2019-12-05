@@ -851,7 +851,7 @@ class Client:
         full_pdu = header + body
         try:
             await self.broker.enqueue(
-                protocol.Message(
+                protocol.EnquireLinkResp(
                     version=self.naz_message_protocol_version,
                     smpp_command=smpp_command,
                     log_id=log_id,
@@ -954,7 +954,7 @@ class Client:
         full_pdu = header + body
         try:
             await self.broker.enqueue(
-                protocol.Message(
+                protocol.DeliverSmResp(
                     version=self.naz_message_protocol_version,
                     smpp_command=smpp_command,
                     log_id=log_id,

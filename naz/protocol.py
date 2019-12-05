@@ -321,6 +321,80 @@ class SubmitSM(Message):
         return SubmitSM(**_in_dict)
 
 
+class EnquireLinkResp(Message):
+    def __init__(
+        self,
+        log_id: str,
+        pdu: bytes,
+        version: int = 1,
+        smpp_command: str = state.SmppCommand.ENQUIRE_LINK_RESP,
+    ) -> None:
+        self.log_id = log_id
+        self.version = version
+        self.smpp_command = state.SmppCommand.ENQUIRE_LINK_RESP
+        self.pdu = pdu
+
+    def to_json(self) -> str:
+        """
+        Serializes the message protocol to json. You can use this method if you would
+        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
+        """
+        _item = dict(
+            smpp_command=self.smpp_command,
+            version=self.version,
+            log_id=self.log_id,
+            pdu=self.pdu.decode(self.ENCODING),
+        )
+        return json.dumps(_item)
+
+    @staticmethod
+    def from_json(json_message: str) -> EnquireLinkResp:
+        _in_dict = json.loads(json_message)
+        # we need to convert pdu to bytes.
+        # all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.
+        # There's a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker
+        # However, this risk is small and we should only consider it if people report it as a bug.
+        _in_dict["pdu"] = _in_dict["pdu"].encode(Message.ENCODING)
+        return EnquireLinkResp(**_in_dict)
+
+
+class DeliverSmResp(Message):
+    def __init__(
+        self,
+        log_id: str,
+        pdu: bytes,
+        version: int = 1,
+        smpp_command: str = state.SmppCommand.DELIVER_SM_RESP,
+    ) -> None:
+        self.log_id = log_id
+        self.version = version
+        self.smpp_command = state.SmppCommand.DELIVER_SM_RESP
+        self.pdu = pdu
+
+    def to_json(self) -> str:
+        """
+        Serializes the message protocol to json. You can use this method if you would
+        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
+        """
+        _item = dict(
+            smpp_command=self.smpp_command,
+            version=self.version,
+            log_id=self.log_id,
+            pdu=self.pdu.decode(self.ENCODING),
+        )
+        return json.dumps(_item)
+
+    @staticmethod
+    def from_json(json_message: str) -> DeliverSmResp:
+        _in_dict = json.loads(json_message)
+        # we need to convert pdu to bytes.
+        # all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.
+        # There's a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker
+        # However, this risk is small and we should only consider it if people report it as a bug.
+        _in_dict["pdu"] = _in_dict["pdu"].encode(Message.ENCODING)
+        return DeliverSmResp(**_in_dict)
+
+
 def json_to_Message(json_message: str) -> Message:
     """
     Deserializes the message protocol from json. You can use this method if you would
@@ -330,8 +404,13 @@ def json_to_Message(json_message: str) -> Message:
         json_message: `naz.protocol.Message` in json format.
     """
     _item = json.loads(json_message)
-    if _item["smpp_command"] == state.SmppCommand.SUBMIT_SM:
+    smpp_command = _item["smpp_command"]
+    if smpp_command == state.SmppCommand.SUBMIT_SM:
         return SubmitSM.from_json(json_message=json_message)
+    elif smpp_command == state.SmppCommand.ENQUIRE_LINK_RESP:
+        return EnquireLinkResp.from_json(json_message=json_message)
+    elif smpp_command == state.SmppCommand.DELIVER_SM_RESP:
+        return DeliverSmResp.from_json(json_message=json_message)
     else:
         raise NotImplementedError(
             "The `from_json` method for smpp_command: `{0}` has not been implemented.".format(
