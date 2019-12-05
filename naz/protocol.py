@@ -46,7 +46,7 @@ class Message:
             version: This indicates the current version of the naz message protocol. This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
             smpp_command: any one of the SMSC commands eg submit_sm
             log_id: a unique identify of this reque
-            pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.      
+            pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.
                  Note that the pdu is a byte that may contain different SMSC fields that are encoded using different schemes.
                  Some fields may be `struct.pack(">I")` others `.encode("ascii")` and still others `codec.encode("ucs2")`
             short_message: message to send to SMSC. It is mutually exclusive with `pdu`
