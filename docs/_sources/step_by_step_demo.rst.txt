@@ -2,7 +2,7 @@
   Example demo of using naz
 =============================
 
-| In this demo, we will see how to use ``naz``.
+| In this demo, we will see how to use ``naz`` step by step.
 
 
 | We are going to start off on an empty directory

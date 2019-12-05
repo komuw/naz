@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.5 documentation</title>
+  <title>naz.client &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -86,7 +86,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../step_by_step_demo.html">Example demo of using naz</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
@@ -174,18 +174,18 @@
 
 
 <span class="c1"># pytype: disable=pyi-error</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">log</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">hooks</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">protocol</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">sequence</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">throttle</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">correlater</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">ratelimiter</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">codec</span> <span class="k">as</span> <span class="n">the_codec</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">broker</span> <span class="k">as</span> <span class="n">the_broker</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">hooks</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">protocol</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">sequence</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">throttle</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">correlater</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ratelimiter</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">codec</span> <span class="k">as</span> <span class="n">the_codec</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">broker</span> <span class="k">as</span> <span class="n">the_broker</span>
 
 
-<span class="kn">from</span> <span class="nn">.state</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">.state</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SmppCommand</span><span class="p">,</span>
     <span class="n">CommandStatus</span><span class="p">,</span>
     <span class="n">SmppDataCoding</span><span class="p">,</span>
@@ -235,7 +235,7 @@
 <span class="sd">        loop.run_until_complete(tasks)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Client.__init__"><a class="viewcode-back" href="../../client.html#naz.client.Client.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Client.__init__"><a class="viewcode-back" href="../../client.html#naz.client.Client.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">smsc_host</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">smsc_port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -248,26 +248,6 @@
         <span class="n">addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">address_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">interface_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">34</span><span class="p">,</span>
-        <span class="n">service_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;CMT&quot;</span><span class="p">,</span>  <span class="c1"># section 5.2.11</span>
-        <span class="n">source_addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>  <span class="c1"># section 5.2.5</span>
-        <span class="n">source_addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>
-        <span class="n">dest_addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>
-        <span class="n">dest_addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>
-        <span class="c1"># xxxxxx00 store-and-forward</span>
-        <span class="c1"># xx0010xx Short Message contains ESME Delivery Acknowledgement</span>
-        <span class="c1"># 00xxxxxx No specific features selected</span>
-        <span class="n">esm_class</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mb">0b00000011</span><span class="p">,</span>  <span class="c1"># section 5.2.12</span>
-        <span class="n">protocol_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
-        <span class="n">priority_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
-        <span class="n">schedule_delivery_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">validity_period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="c1"># xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure</span>
-        <span class="c1"># xxxx01xx SME Delivery Acknowledgement requested</span>
-        <span class="c1"># xxx0xxxx No Intermediate notification requested</span>
-        <span class="c1"># all other values reserved</span>
-        <span class="n">registered_delivery</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mb">0b00000001</span><span class="p">,</span>  <span class="c1"># see section 5.2.17</span>
-        <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
-        <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">55.00</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -285,34 +265,21 @@
 <span class="sd">            smsc_port:	the port at which SMSC is listening on</span>
 <span class="sd">            system_id:	Identifies the ESME system requesting to bind as a transceiver with the SMSC.</span>
 <span class="sd">            password:	The password to be used by the SMSC to authenticate the ESME requesting to bind.</span>
+<span class="sd">            broker:	python class instance implementing some queueing mechanism. \</span>
+<span class="sd">                messages to be sent to SMSC are queued using the said mechanism before been sent</span>
+<span class="sd">            client_id:	a unique string identifying a naz client class instance</span>
 <span class="sd">            system_type:	Identifies the type of ESME system requesting to bind with the SMSC.</span>
 <span class="sd">            addr_ton:	Type of Number of the ESME address.</span>
 <span class="sd">            addr_npi:	Numbering Plan Indicator (NPI) for ESME address(es) served via this SMPP transceiver session</span>
 <span class="sd">            address_range:	A single ESME address or a range of ESME addresses served via this SMPP transceiver session.</span>
 <span class="sd">            interface_version:	Indicates the version of the SMPP protocol supported by the ESME.</span>
-<span class="sd">            service_type:	Indicates the SMS Application service associated with the message</span>
-<span class="sd">            source_addr_ton:	Type of Number of message originator.</span>
-<span class="sd">            source_addr_npi:	Numbering Plan Identity of message originator.</span>
-<span class="sd">            dest_addr_ton:	Type of Number for destination.</span>
-<span class="sd">            dest_addr_npi:	Numbering Plan Identity of destination</span>
-<span class="sd">            esm_class:	Indicates Message Mode &amp; Message Type.</span>
-<span class="sd">            protocol_id:	Protocol Identifier. Network specific field.</span>
-<span class="sd">            priority_flag:	Designates the priority level of the message.</span>
-<span class="sd">            schedule_delivery_time:	The short message is to be scheduled by the SMSC for delivery.</span>
-<span class="sd">            validity_period:	The validity period of this message.</span>
-<span class="sd">            registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.</span>
-<span class="sd">            replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.</span>
-<span class="sd">            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</span>
-<span class="sd">            sequence_generator:	python class instance used to generate sequence_numbers</span>
-<span class="sd">            broker:	python class instance implementing some queueing mechanism. \</span>
-<span class="sd">                messages to be sent to SMSC are queued using the said mechanism before been sent</span>
-<span class="sd">            client_id:	a unique string identifying a naz client class instance</span>
+<span class="sd">            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status</span>
 <span class="sd">            logger: python `logger &lt;https://docs.python.org/3/library/logging.html#logging.Logger&gt;`_ instance to be used for logging</span>
 <span class="sd">            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.</span>
-<span class="sd">            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status</span>
 <span class="sd">            rateLimiter: python class instance implementing rate limitation</span>
 <span class="sd">            hook: python class instance implemeting functionality/hooks to be called by naz \</span>
 <span class="sd">                just before sending request to SMSC and just after getting response from SMSC</span>
+<span class="sd">            sequence_generator:	python class instance used to generate sequence_numbers</span>
 <span class="sd">            throttle_handler: python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC</span>
 <span class="sd">            correlation_handler: A python class instance that naz uses to store relations between \</span>
 <span class="sd">                SMPP sequence numbers and user applications&#39; log_id&#39;s and/or hook_metadata.</span>
@@ -334,19 +301,6 @@
             <span class="n">addr_npi</span><span class="o">=</span><span class="n">addr_npi</span><span class="p">,</span>
             <span class="n">address_range</span><span class="o">=</span><span class="n">address_range</span><span class="p">,</span>
             <span class="n">interface_version</span><span class="o">=</span><span class="n">interface_version</span><span class="p">,</span>
-            <span class="n">service_type</span><span class="o">=</span><span class="n">service_type</span><span class="p">,</span>
-            <span class="n">source_addr_ton</span><span class="o">=</span><span class="n">source_addr_ton</span><span class="p">,</span>
-            <span class="n">source_addr_npi</span><span class="o">=</span><span class="n">source_addr_npi</span><span class="p">,</span>
-            <span class="n">dest_addr_ton</span><span class="o">=</span><span class="n">dest_addr_ton</span><span class="p">,</span>
-            <span class="n">dest_addr_npi</span><span class="o">=</span><span class="n">dest_addr_npi</span><span class="p">,</span>
-            <span class="n">esm_class</span><span class="o">=</span><span class="n">esm_class</span><span class="p">,</span>
-            <span class="n">protocol_id</span><span class="o">=</span><span class="n">protocol_id</span><span class="p">,</span>
-            <span class="n">priority_flag</span><span class="o">=</span><span class="n">priority_flag</span><span class="p">,</span>
-            <span class="n">schedule_delivery_time</span><span class="o">=</span><span class="n">schedule_delivery_time</span><span class="p">,</span>
-            <span class="n">validity_period</span><span class="o">=</span><span class="n">validity_period</span><span class="p">,</span>
-            <span class="n">registered_delivery</span><span class="o">=</span><span class="n">registered_delivery</span><span class="p">,</span>
-            <span class="n">replace_if_present_flag</span><span class="o">=</span><span class="n">replace_if_present_flag</span><span class="p">,</span>
-            <span class="n">sm_default_msg_id</span><span class="o">=</span><span class="n">sm_default_msg_id</span><span class="p">,</span>
             <span class="n">enquire_link_interval</span><span class="o">=</span><span class="n">enquire_link_interval</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
             <span class="n">codec</span><span class="o">=</span><span class="n">codec</span><span class="p">,</span>
@@ -403,19 +357,6 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">codec</span> <span class="o">=</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">SimpleCodec</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">service_type</span> <span class="o">=</span> <span class="n">service_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_ton</span> <span class="o">=</span> <span class="n">source_addr_ton</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_npi</span> <span class="o">=</span> <span class="n">source_addr_npi</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_ton</span> <span class="o">=</span> <span class="n">dest_addr_ton</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_npi</span> <span class="o">=</span> <span class="n">dest_addr_npi</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">esm_class</span> <span class="o">=</span> <span class="n">esm_class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span> <span class="o">=</span> <span class="n">protocol_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">priority_flag</span> <span class="o">=</span> <span class="n">priority_flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">schedule_delivery_time</span> <span class="o">=</span> <span class="n">schedule_delivery_time</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validity_period</span> <span class="o">=</span> <span class="n">validity_period</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">registered_delivery</span> <span class="o">=</span> <span class="n">registered_delivery</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">replace_if_present_flag</span> <span class="o">=</span> <span class="n">replace_if_present_flag</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sm_default_msg_id</span> <span class="o">=</span> <span class="n">sm_default_msg_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">enquire_link_interval</span> <span class="o">=</span> <span class="n">enquire_link_interval</span>
 
         <span class="c1"># see section 5.1.2.1 of smpp ver 3.4 spec document</span>
@@ -527,19 +468,6 @@
         <span class="n">addr_npi</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">address_range</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">interface_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">service_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">source_addr_ton</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">source_addr_npi</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">dest_addr_ton</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">dest_addr_npi</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">esm_class</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">protocol_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">priority_flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">schedule_delivery_time</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">validity_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">registered_delivery</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">],</span>
         <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">],</span>
@@ -629,108 +557,6 @@
                 <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;`interface_version` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                         <span class="nb">type</span><span class="p">(</span><span class="n">interface_version</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">service_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`service_type` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">service_type</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_addr_ton</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`source_addr_ton` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">source_addr_ton</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_addr_npi</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`source_addr_npi` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">source_addr_npi</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dest_addr_ton</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`dest_addr_ton` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">dest_addr_ton</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dest_addr_npi</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`dest_addr_npi` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">dest_addr_npi</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">esm_class</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`esm_class` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">esm_class</span><span class="p">))</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`protocol_id` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">protocol_id</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_flag</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`priority_flag` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">priority_flag</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedule_delivery_time</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`schedule_delivery_time` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">schedule_delivery_time</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">validity_period</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`validity_period` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">validity_period</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">registered_delivery</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`registered_delivery` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">registered_delivery</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">replace_if_present_flag</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`replace_if_present_flag` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">replace_if_present_flag</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sm_default_msg_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`sm_default_msg_id` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">sm_default_msg_id</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -1190,7 +1016,7 @@
         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span>
-                <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span>
+                <span class="n">protocol</span><span class="o">.</span><span class="n">EnquireLinkResp</span><span class="p">(</span>
                     <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span><span class="p">,</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
@@ -1293,7 +1119,7 @@
         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span>
-                <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span>
+                <span class="n">protocol</span><span class="o">.</span><span class="n">DeliverSmResp</span><span class="p">(</span>
                     <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span><span class="p">,</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
@@ -1323,18 +1149,69 @@
         <span class="p">)</span></div>
 
     <span class="c1"># this method just enqueues a submit_sm msg to queue</span>
-<div class="viewcode-block" id="Client.submit_sm"><a class="viewcode-back" href="../../client.html#naz.client.Client.submit_sm">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">submit_sm</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">short_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">source_addr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">destination_addr</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Client.submit_message"><a class="viewcode-back" href="../../client.html#naz.client.Client.submit_message">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">submit_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto_msg</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        enqueues any kind of pdu to :attr:`broker &lt;Client.broker&gt;`</span>
+<span class="sd">        That PDU will later on be sent to SMSC.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            TODO: docs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">smpp_command</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.submit_message&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+                <span class="s2">&quot;short_message&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">short_message</span><span class="p">,</span>
+                <span class="s2">&quot;source_addr&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr</span><span class="p">,</span>
+                <span class="s2">&quot;destination_addr&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">destination_addr</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.submit_message&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
+                    <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+                    <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.submit_message&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+                <span class="s2">&quot;short_message&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">short_message</span><span class="p">,</span>
+                <span class="s2">&quot;source_addr&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr</span><span class="p">,</span>
+                <span class="s2">&quot;destination_addr&quot;</span><span class="p">:</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">destination_addr</span><span class="p">,</span>
+                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Client.submit_sm"><a class="viewcode-back" href="../../client.html#naz.client.Client.submit_sm">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">submit_sm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto_msg</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        enqueues a SUBMIT_SM pdu to :attr:`broker &lt;Client.broker&gt;`</span>
 <span class="sd">        That PDU will later on be sent to SMSC.</span>
 
 <span class="sd">        Parameters:</span>
-<span class="sd">            short_message: message to send to SMSC</span>
-<span class="sd">            log_id: a unique identify of this request</span>
-<span class="sd">            source_addr: the identifier(eg msisdn) of the message sender</span>
-<span class="sd">            destination_addr: the identifier(eg msisdn) of the message recipient</span>
+<span class="sd">            TODO: docs</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">proto_msg</span><span class="o">=</span><span class="n">proto_msg</span><span class="p">)</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_build_submit_sm_pdu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto_msg</span><span class="p">:</span> <span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        builds a SUBMIT_SM pdu.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            proto_msg: an instance of `naz.protocol.SubmitSM`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># HEADER::</span>
         <span class="c1"># submit_sm has the following pdu header:</span>
@@ -1369,67 +1246,25 @@
         <span class="c1">#     2. Octet String - A series of octets, not necessarily NULL terminated.</span>
 
         <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.submit_sm&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;start&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
-                <span class="s2">&quot;short_message&quot;</span><span class="p">:</span> <span class="n">short_message</span><span class="p">,</span>
-                <span class="s2">&quot;source_addr&quot;</span><span class="p">:</span> <span class="n">source_addr</span><span class="p">,</span>
-                <span class="s2">&quot;destination_addr&quot;</span><span class="p">:</span> <span class="n">destination_addr</span><span class="p">,</span>
-                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">enqueue</span><span class="p">(</span>
-                <span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span>
-                    <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span><span class="p">,</span>
-                    <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
-                    <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
-                    <span class="n">short_message</span><span class="o">=</span><span class="n">short_message</span><span class="p">,</span>
-                    <span class="n">source_addr</span><span class="o">=</span><span class="n">source_addr</span><span class="p">,</span>
-                    <span class="n">destination_addr</span><span class="o">=</span><span class="n">destination_addr</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
-                <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
-                <span class="p">{</span>
-                    <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.submit_sm&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span>
-                    <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
-                    <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
-                <span class="p">},</span>
-            <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
-            <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
-            <span class="p">{</span>
-                <span class="s2">&quot;event&quot;</span><span class="p">:</span> <span class="s2">&quot;naz.Client.submit_sm&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;stage&quot;</span><span class="p">:</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="n">log_id</span><span class="p">,</span>
-                <span class="s2">&quot;short_message&quot;</span><span class="p">:</span> <span class="n">short_message</span><span class="p">,</span>
-                <span class="s2">&quot;source_addr&quot;</span><span class="p">:</span> <span class="n">source_addr</span><span class="p">,</span>
-                <span class="s2">&quot;destination_addr&quot;</span><span class="p">:</span> <span class="n">destination_addr</span><span class="p">,</span>
-                <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
-            <span class="p">},</span>
-        <span class="p">)</span></div>
+        <span class="n">log_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span>
+        <span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">hook_metadata</span>
+        <span class="n">short_message</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">short_message</span>
+        <span class="n">source_addr</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr</span>
+        <span class="n">destination_addr</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">destination_addr</span>
+        <span class="n">service_type</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">service_type</span>
+        <span class="n">source_addr_ton</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr_ton</span>
+        <span class="n">source_addr_npi</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr_npi</span>
+        <span class="n">dest_addr_ton</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">dest_addr_ton</span>
+        <span class="n">dest_addr_npi</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">dest_addr_npi</span>
+        <span class="n">esm_class</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">esm_class</span>
+        <span class="n">protocol_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">protocol_id</span>
+        <span class="n">priority_flag</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">priority_flag</span>
+        <span class="n">schedule_delivery_time</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">schedule_delivery_time</span>
+        <span class="n">validity_period</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">validity_period</span>
+        <span class="n">registered_delivery</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">registered_delivery</span>
+        <span class="n">replace_if_present_flag</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">replace_if_present_flag</span>
+        <span class="n">sm_default_msg_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">sm_default_msg_id</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">_build_submit_sm_pdu</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">short_message</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">,</span> <span class="n">source_addr</span><span class="p">,</span> <span class="n">destination_addr</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        builds a SUBMIT_SM pdu.</span>
-
-<span class="sd">        Parameters:</span>
-<span class="sd">            short_message: message to send to SMSC</span>
-<span class="sd">            log_id: a unique identify of this request</span>
-<span class="sd">            hook_metadata: additional metadata that you would like to be passed on to hooks</span>
-<span class="sd">            source_addr: the identifier(eg msisdn) of the message sender</span>
-<span class="sd">            destination_addr: the identifier(eg msisdn) of the message recipient</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
             <span class="p">{</span>
@@ -1446,30 +1281,31 @@
         <span class="n">sm_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded_short_message</span><span class="p">)</span>
 
         <span class="c1"># body</span>
+        <span class="c1"># SUBMIT_SM KKKK</span>
         <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
         <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">body</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">service_type</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">service_type</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_ton</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_npi</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">source_addr_ton</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">source_addr_npi</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">source_addr</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_ton</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_npi</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">dest_addr_ton</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">dest_addr_npi</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">destination_addr</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">esm_class</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">priority_flag</span><span class="p">)</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">schedule_delivery_time</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">esm_class</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">protocol_id</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">priority_flag</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">schedule_delivery_time</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">validity_period</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">validity_period</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">registered_delivery</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace_if_present_flag</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">registered_delivery</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">replace_if_present_flag</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_coding</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sm_default_msg_id</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">sm_default_msg_id</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">sm_length</span><span class="p">)</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">short_message</span><span class="p">)</span>
         <span class="p">)</span>
@@ -1868,21 +1704,19 @@
                     <span class="n">log_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">log_id</span>
                     <span class="n">proto_msg</span><span class="o">.</span><span class="n">version</span>  <span class="c1"># version is a required field</span>
                     <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">smpp_command</span>
-                    <span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="k">if</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-                    <span class="k">if</span> <span class="n">smpp_command</span> <span class="o">==</span> <span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span><span class="p">:</span>
+                    <span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">hook_metadata</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">):</span>
                         <span class="n">short_message</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">short_message</span>
                         <span class="n">source_addr</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">source_addr</span>
                         <span class="n">destination_addr</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">destination_addr</span>
-                        <span class="n">full_pdu</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_submit_sm_pdu</span><span class="p">(</span>
-                            <span class="n">short_message</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">,</span> <span class="n">source_addr</span><span class="p">,</span> <span class="n">destination_addr</span>
-                        <span class="p">)</span>
+                        <span class="n">full_pdu</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_submit_sm_pdu</span><span class="p">(</span><span class="n">proto_msg</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">typing</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
                             <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
                             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">proto_msg</span><span class="o">.</span><span class="n">pdu</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span>
                         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">pdu</span>
-                <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="n">e</span> <span class="o">=</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">e</span> <span class="o">=</span> <span class="ne">AttributeError</span><span class="p">(</span>
                         <span class="s2">&quot;enqueued message/object is missing required field: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
                     <span class="p">)</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
@@ -2392,7 +2226,6 @@
             <span class="c1"># sm_default_msg_id, Int, 1 octet, must be set to NULL.</span>
             <span class="c1"># sm_length, Int, 1 octet.It is length of short message user data in octets.</span>
             <span class="c1"># short_message, C-Octet String, 0-254 octet</span>
-
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">deliver_sm_resp</span><span class="p">(</span><span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># get associated user supplied log_id if any</span>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>protocol &mdash; naz v0.7.5 documentation</title>
+  <title>protocol &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -88,7 +88,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step_by_step_demo.html">Example demo of using naz</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -169,39 +169,118 @@
   <div class="section" id="module-naz.protocol">
 <span id="protocol"></span><h1>protocol<a class="headerlink" href="#module-naz.protocol" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
+<dt id="naz.protocol.DeliverSmResp">
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">DeliverSmResp</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">pdu</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.protocol.Message</span></code></a></p>
+<dl class="method">
+<dt id="naz.protocol.DeliverSmResp.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">pdu</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters:
+version: This indicates the current version of the naz message protocol.</p>
+<blockquote>
+<div><p>This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p>
+</div></blockquote>
+<p>smpp_command: any one of the SMSC commands eg submit_sm
+hook_metadata: a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.protocol.DeliverSmResp.from_json">
+<em class="property">static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserializes the message protocol from json.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#naz.protocol.DeliverSmResp" title="naz.protocol.DeliverSmResp"><code class="xref py py-class docutils literal notranslate"><span class="pre">DeliverSmResp</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.protocol.DeliverSmResp.to_json">
+<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes the message protocol to json. You can use this method if you would
+like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.protocol.EnquireLinkResp">
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">EnquireLinkResp</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">pdu</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.protocol.Message</span></code></a></p>
+<dl class="method">
+<dt id="naz.protocol.EnquireLinkResp.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">pdu</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parameters:
+version: This indicates the current version of the naz message protocol.</p>
+<blockquote>
+<div><p>This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p>
+</div></blockquote>
+<p>smpp_command: any one of the SMSC commands eg submit_sm
+hook_metadata: a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.protocol.EnquireLinkResp.from_json">
+<em class="property">static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserializes the message protocol from json.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#naz.protocol.EnquireLinkResp" title="naz.protocol.EnquireLinkResp"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnquireLinkResp</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.protocol.EnquireLinkResp.to_json">
+<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes the message protocol to json. You can use this method if you would
+like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="naz.protocol.Message">
-<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">Message</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">pdu=None</em>, <em class="sig-param">short_message=None</em>, <em class="sig-param">source_addr=None</em>, <em class="sig-param">destination_addr=None</em>, <em class="sig-param">hook_metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>The message protocol for <cite>naz</cite>. It is the code representation of what
-gets queued into a naz broker.</p>
-<p>Usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
-<span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="p">(</span>
-    <span class="n">version</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">smpp_command</span><span class="o">=</span><span class="n">naz</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span><span class="p">,</span>
-    <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;some-log-id&quot;</span><span class="p">,</span>
-    <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello, thanks for shopping with us.&quot;</span><span class="p">,</span>
-    <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-    <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
-<span class="p">)</span>
-</pre></div>
-</div>
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">Message</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
+<p>TODO: doc</p>
 <dl class="method">
 <dt id="naz.protocol.Message.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">log_id</em>, <em class="sig-param">pdu=None</em>, <em class="sig-param">short_message=None</em>, <em class="sig-param">source_addr=None</em>, <em class="sig-param">destination_addr=None</em>, <em class="sig-param">hook_metadata=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.__init__" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">version</em>, <em class="sig-param">smpp_command</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol. This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
+<li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
+This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
-<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this reque</p></li>
-<li><p><strong>pdu</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>]) – the full PDU as sent to SMSC. It is mutually exclusive with <cite>short_message</cite>.
-Note that the pdu is a byte that may contain different SMSC fields that are encoded using different schemes.
-Some fields may be <cite>struct.pack(“&gt;I”)</cite> others <cite>.encode(“ascii”)</cite> and still others <cite>codec.encode(“ucs2”)</cite></p></li>
-<li><p><strong>short_message</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – message to send to SMSC. It is mutually exclusive with <cite>pdu</cite></p></li>
-<li><p><strong>source_addr</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the identifier(eg msisdn) of the message sender.</p></li>
-<li><p><strong>destination_addr</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – the identifier(eg msisdn) of the message receiver.</p></li>
-<li><p><strong>hook_metadata</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -212,9 +291,8 @@ Some fields may be <cite>struct.pack(“&gt;I”)</cite> others <cite>.encode(�
 
 <dl class="method">
 <dt id="naz.protocol.Message.from_json">
-<em class="property">static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.from_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deserializes the message protocol from json. You can use this method if you would
-like to return the <cite>Message</cite> from a broker like redis/rabbitmq/postgres etc.</p>
+<em class="property">abstract static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserializes the message protocol from json.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p>
@@ -227,7 +305,7 @@ like to return the <cite>Message</cite> from a broker like redis/rabbitmq/postgr
 
 <dl class="method">
 <dt id="naz.protocol.Message.to_json">
-<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.to_json" title="Permalink to this definition">¶</a></dt>
+<em class="property">abstract </em><code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#Message.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.Message.to_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>Serializes the message protocol to json. You can use this method if you would
 like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres etc.</p>
 <dl class="field-list simple">
@@ -237,6 +315,88 @@ like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="class">
+<dt id="naz.protocol.SubmitSM">
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">SubmitSM</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.protocol.Message</span></code></a></p>
+<dl class="method">
+<dt id="naz.protocol.SubmitSM.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>short_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – message to send to SMSC</p></li>
+<li><p><strong>source_addr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the identifier(eg msisdn) of the message sender</p></li>
+<li><p><strong>destination_addr</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the identifier(eg msisdn) of the message recipient</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this request</p></li>
+<li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
+This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
+<li><p><strong>service_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Indicates the SMS Application service associated with the message</p></li>
+<li><p><strong>source_addr_ton</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Type of Number of message originator.</p></li>
+<li><p><strong>source_addr_npi</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numbering Plan Identity of message originator.</p></li>
+<li><p><strong>dest_addr_ton</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Type of Number for destination.</p></li>
+<li><p><strong>dest_addr_npi</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Numbering Plan Identity of destination</p></li>
+<li><p><strong>esm_class</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicates Message Mode &amp; Message Type.</p></li>
+<li><p><strong>protocol_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Protocol Identifier. Network specific field.</p></li>
+<li><p><strong>priority_flag</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Designates the priority level of the message.</p></li>
+<li><p><strong>schedule_delivery_time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The short message is to be scheduled by the SMSC for delivery.</p></li>
+<li><p><strong>validity_period</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The validity period of this message.</p></li>
+<li><p><strong>registered_delivery</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.</p></li>
+<li><p><strong>replace_if_present_flag</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Flag indicating if submitted message should replace an existing message.</p></li>
+<li><p><strong>sm_default_msg_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.protocol.SubmitSM.from_json">
+<em class="property">static </em><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM.from_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM.from_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserializes the message protocol from json.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#naz.protocol.SubmitSM" title="naz.protocol.SubmitSM"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubmitSM</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.protocol.SubmitSM.to_json">
+<code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM.to_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serializes the message protocol to json. You can use this method if you would
+like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="naz.protocol.json_to_Message">
+<code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">json_to_Message</code><span class="sig-paren">(</span><em class="sig-param">json_message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#json_to_Message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.json_to_Message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deserializes the message protocol from json. You can use this method if you would
+like to return the <cite>Message</cite> from a broker like redis/rabbitmq/postgres etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>json_message</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <cite>naz.protocol.Message</cite> in json format.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

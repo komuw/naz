@@ -10,7 +10,7 @@ Contents
 
     introduction
 
-    example_demo
+    step_by_step_demo
 
 API reference
 =============
