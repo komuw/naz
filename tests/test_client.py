@@ -274,7 +274,7 @@ class TestClient(TestCase):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -405,7 +405,7 @@ class TestClient(TestCase):
 
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -490,7 +490,7 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -589,7 +589,7 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -627,7 +627,7 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -652,7 +652,7 @@ class TestClient(TestCase):
         ) as mock_sleep:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -674,7 +674,7 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -756,7 +756,7 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -1069,3 +1069,42 @@ class TestClient(TestCase):
             self._run(cli.connect())
             self.assertTrue(hasattr(cli.reader, "read"))
             self.assertTrue(hasattr(cli.writer, "write"))
+
+    # def test_unknown_protocol_Message(self):
+    #     class UnknownMessage(naz.protocol.Message):
+    #         def __init__(
+    #             self,
+    #             log_id="log-id",
+    #             version=1,
+    #             smpp_command="some-unknown-command",
+    #             hook_metadata="",
+    #         ):
+    #             self.log_id = log_id
+    #             self.version = version
+    #             self.smpp_command = smpp_command
+    #             self.hook_metadata = hook_metadata
+
+    #         def to_json(self):
+    #             _item = dict(
+    #                 smpp_command=self.smpp_command,
+    #                 version=self.version,
+    #                 log_id=self.log_id,
+    #                 hook_metadata=self.hook_metadata,
+    #             )
+    #             return json.dumps(_item)
+
+    #         def from_json(self, json_message: str):
+    #             _in_dict = json.loads(json_message)
+    #             return UnknownMessage(**_in_dict)
+
+    #     with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+    #         log_id = "12345"
+    #         short_message = "hello smpp"
+    #         mock_naz_dequeue.mock.return_value = UnknownMessage()
+
+    #         self._run(self.cli.connect())
+    #         # hack to allow sending submit_sm even when state is wrong
+    #         self.cli.current_session_state = "BOUND_TRX"
+    #         self._run(self.cli.dequeue_messages(TESTING=True))
+
+    #         self.assertTrue(mock_naz_dequeue.mock.called)
