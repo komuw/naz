@@ -139,3 +139,16 @@ class TestProtocol(TestCase):
             naz.protocol.SubmitSM(**_args)
 
         self.assertRaises(ValueError, mock_create_submitSm_message)
+
+    def test_bad_protol_version(self):
+        def create():
+            naz.protocol.SubmitSM(
+                version=1_000_233,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                log_id="some-log-id",
+                short_message="Hello, thanks for shopping with us.",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
+
+        self.assertRaises(ValueError, create)
