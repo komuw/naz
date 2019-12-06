@@ -565,7 +565,7 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"],
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command,
                 naz.SmppCommand.ENQUIRE_LINK_RESP,
             )
 
