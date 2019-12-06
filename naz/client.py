@@ -1593,9 +1593,6 @@ class Client:
                     smpp_command = proto_msg.smpp_command
                     hook_metadata = proto_msg.hook_metadata
                     if isinstance(proto_msg, protocol.SubmitSM):
-                        short_message = proto_msg.short_message
-                        source_addr = proto_msg.source_addr
-                        destination_addr = proto_msg.destination_addr
                         full_pdu = await self._build_submit_sm_pdu(proto_msg)
                     elif isinstance(proto_msg, protocol.DeliverSmResp):
                         full_pdu = await self._build_deliver_sm_pdu(proto_msg)

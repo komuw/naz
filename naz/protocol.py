@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import json
-import typing
 
 from . import state
 
@@ -114,7 +113,7 @@ class SubmitSM(Message):
             validity_period:	The validity period of this message.
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
-            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC      
+            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
         """
         self._validate_msg_type_args(
             short_message=short_message,
@@ -391,8 +390,8 @@ class DeliverSmResp(Message):
 
 def json_to_Message(json_message: str) -> Message:
     """
-    Deserializes the message protocol from json. You can use this method if you would
-    like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
+    Utility function to deserialize the message protocol from json.
+    You can use this method if you would like to return the `Message` from a broker like redis/rabbitmq/postgres etc.
 
     Parameters:
         json_message: `naz.protocol.Message` in json format.
