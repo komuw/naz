@@ -11,7 +11,7 @@ class Message(abc.ABC):
     The message protocol for `naz`. It is the code representation of what
     gets queued into a naz broker.
     This is the interface that must be implemented to satisfy naz's message protocol.
-    
+
     Users should only ever have to deal with the :class:`SubmitSM <SubmitSM>` implementation
     """
 
@@ -76,7 +76,28 @@ class SubmitSM(Message):
     """
     The code representation of the `submit_sm` pdu that will get queued into a broker.
 
-    
+    Usage:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        import naz
+
+        broker = naz.broker.SimpleBroker(maxsize=1000)
+        client = naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                broker=broker,
+            )
+        msg = naz.protocol.SubmitSM(
+            short_message="hello world",
+            source_addr="255700111222",
+            destination_addr="255799000888",
+            log_id="some-id",
+        )
+        await client.send_message(msg)
     """
 
     def __init__(

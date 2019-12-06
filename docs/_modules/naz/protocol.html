@@ -176,7 +176,7 @@
 <span class="sd">    The message protocol for `naz`. It is the code representation of what</span>
 <span class="sd">    gets queued into a naz broker.</span>
 <span class="sd">    This is the interface that must be implemented to satisfy naz&#39;s message protocol.</span>
-<span class="sd">    </span>
+
 <span class="sd">    Users should only ever have to deal with the :class:`SubmitSM &lt;SubmitSM&gt;` implementation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -241,7 +241,28 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The code representation of the `submit_sm` pdu that will get queued into a broker.</span>
 
-<span class="sd">    </span>
+<span class="sd">    Usage:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import naz</span>
+
+<span class="sd">        broker = naz.broker.SimpleBroker(maxsize=1000)</span>
+<span class="sd">        client = naz.Client(</span>
+<span class="sd">                smsc_host=&quot;127.0.0.1&quot;,</span>
+<span class="sd">                smsc_port=2775,</span>
+<span class="sd">                system_id=&quot;smppclient1&quot;,</span>
+<span class="sd">                password=os.getenv(&quot;password&quot;, &quot;password&quot;),</span>
+<span class="sd">                broker=broker,</span>
+<span class="sd">            )</span>
+<span class="sd">        msg = naz.protocol.SubmitSM(</span>
+<span class="sd">            short_message=&quot;hello world&quot;,</span>
+<span class="sd">            source_addr=&quot;255700111222&quot;,</span>
+<span class="sd">            destination_addr=&quot;255799000888&quot;,</span>
+<span class="sd">            log_id=&quot;some-id&quot;,</span>
+<span class="sd">        )</span>
+<span class="sd">        await client.send_message(msg)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SubmitSM.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
