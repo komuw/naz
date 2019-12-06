@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.log &mdash; naz v0.7.5 documentation</title>
+  <title>naz.log &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -86,7 +86,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../step_by_step_demo.html">Step by step tutorial of using naz</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
@@ -168,7 +168,7 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">logging</span> <span class="k">import</span> <span class="n">handlers</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">handlers</span>
 
 
 <div class="viewcode-block" id="SimpleLogger"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger">[docs]</a><span class="k">class</span> <span class="nc">SimpleLogger</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">):</span>
@@ -185,7 +185,7 @@
 <span class="sd">                   {&quot;event&quot;: &quot;web_request&quot;, &quot;url&quot;: &quot;https://www.google.com/&quot;})</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleLogger.__init__"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="SimpleLogger.__init__"><a class="viewcode-back" href="../../log.html#naz.log.SimpleLogger.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">logger_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">level</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
@@ -380,7 +380,7 @@
 <span class="sd">        logger.error(&quot;damn&quot;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="BreachHandler.__init__"><a class="viewcode-back" href="../../log.html#naz.log.BreachHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">flushLevel</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
         <span class="n">capacity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>

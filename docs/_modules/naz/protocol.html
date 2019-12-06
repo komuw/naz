@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.protocol &mdash; naz v0.7.5 documentation</title>
+  <title>naz.protocol &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -86,7 +86,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../step_by_step_demo.html">Step by step tutorial of using naz</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
@@ -163,95 +163,52 @@
            <div itemprop="articleBody">
             
   <h1>Source code for naz.protocol</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">annotations</span>
-
+<span></span><span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">state</span>
 
 
-<div class="viewcode-block" id="Message"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message">[docs]</a><span class="k">class</span> <span class="nc">Message</span><span class="p">:</span>
+<span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The messages that are published to a queue by either naz</span>
+<span class="sd">or user application should be versioned.</span>
+<span class="sd">This version will enable naz to be able to evolve in future;</span>
+<span class="sd">eg a future version of naz could add/remove the number of required items in a message.</span>
+<span class="sd">This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="Message"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message">[docs]</a><span class="k">class</span> <span class="nc">Message</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The message protocol for `naz`. It is the code representation of what</span>
 <span class="sd">    gets queued into a naz broker.</span>
+<span class="sd">    This is the interface that must be implemented to satisfy naz&#39;s message protocol.</span>
 
-<span class="sd">    Usage:</span>
-
-<span class="sd">    .. highlight:: python</span>
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        import naz</span>
-<span class="sd">        msg = naz.protocol.Message(</span>
-<span class="sd">            version=1,</span>
-<span class="sd">            smpp_command=naz.SmppCommand.SUBMIT_SM,</span>
-<span class="sd">            log_id=&quot;some-log-id&quot;,</span>
-<span class="sd">            short_message=&quot;Hello, thanks for shopping with us.&quot;,</span>
-<span class="sd">            source_addr=&quot;254722111111&quot;,</span>
-<span class="sd">            destination_addr=&quot;254722999999&quot;,</span>
-<span class="sd">        )</span>
+<span class="sd">    Users should only ever have to deal with the :class:`SubmitSM &lt;SubmitSM&gt;` implementation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># all messages in `naz` protocol are encoded as `utf8`.</span>
-    <span class="c1"># This is even though the `pdu` passed into this class is a byte that may contain different SMSC fields that are encoded using different schemes.</span>
-    <span class="c1"># Some fields may be `struct.pack(&quot;&gt;I&quot;)` others `.encode(&quot;ascii&quot;)` and still others `codec.encode(&quot;ucs2&quot;)`</span>
-    <span class="n">ENCODING</span> <span class="o">=</span> <span class="s2">&quot;utf8&quot;</span>
-
-<div class="viewcode-block" id="Message.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">pdu</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">short_message</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">hook_metadata</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Message.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.__init__">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
-<span class="sd">            version: This indicates the current version of the naz message protocol. This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.</span>
+<span class="sd">            version: This indicates the current version of the naz message protocol.</span>
+<span class="sd">                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.</span>
 <span class="sd">            smpp_command: any one of the SMSC commands eg submit_sm</span>
-<span class="sd">            log_id: a unique identify of this reque</span>
-<span class="sd">            pdu: the full PDU as sent to SMSC. It is mutually exclusive with `short_message`.</span>
-<span class="sd">                 Note that the pdu is a byte that may contain different SMSC fields that are encoded using different schemes.</span>
-<span class="sd">                 Some fields may be `struct.pack(&quot;&gt;I&quot;)` others `.encode(&quot;ascii&quot;)` and still others `codec.encode(&quot;ucs2&quot;)`</span>
-<span class="sd">            short_message: message to send to SMSC. It is mutually exclusive with `pdu`</span>
-<span class="sd">            source_addr: the identifier(eg msisdn) of the message sender.</span>
-<span class="sd">            destination_addr: the identifier(eg msisdn) of the message receiver.</span>
+<span class="sd">            log_id: a unique identify of this request</span>
 <span class="sd">            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_protocol_args</span><span class="p">(</span>
-            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
-            <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
-            <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
-            <span class="n">pdu</span><span class="o">=</span><span class="n">pdu</span><span class="p">,</span>
-            <span class="n">short_message</span><span class="o">=</span><span class="n">short_message</span><span class="p">,</span>
-            <span class="n">source_addr</span><span class="o">=</span><span class="n">source_addr</span><span class="p">,</span>
-            <span class="n">destination_addr</span><span class="o">=</span><span class="n">destination_addr</span><span class="p">,</span>
-            <span class="n">hook_metadata</span><span class="o">=</span><span class="n">hook_metadata</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">smpp_command</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span> <span class="o">=</span> <span class="n">pdu</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">short_message</span> <span class="o">=</span> <span class="n">short_message</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source_addr</span> <span class="o">=</span> <span class="n">source_addr</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">destination_addr</span> <span class="o">=</span> <span class="n">destination_addr</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span></div>
-
-    <span class="k">def</span> <span class="nf">_validate_protocol_args</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-        <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">pdu</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">],</span>
-        <span class="n">short_message</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">source_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">destination_addr</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">hook_metadata</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-    <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`version` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`naz` currently only supports naz protocol version </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span>
+                <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">smpp_command</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -263,75 +220,501 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;`log_id` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">log_id</span><span class="p">))</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pdu</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">bytes</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`pdu` should be of type:: `None` or `bytes` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">pdu</span><span class="p">))</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">short_message</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`short_message` should be of type:: `None` or `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="p">(</span><span class="n">short_message</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="n">pdu</span> <span class="ow">and</span> <span class="n">short_message</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot specify both `pdu` and `short_message`&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_addr</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`source_addr` should be of type:: `None` or `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="p">(</span><span class="n">source_addr</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination_addr</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`destination_addr` should be of type:: `None` or `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="nb">type</span><span class="p">(</span><span class="n">destination_addr</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">str</span><span class="p">)):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;`hook_metadata` should be of type:: `None` or `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="s2">&quot;`hook_metadata` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="nb">type</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">smpp_command</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span></div>
 
-<div class="viewcode-block" id="Message.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="Message.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.to_json">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Serializes the message protocol to json. You can use this method if you would</span>
 <span class="sd">        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_item</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-            <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">,</span>
-            <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
-            <span class="s2">&quot;pdu&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="p">,</span>
-            <span class="s2">&quot;short_message&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">short_message</span><span class="p">,</span>
-            <span class="s2">&quot;source_addr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source_addr</span><span class="p">,</span>
-            <span class="s2">&quot;destination_addr&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">destination_addr</span><span class="p">,</span>
-            <span class="s2">&quot;hook_metadata&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span><span class="p">,</span>
-        <span class="p">}</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="p">:</span>
-            <span class="n">_item</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pdu</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;to_json method must be implemented.&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Message.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Message&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Deserializes the message protocol from json. You can use this method if you would</span>
-<span class="sd">        like to return the `Message` from a broker like redis/rabbitmq/postgres etc.</span>
+<span class="sd">        Deserializes the message protocol from json.</span>
 
 <span class="sd">        Parameters:</span>
 <span class="sd">            json_message: `naz.protocol.Message` in json format.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_in_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;pdu&quot;</span><span class="p">):</span>
-            <span class="c1"># we need to convert pdu to bytes.</span>
-            <span class="c1"># all valid `naz` protocol messages are encoded/decoded with `Message.ENCODING` scheme.</span>
-            <span class="c1"># There&#39;s a risk of a message having been encoded with another encoding other than `Message.ENCODING` when been saved to broker</span>
-            <span class="c1"># However, this risk is small and we should only consider it if people report it as a bug.</span>
-            <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_in_dict</span><span class="p">[</span><span class="s2">&quot;pdu&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">Message</span><span class="o">.</span><span class="n">ENCODING</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;from_json method must be implemented.&quot;</span><span class="p">)</span></div></div>
 
-        <span class="k">return</span> <span class="n">Message</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="SubmitSM"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM">[docs]</a><span class="k">class</span> <span class="nc">SubmitSM</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The code representation of the `submit_sm` pdu that will get queued into a broker.</span>
+
+<span class="sd">    Usage:</span>
+
+<span class="sd">    .. highlight:: python</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        import naz</span>
+
+<span class="sd">        broker = naz.broker.SimpleBroker(maxsize=1000)</span>
+<span class="sd">        client = naz.Client(</span>
+<span class="sd">                smsc_host=&quot;127.0.0.1&quot;,</span>
+<span class="sd">                smsc_port=2775,</span>
+<span class="sd">                system_id=&quot;smppclient1&quot;,</span>
+<span class="sd">                password=os.getenv(&quot;password&quot;, &quot;password&quot;),</span>
+<span class="sd">                broker=broker,</span>
+<span class="sd">            )</span>
+<span class="sd">        msg = naz.protocol.SubmitSM(</span>
+<span class="sd">            short_message=&quot;hello world&quot;,</span>
+<span class="sd">            source_addr=&quot;255700111222&quot;,</span>
+<span class="sd">            destination_addr=&quot;255799000888&quot;,</span>
+<span class="sd">            log_id=&quot;some-id&quot;,</span>
+<span class="sd">        )</span>
+<span class="sd">        await client.send_message(msg)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SubmitSM.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">short_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">source_addr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">destination_addr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span><span class="p">,</span>
+        <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">service_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;CMT&quot;</span><span class="p">,</span>  <span class="c1"># section 5.2.11</span>
+        <span class="n">source_addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>  <span class="c1"># section 5.2.5</span>
+        <span class="n">source_addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>
+        <span class="n">dest_addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>
+        <span class="n">dest_addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000001</span><span class="p">,</span>
+        <span class="c1"># xxxxxx00 store-and-forward</span>
+        <span class="c1"># xx0010xx Short Message contains ESME Delivery Acknowledgement</span>
+        <span class="c1"># 00xxxxxx No specific features selected</span>
+        <span class="n">esm_class</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mb">0b00000011</span><span class="p">,</span>  <span class="c1"># section 5.2.12</span>
+        <span class="n">protocol_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
+        <span class="n">priority_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
+        <span class="n">schedule_delivery_time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">validity_period</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="c1"># xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure</span>
+        <span class="c1"># xxxx01xx SME Delivery Acknowledgement requested</span>
+        <span class="c1"># xxx0xxxx No Intermediate notification requested</span>
+        <span class="c1"># all other values reserved</span>
+        <span class="n">registered_delivery</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mb">0b00000001</span><span class="p">,</span>  <span class="c1"># see section 5.2.17</span>
+        <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
+        <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00000000</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            short_message: message to send to SMSC</span>
+<span class="sd">            source_addr: the identifier(eg msisdn) of the message sender</span>
+<span class="sd">            destination_addr: the identifier(eg msisdn) of the message recipient</span>
+<span class="sd">            log_id: a unique identify of this request</span>
+<span class="sd">            version: This indicates the current version of the naz message protocol.</span>
+<span class="sd">                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.</span>
+<span class="sd">            smpp_command: any one of the SMSC commands eg submit_sm</span>
+<span class="sd">            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.</span>
+<span class="sd">            service_type:	Indicates the SMS Application service associated with the message</span>
+<span class="sd">            source_addr_ton:	Type of Number of message originator.</span>
+<span class="sd">            source_addr_npi:	Numbering Plan Identity of message originator.</span>
+<span class="sd">            dest_addr_ton:	Type of Number for destination.</span>
+<span class="sd">            dest_addr_npi:	Numbering Plan Identity of destination</span>
+<span class="sd">            esm_class:	Indicates Message Mode &amp; Message Type.</span>
+<span class="sd">            protocol_id:	Protocol Identifier. Network specific field.</span>
+<span class="sd">            priority_flag:	Designates the priority level of the message.</span>
+<span class="sd">            schedule_delivery_time:	The short message is to be scheduled by the SMSC for delivery.</span>
+<span class="sd">            validity_period:	The validity period of this message.</span>
+<span class="sd">            registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.</span>
+<span class="sd">            replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.</span>
+<span class="sd">            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_msg_type_args</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="n">short_message</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="n">source_addr</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="n">destination_addr</span><span class="p">,</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">hook_metadata</span><span class="o">=</span><span class="n">hook_metadata</span><span class="p">,</span>
+            <span class="n">service_type</span><span class="o">=</span><span class="n">service_type</span><span class="p">,</span>
+            <span class="n">source_addr_ton</span><span class="o">=</span><span class="n">source_addr_ton</span><span class="p">,</span>
+            <span class="n">source_addr_npi</span><span class="o">=</span><span class="n">source_addr_npi</span><span class="p">,</span>
+            <span class="n">dest_addr_ton</span><span class="o">=</span><span class="n">dest_addr_ton</span><span class="p">,</span>
+            <span class="n">dest_addr_npi</span><span class="o">=</span><span class="n">dest_addr_npi</span><span class="p">,</span>
+            <span class="n">esm_class</span><span class="o">=</span><span class="n">esm_class</span><span class="p">,</span>
+            <span class="n">protocol_id</span><span class="o">=</span><span class="n">protocol_id</span><span class="p">,</span>
+            <span class="n">priority_flag</span><span class="o">=</span><span class="n">priority_flag</span><span class="p">,</span>
+            <span class="n">schedule_delivery_time</span><span class="o">=</span><span class="n">schedule_delivery_time</span><span class="p">,</span>
+            <span class="n">validity_period</span><span class="o">=</span><span class="n">validity_period</span><span class="p">,</span>
+            <span class="n">registered_delivery</span><span class="o">=</span><span class="n">registered_delivery</span><span class="p">,</span>
+            <span class="n">replace_if_present_flag</span><span class="o">=</span><span class="n">replace_if_present_flag</span><span class="p">,</span>
+            <span class="n">sm_default_msg_id</span><span class="o">=</span><span class="n">sm_default_msg_id</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">short_message</span> <span class="o">=</span> <span class="n">short_message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_addr</span> <span class="o">=</span> <span class="n">source_addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destination_addr</span> <span class="o">=</span> <span class="n">destination_addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">service_type</span> <span class="o">=</span> <span class="n">service_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_ton</span> <span class="o">=</span> <span class="n">source_addr_ton</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source_addr_npi</span> <span class="o">=</span> <span class="n">source_addr_npi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_ton</span> <span class="o">=</span> <span class="n">dest_addr_ton</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_npi</span> <span class="o">=</span> <span class="n">dest_addr_npi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">esm_class</span> <span class="o">=</span> <span class="n">esm_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span> <span class="o">=</span> <span class="n">protocol_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">priority_flag</span> <span class="o">=</span> <span class="n">priority_flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">schedule_delivery_time</span> <span class="o">=</span> <span class="n">schedule_delivery_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validity_period</span> <span class="o">=</span> <span class="n">validity_period</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">registered_delivery</span> <span class="o">=</span> <span class="n">registered_delivery</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">replace_if_present_flag</span> <span class="o">=</span> <span class="n">replace_if_present_flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sm_default_msg_id</span> <span class="o">=</span> <span class="n">sm_default_msg_id</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_msg_type_args</span><span class="p">(</span>
+        <span class="n">short_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">source_addr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">destination_addr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">service_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">source_addr_ton</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">source_addr_npi</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dest_addr_ton</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dest_addr_npi</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">esm_class</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">protocol_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">priority_flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">schedule_delivery_time</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">validity_period</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">registered_delivery</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">replace_if_present_flag</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">sm_default_msg_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`version` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`naz` currently only supports naz protocol version </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">short_message</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`short_message` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">short_message</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`source_addr` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">source_addr</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">destination_addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`destination_addr` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">destination_addr</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`log_id` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">log_id</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`hook_metadata` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">service_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`service_type` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">service_type</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_addr_ton</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`source_addr_ton` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">source_addr_ton</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source_addr_npi</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`source_addr_npi` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">source_addr_npi</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dest_addr_ton</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`dest_addr_ton` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">dest_addr_ton</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dest_addr_npi</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`dest_addr_npi` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">dest_addr_npi</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">esm_class</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`esm_class` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">esm_class</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`protocol_id` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">protocol_id</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">priority_flag</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`priority_flag` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">priority_flag</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schedule_delivery_time</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`schedule_delivery_time` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">schedule_delivery_time</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">validity_period</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`validity_period` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">validity_period</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">registered_delivery</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`registered_delivery` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">registered_delivery</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">replace_if_present_flag</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`replace_if_present_flag` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">replace_if_present_flag</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sm_default_msg_id</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`sm_default_msg_id` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">sm_default_msg_id</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="SubmitSM.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">smpp_command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">short_message</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source_addr</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">destination_addr</span><span class="p">,</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+            <span class="n">hook_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span><span class="p">,</span>
+            <span class="n">service_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">service_type</span><span class="p">,</span>
+            <span class="n">source_addr_ton</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source_addr_ton</span><span class="p">,</span>
+            <span class="n">source_addr_npi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">source_addr_npi</span><span class="p">,</span>
+            <span class="n">dest_addr_ton</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_ton</span><span class="p">,</span>
+            <span class="n">dest_addr_npi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dest_addr_npi</span><span class="p">,</span>
+            <span class="n">esm_class</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">esm_class</span><span class="p">,</span>
+            <span class="n">protocol_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol_id</span><span class="p">,</span>
+            <span class="n">priority_flag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">priority_flag</span><span class="p">,</span>
+            <span class="n">schedule_delivery_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">schedule_delivery_time</span><span class="p">,</span>
+            <span class="n">validity_period</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validity_period</span><span class="p">,</span>
+            <span class="n">registered_delivery</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">registered_delivery</span><span class="p">,</span>
+            <span class="n">replace_if_present_flag</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">replace_if_present_flag</span><span class="p">,</span>
+            <span class="n">sm_default_msg_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sm_default_msg_id</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SubmitSM.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;SubmitSM&quot;</span><span class="p">:</span>
+        <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SubmitSM</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EnquireLinkResp"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp">[docs]</a><span class="k">class</span> <span class="nc">EnquireLinkResp</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+<div class="viewcode-block" id="EnquireLinkResp.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">ENQUIRE_LINK_RESP</span><span class="p">,</span>
+        <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            log_id: a unique identify of this request</span>
+<span class="sd">            version: This indicates the current version of the naz message protocol.</span>
+<span class="sd">                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.</span>
+<span class="sd">            smpp_command: any one of the SMSC commands eg submit_sm</span>
+<span class="sd">            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.</span>
+<span class="sd">            sequence_number: SMPP sequence_number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`log_id` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">log_id</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`sequence_number` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`version` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`naz` currently only supports naz protocol version </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">smpp_command</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`smpp_command` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">smpp_command</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`hook_metadata` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">ENQUIRE_LINK_RESP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span></div>
+
+<div class="viewcode-block" id="EnquireLinkResp.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">smpp_command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+            <span class="n">sequence_number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+            <span class="n">hook_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EnquireLinkResp.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.EnquireLinkResp.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;EnquireLinkResp&quot;</span><span class="p">:</span>
+        <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EnquireLinkResp</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DeliverSmResp"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp">[docs]</a><span class="k">class</span> <span class="nc">DeliverSmResp</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+<div class="viewcode-block" id="DeliverSmResp.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">log_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">message_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">sequence_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">smpp_command</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM_RESP</span><span class="p">,</span>
+        <span class="n">hook_metadata</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            log_id: a unique identify of this request</span>
+<span class="sd">            version: This indicates the current version of the naz message protocol.</span>
+<span class="sd">                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.</span>
+<span class="sd">            smpp_command: any one of the SMSC commands eg submit_sm</span>
+<span class="sd">            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.</span>
+<span class="sd">            message_id: id of this message</span>
+<span class="sd">            sequence_number: SMPP sequence_number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">log_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`log_id` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">log_id</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`message_id` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">message_id</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`sequence_number` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">sequence_number</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`version` should be of type:: `int` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">!=</span> <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`naz` currently only supports naz protocol version </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">smpp_command</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`smpp_command` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">smpp_command</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`hook_metadata` should be of type:: `str` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">hook_metadata</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_id</span> <span class="o">=</span> <span class="n">log_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM_RESP</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">message_id</span> <span class="o">=</span> <span class="n">message_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span> <span class="o">=</span> <span class="n">sequence_number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span> <span class="o">=</span> <span class="n">hook_metadata</span></div>
+
+<div class="viewcode-block" id="DeliverSmResp.to_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">smpp_command</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">smpp_command</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_id</span><span class="p">,</span>
+            <span class="n">message_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">message_id</span><span class="p">,</span>
+            <span class="n">sequence_number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence_number</span><span class="p">,</span>
+            <span class="n">hook_metadata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">hook_metadata</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">_item</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DeliverSmResp.from_json"><a class="viewcode-back" href="../../protocol.html#naz.protocol.DeliverSmResp.from_json">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DeliverSmResp&quot;</span><span class="p">:</span>
+        <span class="n">_in_dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DeliverSmResp</span><span class="p">(</span><span class="o">**</span><span class="n">_in_dict</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="json_to_Message"><a class="viewcode-back" href="../../protocol.html#naz.protocol.json_to_Message">[docs]</a><span class="k">def</span> <span class="nf">json_to_Message</span><span class="p">(</span><span class="n">json_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Message</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Utility function to deserialize the message protocol from json.</span>
+<span class="sd">    You can use this method if you would like to return the `Message` from a broker like redis/rabbitmq/postgres etc.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        json_message: `naz.protocol.Message` in json format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_item</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json_message</span><span class="p">)</span>
+    <span class="n">smpp_command</span> <span class="o">=</span> <span class="n">_item</span><span class="p">[</span><span class="s2">&quot;smpp_command&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">smpp_command</span> <span class="o">==</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">SUBMIT_SM</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SubmitSM</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="o">=</span><span class="n">json_message</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">smpp_command</span> <span class="o">==</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">ENQUIRE_LINK_RESP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EnquireLinkResp</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="o">=</span><span class="n">json_message</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">smpp_command</span> <span class="o">==</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppCommand</span><span class="o">.</span><span class="n">DELIVER_SM_RESP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DeliverSmResp</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">json_message</span><span class="o">=</span><span class="n">json_message</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;The `from_json` method for smpp_command: `</span><span class="si">{0}</span><span class="s2">` has not been implemented.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">smpp_command</span>
+            <span class="p">)</span>
+        <span class="p">)</span></div>
 </pre></div>
 
            </div>

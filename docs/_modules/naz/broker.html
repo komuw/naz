@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.broker &mdash; naz v0.7.5 documentation</title>
+  <title>naz.broker &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -86,7 +86,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../step_by_step_demo.html">Step by step tutorial of using naz</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../client.html">Client</a></li>
@@ -166,7 +166,7 @@
 <span></span><span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">protocol</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">protocol</span>
 
 
 <div class="viewcode-block" id="BaseBroker"><a class="viewcode-back" href="../../broker.html#naz.broker.BaseBroker">[docs]</a><span class="k">class</span> <span class="nc">BaseBroker</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
@@ -184,8 +184,8 @@
 <span class="sd">        enqueue/save an item.</span>
 
 <span class="sd">        Parameters:</span>
-<span class="sd">            item: The item to be enqueued/saved</span>
-<span class="sd">                  The item/message is a `naz.protocol.Message` class instance;</span>
+<span class="sd">            message: The item to be enqueued/saved</span>
+<span class="sd">                  The message is a `naz.protocol.Message` class instance;</span>
 <span class="sd">                  It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.</span>
 <span class="sd">                  `naz.protocol.Message` has a `to_json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -200,7 +200,8 @@
 <span class="sd">            item that was dequeued.</span>
 <span class="sd">            The item has to be returned as a `naz.protocol.Message` class instance.</span>
 <span class="sd">            It is up to the broker implementation to do the de-serialization(if neccesary).</span>
-<span class="sd">            `naz.protocol.Message` has a `from_json()` method that you can use to de-serialize a json string into `naz.protocol.Message` class instance.</span>
+<span class="sd">            `naz.protocol` module has a utility function :func:`json_to_Message &lt;naz.protocol.json_to_Message&gt;`</span>
+<span class="sd">            that you can use to de-serialize a json string into `naz.protocol.Message` class instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;dequeue method must be implemented.&quot;</span><span class="p">)</span></div></div>
 
@@ -212,7 +213,7 @@
 <span class="sd">    Note: It should only be used for tests and demo purposes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleBroker.__init__"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2500</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="SimpleBroker.__init__"><a class="viewcode-back" href="../../broker.html#naz.broker.SimpleBroker.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2500</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
 <span class="sd">            maxsize: the maximum number of items(not size) that can be put in the queue.</span>

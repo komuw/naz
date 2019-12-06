@@ -17,7 +17,7 @@ client = naz.Client(
     broker=ExampleRedisBroker(),
     enquire_link_interval=70.00,
     logger=naz.log.SimpleLogger(
-        "naz.fuzz", level="INFO", log_metadata={"environment": "staging", "release": "canary"},
+        "naz.fuzz", level="INFO", log_metadata={"environment": "staging", "release": "canary"}
     ),
 )
 

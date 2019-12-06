@@ -18,9 +18,7 @@ for i in range(0, 4):
     print("submit_sm round:", i)
     loop.run_until_complete(
         broker.enqueue(
-            naz.protocol.Message(
-                version=1,
-                smpp_command=naz.SmppCommand.SUBMIT_SM,
+            naz.protocol.SubmitSM(
                 short_message="Hello World-{0}".format(str(i)),
                 log_id="myid1234-{0}".format(str(i)),
                 source_addr="254722111111",
@@ -30,13 +28,14 @@ for i in range(0, 4):
     )
 
     # altenatively::
+    # msg = naz.protocol.SubmitSM(
+    #             short_message="Hello World-{0}".format(str(i)),
+    #             log_id="myid12345",
+    #             source_addr="254722111111",
+    #             destination_addr="254722999999",
+    #         )
     # loop.run_until_complete(
-    #     cli.submit_sm(
-    #         short_message="Hello World-{0}".format(str(i)),
-    #         log_id="myid12345",
-    #         source_addr="254722111111",
-    #         destination_addr="254722999999",
-    #     )
+    #     cli.send_message(msg)
     # )
 
 try:

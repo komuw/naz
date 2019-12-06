@@ -19,8 +19,8 @@ class BaseBroker(abc.ABC):
         enqueue/save an item.
 
         Parameters:
-            item: The item to be enqueued/saved
-                  The item/message is a `naz.protocol.Message` class instance;
+            message: The item to be enqueued/saved
+                  The message is a `naz.protocol.Message` class instance;
                   It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.
                   `naz.protocol.Message` has a `to_json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.
         """
@@ -35,7 +35,8 @@ class BaseBroker(abc.ABC):
             item that was dequeued.
             The item has to be returned as a `naz.protocol.Message` class instance.
             It is up to the broker implementation to do the de-serialization(if neccesary).
-            `naz.protocol.Message` has a `from_json()` method that you can use to de-serialize a json string into `naz.protocol.Message` class instance.
+            `naz.protocol` module has a utility function :func:`json_to_Message <naz.protocol.json_to_Message>`
+            that you can use to de-serialize a json string into `naz.protocol.Message` class instance.
         """
         raise NotImplementedError("dequeue method must be implemented.")
 

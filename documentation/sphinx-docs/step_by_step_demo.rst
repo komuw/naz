@@ -1,8 +1,8 @@
-=============================
-  Example demo of using naz
-=============================
+=====================================
+  Step by step tutorial of using naz
+=====================================
 
-| In this demo, we will see how to use ``naz``.
+| In this demo, we will see how to use ``naz`` step by step.
 
 
 | We are going to start off on an empty directory
@@ -18,7 +18,7 @@
 
     pip install naz && \
     naz-cli --version
-      naz v0.7.4
+      naz v0.7.6
 
 | In order to use ``naz``, we need to have a place where messages are going to be stored before been submitted to the SMSC.
 | Messages are stored in a broker in ``naz``. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), ``naz`` is broker agnostic.
@@ -164,7 +164,6 @@
       log_id = tracking_code
       source_addr = "AwesomeStore"
       destination_addr = "254722000111"
-      
       msg = naz.protocol.SubmitSM(
                 short_message=msg,
                 log_id=log_id,

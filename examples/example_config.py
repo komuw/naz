@@ -10,7 +10,9 @@ client = naz.Client(
     system_id="smppclient1",
     password="password",
     broker=ExampleRedisBroker(),
-    codec=naz.codec.SimpleCodec(encoding="ucs2"),
+    # codec=naz.codec.SimpleCodec(encoding="ucs2"),
     socket_timeout=4.00,
     logger=naz.log.SimpleLogger("example_config.client", render_as_json=False),
+    enquire_link_interval=59.00,
+    address_range="254722111111",  # any msisdns beginning with 254. See Appendix A of smpp spec
 )
