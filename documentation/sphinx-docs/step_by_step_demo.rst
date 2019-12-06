@@ -18,7 +18,7 @@
 
     pip install naz && \
     naz-cli --version
-      naz v0.7.4
+      naz v0.7.6
 
 | In order to use ``naz``, we need to have a place where messages are going to be stored before been submitted to the SMSC.
 | Messages are stored in a broker in ``naz``. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), ``naz`` is broker agnostic.
