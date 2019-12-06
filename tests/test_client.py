@@ -294,7 +294,6 @@ class TestClient(TestCase):
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
             self._run(self.cli.dequeue_messages(TESTING=True))
-
             self.assertTrue(mock_naz_dequeue.mock.called)
 
     def test_parse_response_pdu(self):
@@ -1076,6 +1075,34 @@ class TestClient(TestCase):
             self._run(cli.connect())
             self.assertTrue(hasattr(cli.reader, "read"))
             self.assertTrue(hasattr(cli.writer, "write"))
+
+    def test_enquire_link_resp_sending(self):
+        with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = naz.protocol.EnquireLinkResp(
+                log_id="log_id", sequence_number=34,
+            )
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertTrue(mock_naz_dequeue.mock.called)
+
+    def test_deliver_sm_resp_sending(self):
+        with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            log_id = "12345"
+            short_message = "hello smpp"
+            mock_naz_dequeue.mock.return_value = naz.protocol.DeliverSmResp(
+                log_id="mock-id", message_id="message_id", sequence_number=90,
+            )
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertTrue(mock_naz_dequeue.mock.called)
 
     # def test_unknown_protocol_Message(self):
     #     class UnknownMessage(naz.protocol.Message):
