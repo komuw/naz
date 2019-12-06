@@ -1604,8 +1604,6 @@ class Client:
                                 type(proto_msg)
                             )
                         )
-                        # TODO: raise error
-                        full_pdu = proto_msg.pdu
                 except Exception as e:
                     self._log(
                         logging.ERROR,
