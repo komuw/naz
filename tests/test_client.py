@@ -1099,3 +1099,26 @@ class TestClient(TestCase):
             self.cli.current_session_state = "BOUND_TRX"
             self._run(self.cli.dequeue_messages(TESTING=True))
             self.assertTrue(mock_naz_dequeue.mock.called)
+
+    def test_send_message_with_more_args(self):
+        log_id = "12345"
+        short_message = "hello"
+        msg = naz.protocol.SubmitSM(
+            short_message=short_message,
+            source_addr="2492",
+            destination_addr="8930302",
+            log_id=log_id,
+            source_addr_ton=0x00000010,  # National
+            dest_addr_npi=0x00001110,  # Internet
+        )
+        with mock.patch("naz.broker.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+            self._run(self.cli.connect())
+            self._run(self.cli.tranceiver_bind())
+
+            self._run(self.cli.send_message(msg))
+            self.assertTrue(mock_naz_enqueue.mock.called)
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].log_id, log_id)
+            self.assertEqual(
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.SUBMIT_SM
+            )
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].short_message, short_message)
