@@ -1003,7 +1003,7 @@ class Client:
         self._log(
             logging.INFO,
             {
-                "event": "naz.Client.submit_message",
+                "event": "naz.Client.send_message",
                 "stage": "start",
                 "log_id": proto_msg.log_id,
                 "smpp_command": smpp_command,
@@ -1015,7 +1015,7 @@ class Client:
             self._log(
                 logging.ERROR,
                 {
-                    "event": "naz.Client.submit_message",
+                    "event": "naz.Client.send_message",
                     "stage": "end",
                     "error": str(e),
                     "log_id": proto_msg.log_id,
@@ -1026,7 +1026,7 @@ class Client:
         self._log(
             logging.INFO,
             {
-                "event": "naz.Client.submit_message",
+                "event": "naz.Client.send_message",
                 "stage": "end",
                 "log_id": proto_msg.log_id,
                 "smpp_command": smpp_command,

@@ -173,7 +173,11 @@
 
 <div class="viewcode-block" id="Message"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message">[docs]</a><span class="k">class</span> <span class="nc">Message</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    TODO: doc</span>
+<span class="sd">    The message protocol for `naz`. It is the code representation of what</span>
+<span class="sd">    gets queued into a naz broker.</span>
+<span class="sd">    This is the interface that must be implemented to satisfy naz&#39;s message protocol.</span>
+<span class="sd">    </span>
+<span class="sd">    Users should only ever have to deal with the :class:`SubmitSM &lt;SubmitSM&gt;` implementation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Message.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.Message.__init__">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
@@ -185,6 +189,7 @@
 <span class="sd">            version: This indicates the current version of the naz message protocol.</span>
 <span class="sd">                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.</span>
 <span class="sd">            smpp_command: any one of the SMSC commands eg submit_sm</span>
+<span class="sd">            log_id: a unique identify of this request</span>
 <span class="sd">            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
@@ -233,6 +238,12 @@
 
 
 <div class="viewcode-block" id="SubmitSM"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM">[docs]</a><span class="k">class</span> <span class="nc">SubmitSM</span><span class="p">(</span><span class="n">Message</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The code representation of the `submit_sm` pdu that will get queued into a broker.</span>
+
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
 <div class="viewcode-block" id="SubmitSM.__init__"><a class="viewcode-back" href="../../protocol.html#naz.protocol.SubmitSM.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">short_message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>

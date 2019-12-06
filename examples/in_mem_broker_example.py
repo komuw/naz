@@ -35,7 +35,7 @@ for i in range(0, 4):
     #             destination_addr="254722999999",
     #         )
     # loop.run_until_complete(
-    #     cli.submit_message(msg)
+    #     cli.send_message(msg)
     # )
 
 try:

@@ -252,11 +252,11 @@ class TestClient(TestCase):
             )
         # todo: test bind_response
 
-    def test_submit_message_error(self):
+    def test_send_message_error(self):
         with self.assertRaises(ValueError):
-            self._run(self.cli.submit_message("bogusType"))
+            self._run(self.cli.send_message("bogusType"))
 
-    def test_submit_message_success(self):
+    def test_send_message_success(self):
         log_id = "12345"
         short_message = "hello"
         msg = naz.protocol.SubmitSM(
@@ -269,7 +269,7 @@ class TestClient(TestCase):
             self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
 
-            self._run(self.cli.submit_message(msg))
+            self._run(self.cli.send_message(msg))
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].log_id, log_id)
             self.assertEqual(

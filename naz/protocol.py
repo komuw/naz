@@ -8,7 +8,11 @@ from . import state
 
 class Message(abc.ABC):
     """
-    TODO: doc
+    The message protocol for `naz`. It is the code representation of what
+    gets queued into a naz broker.
+    This is the interface that must be implemented to satisfy naz's message protocol.
+    
+    Users should only ever have to deal with the :class:`SubmitSM <SubmitSM>` implementation
     """
 
     @abc.abstractmethod
@@ -20,6 +24,7 @@ class Message(abc.ABC):
             version: This indicates the current version of the naz message protocol.
                      This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
             smpp_command: any one of the SMSC commands eg submit_sm
+            log_id: a unique identify of this request
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
         """
         if not isinstance(version, int):
@@ -68,6 +73,12 @@ class Message(abc.ABC):
 
 
 class SubmitSM(Message):
+    """
+    The code representation of the `submit_sm` pdu that will get queued into a broker.
+
+    
+    """
+
     def __init__(
         self,
         short_message: str,

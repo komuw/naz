@@ -96,7 +96,7 @@ async def send_messages():
                 source_addr=source_addr,
                 destination_addr=destination_addr,
             )
-            await my_naz_client.submit_message(msg)
+            await my_naz_client.send_message(msg)
 
             logger.log(
                 logging.INFO,
