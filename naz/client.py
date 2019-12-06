@@ -971,6 +971,10 @@ class Client:
                        Has to be a class instance that is a child class of `naz.protocol.Message`
 
         Usage:
+
+        .. highlight:: python
+        .. code-block:: python
+
             import naz
 
             broker = naz.broker.SimpleBroker(maxsize=1000)
