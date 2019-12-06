@@ -320,10 +320,6 @@ class SubmitSM(Message):
             )
 
     def to_json(self) -> str:
-        """
-        Serializes the message protocol to json. You can use this method if you would
-        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
-        """
         _item = dict(
             smpp_command=self.smpp_command,
             version=self.version,
@@ -350,12 +346,6 @@ class SubmitSM(Message):
 
     @staticmethod
     def from_json(json_message: str) -> SubmitSM:
-        """
-        Deserializes the message protocol from json.
-
-        Parameters:
-            json_message: `naz.protocol.Message` in json format.
-        """
         _in_dict = json.loads(json_message)
         return SubmitSM(**_in_dict)
 
@@ -411,10 +401,6 @@ class EnquireLinkResp(Message):
         self.hook_metadata = hook_metadata
 
     def to_json(self) -> str:
-        """
-        Serializes the message protocol to json. You can use this method if you would
-        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
-        """
         _item = dict(
             smpp_command=self.smpp_command,
             version=self.version,
@@ -426,12 +412,6 @@ class EnquireLinkResp(Message):
 
     @staticmethod
     def from_json(json_message: str) -> EnquireLinkResp:
-        """
-        Deserializes the message protocol from json.
-
-        Parameters:
-            json_message: `naz.protocol.Message` in json format.
-        """
         _in_dict = json.loads(json_message)
         return EnquireLinkResp(**_in_dict)
 
@@ -494,10 +474,6 @@ class DeliverSmResp(Message):
         self.hook_metadata = hook_metadata
 
     def to_json(self) -> str:
-        """
-        Serializes the message protocol to json. You can use this method if you would
-        like to save the `Message` into a broker like redis/rabbitmq/postgres etc.
-        """
         _item = dict(
             smpp_command=self.smpp_command,
             version=self.version,
@@ -510,12 +486,6 @@ class DeliverSmResp(Message):
 
     @staticmethod
     def from_json(json_message: str) -> DeliverSmResp:
-        """
-        Deserializes the message protocol from json.
-
-        Parameters:
-            json_message: `naz.protocol.Message` in json format.
-        """
         _in_dict = json.loads(json_message)
         return DeliverSmResp(**_in_dict)
 

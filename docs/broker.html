@@ -188,7 +188,8 @@ implement the <a class="reference internal" href="#naz.broker.BaseBroker.enqueue
 <dd class="field-even"><p>item that was dequeued.
 The item has to be returned as a <cite>naz.protocol.Message</cite> class instance.
 It is up to the broker implementation to do the de-serialization(if neccesary).
-<cite>naz.protocol.Message</cite> has a <cite>from_json()</cite> method that you can use to de-serialize a json string into <cite>naz.protocol.Message</cite> class instance.</p>
+<cite>naz.protocol</cite> module has a utility function <a class="reference internal" href="protocol.html#naz.protocol.json_to_Message" title="naz.protocol.json_to_Message"><code class="xref py py-func docutils literal notranslate"><span class="pre">json_to_Message</span></code></a>
+that you can use to de-serialize a json string into <cite>naz.protocol.Message</cite> class instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -199,8 +200,8 @@ It is up to the broker implementation to do the de-serialization(if neccesary).
 <dd><p>enqueue/save an item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>item</strong> – The item to be enqueued/saved
-The item/message is a <cite>naz.protocol.Message</cite> class instance;
+<dd class="field-odd"><p><strong>message</strong> (<a class="reference internal" href="protocol.html#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a>) – The item to be enqueued/saved
+The message is a <cite>naz.protocol.Message</cite> class instance;
 It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.
 <cite>naz.protocol.Message</cite> has a <cite>to_json()</cite> method that you can use to serialize a <cite>naz.protocol.Message</cite> class instance into json.</p>
 </dd>
@@ -243,7 +244,8 @@ It is up to the broker implementation to do the serialization(if neccesary) in o
 <dd class="field-even"><p>item that was dequeued.
 The item has to be returned as a <cite>naz.protocol.Message</cite> class instance.
 It is up to the broker implementation to do the de-serialization(if neccesary).
-<cite>naz.protocol.Message</cite> has a <cite>from_json()</cite> method that you can use to de-serialize a json string into <cite>naz.protocol.Message</cite> class instance.</p>
+<cite>naz.protocol</cite> module has a utility function <a class="reference internal" href="protocol.html#naz.protocol.json_to_Message" title="naz.protocol.json_to_Message"><code class="xref py py-func docutils literal notranslate"><span class="pre">json_to_Message</span></code></a>
+that you can use to de-serialize a json string into <cite>naz.protocol.Message</cite> class instance.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,8 +256,8 @@ It is up to the broker implementation to do the de-serialization(if neccesary).
 <dd><p>enqueue/save an item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>item</strong> – The item to be enqueued/saved
-The item/message is a <cite>naz.protocol.Message</cite> class instance;
+<dd class="field-odd"><p><strong>message</strong> (<a class="reference internal" href="protocol.html#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a>) – The item to be enqueued/saved
+The message is a <cite>naz.protocol.Message</cite> class instance;
 It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.
 <cite>naz.protocol.Message</cite> has a <cite>to_json()</cite> method that you can use to serialize a <cite>naz.protocol.Message</cite> class instance into json.</p>
 </dd>

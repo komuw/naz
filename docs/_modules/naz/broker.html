@@ -184,8 +184,8 @@
 <span class="sd">        enqueue/save an item.</span>
 
 <span class="sd">        Parameters:</span>
-<span class="sd">            item: The item to be enqueued/saved</span>
-<span class="sd">                  The item/message is a `naz.protocol.Message` class instance;</span>
+<span class="sd">            message: The item to be enqueued/saved</span>
+<span class="sd">                  The message is a `naz.protocol.Message` class instance;</span>
 <span class="sd">                  It is up to the broker implementation to do the serialization(if neccesary) in order to be able to store it.</span>
 <span class="sd">                  `naz.protocol.Message` has a `to_json()` method that you can use to serialize a `naz.protocol.Message` class instance into json.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -200,7 +200,8 @@
 <span class="sd">            item that was dequeued.</span>
 <span class="sd">            The item has to be returned as a `naz.protocol.Message` class instance.</span>
 <span class="sd">            It is up to the broker implementation to do the de-serialization(if neccesary).</span>
-<span class="sd">            `naz.protocol.Message` has a `from_json()` method that you can use to de-serialize a json string into `naz.protocol.Message` class instance.</span>
+<span class="sd">            `naz.protocol` module has a utility function :func:`json_to_Message &lt;naz.protocol.json_to_Message&gt;`</span>
+<span class="sd">            that you can use to de-serialize a json string into `naz.protocol.Message` class instance.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;dequeue method must be implemented.&quot;</span><span class="p">)</span></div></div>
 
