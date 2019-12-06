@@ -195,8 +195,8 @@ class SubmitSM(Message):
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
 
+    @staticmethod
     def _validate_msg_type_args(
-        self,
         short_message: str,
         source_addr: str,
         destination_addr: str,
