@@ -245,7 +245,7 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
             <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-       <span class="n">cli</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+       <span class="n">cli</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -602,7 +602,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
             <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-       <span class="n">cli</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+       <span class="n">cli</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="p">)</span>
 </pre></div>
 </div>
@@ -616,7 +616,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
             <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-      <span class="n">cli</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+      <span class="n">cli</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>

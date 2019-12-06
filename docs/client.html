@@ -380,24 +380,13 @@ It also accts as a flow control method that interacts with the IO write buffer.<
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.client.Client.shutdown">
-<em class="property">async </em><code class="sig-name descname">shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.shutdown" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cleanly shutdown this client.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="naz.client.Client.submit_message">
-<em class="property">async </em><code class="sig-name descname">submit_message</code><span class="sig-paren">(</span><em class="sig-param">proto_msg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.submit_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.submit_message" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends a message of any kind/pdu to SMSC.
+<dt id="naz.client.Client.send_message">
+<em class="property">async </em><code class="sig-name descname">send_message</code><span class="sig-paren">(</span><em class="sig-param">proto_msg</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.send_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.send_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends a message/SUBMIT_SM to SMSC.
 That message will get enqueued to <code class="xref py py-attr docutils literal notranslate"><span class="pre">broker</span></code> and later on sent to SMSC.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>proto_msg</strong> (<a class="reference internal" href="protocol.html#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">Message</span></code></a>) – the message to send to SMSC.
+<dd class="field-odd"><p><strong>proto_msg</strong> (<a class="reference internal" href="protocol.html#naz.protocol.SubmitSM" title="naz.protocol.SubmitSM"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubmitSM</span></code></a>) – the message to send to SMSC.
 Has to be a class instance that is a child class of <cite>naz.protocol.Message</cite></p>
 </dd>
 </dl>
@@ -418,9 +407,20 @@ Has to be a class instance that is a child class of <cite>naz.protocol.Message</
     <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;255799000888&quot;</span><span class="p">,</span>
     <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;some-id&quot;</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.client.Client.shutdown">
+<em class="property">async </em><code class="sig-name descname">shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cleanly shutdown this client.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>

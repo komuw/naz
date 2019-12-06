@@ -961,9 +961,9 @@ class Client:
         )
 
     # this method just enqueues a submit_sm msg to queue
-    async def submit_message(self, proto_msg: protocol.Message) -> None:
+    async def send_message(self, proto_msg: protocol.SubmitSM) -> None:
         """
-        Sends a message of any kind/pdu to SMSC.
+        Sends a message/SUBMIT_SM to SMSC.
         That message will get enqueued to :attr:`broker <Client.broker>` and later on sent to SMSC.
 
         Parameters:
@@ -991,11 +991,11 @@ class Client:
                 destination_addr="255799000888",
                 log_id="some-id",
             )
-            await client.submit_message(msg)
+            await client.send_message(msg)
         """
-        if not isinstance(proto_msg, protocol.Message):
+        if not isinstance(proto_msg, protocol.SubmitSM):
             raise ValueError(
-                "`proto_msg` should be of type:: `naz.protocol.Message` You entered: {0}".format(
+                "`proto_msg` should be of type:: `naz.protocol.SubmitSM` You entered: {0}".format(
                     type(proto_msg)
                 )
             )
@@ -1020,6 +1020,7 @@ class Client:
                     "error": str(e),
                     "log_id": proto_msg.log_id,
                     "smpp_command": smpp_command,
+                    "short_message": proto_msg.short_message,
                 },
             )
         self._log(

@@ -55,7 +55,7 @@ naz is in active development and it's API may change in backward incompatible wa
                 destination_addr="254722999999",
             )
         loop.run_until_complete(
-           cli.submit_message(msg)
+           cli.send_message(msg)
     )
 
     try:
@@ -414,7 +414,7 @@ An example of using that broker;
                 destination_addr="254722999999",
             )
         loop.run_until_complete(
-           cli.submit_message(msg)
+           cli.send_message(msg)
         )
 
 
@@ -431,7 +431,7 @@ then in your application, queue items to the queue;
                 destination_addr="254722999999",
             )
         loop.run_until_complete(
-          cli.submit_message(msg)
+          cli.send_message(msg)
     )
 
 
