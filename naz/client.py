@@ -1006,9 +1006,6 @@ class Client:
                 "event": "naz.Client.submit_message",
                 "stage": "start",
                 "log_id": proto_msg.log_id,
-                "short_message": proto_msg.short_message,
-                "source_addr": proto_msg.source_addr,
-                "destination_addr": proto_msg.destination_addr,
                 "smpp_command": smpp_command,
             },
         )
@@ -1031,9 +1028,6 @@ class Client:
                 "event": "naz.Client.submit_message",
                 "stage": "end",
                 "log_id": proto_msg.log_id,
-                "short_message": proto_msg.short_message,
-                "source_addr": proto_msg.source_addr,
-                "destination_addr": proto_msg.destination_addr,
                 "smpp_command": smpp_command,
             },
         )
