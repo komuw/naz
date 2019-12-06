@@ -232,7 +232,8 @@ class TestClient(TestCase):
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
         self.assertIn(
-            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
+            "That encoding: `{0}` is not recognised.".format(encoding),
+            str(raised_exception.exception),
         )
 
     def test_can_connect(self):
