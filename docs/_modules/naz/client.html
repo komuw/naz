@@ -437,12 +437,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">correlation_handler</span> <span class="o">=</span> <span class="n">correlater</span><span class="o">.</span><span class="n">SimpleCorrelater</span><span class="p">()</span>
 
-        <span class="c1"># the messages that are published to a queue by either naz</span>
-        <span class="c1"># or user application should be versioned.</span>
-        <span class="c1"># This version will enable naz to be able to evolve in future;</span>
-        <span class="c1"># eg a future version of naz could add/remove the number of required items in a message.</span>
-        <span class="c1"># This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">naz_message_protocol_version</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">NAZ_MESSAGE_PROTOCOL_VERSION</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">CLOSED</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">=</span> <span class="mi">16</span>
