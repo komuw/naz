@@ -246,7 +246,7 @@ naz-cli --version
             <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">brpop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
                 <span class="n">dequed_item</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
-                <span class="k">return</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">Message</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">dequed_item</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">json_to_Message</span><span class="p">(</span><span class="n">dequed_item</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
