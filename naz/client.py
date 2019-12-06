@@ -1599,12 +1599,14 @@ class Client:
                     elif isinstance(proto_msg, protocol.EnquireLinkResp):
                         full_pdu = await self._build_enquire_link_resp_pdu(proto_msg)
                     else:
+                        raise ValueError(
+                            "The protocol message `{0}` is not recognised by naz.".format(
+                                type(proto_msg)
+                            )
+                        )
                         # TODO: raise error
                         full_pdu = proto_msg.pdu
-                except AttributeError as e:
-                    e = AttributeError(
-                        "enqueued message/object is missing required field: {}".format(str(e))
-                    )
+                except Exception as e:
                     self._log(
                         logging.ERROR,
                         {
