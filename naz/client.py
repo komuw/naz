@@ -2013,27 +2013,6 @@ class Client:
                     "state": commandStatus.description,
                 },
             )
-        try:
-            # call user's hook for responses
-            await self.hook.from_smsc(
-                smpp_command=smpp_command,
-                log_id=log_id,
-                hook_metadata=hook_metadata,
-                status=commandStatus,
-                pdu=pdu,
-            )
-        except Exception as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.command_handlers",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "from_smsc hook error",
-                    "error": str(e),
-                },
-            )
 
         if smpp_command in [
             SmppCommand.BIND_TRANSCEIVER,
@@ -2112,6 +2091,7 @@ class Client:
             # sm_default_msg_id, Int, 1 octet, must be set to NULL.
             # sm_length, Int, 1 octet.It is length of short message user data in octets.
             # short_message, C-Octet String, 0-254 octet
+
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
                 # get associated user supplied log_id if any
@@ -2168,6 +2148,29 @@ class Client:
                     "error": "the smpp_command: `{0}` has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
+                },
+            )
+
+        try:
+            # call user's hook for responses
+            # this has to be done last
+            await self.hook.from_smsc(
+                smpp_command=smpp_command,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                status=commandStatus,
+                pdu=pdu,
+            )
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.command_handlers",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "from_smsc hook error",
+                    "error": str(e),
                 },
             )
 

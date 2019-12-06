@@ -105,4 +105,4 @@ class TestProtocol(TestCase):
         proto = UnknownMessage()
         _in_json = proto.to_json()
         with self.assertRaises(NotImplementedError):
-            new_proto = naz.protocol.json_to_Message(_in_json)
+            naz.protocol.json_to_Message(_in_json)
