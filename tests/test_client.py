@@ -252,24 +252,30 @@ class TestClient(TestCase):
             )
         # todo: test bind_response
 
-    def test_submit_sm_enqueue(self):
+    def test_submit_message_error(self):
+        with self.assertRaises(ValueError):
+            self._run(self.cli.submit_message("bogusType"))
+
+    def test_submit_message_success(self):
+        log_id = "12345"
+        short_message = "hello"
+        msg = naz.protocol.SubmitSM(
+            short_message=short_message,
+            source_addr="2492",
+            destination_addr="8930302",
+            log_id=log_id,
+        )
         with mock.patch("naz.broker.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
-            log_id = "12345"
-            self._run(
-                self.cli.submit_sm(
-                    short_message="hello smpp",
-                    log_id=log_id,
-                    source_addr="9090",
-                    destination_addr="254722000111",
-                )
-            )
+
+            self._run(self.cli.submit_message(msg))
             self.assertTrue(mock_naz_enqueue.mock.called)
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["log_id"], log_id)
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].log_id, log_id)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.SUBMIT_SM
             )
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].short_message, short_message)
 
     def test_submit_sm_sending(self):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
