@@ -986,7 +986,7 @@ class Client:
                     broker=broker,
                 )
             msg = naz.protocol.SubmitSM(
-                short_message=short_message,
+                short_message="hello world",
                 source_addr="255700111222",
                 destination_addr="255799000888",
                 log_id="some-id",

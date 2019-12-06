@@ -1,6 +1,6 @@
-=============================
-  Example demo of using naz
-=============================
+=====================================
+  Step by step tutorial of using naz
+=====================================
 
 | In this demo, we will see how to use ``naz`` step by step.
 
