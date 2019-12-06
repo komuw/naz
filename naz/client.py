@@ -969,7 +969,7 @@ class Client:
         Parameters:
             proto_msg: the message to send to SMSC.
                        Has to be a class instance that is a child class of `naz.protocol.Message`
-        
+
         Usage:
             import naz
 
