@@ -1078,8 +1078,6 @@ class TestClient(TestCase):
 
     def test_enquire_link_resp_sending(self):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            log_id = "12345"
-            short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = naz.protocol.EnquireLinkResp(
                 log_id="log_id", sequence_number=34,
             )
@@ -1092,8 +1090,6 @@ class TestClient(TestCase):
 
     def test_deliver_sm_resp_sending(self):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
-            log_id = "12345"
-            short_message = "hello smpp"
             mock_naz_dequeue.mock.return_value = naz.protocol.DeliverSmResp(
                 log_id="mock-id", message_id="message_id", sequence_number=90,
             )
