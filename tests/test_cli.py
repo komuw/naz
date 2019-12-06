@@ -43,7 +43,7 @@ NAZ_CLIENT = naz.Client(
     broker=ExampleRedisBroker(),
     sequence_generator=MySeqGen(),
     logger=naz.log.SimpleLogger(
-        "naz.client", level="INFO", log_metadata={"environment": "production", "release": "canary"},
+        "naz.client", level="INFO", log_metadata={"environment": "production", "release": "canary"}
     ),
     enquire_link_interval=30.00,
     rateLimiter=MyRateLimiter(),

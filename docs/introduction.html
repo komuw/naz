@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction to naz &mdash; naz v0.7.5 documentation</title>
+  <title>Introduction to naz &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Example demo of using naz" href="example_demo.html" />
+    <link rel="next" title="Step by step tutorial of using naz" href="step_by_step_demo.html" />
     <link rel="prev" title="naz - naz is an async SMPP client." href="index.html" /> 
 </head>
 
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -104,7 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#benchmarks">4 Benchmarks</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step_by_step_demo.html">Step by step tutorial of using naz</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -236,14 +236,16 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
 
 <span class="c1"># queue messages to send</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;submit_sm round:&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;submit_sm round:&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
-        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
-        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+       <span class="n">cli</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -261,7 +263,7 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
     <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 <span class="k">finally</span><span class="p">:</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">unbind</span><span class="p">())</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
@@ -307,10 +309,10 @@ That docker-compose file also has a redis and rabbitMQ container if you would li
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put_nowait</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>then run:
@@ -402,7 +404,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 
     <span class="k">def</span> <span class="nf">_process_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
         <span class="c1"># implementation of key=value log renderer</span>
-        <span class="n">new_msg</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;{0}={1}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">new_msg</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">new_msg</span>
 
 
@@ -426,10 +428,10 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <span class="kn">from</span> <span class="nn">prometheus_client</span> <span class="kn">import</span> <span class="n">Counter</span>
 
 <span class="k">class</span> <span class="nc">MyPrometheusHook</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">):</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">to_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">,</span> <span class="n">pdu</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">to_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">,</span> <span class="n">pdu</span><span class="p">):</span>
         <span class="n">c</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="s1">&#39;my_requests&#39;</span><span class="p">,</span> <span class="s1">&#39;Description of counter&#39;</span><span class="p">)</span>
         <span class="n">c</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span> <span class="c1"># Increment by 1</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">from_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">from_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="p">,</span>
                     <span class="n">hook_metadata</span><span class="p">,</span>
@@ -450,9 +452,9 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <span class="kn">import</span> <span class="nn">naz</span>
 
 <span class="k">class</span> <span class="nc">SetMessageStateHook</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">):</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">to_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">,</span> <span class="n">pdu</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">to_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span><span class="p">,</span> <span class="n">pdu</span><span class="p">):</span>
         <span class="k">pass</span>
-    <span class="n">async</span> <span class="k">def</span> <span class="nf">from_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">from_smsc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                     <span class="n">smpp_command</span><span class="p">,</span>
                     <span class="n">log_id</span><span class="p">,</span>
                     <span class="n">hook_metadata</span><span class="p">,</span>
@@ -585,7 +587,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
     <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error={0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;exception occured. error=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 <span class="k">finally</span><span class="p">:</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">cli</span><span class="o">.</span><span class="n">unbind</span><span class="p">())</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
@@ -593,26 +595,28 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 
 <span class="c1"># queue messages to send</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
-        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
-        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+       <span class="n">cli</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="p">)</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 <p>then in your application, queue items to the queue;</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># queue messages to send</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
-        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-{0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
-        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+      <span class="n">cli</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -631,7 +635,7 @@ As an example if you want to deny outgoing requests if the percentage of throttl
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="example_demo.html" class="btn btn-neutral float-right" title="Example demo of using naz" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="step_by_step_demo.html" class="btn btn-neutral float-right" title="Step by step tutorial of using naz" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="naz - naz is an async SMPP client." accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

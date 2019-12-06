@@ -83,26 +83,6 @@ class Client:
         addr_npi: int = 0,
         address_range: str = "",
         interface_version: int = 34,
-        service_type: str = "CMT",  # section 5.2.11
-        source_addr_ton: int = 0x00000001,  # section 5.2.5
-        source_addr_npi: int = 0x00000001,
-        dest_addr_ton: int = 0x00000001,
-        dest_addr_npi: int = 0x00000001,
-        # xxxxxx00 store-and-forward
-        # xx0010xx Short Message contains ESME Delivery Acknowledgement
-        # 00xxxxxx No specific features selected
-        esm_class: int = 0b00000011,  # section 5.2.12
-        protocol_id: int = 0x00000000,
-        priority_flag: int = 0x00000000,
-        schedule_delivery_time: str = "",
-        validity_period: str = "",
-        # xxxxxx01 SMSC Delivery Receipt requested where final delivery outcome is delivery success or failure
-        # xxxx01xx SME Delivery Acknowledgement requested
-        # xxx0xxxx No Intermediate notification requested
-        # all other values reserved
-        registered_delivery: int = 0b00000001,  # see section 5.2.17
-        replace_if_present_flag: int = 0x00000000,
-        sm_default_msg_id: int = 0x00000000,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
         codec: typing.Union[None, the_codec.BaseCodec] = None,
@@ -120,34 +100,21 @@ class Client:
             smsc_port:	the port at which SMSC is listening on
             system_id:	Identifies the ESME system requesting to bind as a transceiver with the SMSC.
             password:	The password to be used by the SMSC to authenticate the ESME requesting to bind.
+            broker:	python class instance implementing some queueing mechanism. \
+                messages to be sent to SMSC are queued using the said mechanism before been sent
+            client_id:	a unique string identifying a naz client class instance
             system_type:	Identifies the type of ESME system requesting to bind with the SMSC.
             addr_ton:	Type of Number of the ESME address.
             addr_npi:	Numbering Plan Indicator (NPI) for ESME address(es) served via this SMPP transceiver session
             address_range:	A single ESME address or a range of ESME addresses served via this SMPP transceiver session.
             interface_version:	Indicates the version of the SMPP protocol supported by the ESME.
-            service_type:	Indicates the SMS Application service associated with the message
-            source_addr_ton:	Type of Number of message originator.
-            source_addr_npi:	Numbering Plan Identity of message originator.
-            dest_addr_ton:	Type of Number for destination.
-            dest_addr_npi:	Numbering Plan Identity of destination
-            esm_class:	Indicates Message Mode & Message Type.
-            protocol_id:	Protocol Identifier. Network specific field.
-            priority_flag:	Designates the priority level of the message.
-            schedule_delivery_time:	The short message is to be scheduled by the SMSC for delivery.
-            validity_period:	The validity period of this message.
-            registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
-            replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
-            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
-            sequence_generator:	python class instance used to generate sequence_numbers
-            broker:	python class instance implementing some queueing mechanism. \
-                messages to be sent to SMSC are queued using the said mechanism before been sent
-            client_id:	a unique string identifying a naz client class instance
+            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
             codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
-            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             rateLimiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
                 just before sending request to SMSC and just after getting response from SMSC
+            sequence_generator:	python class instance used to generate sequence_numbers
             throttle_handler: python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC
             correlation_handler: A python class instance that naz uses to store relations between \
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
@@ -169,19 +136,6 @@ class Client:
             addr_npi=addr_npi,
             address_range=address_range,
             interface_version=interface_version,
-            service_type=service_type,
-            source_addr_ton=source_addr_ton,
-            source_addr_npi=source_addr_npi,
-            dest_addr_ton=dest_addr_ton,
-            dest_addr_npi=dest_addr_npi,
-            esm_class=esm_class,
-            protocol_id=protocol_id,
-            priority_flag=priority_flag,
-            schedule_delivery_time=schedule_delivery_time,
-            validity_period=validity_period,
-            registered_delivery=registered_delivery,
-            replace_if_present_flag=replace_if_present_flag,
-            sm_default_msg_id=sm_default_msg_id,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
             codec=codec,
@@ -238,19 +192,6 @@ class Client:
         else:
             self.codec = the_codec.SimpleCodec()
 
-        self.service_type = service_type
-        self.source_addr_ton = source_addr_ton
-        self.source_addr_npi = source_addr_npi
-        self.dest_addr_ton = dest_addr_ton
-        self.dest_addr_npi = dest_addr_npi
-        self.esm_class = esm_class
-        self.protocol_id = protocol_id
-        self.priority_flag = priority_flag
-        self.schedule_delivery_time = schedule_delivery_time
-        self.validity_period = validity_period
-        self.registered_delivery = registered_delivery
-        self.replace_if_present_flag = replace_if_present_flag
-        self.sm_default_msg_id = sm_default_msg_id
         self.enquire_link_interval = enquire_link_interval
 
         # see section 5.1.2.1 of smpp ver 3.4 spec document
@@ -331,12 +272,7 @@ class Client:
         else:
             self.correlation_handler = correlater.SimpleCorrelater()
 
-        # the messages that are published to a queue by either naz
-        # or user application should be versioned.
-        # This version will enable naz to be able to evolve in future;
-        # eg a future version of naz could add/remove the number of required items in a message.
-        # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
-        self.naz_message_protocol_version = 1
+        self.naz_message_protocol_version = protocol.NAZ_MESSAGE_PROTOCOL_VERSION
 
         self.current_session_state = SmppSessionState.CLOSED
         self._header_pdu_length = 16
@@ -362,19 +298,6 @@ class Client:
         addr_npi: int,
         address_range: str,
         interface_version: int,
-        service_type: str,
-        source_addr_ton: int,
-        source_addr_npi: int,
-        dest_addr_ton: int,
-        dest_addr_npi: int,
-        esm_class: int,
-        protocol_id: int,
-        priority_flag: int,
-        schedule_delivery_time: str,
-        validity_period: str,
-        registered_delivery: int,
-        replace_if_present_flag: int,
-        sm_default_msg_id: int,
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
         codec: typing.Union[None, the_codec.BaseCodec],
@@ -464,108 +387,6 @@ class Client:
                 ValueError(
                     "`interface_version` should be of type:: `int` You entered: {0}".format(
                         type(interface_version)
-                    )
-                )
-            )
-        if not isinstance(service_type, str):
-            errors.append(
-                ValueError(
-                    "`service_type` should be of type:: `str` You entered: {0}".format(
-                        type(service_type)
-                    )
-                )
-            )
-        if not isinstance(source_addr_ton, int):
-            errors.append(
-                ValueError(
-                    "`source_addr_ton` should be of type:: `int` You entered: {0}".format(
-                        type(source_addr_ton)
-                    )
-                )
-            )
-        if not isinstance(source_addr_npi, int):
-            errors.append(
-                ValueError(
-                    "`source_addr_npi` should be of type:: `int` You entered: {0}".format(
-                        type(source_addr_npi)
-                    )
-                )
-            )
-        if not isinstance(dest_addr_ton, int):
-            errors.append(
-                ValueError(
-                    "`dest_addr_ton` should be of type:: `int` You entered: {0}".format(
-                        type(dest_addr_ton)
-                    )
-                )
-            )
-        if not isinstance(dest_addr_npi, int):
-            errors.append(
-                ValueError(
-                    "`dest_addr_npi` should be of type:: `int` You entered: {0}".format(
-                        type(dest_addr_npi)
-                    )
-                )
-            )
-        if not isinstance(esm_class, int):
-            errors.append(
-                ValueError(
-                    "`esm_class` should be of type:: `int` You entered: {0}".format(type(esm_class))
-                )
-            )
-        if not isinstance(protocol_id, int):
-            errors.append(
-                ValueError(
-                    "`protocol_id` should be of type:: `int` You entered: {0}".format(
-                        type(protocol_id)
-                    )
-                )
-            )
-        if not isinstance(priority_flag, int):
-            errors.append(
-                ValueError(
-                    "`priority_flag` should be of type:: `int` You entered: {0}".format(
-                        type(priority_flag)
-                    )
-                )
-            )
-        if not isinstance(schedule_delivery_time, str):
-            errors.append(
-                ValueError(
-                    "`schedule_delivery_time` should be of type:: `str` You entered: {0}".format(
-                        type(schedule_delivery_time)
-                    )
-                )
-            )
-        if not isinstance(validity_period, str):
-            errors.append(
-                ValueError(
-                    "`validity_period` should be of type:: `str` You entered: {0}".format(
-                        type(validity_period)
-                    )
-                )
-            )
-        if not isinstance(registered_delivery, int):
-            errors.append(
-                ValueError(
-                    "`registered_delivery` should be of type:: `int` You entered: {0}".format(
-                        type(registered_delivery)
-                    )
-                )
-            )
-        if not isinstance(replace_if_present_flag, int):
-            errors.append(
-                ValueError(
-                    "`replace_if_present_flag` should be of type:: `int` You entered: {0}".format(
-                        type(replace_if_present_flag)
-                    )
-                )
-            )
-        if not isinstance(sm_default_msg_id, int):
-            errors.append(
-                ValueError(
-                    "`sm_default_msg_id` should be of type:: `int` You entered: {0}".format(
-                        type(sm_default_msg_id)
                     )
                 )
             )
@@ -1011,25 +832,13 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-
-        # body
-        body = b""
-
-        # header
-        command_length = self._header_pdu_length + len(body)  # 16 is for headers
-        command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
-        sequence_number = sequence_number
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
-
-        full_pdu = header + body
         try:
             await self.broker.enqueue(
-                protocol.Message(
+                protocol.EnquireLinkResp(
                     version=self.naz_message_protocol_version,
                     smpp_command=smpp_command,
                     log_id=log_id,
-                    pdu=full_pdu,
+                    sequence_number=sequence_number,
                 )
             )
         except Exception as e:
@@ -1113,26 +922,15 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        # body
-        body = b""
-        message_id = ""
-        body = body + message_id.encode("ascii") + chr(0).encode()
 
-        # header
-        command_length = self._header_pdu_length + len(body)  # 16 is for headers
-        command_id = self.command_ids[smpp_command]
-        command_status = SmppCommandStatus.ESME_ROK.value
-        sequence_number = sequence_number
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
-
-        full_pdu = header + body
         try:
             await self.broker.enqueue(
-                protocol.Message(
+                protocol.DeliverSmResp(
                     version=self.naz_message_protocol_version,
                     smpp_command=smpp_command,
                     log_id=log_id,
-                    pdu=full_pdu,
+                    message_id="",
+                    sequence_number=sequence_number,
                 )
             )
         except Exception as e:
@@ -1158,18 +956,159 @@ class Client:
         )
 
     # this method just enqueues a submit_sm msg to queue
-    async def submit_sm(
-        self, short_message: str, log_id: str, source_addr: str, destination_addr: str
-    ) -> None:
+    async def send_message(self, proto_msg: protocol.SubmitSM) -> None:
         """
-        enqueues a SUBMIT_SM pdu to :attr:`broker <Client.broker>`
-        That PDU will later on be sent to SMSC.
+        Sends a message/SUBMIT_SM to SMSC.
+        That message will get enqueued to :attr:`broker <Client.broker>` and later on sent to SMSC.
 
         Parameters:
-            short_message: message to send to SMSC
-            log_id: a unique identify of this request
-            source_addr: the identifier(eg msisdn) of the message sender
-            destination_addr: the identifier(eg msisdn) of the message recipient
+            proto_msg: the message to send to SMSC.
+                       Has to be a class instance of :class:`naz.protocol.SubmitSM <naz.protocol.SubmitSM>`
+
+        Usage:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            import naz
+
+            broker = naz.broker.SimpleBroker(maxsize=1000)
+            client = naz.Client(
+                    smsc_host="127.0.0.1",
+                    smsc_port=2775,
+                    system_id="smppclient1",
+                    password=os.getenv("password", "password"),
+                    broker=broker,
+                )
+            msg = naz.protocol.SubmitSM(
+                short_message="hello world",
+                source_addr="255700111222",
+                destination_addr="255799000888",
+                log_id="some-id",
+            )
+            await client.send_message(msg)
+        """
+        if not isinstance(proto_msg, protocol.SubmitSM):
+            raise ValueError(
+                "`proto_msg` should be of type:: `naz.protocol.SubmitSM` You entered: {0}".format(
+                    type(proto_msg)
+                )
+            )
+        smpp_command = proto_msg.smpp_command
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.send_message",
+                "stage": "start",
+                "log_id": proto_msg.log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+        try:
+            await self.broker.enqueue(proto_msg)
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.send_message",
+                    "stage": "end",
+                    "error": str(e),
+                    "log_id": proto_msg.log_id,
+                    "smpp_command": smpp_command,
+                    "short_message": proto_msg.short_message,
+                },
+            )
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client.send_message",
+                "stage": "end",
+                "log_id": proto_msg.log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+
+    async def _build_enquire_link_resp_pdu(self, proto_msg: protocol.EnquireLinkResp) -> bytes:
+        smpp_command = SmppCommand.ENQUIRE_LINK_RESP
+        log_id = proto_msg.log_id
+        sequence_number = proto_msg.sequence_number
+        self._log(
+            logging.DEBUG,
+            {
+                "event": "naz.Client._build_enquire_link_resp_pdu",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+
+        # body
+        body = b""
+
+        # header
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
+        command_id = self.command_ids[smpp_command]
+        command_status = SmppCommandStatus.ESME_ROK.value
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        self._log(
+            logging.DEBUG,
+            {
+                "event": "naz.Client._build_enquire_link_resp_pdu",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+        return full_pdu
+
+    async def _build_deliver_sm_pdu(self, proto_msg: protocol.DeliverSmResp) -> bytes:
+        smpp_command = SmppCommand.DELIVER_SM_RESP
+        log_id = proto_msg.log_id
+        message_id = proto_msg.message_id
+        sequence_number = proto_msg.sequence_number
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client._build_deliver_sm_pdu",
+                "stage": "start",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+
+        # body
+        body = b""
+        message_id = ""
+        body = body + message_id.encode("ascii") + chr(0).encode()
+
+        # header
+        command_length = self._header_pdu_length + len(body)  # 16 is for headers
+        command_id = self.command_ids[smpp_command]
+        command_status = SmppCommandStatus.ESME_ROK.value
+        sequence_number = sequence_number
+        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+
+        full_pdu = header + body
+        self._log(
+            logging.INFO,
+            {
+                "event": "naz.Client._build_deliver_sm_pdu",
+                "stage": "end",
+                "log_id": log_id,
+                "smpp_command": smpp_command,
+            },
+        )
+        return full_pdu
+
+    async def _build_submit_sm_pdu(self, proto_msg: protocol.SubmitSM) -> bytes:
+        """
+        builds a SUBMIT_SM pdu.
+
+        Parameters:
+            proto_msg: an instance of `naz.protocol.SubmitSM`
         """
         # HEADER::
         # submit_sm has the following pdu header:
@@ -1204,67 +1143,25 @@ class Client:
         #     2. Octet String - A series of octets, not necessarily NULL terminated.
 
         smpp_command = SmppCommand.SUBMIT_SM
-        self._log(
-            logging.INFO,
-            {
-                "event": "naz.Client.submit_sm",
-                "stage": "start",
-                "log_id": log_id,
-                "short_message": short_message,
-                "source_addr": source_addr,
-                "destination_addr": destination_addr,
-                "smpp_command": smpp_command,
-            },
-        )
-        try:
-            await self.broker.enqueue(
-                protocol.Message(
-                    version=self.naz_message_protocol_version,
-                    smpp_command=smpp_command,
-                    log_id=log_id,
-                    short_message=short_message,
-                    source_addr=source_addr,
-                    destination_addr=destination_addr,
-                )
-            )
-        except Exception as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.submit_sm",
-                    "stage": "end",
-                    "error": str(e),
-                    "log_id": log_id,
-                    "smpp_command": smpp_command,
-                },
-            )
-        self._log(
-            logging.INFO,
-            {
-                "event": "naz.Client.submit_sm",
-                "stage": "end",
-                "log_id": log_id,
-                "short_message": short_message,
-                "source_addr": source_addr,
-                "destination_addr": destination_addr,
-                "smpp_command": smpp_command,
-            },
-        )
+        log_id = proto_msg.log_id
+        hook_metadata = proto_msg.hook_metadata
+        short_message = proto_msg.short_message
+        source_addr = proto_msg.source_addr
+        destination_addr = proto_msg.destination_addr
+        service_type = proto_msg.service_type
+        source_addr_ton = proto_msg.source_addr_ton
+        source_addr_npi = proto_msg.source_addr_npi
+        dest_addr_ton = proto_msg.dest_addr_ton
+        dest_addr_npi = proto_msg.dest_addr_npi
+        esm_class = proto_msg.esm_class
+        protocol_id = proto_msg.protocol_id
+        priority_flag = proto_msg.priority_flag
+        schedule_delivery_time = proto_msg.schedule_delivery_time
+        validity_period = proto_msg.validity_period
+        registered_delivery = proto_msg.registered_delivery
+        replace_if_present_flag = proto_msg.replace_if_present_flag
+        sm_default_msg_id = proto_msg.sm_default_msg_id
 
-    async def _build_submit_sm_pdu(
-        self, short_message, log_id, hook_metadata, source_addr, destination_addr
-    ) -> bytes:
-        """
-        builds a SUBMIT_SM pdu.
-
-        Parameters:
-            short_message: message to send to SMSC
-            log_id: a unique identify of this request
-            hook_metadata: additional metadata that you would like to be passed on to hooks
-            source_addr: the identifier(eg msisdn) of the message sender
-            destination_addr: the identifier(eg msisdn) of the message recipient
-        """
-        smpp_command = SmppCommand.SUBMIT_SM
         self._log(
             logging.DEBUG,
             {
@@ -1281,30 +1178,31 @@ class Client:
         sm_length = len(encoded_short_message)
 
         # body
+        # SUBMIT_SM KKKK
         body = b""
         body = (
             body
-            + self.service_type.encode("ascii")
+            + service_type.encode("ascii")
             + chr(0).encode()
-            + struct.pack(">B", self.source_addr_ton)
-            + struct.pack(">B", self.source_addr_npi)
+            + struct.pack(">B", source_addr_ton)
+            + struct.pack(">B", source_addr_npi)
             + source_addr.encode("ascii")
             + chr(0).encode()
-            + struct.pack(">B", self.dest_addr_ton)
-            + struct.pack(">B", self.dest_addr_npi)
+            + struct.pack(">B", dest_addr_ton)
+            + struct.pack(">B", dest_addr_npi)
             + destination_addr.encode("ascii")
             + chr(0).encode()
-            + struct.pack(">B", self.esm_class)
-            + struct.pack(">B", self.protocol_id)
-            + struct.pack(">B", self.priority_flag)
-            + self.schedule_delivery_time.encode("ascii")
+            + struct.pack(">B", esm_class)
+            + struct.pack(">B", protocol_id)
+            + struct.pack(">B", priority_flag)
+            + schedule_delivery_time.encode("ascii")
             + chr(0).encode()
-            + self.validity_period.encode("ascii")
+            + validity_period.encode("ascii")
             + chr(0).encode()
-            + struct.pack(">B", self.registered_delivery)
-            + struct.pack(">B", self.replace_if_present_flag)
+            + struct.pack(">B", registered_delivery)
+            + struct.pack(">B", replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
-            + struct.pack(">B", self.sm_default_msg_id)
+            + struct.pack(">B", sm_default_msg_id)
             + struct.pack(">B", sm_length)
             + self.codec.encode(short_message)
         )
@@ -1703,23 +1601,20 @@ class Client:
                     log_id = proto_msg.log_id
                     proto_msg.version  # version is a required field
                     smpp_command = proto_msg.smpp_command
-                    hook_metadata = proto_msg.hook_metadata if proto_msg.hook_metadata else ""
-                    if smpp_command == SmppCommand.SUBMIT_SM:
-                        short_message = proto_msg.short_message
-                        source_addr = proto_msg.source_addr
-                        destination_addr = proto_msg.destination_addr
-                        full_pdu = await self._build_submit_sm_pdu(
-                            short_message, log_id, hook_metadata, source_addr, destination_addr
-                        )
+                    hook_metadata = proto_msg.hook_metadata
+                    if isinstance(proto_msg, protocol.SubmitSM):
+                        full_pdu = await self._build_submit_sm_pdu(proto_msg)
+                    elif isinstance(proto_msg, protocol.DeliverSmResp):
+                        full_pdu = await self._build_deliver_sm_pdu(proto_msg)
+                    elif isinstance(proto_msg, protocol.EnquireLinkResp):
+                        full_pdu = await self._build_enquire_link_resp_pdu(proto_msg)
                     else:
-                        if typing.TYPE_CHECKING:
-                            # make mypy happy; https://github.com/python/mypy/issues/4805
-                            assert isinstance(proto_msg.pdu, bytes)
-                        full_pdu = proto_msg.pdu
-                except KeyError as e:
-                    e = KeyError(
-                        "enqueued message/object is missing required field: {}".format(str(e))
-                    )
+                        raise ValueError(
+                            "The protocol message `{0}` is not recognised by naz.".format(
+                                type(proto_msg)
+                            )
+                        )
+                except Exception as e:
                     self._log(
                         logging.ERROR,
                         {
@@ -2128,27 +2023,6 @@ class Client:
                     "state": commandStatus.description,
                 },
             )
-        try:
-            # call user's hook for responses
-            await self.hook.from_smsc(
-                smpp_command=smpp_command,
-                log_id=log_id,
-                hook_metadata=hook_metadata,
-                status=commandStatus,
-                pdu=pdu,
-            )
-        except Exception as e:
-            self._log(
-                logging.ERROR,
-                {
-                    "event": "naz.Client.command_handlers",
-                    "stage": "end",
-                    "smpp_command": smpp_command,
-                    "log_id": log_id,
-                    "state": "from_smsc hook error",
-                    "error": str(e),
-                },
-            )
 
         if smpp_command in [
             SmppCommand.BIND_TRANSCEIVER,
@@ -2284,6 +2158,29 @@ class Client:
                     "error": "the smpp_command: `{0}` has not been implemented in naz. please create a github issue".format(
                         smpp_command
                     ),
+                },
+            )
+
+        try:
+            # call user's hook for responses
+            # this has to be done last
+            await self.hook.from_smsc(
+                smpp_command=smpp_command,
+                log_id=log_id,
+                hook_metadata=hook_metadata,
+                status=commandStatus,
+                pdu=pdu,
+            )
+        except Exception as e:
+            self._log(
+                logging.ERROR,
+                {
+                    "event": "naz.Client.command_handlers",
+                    "stage": "end",
+                    "smpp_command": smpp_command,
+                    "log_id": log_id,
+                    "state": "from_smsc hook error",
+                    "error": str(e),
                 },
             )
 

@@ -197,19 +197,6 @@ class TestClient(TestCase):
             "address_range": DummyClientArg,
             "sequence_generator": DummyClientArg,
             "codec": DummyClientArg,
-            "service_type": DummyClientArg,
-            "source_addr_ton": DummyClientArg,
-            "source_addr_npi": DummyClientArg,
-            "dest_addr_ton": DummyClientArg,
-            "dest_addr_npi": DummyClientArg,
-            "esm_class": DummyClientArg,
-            "protocol_id": DummyClientArg,
-            "priority_flag": DummyClientArg,
-            "schedule_delivery_time": DummyClientArg,
-            "validity_period": DummyClientArg,
-            "registered_delivery": DummyClientArg,
-            "replace_if_present_flag": DummyClientArg,
-            "sm_default_msg_id": DummyClientArg,
             "enquire_link_interval": DummyClientArg,
             "rateLimiter": DummyClientArg,
             "hook": DummyClientArg,
@@ -245,7 +232,8 @@ class TestClient(TestCase):
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
         self.assertIn(
-            "That encoding:{0} is not recognised.".format(encoding), str(raised_exception.exception)
+            "That encoding: `{0}` is not recognised.".format(encoding),
+            str(raised_exception.exception),
         )
 
     def test_can_connect(self):
@@ -264,30 +252,36 @@ class TestClient(TestCase):
             )
         # todo: test bind_response
 
-    def test_submit_sm_enqueue(self):
+    def test_send_message_error(self):
+        with self.assertRaises(ValueError):
+            self._run(self.cli.send_message("bogusType"))
+
+    def test_send_message_success(self):
+        log_id = "12345"
+        short_message = "hello"
+        msg = naz.protocol.SubmitSM(
+            short_message=short_message,
+            source_addr="2492",
+            destination_addr="8930302",
+            log_id=log_id,
+        )
         with mock.patch("naz.broker.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
             self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
-            log_id = "12345"
-            self._run(
-                self.cli.submit_sm(
-                    short_message="hello smpp",
-                    log_id=log_id,
-                    source_addr="9090",
-                    destination_addr="254722000111",
-                )
-            )
+
+            self._run(self.cli.send_message(msg))
             self.assertTrue(mock_naz_enqueue.mock.called)
-            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1]["log_id"], log_id)
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].log_id, log_id)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"], naz.SmppCommand.SUBMIT_SM
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.SUBMIT_SM
             )
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].short_message, short_message)
 
     def test_submit_sm_sending(self):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -300,7 +294,6 @@ class TestClient(TestCase):
             # hack to allow sending submit_sm even when state is wrong
             self.cli.current_session_state = "BOUND_TRX"
             self._run(self.cli.dequeue_messages(TESTING=True))
-
             self.assertTrue(mock_naz_dequeue.mock.called)
 
     def test_parse_response_pdu(self):
@@ -418,7 +411,7 @@ class TestClient(TestCase):
 
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -503,7 +496,7 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -578,7 +571,7 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_enqueue.mock.called)
             self.assertEqual(
-                mock_naz_enqueue.mock.call_args[0][1]["smpp_command"],
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command,
                 naz.SmppCommand.ENQUIRE_LINK_RESP,
             )
 
@@ -602,7 +595,7 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -640,7 +633,7 @@ class TestClient(TestCase):
         ) as mock_naz_dequeue, mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -665,7 +658,7 @@ class TestClient(TestCase):
         ) as mock_sleep:
             log_id = "12345"
             short_message = "hello smpp"
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -687,7 +680,7 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -769,7 +762,7 @@ class TestClient(TestCase):
             short_message = "hello smpp"
             _hook_metadata = {"telco": "Verizon", "customer_id": "909090123"}
             hook_metadata = json.dumps(_hook_metadata)
-            mock_naz_dequeue.mock.return_value = naz.protocol.Message(
+            mock_naz_dequeue.mock.return_value = naz.protocol.SubmitSM(
                 version=1,
                 log_id=log_id,
                 short_message=short_message,
@@ -796,7 +789,7 @@ class TestClient(TestCase):
             # 2. RECEIVE SUBMIT_SM_RESP
             submit_sm_resp_smsc_message_id = "1618Z-0102G-2333M-25FJF"
             body = b""
-            body = body + submit_sm_resp_smsc_message_id.encode() + chr(0).encode()
+            body = body + submit_sm_resp_smsc_message_id.encode("ascii") + chr(0).encode()
             command_length = 16 + len(body)  # 16 is for headers
             command_id = 0x80000004  # submit_sm_resp
             command_status = 0x00000000  # success
@@ -825,7 +818,7 @@ class TestClient(TestCase):
                 tag_n_len = struct.pack(">HH", tag, length)
                 # DELIVER_SM has same message_id as SUBMIT_SM_RESP but DIFFERENT sequence_number
                 value = submit_sm_resp_smsc_message_id  # 23 in length
-                value = value.encode() + chr(0).encode()  # 24 in length
+                value = value.encode("ascii") + chr(0).encode()  # 24 in length
                 deliver_sm_pdu = (
                     b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00"
                     b"\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234"
@@ -1082,3 +1075,50 @@ class TestClient(TestCase):
             self._run(cli.connect())
             self.assertTrue(hasattr(cli.reader, "read"))
             self.assertTrue(hasattr(cli.writer, "write"))
+
+    def test_enquire_link_resp_sending(self):
+        with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            mock_naz_dequeue.mock.return_value = naz.protocol.EnquireLinkResp(
+                log_id="log_id", sequence_number=34,
+            )
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertTrue(mock_naz_dequeue.mock.called)
+
+    def test_deliver_sm_resp_sending(self):
+        with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:
+            mock_naz_dequeue.mock.return_value = naz.protocol.DeliverSmResp(
+                log_id="mock-id", message_id="message_id", sequence_number=90,
+            )
+
+            self._run(self.cli.connect())
+            # hack to allow sending submit_sm even when state is wrong
+            self.cli.current_session_state = "BOUND_TRX"
+            self._run(self.cli.dequeue_messages(TESTING=True))
+            self.assertTrue(mock_naz_dequeue.mock.called)
+
+    def test_send_message_with_more_args(self):
+        log_id = "12345"
+        short_message = "hello"
+        msg = naz.protocol.SubmitSM(
+            short_message=short_message,
+            source_addr="2492",
+            destination_addr="8930302",
+            log_id=log_id,
+            source_addr_ton=0x00000010,  # National
+            dest_addr_npi=0x00001110,  # Internet
+        )
+        with mock.patch("naz.broker.SimpleBroker.enqueue", new=AsyncMock()) as mock_naz_enqueue:
+            self._run(self.cli.connect())
+            self._run(self.cli.tranceiver_bind())
+
+            self._run(self.cli.send_message(msg))
+            self.assertTrue(mock_naz_enqueue.mock.called)
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].log_id, log_id)
+            self.assertEqual(
+                mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.SUBMIT_SM
+            )
+            self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].short_message, short_message)

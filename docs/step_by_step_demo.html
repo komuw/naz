@@ -1,0 +1,458 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Step by step tutorial of using naz &mdash; naz v0.7.6 documentation</title>
+  
+
+  
+  
+  
+  
+    <link rel="canonical" href="https://komuw.github.io/naz/step_by_step_demo.html"/>
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Client" href="client.html" />
+    <link rel="prev" title="Introduction to naz" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> naz
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v0.7.6
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Step by step tutorial of using naz</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="protocol.html">protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="correlater.html">correlater</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hooks.html">hooks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codec.html">codec</a></li>
+<li class="toctree-l1"><a class="reference internal" href="broker.html">broker</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ratelimiter.html">ratelimiter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sequence.html">sequence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="throttle.html">throttle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="state.html">state</a></li>
+<li class="toctree-l1"><a class="reference internal" href="log.html">log</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">naz</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Step by step tutorial of using naz</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/step_by_step_demo.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="step-by-step-tutorial-of-using-naz">
+<h1>Step by step tutorial of using naz<a class="headerlink" href="#step-by-step-tutorial-of-using-naz" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line">In this demo, we will see how to use <code class="docutils literal notranslate"><span class="pre">naz</span></code> step by step.</div>
+</div>
+<div class="line-block">
+<div class="line">We are going to start off on an empty directory</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir /tmp/demo_naz/ <span class="o">&amp;&amp;</span> <span class="se">\</span>
+<span class="nb">cd</span> /tmp/demo_naz
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">Next we install <code class="docutils literal notranslate"><span class="pre">naz</span></code> and confirm that it is installed</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install naz <span class="o">&amp;&amp;</span> <span class="se">\</span>
+naz-cli --version
+  naz v0.7.6
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">In order to use <code class="docutils literal notranslate"><span class="pre">naz</span></code>, we need to have a place where messages are going to be stored before been submitted to the SMSC.</div>
+<div class="line">Messages are stored in a broker in <code class="docutils literal notranslate"><span class="pre">naz</span></code>. But whereas other smpp clients force you to use a particular queue/broker implementation(redis, rabbitMQ, kafka,, AWS SQS etc), <code class="docutils literal notranslate"><span class="pre">naz</span></code> is broker agnostic.</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> will happily use any queue/broker so long as its implementation in software satisfies <code class="docutils literal notranslate"><span class="pre">naz</span></code>’s <a class="reference external" href="https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker">broker interface</a></div>
+<div class="line">For this demo we will use redis as our broker of choice. We will use docker to start a redis server;</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -p <span class="m">6379</span>:6379 redis:5.0-alpine
+  Redis is starting
+  Ready to accept connections
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">redis server is running inside a docker container and it is available for connection on the host at <code class="docutils literal notranslate"><span class="pre">localhost:6379</span></code></div>
+<div class="line">Now we need a way for <code class="docutils literal notranslate"><span class="pre">naz</span></code> to be able to communicate with the redis server, ie we need to implemnet <code class="docutils literal notranslate"><span class="pre">naz</span></code>’s <a class="reference external" href="https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker">broker interface</a> for our redis server.</div>
+<div class="line">Let’s do that, we’ll create a file called <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_broker.py</span></code></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">import</span> <span class="nn">aioredis</span>  <span class="c1"># pip install aioredis</span>
+
+
+<span class="k">class</span> <span class="nc">MyRedisBroker</span><span class="p">(</span><span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    use redis as our broker.</span>
+<span class="sd">    This is an implementation of the `naz.broker.BaseBroker` interface</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="mi">6379</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># use a password in prod</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span> <span class="o">=</span> <span class="s2">&quot;naz_benchmarks_queue&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_get_redis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span> <span class="o">=</span> <span class="k">await</span> <span class="n">aioredis</span><span class="o">.</span><span class="n">create_redis_pool</span><span class="p">(</span>
+            <span class="n">address</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">),</span>
+            <span class="n">db</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="n">minsize</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">maxsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_redis</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">enqueue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="n">_redis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">lpush</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">message</span><span class="o">.</span><span class="n">to_json</span><span class="p">())</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">dequeue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">_redis</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_redis</span><span class="p">()</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">item</span> <span class="o">=</span> <span class="k">await</span> <span class="n">_redis</span><span class="o">.</span><span class="n">brpop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">queue_name</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+                <span class="n">dequed_item</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">json_to_Message</span><span class="p">(</span><span class="n">dequed_item</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">With that we are now ready to have <code class="docutils literal notranslate"><span class="pre">naz</span></code> communicating with redis.</div>
+<div class="line">Now what we need is an smpp client to talk to SMSC. <code class="docutils literal notranslate"><span class="pre">naz</span></code> is that client, but we need to instantiate a class instance of <a class="reference external" href="https://komuw.github.io/naz/client.html#naz.client.Client">naz Client</a></div>
+<div class="line">Lets do that in a file called <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_client.py</span></code></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<span class="kn">from</span> <span class="nn">my_broker</span> <span class="kn">import</span> <span class="n">MyRedisBroker</span>
+
+<span class="n">my_naz_client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+    <span class="n">smsc_host</span><span class="o">=</span><span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+    <span class="n">smsc_port</span><span class="o">=</span><span class="mi">2775</span><span class="p">,</span>
+    <span class="n">system_id</span><span class="o">=</span><span class="s2">&quot;smppclient1&quot;</span><span class="p">,</span>
+    <span class="n">password</span><span class="o">=</span><span class="s2">&quot;password&quot;</span><span class="p">,</span>
+    <span class="n">broker</span><span class="o">=</span><span class="n">MyRedisBroker</span><span class="p">(),</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">We have instantiated a <code class="docutils literal notranslate"><span class="pre">naz</span></code> client and passed in the redis broker implementation.</div>
+<div class="line">The <code class="docutils literal notranslate"><span class="pre">naz</span></code> client expects to be communicating with an <code class="docutils literal notranslate"><span class="pre">SMSC</span></code> server listening on <code class="docutils literal notranslate"><span class="pre">localhost:2775</span></code>.</div>
+<div class="line">We are going to run an SMSC simulator in this demo, however, if you have a real SMSC server to connect to; you can replace the <code class="docutils literal notranslate"><span class="pre">smsc_host</span></code>, <code class="docutils literal notranslate"><span class="pre">smsc_port</span></code>, <code class="docutils literal notranslate"><span class="pre">system_id</span></code>, <code class="docutils literal notranslate"><span class="pre">password</span></code> and any other SMSC related settings.</div>
+<div class="line">Consult the <a class="reference external" href="https://komuw.github.io/naz/client.html#naz.client.Client.__init__">naz Client documentation</a> to see all the options that you can use to instantaite a naz Client.</div>
+<div class="line">So lets run the SMSC simulator, we’ll use a docker container for that.</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker run -p <span class="m">2775</span>:2775 komuw/smpp_server:v0.3
+  StandardConnectionHandler waiting <span class="k">for</span> connection
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">Okay, lets start the <code class="docutils literal notranslate"><span class="pre">naz-cli</span></code> which is a command line application that ships with <code class="docutils literal notranslate"><span class="pre">naz</span></code>. When you do <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">naz</span></code>, the CLI was also installed.</div>
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz-cli</span></code> typically takes one command line option <code class="docutils literal notranslate"><span class="pre">--client</span></code> which is the dotted path to a <code class="docutils literal notranslate"><span class="pre">naz.Client</span></code> instance. You can run help to see the options</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>naz-cli --help
+usage: naz <span class="o">[</span>-h<span class="o">]</span> <span class="o">[</span>--version<span class="o">]</span> --client CLIENT <span class="o">[</span>--dry-run<span class="o">]</span>
+
+naz is an async SMPP client. example usage: naz-cli --client
+dotted.path.to.naz.Client.instance
+
+optional arguments:
+  -h, --help       show this <span class="nb">help</span> message and <span class="nb">exit</span>
+  --version        The currently installed naz version.
+  --client CLIENT  The dotted path to a <span class="sb">`</span>naz.Client<span class="sb">`</span> instance. eg: --client
+                  dotted.path.to.a.naz.Client.class.instance
+  --dry-run        Whether we want to <span class="k">do</span> a dry-run of the naz cli. This is
+                  typically only used by developers who are developing naz.
+                  eg: --dry-run
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">Okay lets run the thing.</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>naz-cli --client my_client.my_naz_client
+  Naz: the SMPP client.
+  <span class="o">{</span><span class="s1">&#39;timestamp&#39;</span>: <span class="s1">&#39;2019-06-16 07:52:59,412&#39;</span>, <span class="s1">&#39;event&#39;</span>: <span class="s1">&#39;naz.cli.main&#39;</span>, <span class="s1">&#39;stage&#39;</span>: <span class="s1">&#39;start&#39;</span>, <span class="s1">&#39;client_id&#39;</span>: <span class="s1">&#39;7WJF935MQGSJPLQ7E&#39;</span><span class="o">}</span>
+  <span class="o">{</span><span class="s1">&#39;timestamp&#39;</span>: <span class="s1">&#39;2019-06-16 07:52:59,435&#39;</span>, <span class="s1">&#39;event&#39;</span>: <span class="s1">&#39;naz.Client.connect&#39;</span>, <span class="s1">&#39;stage&#39;</span>: <span class="s1">&#39;start&#39;</span>, <span class="s1">&#39;log_id&#39;</span>: <span class="s1">&#39;b526gdnxfbf8sqlzz&#39;</span>, <span class="s1">&#39;smsc_host&#39;</span>: <span class="s1">&#39;localhost&#39;</span>, <span class="s1">&#39;system_id&#39;</span>: <span class="s1">&#39;smppclient1&#39;</span>, <span class="s1">&#39;client_id&#39;</span>: <span class="s1">&#39;0R5ND6BSD3G4ATWUX&#39;</span>, <span class="s1">&#39;pid&#39;</span>: <span class="m">28125</span><span class="o">}</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">So we have started <code class="docutils literal notranslate"><span class="pre">naz</span></code> with the dotted path to the naz Client that we had instantiated in the file <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/my_client.py</span></code></div>
+<div class="line">NB: the file where you have instantiated the naz Client needs to be in your PYTHON_PATH</div>
+</div>
+<div class="line-block">
+<div class="line">So the <cite>naz-cli</cite> is running and communicating to both redis server and SMSC server. However, we have not sent any messages. Let’s do that now.</div>
+<div class="line">We will create another file <code class="docutils literal notranslate"><span class="pre">/tmp/demo_naz/app.py</span></code> that contains our business logic for sending out messages</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">from</span> <span class="nn">my_client</span> <span class="kn">import</span> <span class="n">my_naz_client</span>
+
+<span class="k">async</span> <span class="k">def</span> <span class="nf">send_messages</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    send out messages to customers once they make purchases.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tracking_code</span> <span class="o">=</span> <span class="s2">&quot;kLqk248JSK8&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Thanks for purchasing the Awesome shoes. Tracking code: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tracking_code</span><span class="p">)</span>
+    <span class="n">log_id</span> <span class="o">=</span> <span class="n">tracking_code</span>
+    <span class="n">source_addr</span> <span class="o">=</span> <span class="s2">&quot;AwesomeStore&quot;</span>
+    <span class="n">destination_addr</span> <span class="o">=</span> <span class="s2">&quot;254722000111&quot;</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+              <span class="n">short_message</span><span class="o">=</span><span class="n">msg</span><span class="p">,</span>
+              <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">,</span>
+              <span class="n">source_addr</span><span class="o">=</span><span class="n">source_addr</span><span class="p">,</span>
+              <span class="n">destination_addr</span><span class="o">=</span><span class="n">destination_addr</span>
+          <span class="p">)</span>
+    <span class="k">await</span> <span class="n">my_naz_client</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">send_messages</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">We can execute that file, to send out messages;</div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">app</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">And if you look at the <code class="docutils literal notranslate"><span class="pre">naz-cli</span></code> logs, you should see log events of the message been sent out and the SMSC making responses.</div>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">{</span>
+    <span class="s2">&quot;timestamp&quot;</span>: <span class="s2">&quot;2019-06-16 08:08:35,975&quot;</span>,
+    <span class="s2">&quot;event&quot;</span>: <span class="s2">&quot;naz.Client.dequeue_messages&quot;</span>,
+    <span class="s2">&quot;stage&quot;</span>: <span class="s2">&quot;end&quot;</span>,
+    <span class="s2">&quot;log_id&quot;</span>: <span class="s2">&quot;kLqk248JSK8&quot;</span>,
+    <span class="s2">&quot;smpp_command&quot;</span>: <span class="s2">&quot;submit_sm&quot;</span>,
+    <span class="s2">&quot;send_request&quot;</span>: True,
+    <span class="s2">&quot;smsc_host&quot;</span>: <span class="s2">&quot;localhost&quot;</span>,
+    <span class="s2">&quot;system_id&quot;</span>: <span class="s2">&quot;smppclient1&quot;</span>,
+    <span class="s2">&quot;client_id&quot;</span>: <span class="s2">&quot;0R5ND6BSD3G4ATWUX&quot;</span>,
+    <span class="s2">&quot;pid&quot;</span>: <span class="m">28125</span>,
+<span class="o">}</span>
+<span class="o">{</span>
+    <span class="s2">&quot;timestamp&quot;</span>: <span class="s2">&quot;2019-06-16 08:08:35,974&quot;</span>,
+    <span class="s2">&quot;event&quot;</span>: <span class="s2">&quot;naz.Client.send_data&quot;</span>,
+    <span class="s2">&quot;stage&quot;</span>: <span class="s2">&quot;start&quot;</span>,
+    <span class="s2">&quot;smpp_command&quot;</span>: <span class="s2">&quot;submit_sm&quot;</span>,
+    <span class="s2">&quot;log_id&quot;</span>: <span class="s2">&quot;kLqk248JSK8&quot;</span>,
+    <span class="s2">&quot;msg&quot;</span>: <span class="s2">&quot;@@@à@@@è@@@@@@@ΣCMT@££AwesomeStore@££254722000111@¥@@@@£@@@CThanks for purchasing the Awesome shoes. Tracking code: kLqk248JSK8&quot;</span>,
+    <span class="s2">&quot;connection_lost&quot;</span>: False,
+    <span class="s2">&quot;smsc_host&quot;</span>: <span class="s2">&quot;localhost&quot;</span>,
+    <span class="s2">&quot;system_id&quot;</span>: <span class="s2">&quot;smppclient1&quot;</span>,
+    <span class="s2">&quot;client_id&quot;</span>: <span class="s2">&quot;0R5ND6BSD3G4ATWUX&quot;</span>,
+    <span class="s2">&quot;pid&quot;</span>: <span class="m">28125</span>,
+<span class="o">}</span>
+<span class="o">{</span>
+    <span class="s2">&quot;timestamp&quot;</span>: <span class="s2">&quot;2019-06-16 08:08:35,980&quot;</span>,
+    <span class="s2">&quot;event&quot;</span>: <span class="s2">&quot;naz.Client.receive_data&quot;</span>,
+    <span class="s2">&quot;stage&quot;</span>: <span class="s2">&quot;end&quot;</span>,
+    <span class="s2">&quot;smsc_host&quot;</span>: <span class="s2">&quot;localhost&quot;</span>,
+    <span class="s2">&quot;system_id&quot;</span>: <span class="s2">&quot;smppclient1&quot;</span>,
+    <span class="s2">&quot;client_id&quot;</span>: <span class="s2">&quot;0R5ND6BSD3G4ATWUX&quot;</span>,
+    <span class="s2">&quot;pid&quot;</span>: <span class="m">28125</span>,
+<span class="o">}</span>
+<span class="o">{</span>
+    <span class="s2">&quot;timestamp&quot;</span>: <span class="s2">&quot;2019-06-16 08:08:35,980&quot;</span>,
+    <span class="s2">&quot;event&quot;</span>: <span class="s2">&quot;naz.Client.command_handlers&quot;</span>,
+    <span class="s2">&quot;stage&quot;</span>: <span class="s2">&quot;start&quot;</span>,
+    <span class="s2">&quot;smpp_command&quot;</span>: <span class="s2">&quot;submit_sm_resp&quot;</span>,
+    <span class="s2">&quot;log_id&quot;</span>: <span class="s2">&quot;kLqk248JSK8&quot;</span>,
+    <span class="s2">&quot;command_status&quot;</span>: <span class="m">0</span>,
+    <span class="s2">&quot;state&quot;</span>: <span class="s2">&quot;Success&quot;</span>,
+    <span class="s2">&quot;smsc_host&quot;</span>: <span class="s2">&quot;localhost&quot;</span>,
+    <span class="s2">&quot;system_id&quot;</span>: <span class="s2">&quot;smppclient1&quot;</span>,
+    <span class="s2">&quot;client_id&quot;</span>: <span class="s2">&quot;0R5ND6BSD3G4ATWUX&quot;</span>,
+    <span class="s2">&quot;pid&quot;</span>: <span class="m">28125</span>,
+<span class="o">}</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> gives you a lot more possibilities; you can change brokers at will, you can change the way logging is done(including passing in your own logging implementation), you can have custom rate limiting, custom throttle handling, hooks that get called at various stages of messages passing in through naz, and so much more.</div>
+</div>
+<div class="line-block">
+<div class="line">Go through <a class="reference external" href="https://komuw.github.io/naz/">the documentation</a> to learn much more.</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="client.html" class="btn btn-neutral float-right" title="Client" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction to naz" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Komu Wairagu
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

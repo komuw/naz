@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ratelimiter &mdash; naz v0.7.5 documentation</title>
+  <title>ratelimiter &mdash; naz v0.7.6 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.5
+                v0.7.6
               </div>
             
           
@@ -88,7 +88,7 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to naz</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_demo.html">Example demo of using naz</a></li>
+<li class="toctree-l1"><a class="reference internal" href="step_by_step_demo.html">Step by step tutorial of using naz</a></li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
@@ -198,7 +198,7 @@ naz lets you do this, by allowing you to specify a custom rate limiter.</p>
 <p>It does rate limiting using a <a class="reference external" href="https://en.wikipedia.org/wiki/Token_bucket">token bucket rate limiting algorithm</a></p>
 <p>example usage:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">send_rate</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">await</span> <span class="n">rateLimiter</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
+<span class="k">await</span> <span class="n">rateLimiter</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
 <span class="n">send_messsages</span><span class="p">()</span>
 </pre></div>
 </div>
