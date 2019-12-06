@@ -107,3 +107,35 @@ class TestProtocol(TestCase):
         _in_json = proto.to_json()
         with self.assertRaises(NotImplementedError):
             naz.protocol.json_to_Message(_in_json)
+
+    def test_bad_args(self):
+        class BadArg:
+            pass
+
+        _args = {
+            "smpp_command": BadArg,
+            "version": BadArg,
+            "short_message": BadArg,
+            "source_addr": BadArg,
+            "destination_addr": BadArg,
+            "log_id": BadArg,
+            "hook_metadata": BadArg,
+            "service_type": BadArg,
+            "source_addr_ton": BadArg,
+            "source_addr_npi": BadArg,
+            "dest_addr_ton": BadArg,
+            "dest_addr_npi": BadArg,
+            "esm_class": BadArg,
+            "protocol_id": BadArg,
+            "priority_flag": BadArg,
+            "schedule_delivery_time": BadArg,
+            "validity_period": BadArg,
+            "registered_delivery": BadArg,
+            "replace_if_present_flag": BadArg,
+            "sm_default_msg_id": BadArg,
+        }
+
+        def mock_create_submitSm_message():
+            naz.protocol.SubmitSM(**_args)
+
+        self.assertRaises(ValueError, mock_create_submitSm_message)
