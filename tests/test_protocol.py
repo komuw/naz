@@ -74,3 +74,35 @@ class TestProtocol(TestCase):
         self.assertEqual(new_proto.sequence_number, proto.sequence_number)
         self.assertEqual(new_proto.smpp_command, naz.state.SmppCommand.ENQUIRE_LINK_RESP)
         self.assertEqual(new_proto.smpp_command, naz.state.SmppCommand.ENQUIRE_LINK_RESP)
+
+    def test_unknown_protocol_Message(self):
+        class UnknownMessage(naz.protocol.Message):
+            def __init__(
+                self,
+                log_id="log-id",
+                version=1,
+                smpp_command="some-unknown-command",
+                hook_metadata="",
+            ):
+                self.log_id = log_id
+                self.version = version
+                self.smpp_command = smpp_command
+                self.hook_metadata = hook_metadata
+
+            def to_json(self):
+                _item = dict(
+                    smpp_command=self.smpp_command,
+                    version=self.version,
+                    log_id=self.log_id,
+                    hook_metadata=self.hook_metadata,
+                )
+                return json.dumps(_item)
+
+            def from_json(self, json_message: str):
+                _in_dict = json.loads(json_message)
+                return UnknownMessage(**_in_dict)
+
+        proto = UnknownMessage()
+        _in_json = proto.to_json()
+        with self.assertRaises(NotImplementedError):
+            new_proto = naz.protocol.json_to_Message(_in_json)
