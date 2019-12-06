@@ -175,16 +175,20 @@
 <dl class="method">
 <dt id="naz.protocol.DeliverSmResp.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">message_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parameters:
-version: This indicates the current version of the naz message protocol.</p>
-<blockquote>
-<div><p>This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p>
-</div></blockquote>
-<p>smpp_command: any one of the SMSC commands eg submit_sm
-hook_metadata: a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this request</p></li>
+<li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
+This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
+<li><p><strong>message_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – id of this message</p></li>
+<li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>
@@ -224,16 +228,19 @@ like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres
 <dl class="method">
 <dt id="naz.protocol.EnquireLinkResp.__init__">
 <code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parameters:
-version: This indicates the current version of the naz message protocol.</p>
-<blockquote>
-<div><p>This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p>
-</div></blockquote>
-<p>smpp_command: any one of the SMSC commands eg submit_sm
-hook_metadata: a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this request</p></li>
+<li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
+This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
+<li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
 </dd>
 </dl>
 </dd></dl>

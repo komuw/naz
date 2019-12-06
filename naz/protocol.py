@@ -311,6 +311,12 @@ class SubmitSM(Message):
 
     @staticmethod
     def from_json(json_message: str) -> SubmitSM:
+        """
+        Deserializes the message protocol from json.
+
+        Parameters:
+            json_message: `naz.protocol.Message` in json format.
+        """
         _in_dict = json.loads(json_message)
         return SubmitSM(**_in_dict)
 
@@ -324,6 +330,15 @@ class EnquireLinkResp(Message):
         smpp_command: str = state.SmppCommand.ENQUIRE_LINK_RESP,
         hook_metadata: str = "",
     ) -> None:
+        """
+        Parameters:
+            log_id: a unique identify of this request
+            version: This indicates the current version of the naz message protocol.
+                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
+            smpp_command: any one of the SMSC commands eg submit_sm
+            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
+            sequence_number: SMPP sequence_number
+        """
         if not isinstance(log_id, str):
             raise ValueError(
                 "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
@@ -372,6 +387,12 @@ class EnquireLinkResp(Message):
 
     @staticmethod
     def from_json(json_message: str) -> EnquireLinkResp:
+        """
+        Deserializes the message protocol from json.
+
+        Parameters:
+            json_message: `naz.protocol.Message` in json format.
+        """
         _in_dict = json.loads(json_message)
         return EnquireLinkResp(**_in_dict)
 
@@ -386,6 +407,16 @@ class DeliverSmResp(Message):
         smpp_command: str = state.SmppCommand.DELIVER_SM_RESP,
         hook_metadata: str = "",
     ) -> None:
+        """
+        Parameters:
+            log_id: a unique identify of this request
+            version: This indicates the current version of the naz message protocol.
+                     This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
+            smpp_command: any one of the SMSC commands eg submit_sm
+            hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
+            message_id: id of this message
+            sequence_number: SMPP sequence_number
+        """
         if not isinstance(log_id, str):
             raise ValueError(
                 "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
@@ -440,6 +471,12 @@ class DeliverSmResp(Message):
 
     @staticmethod
     def from_json(json_message: str) -> DeliverSmResp:
+        """
+        Deserializes the message protocol from json.
+
+        Parameters:
+            json_message: `naz.protocol.Message` in json format.
+        """
         _in_dict = json.loads(json_message)
         return DeliverSmResp(**_in_dict)
 
