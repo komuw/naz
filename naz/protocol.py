@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import abc
 import json
 
@@ -62,7 +60,7 @@ class Message(abc.ABC):
 
     @staticmethod
     @abc.abstractmethod
-    def from_json(json_message: str) -> Message:
+    def from_json(json_message: str) -> "Message":
         """
         Deserializes the message protocol from json.
 
@@ -345,7 +343,7 @@ class SubmitSM(Message):
         return json.dumps(_item)
 
     @staticmethod
-    def from_json(json_message: str) -> SubmitSM:
+    def from_json(json_message: str) -> "SubmitSM":
         _in_dict = json.loads(json_message)
         return SubmitSM(**_in_dict)
 
@@ -411,7 +409,7 @@ class EnquireLinkResp(Message):
         return json.dumps(_item)
 
     @staticmethod
-    def from_json(json_message: str) -> EnquireLinkResp:
+    def from_json(json_message: str) -> "EnquireLinkResp":
         _in_dict = json.loads(json_message)
         return EnquireLinkResp(**_in_dict)
 
@@ -485,7 +483,7 @@ class DeliverSmResp(Message):
         return json.dumps(_item)
 
     @staticmethod
-    def from_json(json_message: str) -> DeliverSmResp:
+    def from_json(json_message: str) -> "DeliverSmResp":
         _in_dict = json.loads(json_message)
         return DeliverSmResp(**_in_dict)
 
