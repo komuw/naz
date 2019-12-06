@@ -98,7 +98,8 @@ class TestProtocol(TestCase):
                 )
                 return json.dumps(_item)
 
-            def from_json(self, json_message: str):
+            @staticmethod
+            def from_json(json_message: str):
                 _in_dict = json.loads(json_message)
                 return UnknownMessage(**_in_dict)
 
