@@ -272,12 +272,7 @@ class Client:
         else:
             self.correlation_handler = correlater.SimpleCorrelater()
 
-        # the messages that are published to a queue by either naz
-        # or user application should be versioned.
-        # This version will enable naz to be able to evolve in future;
-        # eg a future version of naz could add/remove the number of required items in a message.
-        # This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
-        self.naz_message_protocol_version = 1
+        self.naz_message_protocol_version = protocol.NAZ_MESSAGE_PROTOCOL_VERSION
 
         self.current_session_state = SmppSessionState.CLOSED
         self._header_pdu_length = 16

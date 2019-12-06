@@ -4,6 +4,14 @@ import json
 from . import state
 
 
+# the messages that are published to a queue by either naz
+# or user application should be versioned.
+# This version will enable naz to be able to evolve in future;
+# eg a future version of naz could add/remove the number of required items in a message.
+# This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
+NAZ_MESSAGE_PROTOCOL_VERSION = 1
+
+
 class Message(abc.ABC):
     """
     The message protocol for `naz`. It is the code representation of what
@@ -28,6 +36,12 @@ class Message(abc.ABC):
         if not isinstance(version, int):
             raise ValueError(
                 "`version` should be of type:: `int` You entered: {0}".format(type(version))
+            )
+        if version != NAZ_MESSAGE_PROTOCOL_VERSION:
+            raise ValueError(
+                "`naz` currently only supports naz protocol version {0}".format(
+                    NAZ_MESSAGE_PROTOCOL_VERSION
+                )
             )
         if not isinstance(smpp_command, str):
             raise ValueError(
@@ -157,6 +171,7 @@ class SubmitSM(Message):
             source_addr=source_addr,
             destination_addr=destination_addr,
             log_id=log_id,
+            version=version,
             hook_metadata=hook_metadata,
             service_type=service_type,
             source_addr_ton=source_addr_ton,
@@ -201,6 +216,7 @@ class SubmitSM(Message):
         source_addr: str,
         destination_addr: str,
         log_id: str,
+        version: int,
         hook_metadata: str,
         service_type: str,
         source_addr_ton: int,
@@ -216,6 +232,16 @@ class SubmitSM(Message):
         replace_if_present_flag: int,
         sm_default_msg_id: int,
     ) -> None:
+        if not isinstance(version, int):
+            raise ValueError(
+                "`version` should be of type:: `int` You entered: {0}".format(type(version))
+            )
+        if version != NAZ_MESSAGE_PROTOCOL_VERSION:
+            raise ValueError(
+                "`naz` currently only supports naz protocol version {0}".format(
+                    NAZ_MESSAGE_PROTOCOL_VERSION
+                )
+            )
         if not isinstance(short_message, str):
             raise ValueError(
                 "`short_message` should be of type:: `str` You entered: {0}".format(
@@ -380,6 +406,12 @@ class EnquireLinkResp(Message):
             raise ValueError(
                 "`version` should be of type:: `int` You entered: {0}".format(type(version))
             )
+        if version != NAZ_MESSAGE_PROTOCOL_VERSION:
+            raise ValueError(
+                "`naz` currently only supports naz protocol version {0}".format(
+                    NAZ_MESSAGE_PROTOCOL_VERSION
+                )
+            )
         if not isinstance(smpp_command, str):
             raise ValueError(
                 "`smpp_command` should be of type:: `str` You entered: {0}".format(
@@ -451,6 +483,12 @@ class DeliverSmResp(Message):
         if not isinstance(version, int):
             raise ValueError(
                 "`version` should be of type:: `int` You entered: {0}".format(type(version))
+            )
+        if version != NAZ_MESSAGE_PROTOCOL_VERSION:
+            raise ValueError(
+                "`naz` currently only supports naz protocol version {0}".format(
+                    NAZ_MESSAGE_PROTOCOL_VERSION
+                )
             )
         if not isinstance(smpp_command, str):
             raise ValueError(
