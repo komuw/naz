@@ -47,13 +47,15 @@ naz is in active development and it's API may change in backward incompatible wa
     # queue messages to send
     for i in range(0, 4):
         print("submit_sm round:", i)
+
+        msg = naz.protocol.SubmitSM(
+                short_message="Hello World-{0}".format(str(i)),
+                log_id="myid12345",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
         loop.run_until_complete(
-        cli.submit_sm(
-            short_message="Hello World-{0}".format(str(i)),
-            log_id="myid12345",
-            source_addr="254722111111",
-            destination_addr="254722999999",
-        )
+           cli.submit_message(msg)
     )
 
     try:
@@ -405,14 +407,16 @@ An example of using that broker;
 
     # queue messages to send
     for i in range(0, 4):
+        msg = naz.protocol.SubmitSM(
+                short_message="Hello World-{0}".format(str(i)),
+                log_id="myid12345",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
         loop.run_until_complete(
-        cli.submit_sm(
-            short_message="Hello World-{0}".format(str(i)),
-            log_id="myid12345",
-            source_addr="254722111111",
-            destination_addr="254722999999",
+           cli.submit_message(msg)
         )
-    )
+
 
 then in your application, queue items to the queue;
 
@@ -420,13 +424,14 @@ then in your application, queue items to the queue;
 
     # queue messages to send
     for i in range(0, 4):
+        msg = naz.protocol.SubmitSM(
+                short_message="Hello World-{0}".format(str(i)),
+                log_id="myid12345",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
         loop.run_until_complete(
-        cli.submit_sm(
-            short_message="Hello World-{0}".format(str(i)),
-            log_id="myid12345",
-            source_addr="254722111111",
-            destination_addr="254722999999",
-        )
+          cli.submit_message(msg)
     )
 
 

@@ -90,12 +90,14 @@ async def send_messages():
                     "MSGS_SENT": MSGS_SENT,
                 },
             )
-            await my_naz_client.submit_sm(
+            msg = naz.protocol.SubmitSM(
                 short_message=msg,
                 log_id=log_id,
                 source_addr=source_addr,
                 destination_addr=destination_addr,
             )
+            await my_naz_client.submit_message(msg)
+
             logger.log(
                 logging.INFO,
                 {

@@ -164,9 +164,14 @@
       log_id = tracking_code
       source_addr = "AwesomeStore"
       destination_addr = "254722000111"
-      await my_naz_client.submit_sm(
-          short_message=msg, log_id=log_id, source_addr=source_addr, destination_addr=destination_addr
-      )
+      
+      msg = naz.protocol.SubmitSM(
+                short_message=msg,
+                log_id=log_id,
+                source_addr=source_addr,
+                destination_addr=destination_addr
+            )
+      await my_naz_client.submit_message(msg)
 
   loop = asyncio.get_event_loop()
   loop.run_until_complete(send_messages())

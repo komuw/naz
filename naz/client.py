@@ -963,12 +963,38 @@ class Client:
     # this method just enqueues a submit_sm msg to queue
     async def submit_message(self, proto_msg: protocol.Message) -> None:
         """
-        enqueues any kind of pdu to :attr:`broker <Client.broker>`
-        That PDU will later on be sent to SMSC.
+        Sends a message of any kind/pdu to SMSC.
+        That message will get enqueued to :attr:`broker <Client.broker>` and later on sent to SMSC.
 
         Parameters:
-            TODO: docs
+            proto_msg: the message to send to SMSC.
+                       Has to be a class instance that is a child class of `naz.protocol.Message`
+        
+        Usage:
+            import naz
+
+            broker = naz.broker.SimpleBroker(maxsize=1000)
+            client = naz.Client(
+                    smsc_host="127.0.0.1",
+                    smsc_port=2775,
+                    system_id="smppclient1",
+                    password=os.getenv("password", "password"),
+                    broker=broker,
+                )
+            msg = naz.protocol.SubmitSM(
+                short_message=short_message,
+                source_addr="255700111222",
+                destination_addr="255799000888",
+                log_id="some-id",
+            )
+            await client.submit_message(msg)
         """
+        if not isinstance(proto_msg, protocol.Message):
+            raise ValueError(
+                "`proto_msg` should be of type:: `naz.protocol.Message` You entered: {0}".format(
+                    type(proto_msg)
+                )
+            )
         smpp_command = proto_msg.smpp_command
         self._log(
             logging.INFO,
@@ -1007,16 +1033,6 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-
-    async def submit_sm(self, proto_msg: protocol.SubmitSM) -> None:
-        """
-        enqueues a SUBMIT_SM pdu to :attr:`broker <Client.broker>`
-        That PDU will later on be sent to SMSC.
-
-        Parameters:
-            TODO: docs
-        """
-        await self.submit_message(proto_msg=proto_msg)
 
     async def _build_enquire_link_resp_pdu(self, proto_msg: protocol.EnquireLinkResp) -> bytes:
         smpp_command = SmppCommand.ENQUIRE_LINK_RESP

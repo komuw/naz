@@ -237,13 +237,15 @@ Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class=
 <span class="c1"># queue messages to send</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;submit_sm round:&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
-        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
-        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+       <span class="n">cli</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 <span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -593,26 +595,28 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 
 <span class="c1"># queue messages to send</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
-        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
-        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+       <span class="n">cli</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
     <span class="p">)</span>
-<span class="p">)</span>
 </pre></div>
 </div>
 <p>then in your application, queue items to the queue;</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># queue messages to send</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">SubmitSM</span><span class="p">(</span>
+            <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
+            <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
+            <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
+            <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span>
-    <span class="n">cli</span><span class="o">.</span><span class="n">submit_sm</span><span class="p">(</span>
-        <span class="n">short_message</span><span class="o">=</span><span class="s2">&quot;Hello World-</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)),</span>
-        <span class="n">log_id</span><span class="o">=</span><span class="s2">&quot;myid12345&quot;</span><span class="p">,</span>
-        <span class="n">source_addr</span><span class="o">=</span><span class="s2">&quot;254722111111&quot;</span><span class="p">,</span>
-        <span class="n">destination_addr</span><span class="o">=</span><span class="s2">&quot;254722999999&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+      <span class="n">cli</span><span class="o">.</span><span class="n">submit_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
