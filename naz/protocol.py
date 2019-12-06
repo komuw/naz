@@ -4,12 +4,14 @@ import json
 from . import state
 
 
-# the messages that are published to a queue by either naz
-# or user application should be versioned.
-# This version will enable naz to be able to evolve in future;
-# eg a future version of naz could add/remove the number of required items in a message.
-# This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
 NAZ_MESSAGE_PROTOCOL_VERSION = 1
+"""
+The messages that are published to a queue by either naz
+or user application should be versioned.
+This version will enable naz to be able to evolve in future;
+eg a future version of naz could add/remove the number of required items in a message.
+This is a bit similar to: http://docs.celeryproject.org/en/latest/internals/protocol.html
+"""
 
 
 class Message(abc.ABC):

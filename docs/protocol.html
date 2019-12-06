@@ -328,6 +328,16 @@ like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres
 
 </dd></dl>
 
+<dl class="data">
+<dt id="naz.protocol.NAZ_MESSAGE_PROTOCOL_VERSION">
+<code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">NAZ_MESSAGE_PROTOCOL_VERSION</code><em class="property"> = 1</em><a class="headerlink" href="#naz.protocol.NAZ_MESSAGE_PROTOCOL_VERSION" title="Permalink to this definition">¶</a></dt>
+<dd><p>The messages that are published to a queue by either naz
+or user application should be versioned.
+This version will enable naz to be able to evolve in future;
+eg a future version of naz could add/remove the number of required items in a message.
+This is a bit similar to: <a class="reference external" href="http://docs.celeryproject.org/en/latest/internals/protocol.html">http://docs.celeryproject.org/en/latest/internals/protocol.html</a></p>
+</dd></dl>
+
 <dl class="class">
 <dt id="naz.protocol.SubmitSM">
 <em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">SubmitSM</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM" title="Permalink to this definition">¶</a></dt>
