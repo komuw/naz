@@ -16,7 +16,7 @@ class TestProtocol(TestCase):
     """
 
     def test_success_instanciation(self):
-        proto = naz.protocol.Message(
+        proto = naz.protocol.SubmitSM(
             version=1,
             smpp_command=naz.SmppCommand.SUBMIT_SM,
             log_id="some-log-id",
@@ -28,7 +28,7 @@ class TestProtocol(TestCase):
 
     def test_pdu_N_shortMsg_exclusive(self):
         with self.assertRaises(ValueError) as raised_exception:
-            naz.protocol.Message(
+            naz.protocol.SubmitSM(
                 version=1,
                 smpp_command=naz.SmppCommand.SUBMIT_SM,
                 log_id="some-log-id",
@@ -41,38 +41,39 @@ class TestProtocol(TestCase):
         )
 
     def test_json_serialization(self):
-        proto = naz.protocol.Message(
+        proto = naz.protocol.SubmitSM(
             version=1,
-            smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP,
             log_id="some-log-id",
-            pdu=b"pdu",
+            short_message="hello",
+            source_addr="546464",
+            destination_addr="24292",
         )
         _in_json = proto.to_json()
         _in_dict = json.loads(_in_json)
-        _in_dict["pdu"] = _in_dict["pdu"].encode(naz.protocol.Message.ENCODING)
-
-        self.assertEqual(type(proto), type(naz.protocol.Message(**_in_dict)))
+        self.assertEqual(type(proto), type(naz.protocol.SubmitSM(**_in_dict)))
 
     def test_json_serialization_pdu_None(self):
-        proto = naz.protocol.Message(
+        proto = naz.protocol.DeliverSmResp(
             version=1,
-            smpp_command=naz.SmppCommand.BIND_TRANSCEIVER_RESP,
+            smpp_command=naz.SmppCommand.DELIVER_SM_RESP,
             log_id="some-log-id",
-            pdu=None,
+            sequence_number=599,
+            message_id="900",
         )
         _in_json = proto.to_json()
-
         self.assertIsNotNone(_in_json)
 
     def test_json_de_serialization(self):
         x = {
             "version": 1,
-            "smpp_command": "bind_transceiver_resp",
+            "smpp_command": naz.SmppCommand.SUBMIT_SM,
             "log_id": "some-log-id",
-            "pdu": "pdu",
+            "short_message": "hello",
+            "source_addr": "546464",
+            "destination_addr": "24292",
         }
         _in_json = json.dumps(x)
-        proto = naz.protocol.Message.from_json(_in_json)
+        proto = naz.protocol.json_to_Message(_in_json)
 
         self.assertIsInstance(proto, naz.protocol.Message)
 

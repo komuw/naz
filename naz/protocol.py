@@ -324,6 +324,32 @@ class EnquireLinkResp(Message):
         smpp_command: str = state.SmppCommand.ENQUIRE_LINK_RESP,
         hook_metadata: str = "",
     ) -> None:
+        if not isinstance(log_id, str):
+            raise ValueError(
+                "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
+            )
+        if not isinstance(sequence_number, int):
+            raise ValueError(
+                "`sequence_number` should be of type:: `int` You entered: {0}".format(
+                    type(sequence_number)
+                )
+            )
+        if not isinstance(version, int):
+            raise ValueError(
+                "`version` should be of type:: `int` You entered: {0}".format(type(version))
+            )
+        if not isinstance(smpp_command, str):
+            raise ValueError(
+                "`smpp_command` should be of type:: `str` You entered: {0}".format(
+                    type(smpp_command)
+                )
+            )
+        if not isinstance(hook_metadata, str):
+            raise ValueError(
+                "`hook_metadata` should be of type:: `str` You entered: {0}".format(
+                    type(hook_metadata)
+                )
+            )
         self.log_id = log_id
         self.sequence_number = sequence_number
         self.version = version
@@ -360,6 +386,36 @@ class DeliverSmResp(Message):
         smpp_command: str = state.SmppCommand.DELIVER_SM_RESP,
         hook_metadata: str = "",
     ) -> None:
+        if not isinstance(log_id, str):
+            raise ValueError(
+                "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
+            )
+        if not isinstance(message_id, str):
+            raise ValueError(
+                "`message_id` should be of type:: `str` You entered: {0}".format(type(message_id))
+            )
+        if not isinstance(sequence_number, int):
+            raise ValueError(
+                "`sequence_number` should be of type:: `int` You entered: {0}".format(
+                    type(sequence_number)
+                )
+            )
+        if not isinstance(version, int):
+            raise ValueError(
+                "`version` should be of type:: `int` You entered: {0}".format(type(version))
+            )
+        if not isinstance(smpp_command, str):
+            raise ValueError(
+                "`smpp_command` should be of type:: `str` You entered: {0}".format(
+                    type(smpp_command)
+                )
+            )
+        if not isinstance(hook_metadata, str):
+            raise ValueError(
+                "`hook_metadata` should be of type:: `str` You entered: {0}".format(
+                    type(hook_metadata)
+                )
+            )
         self.log_id = log_id
         self.version = version
         self.smpp_command = state.SmppCommand.DELIVER_SM_RESP
