@@ -50,7 +50,7 @@ jobs:
         run: |
           pwd; ls -lsha
           sudo apt -y update; sudo apt-get -y install pandoc
-          pip install -e .[dev,test,benchmarks]
+          pip install -U -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
       - name: run them analyzers
@@ -93,7 +93,7 @@ jobs:
         run: |
           pwd; ls -lsha
           sudo apt -y update; sudo apt-get -y install curl pandoc
-          pip install -e .[dev,test,benchmarks]
+          pip install -U -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
       - name: run tests
@@ -124,7 +124,7 @@ jobs:
         run: |
           pwd; ls -lsha
           sudo apt -y update; sudo apt-get -y install pandoc
-          pip install -e .[dev,test,benchmarks]
+          pip install -U -e .[dev,test,benchmarks]
           find . -name '*.pyc' -delete;find . -name '__pycache__' -delete | xargs echo
 
       - name: check docs are okay

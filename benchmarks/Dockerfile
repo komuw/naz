@@ -10,7 +10,7 @@ ENV PYTHONPATH="/usr/src/app"
 RUN printf "\\n\\t Installing using branch: %s \\n" "${NAZ_BRANCH}" && \
     wget -nc "https://github.com/komuw/naz/archive/${NAZ_BRANCH}.zip" && \
     unzip ./*.zip && \
-    (cd naz-*; pip install -e .[benchmarks]) && \
+    (cd naz-*; pip install -U -e .[benchmarks]) && \
     rm -rf ./naz-* && \
     rm -rf ./*.zip && \
     find . -name '*.pyc' -delete;find . -name '__pycache__' -delete;find . -name '*.pid' -delete

@@ -35,7 +35,7 @@ cd naz/benchmarks
 # A. SMSC SERVER
 # 1. Add firewall to the server that has these ports open: 22, 2775, 6379, 9000
 # 2. start screen
-python3.7 -m pip install -e ..[dev,test,benchmarks]
+python3.7 -m pip install -U -e ..[dev,test,benchmarks]
 export REDIS_PASSWORD=hey_NSA && python3.7 smpp_n_broker_servers.py &>/dev/null &
 disown
 
