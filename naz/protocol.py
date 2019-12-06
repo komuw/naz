@@ -12,7 +12,9 @@ class Message(abc.ABC):
     """
 
     @abc.abstractmethod
-    def __init__(self, version: int, smpp_command: str, hook_metadata: str = "") -> None:
+    def __init__(
+        self, version: int, smpp_command: str, log_id: str, hook_metadata: str = ""
+    ) -> None:
         """
         Parameters:
             version: This indicates the current version of the naz message protocol.
@@ -30,6 +32,10 @@ class Message(abc.ABC):
                     type(smpp_command)
                 )
             )
+        if not isinstance(log_id, str):
+            raise ValueError(
+                "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
+            )
         if not isinstance(hook_metadata, str):
             raise ValueError(
                 "`hook_metadata` should be of type:: `str` You entered: {0}".format(
@@ -38,6 +44,7 @@ class Message(abc.ABC):
             )
         self.version = version
         self.smpp_command = smpp_command
+        self.log_id = log_id
         self.hook_metadata = hook_metadata
 
     @abc.abstractmethod
