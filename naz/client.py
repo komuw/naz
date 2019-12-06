@@ -963,7 +963,7 @@ class Client:
 
         Parameters:
             proto_msg: the message to send to SMSC.
-                       Has to be a class instance that is a child class of `naz.protocol.Message`
+                       Has to be a class instance of :class:`naz.protocol.SubmitSM <naz.protocol.SubmitSM>`
 
         Usage:
 

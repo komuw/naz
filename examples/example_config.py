@@ -14,4 +14,5 @@ client = naz.Client(
     socket_timeout=4.00,
     logger=naz.log.SimpleLogger("example_config.client", render_as_json=False),
     enquire_link_interval=59.00,
+    address_range="254722111111",  # any msisdns beginning with 254. See Appendix A of smpp spec
 )
