@@ -2,6 +2,11 @@
 most recent version is listed first.
 
 
+
+## **version:** v0.7.7
+- support python version 3.8: https://github.com/komuw/naz/pull/186   
+
+
 ## **version:** v0.7.6
 - Add ability to supply more `submit_sm` parameters when enquiuing `submit_sm`: https://github.com/komuw/naz/pull/193
 

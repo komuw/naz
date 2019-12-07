@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Step by step tutorial of using naz &mdash; naz v0.7.6 documentation</title>
+  <title>Step by step tutorial of using naz &mdash; naz v0.7.7 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.6
+                v0.7.7
               </div>
             
           
@@ -319,7 +319,7 @@ optional arguments:
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">from</span> <span class="nn">my_client</span> <span class="kn">import</span> <span class="n">my_naz_client</span>
 
-<span class="k">async</span> <span class="k">def</span> <span class="nf">send_messages</span><span class="p">():</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">send</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    send out messages to customers once they make purchases.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -337,7 +337,7 @@ optional arguments:
     <span class="k">await</span> <span class="n">my_naz_client</span><span class="o">.</span><span class="n">send_message</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
-<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">send_messages</span><span class="p">())</span>
+<span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">send</span><span class="p">())</span>
 </pre></div>
 </div>
 <div class="line-block">

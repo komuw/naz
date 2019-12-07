@@ -155,7 +155,7 @@
   import asyncio
   from my_client import my_naz_client
 
-  async def send_messages():
+  async def send():
       """
       send out messages to customers once they make purchases.
       """
@@ -173,7 +173,7 @@
       await my_naz_client.send_message(msg)
 
   loop = asyncio.get_event_loop()
-  loop.run_until_complete(send_messages())
+  loop.run_until_complete(send())
 
 
 | We can execute that file, to send out messages;

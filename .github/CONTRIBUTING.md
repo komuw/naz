@@ -12,7 +12,7 @@ Contributions are under the [MIT License](https://github.com/komuw/naz/blob/mast
 - fork this repo.
 - install pre-requiste software:             
 ```shell
-apt-get -y install pandoc && pip install -e .[dev,test,benchmarks]
+apt-get -y install pandoc && pip install -U -e .[dev,test,benchmarks]
 ```                   
 - make the changes you want on your fork.
 - your changes should have backward compatibility in mind unless it is impossible to do so.

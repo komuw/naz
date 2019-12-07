@@ -140,4 +140,4 @@ setup(
 # g) pip install -i https://testpypi.python.org/pypi <package name>
 # h) twine upload dist/*   # prod pypi
 # i) pip install <package name>
-# pip install -e .[dev,test,benchmarks]
+# pip install -U -e .[dev,test,benchmarks]
