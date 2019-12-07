@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-18.04
     strategy:
       matrix:
-        python-version: [ '3.7', '3.8' ]
+        python-version: [ '3.7' ] # pytype doesnt yet support python3.8; https://github.com/google/pytype/issues/466
     timeout-minutes: 6
     steps:
       - uses: actions/checkout@v1
