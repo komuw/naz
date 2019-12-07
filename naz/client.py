@@ -573,15 +573,11 @@ class Client:
             self._log(
                 logging.INFO, {"event": "naz.Client.connect", "stage": "start", "log_id": log_id}
             )
-            reader, writer = await asyncio.open_connection(self.smsc_host, self.smsc_port)
+            reader, writer = await asyncio.wait_for(
+                asyncio.open_connection(self.smsc_host, self.smsc_port), timeout=self.socket_timeout
+            )
             self.reader = reader
             self.writer = writer
-            # sock = self.writer.get_extra_info("socket")
-            # sock.settimeout(self.socket_timeout)
-            # A socket object can be in one of three modes: blocking, non-blocking, or timeout.
-            # At the OS level, sockets in timeout mode are internally set in non-blocking mode.
-            # https://docs.python.org/3/library/socket.html#notes-on-socket-timeouts
-
             self._log(
                 logging.INFO, {"event": "naz.Client.connect", "stage": "end", "log_id": log_id}
             )
@@ -590,6 +586,8 @@ class Client:
             OSError,
             ConnectionError,
             TimeoutError,
+            # Note that `asyncio.TimeoutError` is raised with no msg/args. So it will appear in logs as an empty string
+            # https://github.com/python/cpython/blob/723f71abf7ab0a7be394f9f7b2daa9ecdf6fb1eb/Lib/asyncio/tasks.py#L490
             asyncio.TimeoutError,
             socket.error,
             socket.herror,
