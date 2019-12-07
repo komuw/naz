@@ -86,7 +86,7 @@ class Client:
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
         codec: typing.Union[None, the_codec.BaseCodec] = None,
-        rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
+        rate_limiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler] = None,
@@ -111,7 +111,7 @@ class Client:
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
             codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
-            rateLimiter: python class instance implementing rate limitation
+            rate_limiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
                 just before sending request to SMSC and just after getting response from SMSC
             sequence_generator:	python class instance used to generate sequence_numbers
@@ -139,7 +139,7 @@ class Client:
             enquire_link_interval=enquire_link_interval,
             logger=logger,
             codec=codec,
-            rateLimiter=rateLimiter,
+            rate_limiter=rate_limiter,
             hook=hook,
             sequence_generator=sequence_generator,
             throttle_handler=throttle_handler,
@@ -250,10 +250,10 @@ class Client:
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
-        if rateLimiter is not None:
-            self.rateLimiter = rateLimiter
+        if rate_limiter is not None:
+            self.rate_limiter = rate_limiter
         else:
-            self.rateLimiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
+            self.rate_limiter = ratelimiter.SimpleRateLimiter(logger=self.logger)
 
         if hook is not None:
             self.hook = hook
@@ -301,7 +301,7 @@ class Client:
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
         codec: typing.Union[None, the_codec.BaseCodec],
-        rateLimiter: typing.Union[None, ratelimiter.BaseRateLimiter],
+        rate_limiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
         throttle_handler: typing.Union[None, throttle.BaseThrottleHandler],
@@ -414,11 +414,11 @@ class Client:
                     )
                 )
             )
-        if not isinstance(rateLimiter, (type(None), ratelimiter.BaseRateLimiter)):
+        if not isinstance(rate_limiter, (type(None), ratelimiter.BaseRateLimiter)):
             errors.append(
                 ValueError(
-                    "`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
-                        type(rateLimiter)
+                    "`rate_limiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: {0}".format(
+                        type(rate_limiter)
                     )
                 )
             )
@@ -1556,7 +1556,7 @@ class Client:
             if send_request:
                 try:
                     # rate limit ourselves
-                    await self.rateLimiter.limit()
+                    await self.rate_limiter.limit()
                 except Exception as e:
                     self._log(
                         logging.ERROR,

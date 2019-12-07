@@ -36,8 +36,8 @@ class SimpleRateLimiter(BaseRateLimiter):
     .. highlight:: python
     .. code-block:: python
 
-        rateLimiter = SimpleRateLimiter(send_rate=10)
-        await rateLimiter.limit()
+        rate_limiter = SimpleRateLimiter(send_rate=10)
+        await rate_limiter.limit()
         send_messsages()
     """
 

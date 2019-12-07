@@ -26,8 +26,8 @@ class MySeqGen(naz.sequence.BaseSequenceGenerator):
 class MyRateLimiter(naz.ratelimiter.BaseRateLimiter):
     """
     Usage:
-        rateLimiter = MyRateLimiter(send_rate=10, max_tokens=25)
-        await rateLimiter.limit()
+        rate_limiter = MyRateLimiter(send_rate=10, max_tokens=25)
+        await rate_limiter.limit()
         send_messsages()
     """
 

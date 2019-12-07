@@ -310,7 +310,7 @@ import naz
 myLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=35)
 cli = naz.Client(
     ...
-    rateLimiter=myLimiter,
+    rate_limiter=myLimiter,
 )
 ```
 

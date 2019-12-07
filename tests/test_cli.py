@@ -46,7 +46,7 @@ NAZ_CLIENT = naz.Client(
         "naz.client", level="INFO", log_metadata={"environment": "production", "release": "canary"}
     ),
     enquire_link_interval=30.00,
-    rateLimiter=MyRateLimiter(),
+    rate_limiter=MyRateLimiter(),
     codec=naz.codec.SimpleCodec(encoding="gsm0338", errors="ignore"),
 )
 

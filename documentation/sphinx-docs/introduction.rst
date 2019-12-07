@@ -331,7 +331,7 @@ another example is if you want to update a database record whenever you get a de
     myLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=35)
     cli = naz.Client(
         ...
-        rateLimiter=myLimiter,
+        rate_limiter=myLimiter,
     )
 
 3.4 Throttle handling
