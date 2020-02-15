@@ -198,7 +198,7 @@ class TestClient(TestCase):
             "sequence_generator": DummyClientArg,
             "codec": DummyClientArg,
             "enquire_link_interval": DummyClientArg,
-            "rateLimiter": DummyClientArg,
+            "rate_limiter": DummyClientArg,
             "hook": DummyClientArg,
             "throttle_handler": DummyClientArg,
             "correlation_handler": DummyClientArg,

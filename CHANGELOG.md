@@ -3,6 +3,11 @@ most recent version is listed first.
 
 
 
+## **version:** v0.7.8
+- Rename `naz.Client.rateLimiter` to `naz.Client.rate_limiter`: https://github.com/komuw/naz/pull/195      
+  This was done so as to maintain consistency with other `naz.Client` attributes.    
+
+
 ## **version:** v0.7.7
 - support python version 3.8: https://github.com/komuw/naz/pull/186   
 

@@ -28,7 +28,7 @@ class TestRateLimit(TestCase):
 
     def setUp(self):
         self.send_rate = 1.0
-        self.rateLimiter = naz.ratelimiter.SimpleRateLimiter(send_rate=self.send_rate)
+        self.rate_limiter = naz.ratelimiter.SimpleRateLimiter(send_rate=self.send_rate)
 
     def tearDown(self):
         pass
@@ -41,15 +41,15 @@ class TestRateLimit(TestCase):
     def test_no_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
             for _ in range(0, int(self.send_rate)):
-                self._run(self.rateLimiter.limit())
+                self._run(self.rate_limiter.limit())
             self.assertFalse(mock_sleep.mock.called)
 
     def test_token_exhaustion_causes_rlimit(self):
         with mock.patch("naz.ratelimiter.asyncio.sleep", new=AsyncMock()) as mock_sleep:
             for _ in range(0, int(self.send_rate) * 2):
-                self._run(self.rateLimiter.limit())
+                self._run(self.rate_limiter.limit())
             self.assertTrue(mock_sleep.mock.called)
-            self.assertEqual(mock_sleep.mock.call_args[0][0], self.rateLimiter.delay_for_tokens)
+            self.assertEqual(mock_sleep.mock.call_args[0][0], self.rate_limiter.delay_for_tokens)
 
     def test_send_rate(self):
         send_rate = 3.0
