@@ -6,6 +6,7 @@ most recent version is listed first.
 ## **version:** v0.7.8
 - Rename `naz.Client.rateLimiter` to `naz.Client.rate_limiter`: https://github.com/komuw/naz/pull/195      
   This was done so as to maintain consistency with other `naz.Client` attributes.    
+- Fix a bug where `naz` was not formatting 1octet integers correctly : https://github.com/komuw/naz/pull/196
 
 
 ## **version:** v0.7.7
