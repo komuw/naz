@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction to naz &mdash; naz v0.7.7 documentation</title>
+  <title>Introduction to naz &mdash; naz v0.7.8 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.7
+                v0.7.8
               </div>
             
           
@@ -523,7 +523,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <span class="n">myLimiter</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">ratelimiter</span><span class="o">.</span><span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">send_rate</span><span class="o">=</span><span class="mi">35</span><span class="p">)</span>
 <span class="n">cli</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
     <span class="o">...</span>
-    <span class="n">rateLimiter</span><span class="o">=</span><span class="n">myLimiter</span><span class="p">,</span>
+    <span class="n">rate_limiter</span><span class="o">=</span><span class="n">myLimiter</span><span class="p">,</span>
 <span class="p">)</span>
 </pre></div>
 </div>
