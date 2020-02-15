@@ -110,8 +110,7 @@ struct.pack('>B', interface_version) # here we use `B` because has size 1 see; h
 ```python
 import six
 system_id = 'smppclient1' 
-six.b( system_id + chr(0)) # b'smppclient1\x00'
-# alternative: bytes(system_id + chr(0), 'utf8') but we would have to check on encoding
+system_id.encode("ascii") + chr(0).encode("ascii") # b'smppclient1\x00'
 ```
 - C-Octet Strin(Decimal) - A series of ASCII characters, each character **representing** a decimal digit (0 - 9) and terminated with the NULL character.
 - C-Octet String(Hex) - A series of ASCII characters, each character representing a hexadecimal digit (0 - F) and terminated with the NULL character.
@@ -184,13 +183,13 @@ addr_npi = 0
 address_range = ''
 
 body = body + \
-       bytes(system_id + chr(0), 'utf8') + \
-       bytes(password + chr(0), 'utf8') + \
-       bytes(system_type + chr(0), 'utf8') + \
+       system_id.encode("ascii") + chr(0).encode("ascii") + \
+       password.encode("ascii") + chr(0).encode("ascii") + \
+       system_type.encode("ascii") + chr(0).encode("ascii") + \
        struct.pack('>B', interface_version) + \
        struct.pack('>B', addr_ton) + \
        struct.pack('>B', addr_npi) + \
-      bytes(address_range + chr(0), 'utf8')
+      address_range.encode("ascii") + chr(0).encode("ascii")
 ####################
 
 ### create header ####

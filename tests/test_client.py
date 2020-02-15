@@ -789,7 +789,7 @@ class TestClient(TestCase):
             # 2. RECEIVE SUBMIT_SM_RESP
             submit_sm_resp_smsc_message_id = "1618Z-0102G-2333M-25FJF"
             body = b""
-            body = body + submit_sm_resp_smsc_message_id.encode("ascii") + chr(0).encode()
+            body = body + submit_sm_resp_smsc_message_id.encode("ascii") + chr(0).encode("ascii")
             command_length = 16 + len(body)  # 16 is for headers
             command_id = 0x80000004  # submit_sm_resp
             command_status = 0x00000000  # success
@@ -818,7 +818,7 @@ class TestClient(TestCase):
                 tag_n_len = struct.pack(">HH", tag, length)
                 # DELIVER_SM has same message_id as SUBMIT_SM_RESP but DIFFERENT sequence_number
                 value = submit_sm_resp_smsc_message_id  # 23 in length
-                value = value.encode("ascii") + chr(0).encode()  # 24 in length
+                value = value.encode("ascii") + chr(0).encode("ascii")  # 24 in length
                 deliver_sm_pdu = (
                     b"\x00\x00\x00M\x00\x00\x00\x05\x00\x00\x00"
                     b"\x00\x9f\x88\xf1$AWSBD\x00\x01\x0116505551234"
