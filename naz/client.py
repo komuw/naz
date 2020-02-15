@@ -628,9 +628,9 @@ class Client:
             + chr(0).encode()
             + self.system_type.encode("ascii")
             + chr(0).encode()
-            + struct.pack(">I", self.interface_version)
-            + struct.pack(">I", self.addr_ton)
-            + struct.pack(">I", self.addr_npi)
+            + struct.pack(">B", self.interface_version)  # unsigned Int, 1octet
+            + struct.pack(">B", self.addr_ton)
+            + struct.pack(">B", self.addr_npi)
             + self.address_range.encode("ascii")
             + chr(0).encode()
         )
@@ -683,7 +683,9 @@ class Client:
                 },
             )
 
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+        header = struct.pack(
+            ">IIII", command_length, command_id, command_status, sequence_number
+        )  # unsigned Int, 4octet
         full_pdu = header + body
         await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
         self._log(
@@ -1182,7 +1184,7 @@ class Client:
             body
             + service_type.encode("ascii")
             + chr(0).encode()
-            + struct.pack(">B", source_addr_ton)
+            + struct.pack(">B", source_addr_ton)  # unsigned Int, 1octet
             + struct.pack(">B", source_addr_npi)
             + source_addr.encode("ascii")
             + chr(0).encode()
@@ -2103,7 +2105,9 @@ class Client:
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
                 # get associated user supplied log_id if any
-                target_tag = struct.pack(">H", SmppOptionalTag.receipted_message_id)
+                target_tag = struct.pack(
+                    ">H", SmppOptionalTag.receipted_message_id
+                )  # unsigned Int, 2octet
                 if target_tag in body_data:
                     # the PDU contains a `receipted_message_id` TLV optional tag
                     position_of_target_tag = body_data.find(target_tag)

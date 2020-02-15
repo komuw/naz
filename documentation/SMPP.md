@@ -187,9 +187,9 @@ body = body + \
        bytes(system_id + chr(0), 'utf8') + \
        bytes(password + chr(0), 'utf8') + \
        bytes(system_type + chr(0), 'utf8') + \
-       struct.pack('>I', interface_version) + \
-       struct.pack('>I', addr_ton) + \
-       struct.pack('>I', addr_npi) + \
+       struct.pack('>B', interface_version) + \
+       struct.pack('>B', addr_ton) + \
+       struct.pack('>B', addr_npi) + \
       bytes(address_range + chr(0), 'utf8')
 ####################
 
