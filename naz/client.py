@@ -78,11 +78,17 @@ class Client:
         password: str,
         broker: the_broker.BaseBroker,
         client_id: typing.Union[None, str] = None,
+        # Reference made to NULL settings of Octet-String fields implies that the field
+        # consists of a single NULL character, i.e., an octet encoded with value 0x00 (zero).
+        # see section 3.1 of v3.4 smpp specification.
+        #
+        # In Python; "".encode("ascii") + chr(0).encode("ascii") == chr(0).encode("ascii")
+        # thus it is okay to use ""(empty string) to represent NULL for c-octet strings
         system_type: str = "",
-        addr_ton: int = 0,
-        addr_npi: int = 0,
+        addr_ton: int = 0x00,
+        addr_npi: int = 0x00,
         address_range: str = "",
-        interface_version: int = 34,
+        interface_version: int = 0x34,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
         codec: typing.Union[None, the_codec.BaseCodec] = None,
@@ -621,18 +627,18 @@ class Client:
             body
             # system_id is a C-Octet string, which is a series of ASCII characters terminated with the NULL character.
             # see; section 3.1 of SMPP spec
-            # Thus we need to encode C-Octet strings as ascii and also terminate them with NULL char(chr(0).encode())
+            # Thus we need to encode C-Octet strings as ascii and also terminate them with NULL char(chr(0).encode("ascii"))
             + self.system_id.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
             + self.password.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
             + self.system_type.encode("ascii")
-            + chr(0).encode()
-            + struct.pack(">I", self.interface_version)
-            + struct.pack(">I", self.addr_ton)
-            + struct.pack(">I", self.addr_npi)
+            + chr(0).encode("ascii")
+            + struct.pack(">B", self.interface_version)  # unsigned Int, 1octet
+            + struct.pack(">B", self.addr_ton)
+            + struct.pack(">B", self.addr_npi)
             + self.address_range.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
         )
 
         # header
@@ -683,7 +689,9 @@ class Client:
                 },
             )
 
-        header = struct.pack(">IIII", command_length, command_id, command_status, sequence_number)
+        header = struct.pack(
+            ">IIII", command_length, command_id, command_status, sequence_number
+        )  # unsigned Int, 4octet
         full_pdu = header + body
         await self.send_data(smpp_command=smpp_command, msg=full_pdu, log_id=log_id)
         self._log(
@@ -1080,7 +1088,7 @@ class Client:
         # body
         body = b""
         message_id = ""
-        body = body + message_id.encode("ascii") + chr(0).encode()
+        body = body + message_id.encode("ascii") + chr(0).encode("ascii")
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
@@ -1181,22 +1189,22 @@ class Client:
         body = (
             body
             + service_type.encode("ascii")
-            + chr(0).encode()
-            + struct.pack(">B", source_addr_ton)
+            + chr(0).encode("ascii")
+            + struct.pack(">B", source_addr_ton)  # unsigned Int, 1octet
             + struct.pack(">B", source_addr_npi)
             + source_addr.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
             + struct.pack(">B", dest_addr_ton)
             + struct.pack(">B", dest_addr_npi)
             + destination_addr.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
             + struct.pack(">B", esm_class)
             + struct.pack(">B", protocol_id)
             + struct.pack(">B", priority_flag)
             + schedule_delivery_time.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
             + validity_period.encode("ascii")
-            + chr(0).encode()
+            + chr(0).encode("ascii")
             + struct.pack(">B", registered_delivery)
             + struct.pack(">B", replace_if_present_flag)
             + struct.pack(">B", self.data_coding)
@@ -2049,7 +2057,7 @@ class Client:
                 # This field contains the SMSC message_id of the submitted message.
                 # It may be used at a later stage to query the status of a message, cancel
                 # or replace the message.
-                _message_id = body_data.replace(chr(0).encode(), b"")
+                _message_id = body_data.replace(chr(0).encode("ascii"), b"")
                 smsc_message_id = _message_id.decode("ascii")
                 await self.correlation_handler.put(
                     smpp_command=smpp_command,
@@ -2103,7 +2111,9 @@ class Client:
             await self.deliver_sm_resp(sequence_number=sequence_number)
             try:
                 # get associated user supplied log_id if any
-                target_tag = struct.pack(">H", SmppOptionalTag.receipted_message_id)
+                target_tag = struct.pack(
+                    ">H", SmppOptionalTag.receipted_message_id
+                )  # unsigned Int, 2octet
                 if target_tag in body_data:
                     # the PDU contains a `receipted_message_id` TLV optional tag
                     position_of_target_tag = body_data.find(target_tag)
@@ -2119,7 +2129,7 @@ class Client:
                     end_of_tag_value = end_of_target_tag_length + 65
                     tag_value = body_data[end_of_target_tag_length:end_of_tag_value]
                     _tag_value = tag_value.replace(
-                        chr(0).encode(), b""
+                        chr(0).encode("ascii"), b""
                     )  # change variable names to make mypy happy
                     t_value = _tag_value.decode("ascii")
                     log_id, hook_metadata = await self.correlation_handler.get(

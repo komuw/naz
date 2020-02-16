@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.7 documentation</title>
+  <title>naz.client &mdash; naz v0.7.8 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.7
+                v0.7.8
               </div>
             
           
@@ -243,15 +243,21 @@
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">broker</span><span class="p">:</span> <span class="n">the_broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">,</span>
         <span class="n">client_id</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="c1"># Reference made to NULL settings of Octet-String fields implies that the field</span>
+        <span class="c1"># consists of a single NULL character, i.e., an octet encoded with value 0x00 (zero).</span>
+        <span class="c1"># see section 3.1 of v3.4 smpp specification.</span>
+        <span class="c1">#</span>
+        <span class="c1"># In Python; &quot;&quot;.encode(&quot;ascii&quot;) + chr(0).encode(&quot;ascii&quot;) == chr(0).encode(&quot;ascii&quot;)</span>
+        <span class="c1"># thus it is okay to use &quot;&quot;(empty string) to represent NULL for c-octet strings</span>
         <span class="n">system_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">addr_ton</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00</span><span class="p">,</span>
+        <span class="n">addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00</span><span class="p">,</span>
         <span class="n">address_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-        <span class="n">interface_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">34</span><span class="p">,</span>
+        <span class="n">interface_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x34</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">55.00</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">rateLimiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">rate_limiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">hook</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sequence_generator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">sequence</span><span class="o">.</span><span class="n">BaseSequenceGenerator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">throttle_handler</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">throttle</span><span class="o">.</span><span class="n">BaseThrottleHandler</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -276,7 +282,7 @@
 <span class="sd">            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status</span>
 <span class="sd">            logger: python `logger &lt;https://docs.python.org/3/library/logging.html#logging.Logger&gt;`_ instance to be used for logging</span>
 <span class="sd">            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.</span>
-<span class="sd">            rateLimiter: python class instance implementing rate limitation</span>
+<span class="sd">            rate_limiter: python class instance implementing rate limitation</span>
 <span class="sd">            hook: python class instance implemeting functionality/hooks to be called by naz \</span>
 <span class="sd">                just before sending request to SMSC and just after getting response from SMSC</span>
 <span class="sd">            sequence_generator:	python class instance used to generate sequence_numbers</span>
@@ -304,7 +310,7 @@
             <span class="n">enquire_link_interval</span><span class="o">=</span><span class="n">enquire_link_interval</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
             <span class="n">codec</span><span class="o">=</span><span class="n">codec</span><span class="p">,</span>
-            <span class="n">rateLimiter</span><span class="o">=</span><span class="n">rateLimiter</span><span class="p">,</span>
+            <span class="n">rate_limiter</span><span class="o">=</span><span class="n">rate_limiter</span><span class="p">,</span>
             <span class="n">hook</span><span class="o">=</span><span class="n">hook</span><span class="p">,</span>
             <span class="n">sequence_generator</span><span class="o">=</span><span class="n">sequence_generator</span><span class="p">,</span>
             <span class="n">throttle_handler</span><span class="o">=</span><span class="n">throttle_handler</span><span class="p">,</span>
@@ -415,10 +421,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">rateLimiter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">rateLimiter</span>
+        <span class="k">if</span> <span class="n">rate_limiter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rate_limiter</span> <span class="o">=</span> <span class="n">rate_limiter</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rate_limiter</span> <span class="o">=</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">SimpleRateLimiter</span><span class="p">(</span><span class="n">logger</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">hook</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">hook</span> <span class="o">=</span> <span class="n">hook</span>
@@ -466,7 +472,7 @@
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">],</span>
         <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">],</span>
-        <span class="n">rateLimiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">],</span>
+        <span class="n">rate_limiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">],</span>
         <span class="n">hook</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">],</span>
         <span class="n">sequence_generator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">sequence</span><span class="o">.</span><span class="n">BaseSequenceGenerator</span><span class="p">],</span>
         <span class="n">throttle_handler</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">throttle</span><span class="o">.</span><span class="n">BaseThrottleHandler</span><span class="p">],</span>
@@ -579,11 +585,11 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rateLimiter</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">)):</span>
             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`rateLimiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">rateLimiter</span><span class="p">)</span>
+                    <span class="s2">&quot;`rate_limiter` should be of type:: `None` or `naz.ratelimiter.BaseRateLimiter` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -786,18 +792,18 @@
             <span class="n">body</span>
             <span class="c1"># system_id is a C-Octet string, which is a series of ASCII characters terminated with the NULL character.</span>
             <span class="c1"># see; section 3.1 of SMPP spec</span>
-            <span class="c1"># Thus we need to encode C-Octet strings as ascii and also terminate them with NULL char(chr(0).encode())</span>
+            <span class="c1"># Thus we need to encode C-Octet strings as ascii and also terminate them with NULL char(chr(0).encode(&quot;ascii&quot;))</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_type</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface_version</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addr_ton</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;I&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addr_npi</span><span class="p">)</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">interface_version</span><span class="p">)</span>  <span class="c1"># unsigned Int, 1octet</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addr_ton</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addr_npi</span><span class="p">)</span>
             <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">address_range</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="c1"># header</span>
@@ -848,7 +854,9 @@
                 <span class="p">},</span>
             <span class="p">)</span>
 
-        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span><span class="p">)</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
+            <span class="s2">&quot;&gt;IIII&quot;</span><span class="p">,</span> <span class="n">command_length</span><span class="p">,</span> <span class="n">command_id</span><span class="p">,</span> <span class="n">command_status</span><span class="p">,</span> <span class="n">sequence_number</span>
+        <span class="p">)</span>  <span class="c1"># unsigned Int, 4octet</span>
         <span class="n">full_pdu</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="n">body</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">send_data</span><span class="p">(</span><span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="n">full_pdu</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
@@ -1245,7 +1253,7 @@
         <span class="c1"># body</span>
         <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
         <span class="n">message_id</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="n">message_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">body</span> <span class="o">+</span> <span class="n">message_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
 
         <span class="c1"># header</span>
         <span class="n">command_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_pdu_length</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>  <span class="c1"># 16 is for headers</span>
@@ -1346,22 +1354,22 @@
         <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">body</span>
             <span class="o">+</span> <span class="n">service_type</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">source_addr_ton</span><span class="p">)</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">source_addr_ton</span><span class="p">)</span>  <span class="c1"># unsigned Int, 1octet</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">source_addr_npi</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">source_addr</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">dest_addr_ton</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">dest_addr_npi</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">destination_addr</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">esm_class</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">protocol_id</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">priority_flag</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">schedule_delivery_time</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">validity_period</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
-            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+            <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">registered_delivery</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">replace_if_present_flag</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_coding</span><span class="p">)</span>
@@ -1721,7 +1729,7 @@
             <span class="k">if</span> <span class="n">send_request</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># rate limit ourselves</span>
-                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">rateLimiter</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate_limiter</span><span class="o">.</span><span class="n">limit</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
                         <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span>
@@ -2214,7 +2222,7 @@
                 <span class="c1"># This field contains the SMSC message_id of the submitted message.</span>
                 <span class="c1"># It may be used at a later stage to query the status of a message, cancel</span>
                 <span class="c1"># or replace the message.</span>
-                <span class="n">_message_id</span> <span class="o">=</span> <span class="n">body_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">_message_id</span> <span class="o">=</span> <span class="n">body_data</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
                 <span class="n">smsc_message_id</span> <span class="o">=</span> <span class="n">_message_id</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_handler</span><span class="o">.</span><span class="n">put</span><span class="p">(</span>
                     <span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span>
@@ -2268,7 +2276,9 @@
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">deliver_sm_resp</span><span class="p">(</span><span class="n">sequence_number</span><span class="o">=</span><span class="n">sequence_number</span><span class="p">)</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># get associated user supplied log_id if any</span>
-                <span class="n">target_tag</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;H&quot;</span><span class="p">,</span> <span class="n">SmppOptionalTag</span><span class="o">.</span><span class="n">receipted_message_id</span><span class="p">)</span>
+                <span class="n">target_tag</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
+                    <span class="s2">&quot;&gt;H&quot;</span><span class="p">,</span> <span class="n">SmppOptionalTag</span><span class="o">.</span><span class="n">receipted_message_id</span>
+                <span class="p">)</span>  <span class="c1"># unsigned Int, 2octet</span>
                 <span class="k">if</span> <span class="n">target_tag</span> <span class="ow">in</span> <span class="n">body_data</span><span class="p">:</span>
                     <span class="c1"># the PDU contains a `receipted_message_id` TLV optional tag</span>
                     <span class="n">position_of_target_tag</span> <span class="o">=</span> <span class="n">body_data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">target_tag</span><span class="p">)</span>
@@ -2284,7 +2294,7 @@
                     <span class="n">end_of_tag_value</span> <span class="o">=</span> <span class="n">end_of_target_tag_length</span> <span class="o">+</span> <span class="mi">65</span>
                     <span class="n">tag_value</span> <span class="o">=</span> <span class="n">body_data</span><span class="p">[</span><span class="n">end_of_target_tag_length</span><span class="p">:</span><span class="n">end_of_tag_value</span><span class="p">]</span>
                     <span class="n">_tag_value</span> <span class="o">=</span> <span class="n">tag_value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                        <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+                        <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">),</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
                     <span class="p">)</span>  <span class="c1"># change variable names to make mypy happy</span>
                     <span class="n">t_value</span> <span class="o">=</span> <span class="n">_tag_value</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
                     <span class="n">log_id</span><span class="p">,</span> <span class="n">hook_metadata</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_handler</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
