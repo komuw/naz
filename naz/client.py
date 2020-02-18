@@ -2315,7 +2315,7 @@ class Client:
             await self.unbind()
             async with self.drain_lock:
                 await self.writer.drain()
-            self.writer.close()
+            self.writer.write_eof()
         except (
             ConnectionError,
             TimeoutError,
