@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.8 documentation</title>
+  <title>naz.client &mdash; naz v0.7.9 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.8
+                v0.7.9
               </div>
             
           
@@ -2480,7 +2480,7 @@
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">unbind</span><span class="p">()</span>
             <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">drain_lock</span><span class="p">:</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write_eof</span><span class="p">()</span>
         <span class="k">except</span> <span class="p">(</span>
             <span class="ne">ConnectionError</span><span class="p">,</span>
             <span class="ne">TimeoutError</span><span class="p">,</span>
