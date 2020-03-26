@@ -275,3 +275,14 @@ class SimpleCodec(BaseCodec):
 
         obj, _ = decoder(input, self.errors)
         return obj
+
+    # TODO: add this method to base interface
+    # TODO: check if python has protocol methods for json(akin to Golang's marshalJson interface methods)
+    def to_json(self) -> str:
+        """
+        # TODO: add documentation
+        """
+        import json
+
+        _item = dict(encoding=self.encoding, errors=self.errors)
+        return json.dumps(_item)

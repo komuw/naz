@@ -1,7 +1,9 @@
 import abc
 import json
+import typing
 
 from . import state
+from . import codec as the_codec
 
 
 NAZ_MESSAGE_PROTOCOL_VERSION = 1
@@ -86,6 +88,27 @@ class Message(abc.ABC):
         raise NotImplementedError("from_json method must be implemented.")
 
 
+# class SimpleCodec(BaseCodec):
+#     # custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
+
+#     def __init__(self, encoding: str = "gsm0338", errors: str = "strict") -> None:
+#         self.encoding = encoding
+#         self.errors = errors
+
+#     def encode(self, input: str) -> bytes:
+#         encoder = self.custom_codecs[self.encoding].encode
+#         obj, _ = encoder(input, self.errors)
+#         return obj
+
+
+# # codec = SimpleCodec()
+# # encoded_short_message = self.codec.encode(short_message)
+
+# # self.data_coding = self._find_data_coding(codec.encoding)
+
+# # struct.pack(">B", self.data_coding)
+
+
 class SubmitSM(Message):
     """
     The code representation of the `submit_sm` pdu that will get queued into a broker.
@@ -120,9 +143,6 @@ class SubmitSM(Message):
         source_addr: str,
         destination_addr: str,
         log_id: str,
-        version: int = 1,
-        smpp_command: str = state.SmppCommand.SUBMIT_SM,
-        hook_metadata: str = "",
         service_type: str = "CMT",  # section 5.2.11
         source_addr_ton: int = 0x00000001,  # section 5.2.5
         source_addr_npi: int = 0x00000001,
@@ -143,6 +163,11 @@ class SubmitSM(Message):
         registered_delivery: int = 0b00000001,  # see section 5.2.17
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
+        ### NON-SMPP ATTRIBUTES ###
+        codec: typing.Union[None, the_codec.BaseCodec] = None,
+        version: int = 1,
+        hook_metadata: str = "",
+        #### NON-SMPP ATTRIBUTES ###
     ) -> None:
         """
         Parameters:
@@ -152,7 +177,6 @@ class SubmitSM(Message):
             log_id: a unique identify of this request
             version: This indicates the current version of the naz message protocol.
                      This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
-            smpp_command: any one of the SMSC commands eg submit_sm
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
             service_type:	Indicates the SMS Application service associated with the message
             source_addr_ton:	Type of Number of message originator.
@@ -167,6 +191,7 @@ class SubmitSM(Message):
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
             sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
+            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
         """
         self._validate_msg_type_args(
             short_message=short_message,
@@ -188,6 +213,7 @@ class SubmitSM(Message):
             registered_delivery=registered_delivery,
             replace_if_present_flag=replace_if_present_flag,
             sm_default_msg_id=sm_default_msg_id,
+            codec=codec,
         )
 
         self.smpp_command: str = state.SmppCommand.SUBMIT_SM
@@ -212,6 +238,11 @@ class SubmitSM(Message):
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
 
+        if codec is not None:
+            self.codec = codec
+        else:
+            self.codec = the_codec.SimpleCodec()
+
     @staticmethod
     def _validate_msg_type_args(
         short_message: str,
@@ -233,6 +264,7 @@ class SubmitSM(Message):
         registered_delivery: int,
         replace_if_present_flag: int,
         sm_default_msg_id: int,
+        codec: typing.Union[None, the_codec.BaseCodec],
     ) -> None:
         if not isinstance(version, int):
             raise ValueError(
@@ -345,9 +377,15 @@ class SubmitSM(Message):
                 )
             )
 
+        if not isinstance(codec, (type(None), the_codec.BaseCodec)):
+            raise ValueError(
+                "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
+                    type(codec)
+                )
+            )
+
     def to_json(self) -> str:
         _item = dict(
-            smpp_command=self.smpp_command,
             version=self.version,
             short_message=self.short_message,
             source_addr=self.source_addr,
@@ -367,30 +405,28 @@ class SubmitSM(Message):
             registered_delivery=self.registered_delivery,
             replace_if_present_flag=self.replace_if_present_flag,
             sm_default_msg_id=self.sm_default_msg_id,
+            codec=self.codec.to_json(),
         )
         return json.dumps(_item)
 
     @staticmethod
     def from_json(json_message: str) -> "SubmitSM":
         _in_dict = json.loads(json_message)
+        _codec = the_codec.BaseCodec(**_in_dict["codec"])
+
+        _in_dict["codec"] = _codec
         return SubmitSM(**_in_dict)
 
 
 class EnquireLinkResp(Message):
     def __init__(
-        self,
-        log_id: str,
-        sequence_number: int,
-        version: int = 1,
-        smpp_command: str = state.SmppCommand.ENQUIRE_LINK_RESP,
-        hook_metadata: str = "",
+        self, log_id: str, sequence_number: int, version: int = 1, hook_metadata: str = "",
     ) -> None:
         """
         Parameters:
             log_id: a unique identify of this request
             version: This indicates the current version of the naz message protocol.
                      This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
-            smpp_command: any one of the SMSC commands eg submit_sm
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
             sequence_number: SMPP sequence_number
         """
@@ -414,12 +450,6 @@ class EnquireLinkResp(Message):
                     NAZ_MESSAGE_PROTOCOL_VERSION
                 )
             )
-        if not isinstance(smpp_command, str):
-            raise ValueError(
-                "`smpp_command` should be of type:: `str` You entered: {0}".format(
-                    type(smpp_command)
-                )
-            )
         if not isinstance(hook_metadata, str):
             raise ValueError(
                 "`hook_metadata` should be of type:: `str` You entered: {0}".format(
@@ -434,7 +464,6 @@ class EnquireLinkResp(Message):
 
     def to_json(self) -> str:
         _item = dict(
-            smpp_command=self.smpp_command,
             version=self.version,
             log_id=self.log_id,
             sequence_number=self.sequence_number,
@@ -455,7 +484,6 @@ class DeliverSmResp(Message):
         message_id: str,
         sequence_number: int,
         version: int = 1,
-        smpp_command: str = state.SmppCommand.DELIVER_SM_RESP,
         hook_metadata: str = "",
     ) -> None:
         """
@@ -463,7 +491,6 @@ class DeliverSmResp(Message):
             log_id: a unique identify of this request
             version: This indicates the current version of the naz message protocol.
                      This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
-            smpp_command: any one of the SMSC commands eg submit_sm
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
             message_id: id of this message
             sequence_number: SMPP sequence_number
@@ -492,12 +519,6 @@ class DeliverSmResp(Message):
                     NAZ_MESSAGE_PROTOCOL_VERSION
                 )
             )
-        if not isinstance(smpp_command, str):
-            raise ValueError(
-                "`smpp_command` should be of type:: `str` You entered: {0}".format(
-                    type(smpp_command)
-                )
-            )
         if not isinstance(hook_metadata, str):
             raise ValueError(
                 "`hook_metadata` should be of type:: `str` You entered: {0}".format(
@@ -513,7 +534,6 @@ class DeliverSmResp(Message):
 
     def to_json(self) -> str:
         _item = dict(
-            smpp_command=self.smpp_command,
             version=self.version,
             log_id=self.log_id,
             message_id=self.message_id,

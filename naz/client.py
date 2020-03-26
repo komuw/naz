@@ -16,7 +16,6 @@ from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
-from . import codec as the_codec
 from . import broker as the_broker
 
 
@@ -88,11 +87,10 @@ class Client:
         addr_npi: int = 0x00,
         address_range: str = "",
         interface_version: int = 0x34,
-        # non-smpp attributes
+        ### NON-SMPP ATTRIBUTES ###
         client_id: typing.Union[None, str] = None,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
-        codec: typing.Union[None, the_codec.BaseCodec] = None,
         rate_limiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
@@ -100,7 +98,7 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
         socket_timeout: float = 30.0,
-        # non-smpp attributes
+        ### NON-SMPP ATTRIBUTES ###
     ) -> None:
         """
         Parameters:
@@ -118,7 +116,6 @@ class Client:
             interface_version:	Indicates the version of the SMPP protocol supported by the ESME.
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
-            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
             rate_limiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
                 just before sending request to SMSC and just after getting response from SMSC
@@ -146,7 +143,6 @@ class Client:
             interface_version=interface_version,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
-            codec=codec,
             rate_limiter=rate_limiter,
             hook=hook,
             sequence_generator=sequence_generator,
@@ -194,11 +190,6 @@ class Client:
                 },
             )
         self._sanity_check_logger()
-
-        if codec is not None:
-            self.codec = codec
-        else:
-            self.codec = the_codec.SimpleCodec()
 
         self.enquire_link_interval = enquire_link_interval
 
@@ -253,8 +244,6 @@ class Client:
             SmppCommand.RESERVED_FOR_SMSC_VENDOR_B: [0x80010200, 0x800102FF],
         }
 
-        self.data_coding = self._find_data_coding(self.codec.encoding)
-
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
@@ -308,7 +297,6 @@ class Client:
         interface_version: int,
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
-        codec: typing.Union[None, the_codec.BaseCodec],
         rate_limiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
@@ -414,14 +402,7 @@ class Client:
                     )
                 )
             )
-        if not isinstance(codec, (type(None), the_codec.BaseCodec)):
-            errors.append(
-                ValueError(
-                    "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
-                        type(codec)
-                    )
-                )
-            )
+
         if not isinstance(rate_limiter, (type(None), ratelimiter.BaseRateLimiter)):
             errors.append(
                 ValueError(
@@ -1170,6 +1151,10 @@ class Client:
         replace_if_present_flag = proto_msg.replace_if_present_flag
         sm_default_msg_id = proto_msg.sm_default_msg_id
 
+        codec = proto_msg.codec
+        # TODO: make this an attribute of naz.codec.BaseCodec
+        data_coding = self._find_data_coding(codec.encoding)
+
         self._log(
             logging.DEBUG,
             {
@@ -1182,7 +1167,7 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        encoded_short_message = self.codec.encode(short_message)
+        encoded_short_message = codec.encode(short_message)
         sm_length = len(encoded_short_message)
 
         # body
@@ -1209,10 +1194,10 @@ class Client:
             + chr(0).encode("ascii")
             + struct.pack(">B", registered_delivery)
             + struct.pack(">B", replace_if_present_flag)
-            + struct.pack(">B", self.data_coding)
+            + struct.pack(">B", data_coding)
             + struct.pack(">B", sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec.encode(short_message)
+            + encoded_short_message
         )
 
         # header
