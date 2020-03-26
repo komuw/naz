@@ -337,7 +337,11 @@ class SmppDataCoding:
     #   3. https://docs.python.org/3/library/codecs.html#standard-encodings
 
     # The attributes of this class are equivalent to some of the names found in the python standard-encodings documentation
-    # ie; https://docs.python.org/3/library/codecs.html#standard-encodings
+    # We cant use all python standard encodings[1]
+    # We can only use the ones defined in SMPP spec[2];
+    #
+    # 1. https://docs.python.org/3/library/codecs.html#standard-encodings
+    # 2. section 5.2.19 of smpp ver 3.4 spec document.
 
     gsm0338: DataCoding = DataCoding(
         code="gsm0338", value=0b00000000, description="SMSC Default Alphabet"
@@ -394,6 +398,19 @@ class SmppDataCoding:
     # 0b1101xxxx GSM MWI control - see [GSM 03.38]
     # 0b1110xxxx reserved
     # 0b1111xxxx GSM message class control - see [GSM 03.38]
+
+    @staticmethod
+    def _find_data_coding(encoding):
+        # NB:
+        # We cant use all python standard encodings[1]
+        # We can only use the ones defined in SMPP spec[2];
+        #
+        # 1. https://docs.python.org/3/library/codecs.html#standard-encodings
+        # 2. section 5.2.19 of smpp ver 3.4 spec document.
+        try:
+            return SmppDataCoding.__dict__[encoding]
+        except Exception as e:
+            raise ValueError("That encoding: `{0}` is not recognised.".format(encoding)) from e
 
 
 class SmppOptionalTag:

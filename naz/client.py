@@ -22,7 +22,6 @@ from . import broker as the_broker
 from .state import (
     SmppCommand,
     CommandStatus,
-    SmppDataCoding,
     SmppOptionalTag,
     SmppSessionState,
     SmppCommandStatus,
@@ -478,15 +477,6 @@ class Client:
             self.logger.log(level, log_data)
         except Exception:
             pass
-
-    @staticmethod
-    def _find_data_coding(encoding):
-        for key, val in SmppDataCoding.__dict__.items():
-            if not key.startswith("__"):
-                if encoding == val.code:
-                    return val.value
-
-        raise ValueError("That encoding: `{0}` is not recognised.".format(encoding))
 
     def _search_by_command_id_code(self, command_id_code: int) -> typing.Union[None, str]:
         for key, val in self.command_ids.items():
@@ -1153,7 +1143,7 @@ class Client:
 
         codec = proto_msg.codec
         # TODO: make this an attribute of naz.codec.BaseCodec
-        data_coding = self._find_data_coding(codec.encoding)
+        data_coding = codec.data_coding.value
 
         self._log(
             logging.DEBUG,
@@ -1171,7 +1161,7 @@ class Client:
         sm_length = len(encoded_short_message)
 
         # body
-        # SUBMIT_SM KKKK
+        # SUBMIT_SM
         body = b""
         body = (
             body

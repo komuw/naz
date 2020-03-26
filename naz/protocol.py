@@ -88,27 +88,6 @@ class Message(abc.ABC):
         raise NotImplementedError("from_json method must be implemented.")
 
 
-# class SimpleCodec(BaseCodec):
-#     # custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
-
-#     def __init__(self, encoding: str = "gsm0338", errors: str = "strict") -> None:
-#         self.encoding = encoding
-#         self.errors = errors
-
-#     def encode(self, input: str) -> bytes:
-#         encoder = self.custom_codecs[self.encoding].encode
-#         obj, _ = encoder(input, self.errors)
-#         return obj
-
-
-# # codec = SimpleCodec()
-# # encoded_short_message = self.codec.encode(short_message)
-
-# # self.data_coding = self._find_data_coding(codec.encoding)
-
-# # struct.pack(">B", self.data_coding)
-
-
 class SubmitSM(Message):
     """
     The code representation of the `submit_sm` pdu that will get queued into a broker.
@@ -118,6 +97,7 @@ class SubmitSM(Message):
     .. highlight:: python
     .. code-block:: python
 
+        import os
         import naz
 
         broker = naz.broker.SimpleBroker(maxsize=1000)
@@ -412,7 +392,15 @@ class SubmitSM(Message):
     @staticmethod
     def from_json(json_message: str) -> "SubmitSM":
         _in_dict = json.loads(json_message)
-        _codec = the_codec.BaseCodec(**_in_dict["codec"])
+        _codec = json.loads(_in_dict["codec"])
+        # TODO: fix this
+        # we cant use `the_codec.SimpleCodec(**_codec)`
+        # because we do not know what the actual codec class was.
+        # the user might have used a custom codec class
+        _codec = the_codec.SimpleCodec(
+            # TODO: maybe use self.codec.from_json()
+            **_codec
+        )
 
         _in_dict["codec"] = _codec
         return SubmitSM(**_in_dict)

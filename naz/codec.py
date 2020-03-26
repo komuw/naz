@@ -36,6 +36,7 @@ import sys
 import abc
 import codecs
 
+from . import state
 
 # An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
 # however, I'm guessing that vumi has been in use longer and we should thus go with it.
@@ -204,6 +205,7 @@ class BaseCodec(abc.ABC):
         """
         raise NotImplementedError("encode method must be implemented.")
 
+    @abc.abstractmethod
     def decode(self, input: bytes) -> str:
         """
         return a string decoded from the given bytes.
@@ -212,6 +214,13 @@ class BaseCodec(abc.ABC):
             input: the bytes to decode
         """
         raise NotImplementedError("decode method must be implemented.")
+
+    @abc.abstractmethod
+    def to_json(self) -> str:
+        """
+        Serializes the Codec to json.
+        """
+        raise NotImplementedError("to_json method must be implemented.")
 
 
 class SimpleCodec(BaseCodec):
@@ -251,6 +260,7 @@ class SimpleCodec(BaseCodec):
             )
         self.encoding = encoding
         self.errors = errors
+        self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
     def encode(self, input: str) -> bytes:
         if not isinstance(input, str):
