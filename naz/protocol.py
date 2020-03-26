@@ -144,6 +144,7 @@ class SubmitSM(Message):
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
         ### NON-SMPP ATTRIBUTES ###
+        smpp_command: str = state.SmppCommand.SUBMIT_SM,
         codec: typing.Union[None, the_codec.BaseCodec] = None,
         version: int = 1,
         hook_metadata: str = "",
@@ -171,6 +172,7 @@ class SubmitSM(Message):
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
             sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
+            smpp_command: any one of the SMSC commands eg submit_sm
             codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
         """
         self._validate_msg_type_args(
@@ -366,6 +368,7 @@ class SubmitSM(Message):
 
     def to_json(self) -> str:
         _item = dict(
+            smpp_command=self.smpp_command,
             version=self.version,
             short_message=self.short_message,
             source_addr=self.source_addr,
@@ -408,11 +411,17 @@ class SubmitSM(Message):
 
 class EnquireLinkResp(Message):
     def __init__(
-        self, log_id: str, sequence_number: int, version: int = 1, hook_metadata: str = "",
+        self,
+        log_id: str,
+        sequence_number: int,
+        smpp_command: str = state.SmppCommand.ENQUIRE_LINK_RESP,
+        version: int = 1,
+        hook_metadata: str = "",
     ) -> None:
         """
         Parameters:
             log_id: a unique identify of this request
+            smpp_command: any one of the SMSC commands eg enquire_link_resp
             version: This indicates the current version of the naz message protocol.
                      This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
@@ -452,6 +461,7 @@ class EnquireLinkResp(Message):
 
     def to_json(self) -> str:
         _item = dict(
+            smpp_command=self.smpp_command,
             version=self.version,
             log_id=self.log_id,
             sequence_number=self.sequence_number,
@@ -471,12 +481,14 @@ class DeliverSmResp(Message):
         log_id: str,
         message_id: str,
         sequence_number: int,
+        smpp_command: str = state.SmppCommand.DELIVER_SM_RESP,
         version: int = 1,
         hook_metadata: str = "",
     ) -> None:
         """
         Parameters:
             log_id: a unique identify of this request
+            smpp_command: any one of the SMSC commands eg deliver_sm_resp
             version: This indicates the current version of the naz message protocol.
                      This version will enable naz to be able to evolve in future; a future version of `naz` may ship with a different message protocol.
             hook_metadata: a string that to will later on be passed to `naz.Client.hook`. Your application can use it for correlation.
@@ -522,6 +534,7 @@ class DeliverSmResp(Message):
 
     def to_json(self) -> str:
         _item = dict(
+            smpp_command=self.smpp_command,
             version=self.version,
             log_id=self.log_id,
             message_id=self.message_id,
