@@ -77,7 +77,6 @@ class Client:
         system_id: str,
         password: str,
         broker: the_broker.BaseBroker,
-        client_id: typing.Union[None, str] = None,
         # Reference made to NULL settings of Octet-String fields implies that the field
         # consists of a single NULL character, i.e., an octet encoded with value 0x00 (zero).
         # see section 3.1 of v3.4 smpp specification.
@@ -89,6 +88,8 @@ class Client:
         addr_npi: int = 0x00,
         address_range: str = "",
         interface_version: int = 0x34,
+        # non-smpp attributes
+        client_id: typing.Union[None, str] = None,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
         codec: typing.Union[None, the_codec.BaseCodec] = None,
@@ -99,6 +100,7 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
         socket_timeout: float = 30.0,
+        # non-smpp attributes
     ) -> None:
         """
         Parameters:
