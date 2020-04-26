@@ -127,3 +127,40 @@ class TestCodec(TestCase):
     def test_decode_gsm0338_replace(self):
         codec = naz.codec.GSM7BitCodec()
         self.assertEqual(codec.decode("Zoë".encode("utf-8"), "replace")[0], "Zo??")
+
+
+class TestCodecRegistration(TestCase):
+    """
+    run tests as:
+        python -m unittest discover -v -s .
+    run one testcase as:
+        python -m unittest -v tests.test_codec.TestCodecRegistration.test_something
+    """
+
+    def test_registration_of_inbuilt_codecs(self):
+        for k, v in naz.codec._INBUILT_CODECS.items():
+            with self.assertRaises(LookupError) as raised_exception:
+                codecs.lookup(k)
+
+        # register
+        naz.codec.register_codecs()
+
+        for k, v in naz.codec._INBUILT_CODECS.items():
+            codec = codecs.lookup(k)
+            self.assertEqual(codec.name, k)
+
+    # def test_registration_works(self):
+    #     codec = codecs.lookup("utf-8")
+
+    #     custom_codecs = (
+    #         {
+    #             "shift_jis": codecs.CodecInfo(
+    #                 name="ucs2",
+    #                 encode=naz.codec.UCS2Codec.encode,
+    #                 decode=naz.codec.UCS2Codec.decode,
+    #             ),
+    #         },
+    #     )
+
+    #     naz.codec.register_codecs(custom_codecs=custom_codecs)
+    #     self.assertRaises(TypeError, codec.encode, b"some bytes")
