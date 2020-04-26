@@ -173,12 +173,6 @@ class UCS2Codec(codecs.Codec):
     def decode(self, input, errors="strict"):
         return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
-    def toJSON(self):
-        # TODO: remove
-        import json
-
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
-
 
 _INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
     "ucs2": codecs.CodecInfo(name="ucs2", encode=UCS2Codec.encode, decode=UCS2Codec.decode),
