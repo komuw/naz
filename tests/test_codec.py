@@ -138,10 +138,6 @@ class TestCodecRegistration(TestCase):
     """
 
     def test_registration_of_inbuilt_codecs(self):
-        for k, v in naz.codec._INBUILT_CODECS.items():
-            with self.assertRaises(LookupError) as raised_exception:
-                codecs.lookup(k)
-
         # register
         naz.codec.register_codecs()
 
@@ -149,18 +145,28 @@ class TestCodecRegistration(TestCase):
             codec = codecs.lookup(k)
             self.assertEqual(codec.name, k)
 
-    # def test_registration_works(self):
-    #     codec = codecs.lookup("utf-8")
+    def test_registration_of_custom_codecs(self):
+        _sheng_encoding = "kenyan_sheng"
+        with self.assertRaises(LookupError) as raised_exception:
+            codecs.lookup(_sheng_encoding)
 
-    #     custom_codecs = (
-    #         {
-    #             "shift_jis": codecs.CodecInfo(
-    #                 name="ucs2",
-    #                 encode=naz.codec.UCS2Codec.encode,
-    #                 decode=naz.codec.UCS2Codec.decode,
-    #             ),
-    #         },
-    #     )
+        class KenyanShengCodec(codecs.Codec):
+            def encode(self, input, errors="strict"):
+                return codecs.utf_8_encode(input, errors)
 
-    #     naz.codec.register_codecs(custom_codecs=custom_codecs)
-    #     self.assertRaises(TypeError, codec.encode, b"some bytes")
+            def decode(self, input, errors="strict"):
+                return codecs.utf_8_decode(input, errors)
+
+        custom_codecs = {
+            _sheng_encoding: codecs.CodecInfo(
+                name=_sheng_encoding,
+                encode=KenyanShengCodec.encode,
+                decode=KenyanShengCodec.decode,
+            ),
+        }
+
+        # register
+        naz.codec.register_codecs(custom_codecs)
+
+        codec = codecs.lookup(_sheng_encoding)
+        self.assertEqual(codec.name, _sheng_encoding)

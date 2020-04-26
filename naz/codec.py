@@ -195,6 +195,10 @@ def register_codecs(custom_codecs=None):
     Parameters:
         custom_codecs: a list of custom codecs to register.
     """
+    # Note: Search function registration is not currently reversible,
+    # which may cause problems in some cases, such as unit testing or module reloading.
+    # https://docs.python.org/3.7/library/codecs.html#codecs.register
+
     # register the naz inbuilt ones first so that if a custom one
     # wants to override inbuilt ones it can be able to do so.
     def _codec_search_function(_encoding):
