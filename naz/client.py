@@ -1,5 +1,6 @@
 import os
 import struct
+import codecs
 import random
 import socket
 import string
@@ -16,6 +17,7 @@ from . import sequence
 from . import throttle
 from . import correlater
 from . import ratelimiter
+from . import codec as the_codec
 from . import broker as the_broker
 
 
@@ -97,6 +99,7 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
         socket_timeout: float = 30.0,
+        custom_codecs: typing.Union[None, typing.Dict[str, codecs.CodecInfo]] = None
         ### NON-SMPP ATTRIBUTES ###
     ) -> None:
         """
@@ -124,6 +127,7 @@ class Client:
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
             socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out
+            custom_codecs: a dictionary of encodings and their corresponding `codecs.CodecInfo <https://docs.python.org/3/library/codecs.html#codecs.CodecInfo>`_ that you would like to register.
 
         Raises:
             NazClientError: raised if there’s an error instantiating a naz Client.
@@ -149,6 +153,7 @@ class Client:
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
             socket_timeout=socket_timeout,
+            custom_codecs=custom_codecs,
         )
 
         self._PID = os.getpid()
@@ -278,6 +283,8 @@ class Client:
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
+        the_codec.register_codecs(custom_codecs)
+
         # For exceptions, we try and avoid catch-all blocks. Instead we catch only the exceptions we expect.
         # Exception hierarchy: https://docs.python.org/3/library/exceptions.html#exception-hierarchy
 
@@ -303,6 +310,7 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
         socket_timeout: float,
+        custom_codecs: typing.Union[None, typing.Dict[str, codecs.CodecInfo]],
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -458,6 +466,34 @@ class Client:
                     )
                 )
             )
+        typing.Dict[str, codecs.CodecInfo]
+
+        if not isinstance(custom_codecs, (type(None), dict)):
+            errors.append(
+                ValueError(
+                    "`custom_codecs` should be of type:: `None` or `dict` You entered: {0}".format(
+                        type(custom_codecs)
+                    )
+                )
+            )
+
+        if custom_codecs:
+            if not isinstance(custom_codecs, dict):
+                raise ValueError(
+                    "`custom_codecs` should be of type:: `None` or `dict` You entered: {0}".format(
+                        type(custom_codecs)
+                    )
+                )
+            for _, _codec_info in custom_codecs.items():
+                if not isinstance(_codec_info, codecs.CodecInfo):
+                    errors.append(
+                        ValueError(
+                            "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo` You entered: {0}".format(
+                                type(custom_codecs)
+                            )
+                        )
+                    )
+
         if len(errors):
             raise NazClientError(errors)
 
@@ -1141,9 +1177,14 @@ class Client:
         replace_if_present_flag = proto_msg.replace_if_present_flag
         sm_default_msg_id = proto_msg.sm_default_msg_id
 
-        codec = proto_msg.codec
-        # TODO: make this an attribute of naz.codec.BaseCodec
-        data_coding = codec.data_coding.value
+        codecs.getencoder(proto_msg.encoding)
+        codecs.lookup(proto_msg.encoding)
+
+        encoder = codecs.getencoder(proto_msg.encoding)
+        data_coding = proto_msg.data_coding
+        import pdb
+
+        pdb.set_trace()
 
         self._log(
             logging.DEBUG,
@@ -1157,7 +1198,7 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        encoded_short_message = codec.encode(short_message)
+        encoded_short_message, _ = encoder(short_message, proto_msg.errors)
         sm_length = len(encoded_short_message)
 
         # body
@@ -1184,7 +1225,7 @@ class Client:
             + chr(0).encode("ascii")
             + struct.pack(">B", registered_delivery)
             + struct.pack(">B", replace_if_present_flag)
-            + struct.pack(">B", data_coding)
+            + struct.pack(">B", data_coding.value)
             + struct.pack(">B", sm_default_msg_id)
             + struct.pack(">B", sm_length)
             + encoded_short_message

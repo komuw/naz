@@ -1,9 +1,9 @@
 import abc
 import json
+import codecs
 import typing
 
 from . import state
-from . import codec as the_codec
 
 
 NAZ_MESSAGE_PROTOCOL_VERSION = 1
@@ -145,9 +145,10 @@ class SubmitSM(Message):
         sm_default_msg_id: int = 0x00000000,
         ### NON-SMPP ATTRIBUTES ###
         smpp_command: str = state.SmppCommand.SUBMIT_SM,
-        codec: typing.Union[None, the_codec.BaseCodec] = None,
         version: int = 1,
         hook_metadata: str = "",
+        encoding: str = "gsm0338",
+        errors: str = "strict",
         #### NON-SMPP ATTRIBUTES ###
     ) -> None:
         """
@@ -173,7 +174,10 @@ class SubmitSM(Message):
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
             sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
             smpp_command: any one of the SMSC commands eg submit_sm
-            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
+
+            encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
+                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
+            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         self._validate_msg_type_args(
             short_message=short_message,
@@ -195,7 +199,8 @@ class SubmitSM(Message):
             registered_delivery=registered_delivery,
             replace_if_present_flag=replace_if_present_flag,
             sm_default_msg_id=sm_default_msg_id,
-            codec=codec,
+            encoding=encoding,
+            errors=errors,
         )
 
         self.smpp_command: str = state.SmppCommand.SUBMIT_SM
@@ -219,11 +224,9 @@ class SubmitSM(Message):
         self.registered_delivery = registered_delivery
         self.replace_if_present_flag = replace_if_present_flag
         self.sm_default_msg_id = sm_default_msg_id
-
-        if codec is not None:
-            self.codec = codec
-        else:
-            self.codec = the_codec.SimpleCodec()
+        self.encoding = encoding
+        self.errors = errors
+        self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
     @staticmethod
     def _validate_msg_type_args(
@@ -246,7 +249,8 @@ class SubmitSM(Message):
         registered_delivery: int,
         replace_if_present_flag: int,
         sm_default_msg_id: int,
-        codec: typing.Union[None, the_codec.BaseCodec],
+        encoding: str,
+        errors: str,
     ) -> None:
         if not isinstance(version, int):
             raise ValueError(
@@ -358,12 +362,13 @@ class SubmitSM(Message):
                     type(sm_default_msg_id)
                 )
             )
-
-        if not isinstance(codec, (type(None), the_codec.BaseCodec)):
+        if not isinstance(encoding, str):
             raise ValueError(
-                "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
-                    type(codec)
-                )
+                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
+            )
+        if not isinstance(errors, str):
+            raise ValueError(
+                "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
             )
 
     def to_json(self) -> str:
@@ -388,24 +393,14 @@ class SubmitSM(Message):
             registered_delivery=self.registered_delivery,
             replace_if_present_flag=self.replace_if_present_flag,
             sm_default_msg_id=self.sm_default_msg_id,
-            codec=self.codec.to_json(),
+            encoding=self.encoding,
+            errors=self.errors,
         )
         return json.dumps(_item)
 
     @staticmethod
     def from_json(json_message: str) -> "SubmitSM":
         _in_dict = json.loads(json_message)
-        _codec = json.loads(_in_dict["codec"])
-        # TODO: fix this
-        # we cant use `the_codec.SimpleCodec(**_codec)`
-        # because we do not know what the actual codec class was.
-        # the user might have used a custom codec class
-        _codec = the_codec.SimpleCodec(
-            # TODO: maybe use self.codec.from_json()
-            **_codec
-        )
-
-        _in_dict["codec"] = _codec
         return SubmitSM(**_in_dict)
 
 

@@ -35,6 +35,7 @@
 import sys
 import abc
 import codecs
+import typing
 
 from . import state
 
@@ -172,6 +173,47 @@ class UCS2Codec(codecs.Codec):
     def decode(self, input, errors="strict"):
         return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
+    def toJSON(self):
+        import json
+
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+
+
+_INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
+    "ucs2": codecs.CodecInfo(name="ucs2", encode=UCS2Codec.encode, decode=UCS2Codec.decode),
+    "gsm0338": codecs.CodecInfo(
+        name="gsm0338", encode=GSM7BitCodec.encode, decode=GSM7BitCodec.decode
+    ),
+}
+
+
+def register_codecs(custom_codecs=None):
+    """
+    Register codecs, both custom and naz inbuilt ones
+
+    Parameters:
+        custom_codecs: a list of custom codecs to register.
+    """
+    # register the naz inbuilt ones first so that if a custom one
+    # wants to override inbuilt ones it can be able to do so.
+    def _codec_search_function(_encoding):
+        return _INBUILT_CODECS.get(_encoding)
+
+    codecs.register(_codec_search_function)
+
+    # codecs.getencoder('ucs2')
+    # codecs.lookup('ucs2')
+
+    if custom_codecs:
+
+        def _codec_search_function(_encoding):
+            import pdb
+
+            pdb.set_trace()
+            return custom_codecs.get(_encoding)
+
+        codecs.register(_codec_search_function)
+
 
 class BaseCodec(abc.ABC):
     """
@@ -223,11 +265,13 @@ class BaseCodec(abc.ABC):
         raise NotImplementedError("to_json method must be implemented.")
 
 
-class SimpleCodec(BaseCodec):
+class SimpleCodec:
     """
-    This is an implementation of `BaseCodec`
+    This is an implementation of encoding and decoding for smpp messages.
 
     SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
+    It also implements the ucs2 encoding/decoding scheme.
+    Additionally, you can use it to pass in a custom codec.
     This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_
 
     example usage:
@@ -235,20 +279,36 @@ class SimpleCodec(BaseCodec):
     .. highlight:: python
     .. code-block:: python
 
-       ncodec = SimpleCodec(encoding="ucs2")
+        ncodec = SimpleCodec(encoding="ucs2")
+        ncodec.encode("Zoë")
+        ncodec.decode(b'Zo\xc3\xab')
 
-       ncodec.encode("Zoë")
-       ncodec.decode(b'Zo\xc3\xab')
+        # to use a custom codec.
+        import codecs
+        class MyGsm0338Codec(codecs.Codec):
+            def encode(self, input, errors="strict"):
+                # implement here
+                pass
+            def decode(self, input, errors="strict"):
+                pass
+        
+        my_codec = SimpleCodec(encoding="gsm0338", custom_codec=MyGsm0338Codec())
+        my_codec.encode("Zoë")
     """
 
-    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
+    _CUSTOM_CODECS = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
 
-    def __init__(self, encoding: str = "gsm0338", errors: str = "strict") -> None:
+    def __init__(
+        self, encoding: str = "gsm0338", errors: str = "strict", custom_codec=None
+    ) -> None:
         """
         Parameters:
             encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            custom_codec: an implementation of pythons' `codecs.Codec <https://github.com/python/cpython/blob/3.8/Lib/codecs.py#L114>`_ interface.
+                          When supplied, the custom_codec will be used to encode & decode for the given :attr:`encoding <SimpleCodec.encoding>`
+                          If a codec already exists for the given :attr:`encoding <SimpleCodec.encoding>`, then it is replaced with custom_codec.
         """
         if not isinstance(encoding, str):
             raise ValueError(
@@ -258,6 +318,18 @@ class SimpleCodec(BaseCodec):
             raise ValueError(
                 "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
             )
+        if not isinstance(custom_codec, (type(None), codecs.Codec)):
+            raise ValueError(
+                "`custom_codec` should be of type:: `None` or `codecs.Codec` You entered: {0}".format(
+                    type(custom_codec)
+                )
+            )
+
+        self.custom_codec = custom_codec
+        if self.custom_codec:
+            # will replace codec for the given encoding if it already exists
+            self._CUSTOM_CODECS.update({encoding: self.custom_codec})
+
         self.encoding = encoding
         self.errors = errors
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
@@ -265,9 +337,10 @@ class SimpleCodec(BaseCodec):
     def encode(self, input: str) -> bytes:
         if not isinstance(input, str):
             raise NazCodecException("Only strings accepted for encoding.")
+
         encoding = self.encoding or sys.getdefaultencoding()
-        if encoding in self.custom_codecs:
-            encoder = self.custom_codecs[encoding].encode
+        if encoding in self._CUSTOM_CODECS:
+            encoder = self._CUSTOM_CODECS[encoding].encode
         else:
             encoder = codecs.getencoder(encoding)
 
@@ -277,16 +350,16 @@ class SimpleCodec(BaseCodec):
     def decode(self, input: bytes) -> str:
         if not isinstance(input, (bytes, bytearray)):
             raise NazCodecException("Only bytestrings accepted for decoding.")
+
         encoding = self.encoding or sys.getdefaultencoding()
-        if encoding in self.custom_codecs:
-            decoder = self.custom_codecs[encoding].decode
+        if encoding in self._CUSTOM_CODECS:
+            decoder = self._CUSTOM_CODECS[encoding].decode
         else:
             decoder = codecs.getdecoder(encoding)
 
         obj, _ = decoder(input, self.errors)
         return obj
 
-    # TODO: add this method to base interface
     # TODO: check if python has protocol methods for json(akin to Golang's marshalJson interface methods)
     def to_json(self) -> str:
         """
@@ -294,5 +367,5 @@ class SimpleCodec(BaseCodec):
         """
         import json
 
-        _item = dict(encoding=self.encoding, errors=self.errors)
+        _item = dict(encoding=self.encoding, errors=self.errors, custom_codec=self.custom_codec)
         return json.dumps(_item)
