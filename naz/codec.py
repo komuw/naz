@@ -174,6 +174,7 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
 
     def toJSON(self):
+        # TODO: remove
         import json
 
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
