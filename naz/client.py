@@ -1176,15 +1176,8 @@ class Client:
         registered_delivery = proto_msg.registered_delivery
         replace_if_present_flag = proto_msg.replace_if_present_flag
         sm_default_msg_id = proto_msg.sm_default_msg_id
-
-        codecs.getencoder(proto_msg.encoding)
-        codecs.lookup(proto_msg.encoding)
-
         encoder = codecs.getencoder(proto_msg.encoding)
         data_coding = proto_msg.data_coding
-        import pdb
-
-        pdb.set_trace()
 
         self._log(
             logging.DEBUG,
