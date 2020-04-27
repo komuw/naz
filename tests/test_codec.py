@@ -172,4 +172,27 @@ class TestCodecRegistration(TestCase):
         self.assertEqual(codec.name, _sheng_encoding)
 
     def test_codec_overriding(self):
-        raise ValueError("TODO:")
+        """
+        tests that users can be able to override an inbuilt codec
+        with their own implementation.
+        """
+
+        class OverridingCodec(codecs.Codec):
+            def encode(self, input, errors="strict"):
+                return codecs.utf_8_encode(input, errors)
+
+            def decode(self, input, errors="strict"):
+                return codecs.utf_8_decode(input, errors)
+
+        custom_codecs = {
+            "gsm0338": codecs.CodecInfo(
+                name="gsm0338", encode=OverridingCodec.encode, decode=OverridingCodec.decode,
+            ),
+        }
+
+        # register, this will override inbuilt `gsm0338` codec with a custom one.
+        naz.codec.register_codecs(custom_codecs)
+
+        new_codec = codecs.lookup("gsm0338")
+        self.assertNotEqual(new_codec.encode, naz.codec.GSM7BitCodec.encode)
+        self.assertEqual(new_codec.encode, OverridingCodec.encode)

@@ -184,25 +184,25 @@ _INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
 
 def register_codecs(custom_codecs=None):
     """
-    Register codecs, both custom and naz inbuilt ones
+    Register codecs, both custom and naz inbuilt ones.
+    Custom codecs that have same encoding as inbuilt ones will take precedence.
 
     Parameters:
         custom_codecs: a list of custom codecs to register.
     """
+    if custom_codecs is None:
+        custom_codecs = {}
+
     # Note: Search function registration is not currently reversible,
     # which may cause problems in some cases, such as unit testing or module reloading.
     # https://docs.python.org/3.7/library/codecs.html#codecs.register
 
-    # register the naz inbuilt ones first so that if a custom one
-    # wants to override inbuilt ones it can be able to do so.
     def _codec_search_function(_encoding):
-        return _INBUILT_CODECS.get(_encoding)
+        """
+        We should try and get codecs from the custom_codecs first.
+        This way, if someone had overridden an inbuilt codec, their
+        implementation is chosen first and cached.
+        """
+        return custom_codecs.get(_encoding, _INBUILT_CODECS.get(_encoding))
 
     codecs.register(_codec_search_function)
-
-    if custom_codecs:
-
-        def _codec_search_function(_encoding):
-            return custom_codecs.get(_encoding)
-
-        codecs.register(_codec_search_function)
