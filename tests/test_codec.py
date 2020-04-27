@@ -147,7 +147,7 @@ class TestCodecRegistration(TestCase):
 
     def test_registration_of_custom_codecs(self):
         _sheng_encoding = "kenyan_sheng"
-        with self.assertRaises(LookupError) as raised_exception:
+        with self.assertRaises(LookupError):
             codecs.lookup(_sheng_encoding)
 
         class KenyanShengCodec(codecs.Codec):

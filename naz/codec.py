@@ -32,12 +32,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys
-import abc
 import codecs
 import typing
 
-from . import state
 
 # An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
 # however, I'm guessing that vumi has been in use longer and we should thus go with it.
