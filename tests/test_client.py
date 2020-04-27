@@ -197,7 +197,7 @@ class TestClient(TestCase):
             "addr_npi": DummyClientArg,
             "address_range": DummyClientArg,
             "sequence_generator": DummyClientArg,
-            "codec": DummyClientArg,
+            "custom_codecs": DummyClientArg,
             "enquire_link_interval": DummyClientArg,
             "rate_limiter": DummyClientArg,
             "hook": DummyClientArg,
