@@ -76,6 +76,8 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
+    # https://github.com/google/pytype/issues/574
+    # https://github.com/python/mypy/issues/8732
     def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object and its length.
