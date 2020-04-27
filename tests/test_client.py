@@ -263,6 +263,41 @@ class TestClient(TestCase):
             str(raised_exception.exception),
         )
 
+    def test_custom_encodings(self):
+        """
+        tests that any of the encodings allowed by SMPP spec[1] can be used.
+        1. https://github.com/komuw/naz/blob/c47f5030b720f3bac400dd6bd457b4415b0d5b7b/naz/state.py#L328
+        2. Also see section 5.2.19 of SMPP spec
+        """
+
+        class ExampleCodec(codecs.Codec):
+            def encode(self, input, errors="strict"):
+                return codecs.utf_8_encode(input, errors)
+
+            def decode(self, input, errors="strict"):
+                return codecs.utf_8_decode(input, errors)
+
+        for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
+            cli = naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                broker=self.broker,
+                logger=naz.log.SimpleLogger(
+                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                ),
+                socket_timeout=0.0000001,
+                custom_codecs={
+                    encoding: codecs.CodecInfo(
+                        name=encoding, encode=ExampleCodec.encode, decode=ExampleCodec.decode,
+                    ),
+                },
+            )
+            self._run(cli.connect())
+            self.assertTrue(hasattr(cli.reader, "read"))
+            self.assertTrue(hasattr(cli.writer, "write"))
+
     def test_can_connect(self):
         self._run(self.cli.connect())
         self.assertTrue(hasattr(self.cli.reader, "read"))
@@ -1079,29 +1114,6 @@ class TestClient(TestCase):
         ) as mock_naz_unbind_and_disconnect:
             self._run(self.cli._parse_response_pdu(pdu=b"\x00\x00\x00\x15\x80"))
             self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)
-
-    def test_custom_encodings(self):
-        """
-        tests that any of the encodings allowed by SMPP spec[1] can be used.
-        1. https://github.com/komuw/naz/blob/c47f5030b720f3bac400dd6bd457b4415b0d5b7b/naz/state.py#L328
-        2. Also see section 5.2.19 of SMPP spec
-        """
-        for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
-            cli = naz.Client(
-                smsc_host="127.0.0.1",
-                smsc_port=2775,
-                system_id="smppclient1",
-                password=os.getenv("password", "password"),
-                broker=self.broker,
-                logger=naz.log.SimpleLogger(
-                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
-                ),
-                socket_timeout=0.0000001,
-                codec=naz.codec.SimpleCodec(encoding=encoding),
-            )
-            self._run(cli.connect())
-            self.assertTrue(hasattr(cli.reader, "read"))
-            self.assertTrue(hasattr(cli.writer, "write"))
 
     def test_enquire_link_resp_sending(self):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:

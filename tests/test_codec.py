@@ -170,3 +170,6 @@ class TestCodecRegistration(TestCase):
 
         codec = codecs.lookup(_sheng_encoding)
         self.assertEqual(codec.name, _sheng_encoding)
+
+    def test_codec_overriding(self):
+        raise ValueError("TODO:")
