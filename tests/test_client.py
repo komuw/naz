@@ -3,6 +3,7 @@
 
 import os
 import json
+import codecs
 import struct
 import asyncio
 from unittest import TestCase, mock, skip
@@ -225,14 +226,17 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 broker=self.broker,
-                codec=naz.codec.SimpleCodec(encoding=encoding),
+                custom_codecs={"encoding": {"someKey": "someValue"},},
             )
 
-        self.assertRaises(ValueError, mock_create_client)
-        with self.assertRaises(ValueError) as raised_exception:
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
             mock_create_client()
+
         self.assertIn(
-            "That encoding: `{0}` is not recognised.".format(encoding),
+            "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo`".format(
+                encoding
+            ),
             str(raised_exception.exception),
         )
 
