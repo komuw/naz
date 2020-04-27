@@ -175,6 +175,7 @@ class SubmitSM(Message):
 
             encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
+                      If you want to use your own custom codec implementation for an encoding, make sure to pass it to :attr:`custom_codecs <Client.custom_codecs>`
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         self._validate_msg_type_args(
