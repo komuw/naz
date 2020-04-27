@@ -76,7 +76,7 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, input, errors="strict"):
+    def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object.
 
@@ -84,6 +84,8 @@ class GSM7BitCodec(codecs.Codec):
             input: the string to encode
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
+        # for the types of this method,
+        # see: https://github.com/python/typeshed/blob/f7d240f06e5608a20b2daac4e96fe085c0577239/stdlib/2and3/codecs.pyi#L21-L22
         result = []
         for position, c in enumerate(input):
             idx = self.gsm_basic_charset_map.get(c)
@@ -104,7 +106,7 @@ class GSM7BitCodec(codecs.Codec):
         obj = obj.encode("latin-1")
         return (obj, len(obj))
 
-    def decode(self, input, errors="strict"):
+    def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
         return a string decoded from the given bytes.
 
@@ -180,7 +182,7 @@ class UCS2Codec(codecs.Codec):
     UCS2 is for all intents & purposes assumed to be the same as big endian UTF16.
     """
 
-    def encode(self, input, errors="strict"):
+    def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object.
 
@@ -191,7 +193,7 @@ class UCS2Codec(codecs.Codec):
         # https://github.com/google/pytype/issues/348
         return codecs.utf_16_be_encode(input, errors)  # pytype: disable=module-attr
 
-    def decode(self, input, errors="strict"):
+    def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
         return a string decoded from the given bytes.
 
