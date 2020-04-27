@@ -67,7 +67,7 @@ class SimpleCorrelater(BaseCorrelater):
 
     SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.
 
-     The storage is done in memory using a python dictionary. The storage looks like:
+    The storage is done in memory using a python dictionary. The storage looks like:
 
     .. highlight:: python
     .. code-block:: python
