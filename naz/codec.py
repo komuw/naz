@@ -158,11 +158,7 @@ class GSM7BitCodec(codecs.Codec):
     def _handle_decode_strict_error(char, position, obj, indexErrorException):
         # https://github.com/google/pytype/issues/349
         raise UnicodeDecodeError(
-            "gsm0338",
-            chr(char).encode("latin-1"),
-            position,
-            position + 1,
-            repr(obj),  # pytype: disable=wrong-arg-types
+            "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj),
         ) from indexErrorException
 
     @staticmethod
@@ -191,7 +187,7 @@ class UCS2Codec(codecs.Codec):
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         # https://github.com/google/pytype/issues/348
-        return codecs.utf_16_be_encode(input, errors)  # pytype: disable=module-attr
+        return codecs.utf_16_be_encode(input, errors)
 
     def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
@@ -201,7 +197,7 @@ class UCS2Codec(codecs.Codec):
             input: the bytes to decode
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
-        return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
+        return codecs.utf_16_be_decode(input, errors)
 
 
 _INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
