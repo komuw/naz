@@ -78,7 +78,7 @@ class GSM7BitCodec(codecs.Codec):
 
     def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
-        return an encoded version of the string as a bytes object.
+        return an encoded version of the string as a bytes object and its length.
 
         Parameters:
             input: the string to encode
@@ -103,12 +103,12 @@ class GSM7BitCodec(codecs.Codec):
         # import six; six.b('someString')
         # see:
         # https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625
-        obj = obj.encode("latin-1")
-        return (obj, len(obj))
+        obj_bytes = obj.encode("latin-1")
+        return (obj_bytes, len(obj_bytes))
 
     def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
-        return a string decoded from the given bytes.
+        return a string decoded from the given bytes and its length.
 
         Parameters:
             input: the bytes to decode
@@ -180,7 +180,7 @@ class UCS2Codec(codecs.Codec):
 
     def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
-        return an encoded version of the string as a bytes object.
+        return an encoded version of the string as a bytes object and its length.
 
         Parameters:
             input: the string to encode
@@ -191,7 +191,7 @@ class UCS2Codec(codecs.Codec):
 
     def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
-        return a string decoded from the given bytes.
+        return a string decoded from the given bytes and its length.
 
         Parameters:
             input: the bytes to decode
