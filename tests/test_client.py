@@ -216,8 +216,28 @@ class TestClient(TestCase):
         for exc in raised_exception.exception.args[0]:
             self.assertIsInstance(exc, ValueError)
 
+    def test_instantiate_custom_codecs(self):
+        def mock_create_client():
+            naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                broker=self.broker,
+                custom_codecs={"encoding": {"someKey": "someValue"}},
+            )
+
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+            mock_create_client()
+
+        self.assertIn(
+            "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo`",
+            str(raised_exception.exception),
+        )
+
     def test_instantiate_bad_encoding(self):
-        encoding = "unknownEncoding"
+        encoding = "unknownSmppEncoding"
 
         def mock_create_client():
             naz.Client(
@@ -226,17 +246,20 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 broker=self.broker,
-                custom_codecs={"encoding": {"someKey": "someValue"},},
+                custom_codecs={
+                    encoding: codecs.CodecInfo(
+                        name=encoding,
+                        encode=naz.codec.UCS2Codec.encode,
+                        decode=naz.codec.UCS2Codec.decode,
+                    ),
+                },
             )
 
-        self.assertRaises(naz.client.NazClientError, mock_create_client)
-        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+        self.assertRaises(ValueError, mock_create_client)
+        with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
-
         self.assertIn(
-            "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo`".format(
-                encoding
-            ),
+            "That encoding: `{0}` is not a recognised SMPP encoding".format(encoding),
             str(raised_exception.exception),
         )
 

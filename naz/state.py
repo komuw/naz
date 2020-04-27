@@ -410,7 +410,9 @@ class SmppDataCoding:
         try:
             return SmppDataCoding.__dict__[encoding]
         except Exception as e:
-            raise ValueError("That encoding: `{0}` is not recognised.".format(encoding)) from e
+            raise ValueError(
+                "That encoding: `{0}` is not a recognised SMPP encoding.".format(encoding)
+            ) from e
 
 
 class SmppOptionalTag:

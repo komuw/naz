@@ -12,6 +12,7 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
+from . import state
 from . import protocol
 from . import sequence
 from . import throttle
@@ -484,7 +485,7 @@ class Client:
                         type(custom_codecs)
                     )
                 )
-            for _, _codec_info in custom_codecs.items():
+            for _encoding, _codec_info in custom_codecs.items():
                 if not isinstance(_codec_info, codecs.CodecInfo):
                     errors.append(
                         ValueError(
@@ -493,6 +494,8 @@ class Client:
                             )
                         )
                     )
+                # validate encoding is one allowed by SMPP
+                _ = state.SmppDataCoding._find_data_coding(_encoding)
 
         if len(errors):
             raise NazClientError(errors)
