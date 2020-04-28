@@ -141,7 +141,7 @@ class TestCodecRegistration(TestCase):
         # register
         naz.codec.register_codecs()
 
-        for k, v in naz.codec._INBUILT_CODECS.items():
+        for k, _ in naz.codec._INBUILT_CODECS.items():
             codec = codecs.lookup(k)
             self.assertEqual(codec.name, k)
 

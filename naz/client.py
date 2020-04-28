@@ -467,7 +467,6 @@ class Client:
                     )
                 )
             )
-        typing.Dict[str, codecs.CodecInfo]
 
         if not isinstance(custom_codecs, (type(None), dict)):
             errors.append(
