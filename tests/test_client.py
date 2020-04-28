@@ -227,8 +227,8 @@ class TestClient(TestCase):
                 custom_codecs={"encoding": {"someKey": "someValue"}},
             )
 
-        self.assertRaises(naz.client.NazClientError, mock_create_client)
-        with self.assertRaises(naz.client.NazClientError) as raised_exception:
+        self.assertRaises(ValueError, mock_create_client)
+        with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
 
         self.assertIn(
@@ -278,7 +278,7 @@ class TestClient(TestCase):
                 return codecs.utf_8_decode(input, errors)
 
         for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
-            cli = naz.Client(
+            naz.Client(
                 smsc_host="127.0.0.1",
                 smsc_port=2775,
                 system_id="smppclient1",
@@ -294,9 +294,6 @@ class TestClient(TestCase):
                     ),
                 },
             )
-            self._run(cli.connect())
-            self.assertTrue(hasattr(cli.reader, "read"))
-            self.assertTrue(hasattr(cli.writer, "write"))
 
     def test_can_connect(self):
         self._run(self.cli.connect())
