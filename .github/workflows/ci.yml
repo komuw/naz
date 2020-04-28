@@ -80,7 +80,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.7', '3.8' ]
-    timeout-minutes: 7
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v1
 
