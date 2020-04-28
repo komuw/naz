@@ -76,7 +76,9 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
+    # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+    @staticmethod
+    def encode(input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object and its length.
 
@@ -88,15 +90,15 @@ class GSM7BitCodec(codecs.Codec):
         # see: https://github.com/python/typeshed/blob/f7d240f06e5608a20b2daac4e96fe085c0577239/stdlib/2and3/codecs.pyi#L21-L22
         result = []
         for position, c in enumerate(input):
-            idx = self.gsm_basic_charset_map.get(c)
+            idx = GSM7BitCodec.gsm_basic_charset_map.get(c)
             if idx is not None:
                 result.append(chr(idx))
                 continue
-            idx = self.gsm_extension_map.get(c)
+            idx = GSM7BitCodec.gsm_extension_map.get(c)
             if idx is not None:
                 result.append(chr(27) + chr(idx))
             else:
-                result.append(self._handle_encode_error(c, errors, position, input))
+                result.append(GSM7BitCodec._handle_encode_error(c, errors, position, input))
 
         obj = "".join(result)
         # this is equivalent to;
@@ -106,7 +108,8 @@ class GSM7BitCodec(codecs.Codec):
         obj_bytes = obj.encode("latin-1")
         return (obj_bytes, len(obj_bytes))
 
-    def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
+    @staticmethod
+    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
         return a string decoded from the given bytes and its length.
 
@@ -120,21 +123,31 @@ class GSM7BitCodec(codecs.Codec):
             try:
                 if c == 27:
                     c = next(res)
-                    result.append(self.gsm_extension[c])
+                    result.append(GSM7BitCodec.gsm_extension[c])
                 else:
-                    result.append(self.gsm_basic_charset[c])
+                    result.append(GSM7BitCodec.gsm_basic_charset[c])
             except IndexError as indexErrorException:
                 result.append(
-                    self._handle_decode_error(c, errors, position, input, indexErrorException)
+                    GSM7BitCodec._handle_decode_error(
+                        c, errors, position, input, indexErrorException
+                    )
                 )
 
         obj = "".join(result)
         return (obj, len(obj))
 
-    def _handle_encode_error(self, char, handler_type, position, obj):
-        handler = getattr(self, "handle_encode_%s_error" % (handler_type,), None)
+    @staticmethod
+    def _handle_encode_error(char, handler_type, position, obj):
+        handler = None
+        if handler_type == "strict":
+            handler = GSM7BitCodec._handle_encode_strict_error
+        elif handler_type == "ignore":
+            handler = GSM7BitCodec._handle_encode_ignore_error
+        elif handler_type == "replace":
+            handler = GSM7BitCodec._handle_encode_replace_error
+
         if handler is None:
-            raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
+            raise NazCodecException("Invalid errors type {0} for GSM7BitCodec".format(handler_type))
         return handler(char, position, obj)
 
     @staticmethod
@@ -145,13 +158,22 @@ class GSM7BitCodec(codecs.Codec):
     def _handle_encode_ignore_error(char, position, obj):
         return ""
 
-    def _handle_encode_replace_error(self, char, position, obj):
-        return chr(self.gsm_basic_charset_map.get("?"))
+    @staticmethod
+    def _handle_encode_replace_error(char, position, obj):
+        return chr(GSM7BitCodec.gsm_basic_charset_map.get("?"))
 
-    def _handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
-        handler = getattr(self, "handle_decode_%s_error" % (handler_type,), None)
+    @staticmethod
+    def _handle_decode_error(char, handler_type, position, obj, indexErrorException):
+        handler = None
+        if handler_type == "strict":
+            handler = GSM7BitCodec._handle_decode_strict_error
+        elif handler_type == "ignore":
+            handler = GSM7BitCodec._handle_decode_ignore_error
+        elif handler_type == "replace":
+            handler = GSM7BitCodec._handle_decode_replace_error
+
         if handler is None:
-            raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
+            raise NazCodecException("Invalid errors type {0} for GSM7BitCodec".format(handler_type))
         return handler(char, position, obj, indexErrorException)
 
     @staticmethod
@@ -178,7 +200,9 @@ class UCS2Codec(codecs.Codec):
     UCS2 is for all intents & purposes assumed to be the same as big endian UTF16.
     """
 
-    def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
+    # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+    @staticmethod
+    def encode(input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object and its length.
 
@@ -189,7 +213,8 @@ class UCS2Codec(codecs.Codec):
         # https://github.com/google/pytype/issues/348
         return codecs.utf_16_be_encode(input, errors)
 
-    def decode(self, input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
+    @staticmethod
+    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
         """
         return a string decoded from the given bytes and its length.
 
