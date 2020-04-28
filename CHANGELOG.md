@@ -3,7 +3,7 @@ most recent version is listed first.
 
 
 ## **version:** v0.8.0
-- Add ability to use different codecs for different messages while using the same `naz` client : https://github.com/komuw/naz/pull/201   
+- Add ability to use different codecs for different messages while using the same `naz` client: https://github.com/komuw/naz/pull/201   
   With this change, message encoding is now a property of the message and not the client.
 
 
