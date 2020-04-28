@@ -245,6 +245,8 @@ def register_codecs(custom_codecs: typing.Union[None, typing.Dict[str, codecs.Co
     """
     Register codecs, both custom and naz inbuilt ones.
     Custom codecs that have same encoding as inbuilt ones will take precedence.
+    Users should never have to use this directly,
+    instead; use `naz.Client(custom_codecs={"my_encoding": codecs.CodecInfo(name="my_encoding", encode=..., decode=...)})`
 
     Parameters:
         custom_codecs: a list of custom codecs to register.
