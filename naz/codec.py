@@ -227,8 +227,17 @@ class UCS2Codec(codecs.Codec):
 
 _INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
     #  mypy issue; https://github.com/python/mypy/issues/8732
-    "ucs2": codecs.CodecInfo(name="ucs2", encode=UCS2Codec.encode, decode=UCS2Codec.decode),  # type: ignore
-    "gsm0338": codecs.CodecInfo(name="gsm0338", encode=GSM7BitCodec.encode, decode=GSM7BitCodec.decode),  # type: ignore
+    # pytype issue; https://github.com/google/pytype/issues/574
+    "ucs2": codecs.CodecInfo(
+        name="ucs2",
+        encode=UCS2Codec.encode,
+        decode=UCS2Codec.decode,  # pytype: disable=wrong-arg-types
+    ),
+    "gsm0338": codecs.CodecInfo(
+        name="gsm0338",
+        encode=GSM7BitCodec.encode,
+        decode=GSM7BitCodec.decode,  # pytype: disable=wrong-arg-types
+    ),
 }
 
 
