@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.7' ] # pytype doesnt yet support python3.8; https://github.com/google/pytype/issues/466
-    timeout-minutes: 6
+    timeout-minutes: 4
     steps:
       - uses: actions/checkout@v1
 
@@ -80,7 +80,7 @@ jobs:
     strategy:
       matrix:
         python-version: [ '3.7', '3.8' ]
-    timeout-minutes: 6
+    timeout-minutes: 7
     steps:
       - uses: actions/checkout@v1
 
