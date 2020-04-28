@@ -76,8 +76,6 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    # https://github.com/google/pytype/issues/574
-    # https://github.com/python/mypy/issues/8732
     def encode(self, input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object and its length.
@@ -203,10 +201,9 @@ class UCS2Codec(codecs.Codec):
 
 
 _INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
-    "ucs2": codecs.CodecInfo(name="ucs2", encode=UCS2Codec.encode, decode=UCS2Codec.decode),
-    "gsm0338": codecs.CodecInfo(
-        name="gsm0338", encode=GSM7BitCodec.encode, decode=GSM7BitCodec.decode
-    ),
+    #  mypy issue; https://github.com/python/mypy/issues/8732
+    "ucs2": codecs.CodecInfo(name="ucs2", encode=UCS2Codec.encode, decode=UCS2Codec.decode),  # type: ignore
+    "gsm0338": codecs.CodecInfo(name="gsm0338", encode=GSM7BitCodec.encode, decode=GSM7BitCodec.decode),  # type: ignore
 }
 
 
