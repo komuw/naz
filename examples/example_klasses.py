@@ -127,7 +127,6 @@ if __name__ == "__main__":
                     source_addr="254722111111",
                     destination_addr="254722999999",
                     hook_metadata='{"telco": "verizon", "customer_id": 123456}',
-                    encoding="shift_jis",
                 )
             )
         )
