@@ -172,7 +172,6 @@ class SubmitSM(Message):
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
             sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
             smpp_command: any one of the SMSC commands eg submit_sm
-
             encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC.
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.
                       If you want to use your own custom codec implementation for an encoding, make sure to pass it to :py:attr:`naz.Client.custom_codecs <naz.Client.custom_codecs>`
