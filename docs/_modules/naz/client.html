@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.7.9 documentation</title>
+  <title>naz.client &mdash; naz v0.8.0 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.9
+                v0.8.0
               </div>
             
           
@@ -165,6 +165,7 @@
   <h1>Source code for naz.client</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">codecs</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">string</span>
@@ -176,6 +177,7 @@
 <span class="c1"># pytype: disable=pyi-error</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">log</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">hooks</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">state</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">protocol</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">sequence</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">throttle</span>
@@ -188,7 +190,6 @@
 <span class="kn">from</span> <span class="nn">.state</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">SmppCommand</span><span class="p">,</span>
     <span class="n">CommandStatus</span><span class="p">,</span>
-    <span class="n">SmppDataCoding</span><span class="p">,</span>
     <span class="n">SmppOptionalTag</span><span class="p">,</span>
     <span class="n">SmppSessionState</span><span class="p">,</span>
     <span class="n">SmppCommandStatus</span><span class="p">,</span>
@@ -242,7 +243,6 @@
         <span class="n">system_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">broker</span><span class="p">:</span> <span class="n">the_broker</span><span class="o">.</span><span class="n">BaseBroker</span><span class="p">,</span>
-        <span class="n">client_id</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="c1"># Reference made to NULL settings of Octet-String fields implies that the field</span>
         <span class="c1"># consists of a single NULL character, i.e., an octet encoded with value 0x00 (zero).</span>
         <span class="c1"># see section 3.1 of v3.4 smpp specification.</span>
@@ -254,9 +254,10 @@
         <span class="n">addr_npi</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x00</span><span class="p">,</span>
         <span class="n">address_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">interface_version</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mh">0x34</span><span class="p">,</span>
+        <span class="c1">### NON-SMPP ATTRIBUTES ###</span>
+        <span class="n">client_id</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">55.00</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">rate_limiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">hook</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sequence_generator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">sequence</span><span class="o">.</span><span class="n">BaseSequenceGenerator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -264,6 +265,8 @@
         <span class="n">correlation_handler</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">correlater</span><span class="o">.</span><span class="n">BaseCorrelater</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">drain_duration</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">8.00</span><span class="p">,</span>
         <span class="n">socket_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">30.0</span><span class="p">,</span>
+        <span class="n">custom_codecs</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">CodecInfo</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">### NON-SMPP ATTRIBUTES ###</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters:</span>
@@ -281,7 +284,6 @@
 <span class="sd">            interface_version:	Indicates the version of the SMPP protocol supported by the ESME.</span>
 <span class="sd">            enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status</span>
 <span class="sd">            logger: python `logger &lt;https://docs.python.org/3/library/logging.html#logging.Logger&gt;`_ instance to be used for logging</span>
-<span class="sd">            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.</span>
 <span class="sd">            rate_limiter: python class instance implementing rate limitation</span>
 <span class="sd">            hook: python class instance implemeting functionality/hooks to be called by naz \</span>
 <span class="sd">                just before sending request to SMSC and just after getting response from SMSC</span>
@@ -291,6 +293,7 @@
 <span class="sd">                SMPP sequence numbers and user applications&#39; log_id&#39;s and/or hook_metadata.</span>
 <span class="sd">            drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.</span>
 <span class="sd">            socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out</span>
+<span class="sd">            custom_codecs: a dictionary of encodings and their corresponding `codecs.CodecInfo &lt;https://docs.python.org/3/library/codecs.html#codecs.CodecInfo&gt;`_ that you would like to register.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            NazClientError: raised if there’s an error instantiating a naz Client.</span>
@@ -309,7 +312,6 @@
             <span class="n">interface_version</span><span class="o">=</span><span class="n">interface_version</span><span class="p">,</span>
             <span class="n">enquire_link_interval</span><span class="o">=</span><span class="n">enquire_link_interval</span><span class="p">,</span>
             <span class="n">logger</span><span class="o">=</span><span class="n">logger</span><span class="p">,</span>
-            <span class="n">codec</span><span class="o">=</span><span class="n">codec</span><span class="p">,</span>
             <span class="n">rate_limiter</span><span class="o">=</span><span class="n">rate_limiter</span><span class="p">,</span>
             <span class="n">hook</span><span class="o">=</span><span class="n">hook</span><span class="p">,</span>
             <span class="n">sequence_generator</span><span class="o">=</span><span class="n">sequence_generator</span><span class="p">,</span>
@@ -317,6 +319,7 @@
             <span class="n">correlation_handler</span><span class="o">=</span><span class="n">correlation_handler</span><span class="p">,</span>
             <span class="n">drain_duration</span><span class="o">=</span><span class="n">drain_duration</span><span class="p">,</span>
             <span class="n">socket_timeout</span><span class="o">=</span><span class="n">socket_timeout</span><span class="p">,</span>
+            <span class="n">custom_codecs</span><span class="o">=</span><span class="n">custom_codecs</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_PID</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
@@ -357,11 +360,6 @@
                 <span class="p">},</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sanity_check_logger</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="n">codec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">codec</span> <span class="o">=</span> <span class="n">codec</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">codec</span> <span class="o">=</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">SimpleCodec</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">enquire_link_interval</span> <span class="o">=</span> <span class="n">enquire_link_interval</span>
 
@@ -416,8 +414,6 @@
             <span class="n">SmppCommand</span><span class="o">.</span><span class="n">RESERVED_FOR_SMSC_VENDOR_B</span><span class="p">:</span> <span class="p">[</span><span class="mh">0x80010200</span><span class="p">,</span> <span class="mh">0x800102FF</span><span class="p">],</span>
         <span class="p">}</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">data_coding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_data_coding</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">reader</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamReader</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">StreamWriter</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -451,7 +447,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">drain_duration</span> <span class="o">=</span> <span class="n">drain_duration</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">socket_timeout</span> <span class="o">=</span> <span class="n">socket_timeout</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">SHOULD_SHUT_DOWN</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drain_lock</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drain_lock</span><span class="p">:</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">()</span>
+
+        <span class="n">the_codec</span><span class="o">.</span><span class="n">register_codecs</span><span class="p">(</span><span class="n">custom_codecs</span><span class="p">)</span></div>
 
         <span class="c1"># For exceptions, we try and avoid catch-all blocks. Instead we catch only the exceptions we expect.</span>
         <span class="c1"># Exception hierarchy: https://docs.python.org/3/library/exceptions.html#exception-hierarchy</span>
@@ -471,7 +469,6 @@
         <span class="n">interface_version</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">enquire_link_interval</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">logger</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="p">],</span>
-        <span class="n">codec</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">],</span>
         <span class="n">rate_limiter</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">],</span>
         <span class="n">hook</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">hooks</span><span class="o">.</span><span class="n">BaseHook</span><span class="p">],</span>
         <span class="n">sequence_generator</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">sequence</span><span class="o">.</span><span class="n">BaseSequenceGenerator</span><span class="p">],</span>
@@ -479,6 +476,7 @@
         <span class="n">correlation_handler</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">correlater</span><span class="o">.</span><span class="n">BaseCorrelater</span><span class="p">],</span>
         <span class="n">drain_duration</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">socket_timeout</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">custom_codecs</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">CodecInfo</span><span class="p">]],</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Checks that the arguments to `naz.Client` are okay.</span>
@@ -577,14 +575,7 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">codec</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">the_codec</span><span class="o">.</span><span class="n">BaseCodec</span><span class="p">)):</span>
-            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="s2">&quot;`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                        <span class="nb">type</span><span class="p">(</span><span class="n">codec</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rate_limiter</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">ratelimiter</span><span class="o">.</span><span class="n">BaseRateLimiter</span><span class="p">)):</span>
             <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="ne">ValueError</span><span class="p">(</span>
@@ -641,6 +632,38 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_codecs</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="nb">dict</span><span class="p">)):</span>
+            <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;`custom_codecs` should be of type:: `None` or `dict` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">custom_codecs</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">custom_codecs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">custom_codecs</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;`custom_codecs` should be of type:: `None` or `dict` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="nb">type</span><span class="p">(</span><span class="n">custom_codecs</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="k">for</span> <span class="n">_encoding</span><span class="p">,</span> <span class="n">_codec_info</span> <span class="ow">in</span> <span class="n">custom_codecs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_codec_info</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">CodecInfo</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo` You entered: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="nb">type</span><span class="p">(</span><span class="n">custom_codecs</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">_encoding</span> <span class="o">!=</span> <span class="n">_codec_info</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;the key `</span><span class="si">{0}</span><span class="s2">` should be equal to codecs.CodecInfo.name&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_encoding</span><span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># validate encoding is one allowed by SMPP</span>
+                <span class="n">_</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">SmppDataCoding</span><span class="o">.</span><span class="n">_find_data_coding</span><span class="p">(</span><span class="n">_encoding</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">NazClientError</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
 
@@ -660,15 +683,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">log_data</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">pass</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_find_data_coding</span><span class="p">(</span><span class="n">encoding</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">SmppDataCoding</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">encoding</span> <span class="o">==</span> <span class="n">val</span><span class="o">.</span><span class="n">code</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">val</span><span class="o">.</span><span class="n">value</span>
-
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;That encoding: `</span><span class="si">{0}</span><span class="s2">` is not recognised.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">encoding</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">_search_by_command_id_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_id_code</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">command_ids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1332,6 +1346,8 @@
         <span class="n">registered_delivery</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">registered_delivery</span>
         <span class="n">replace_if_present_flag</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">replace_if_present_flag</span>
         <span class="n">sm_default_msg_id</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">sm_default_msg_id</span>
+        <span class="n">encoder</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">getencoder</span><span class="p">(</span><span class="n">proto_msg</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+        <span class="n">data_coding</span> <span class="o">=</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">data_coding</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span>
             <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
@@ -1345,11 +1361,11 @@
                 <span class="s2">&quot;smpp_command&quot;</span><span class="p">:</span> <span class="n">smpp_command</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="n">encoded_short_message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">short_message</span><span class="p">)</span>
+        <span class="n">encoded_short_message</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">encoder</span><span class="p">(</span><span class="n">short_message</span><span class="p">,</span> <span class="n">proto_msg</span><span class="o">.</span><span class="n">errors</span><span class="p">)</span>
         <span class="n">sm_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encoded_short_message</span><span class="p">)</span>
 
         <span class="c1"># body</span>
-        <span class="c1"># SUBMIT_SM KKKK</span>
+        <span class="c1"># SUBMIT_SM</span>
         <span class="n">body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
         <span class="n">body</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">body</span>
@@ -1372,10 +1388,10 @@
             <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">registered_delivery</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">replace_if_present_flag</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_coding</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">data_coding</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">sm_default_msg_id</span><span class="p">)</span>
             <span class="o">+</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;B&quot;</span><span class="p">,</span> <span class="n">sm_length</span><span class="p">)</span>
-            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">short_message</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">encoded_short_message</span>
         <span class="p">)</span>
 
         <span class="c1"># header</span>

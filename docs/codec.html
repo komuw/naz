@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>codec &mdash; naz v0.7.9 documentation</title>
+  <title>codec &mdash; naz v0.8.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.9
+                v0.8.0
               </div>
             
           
@@ -169,56 +169,50 @@
   <div class="section" id="module-naz.codec">
 <span id="codec"></span><h1>codec<a class="headerlink" href="#module-naz.codec" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
-<dt id="naz.codec.BaseCodec">
-<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">BaseCodec</code><span class="sig-paren">(</span><em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>This is the interface that must be implemented to satisfy naz’s encoding/decoding.
-User implementations should inherit this class and
-implement the <a class="reference internal" href="#naz.codec.BaseCodec.__init__" title="naz.codec.BaseCodec.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__</span></code></a>, <a class="reference internal" href="#naz.codec.BaseCodec.encode" title="naz.codec.BaseCodec.encode"><code class="xref py py-func docutils literal notranslate"><span class="pre">encode</span></code></a> and <a class="reference internal" href="#naz.codec.BaseCodec.decode" title="naz.codec.BaseCodec.decode"><code class="xref py py-func docutils literal notranslate"><span class="pre">decode</span></code></a>
-methods with the type signatures shown.</p>
-<p>naz calls an implementation of this class to encode/decode messages.</p>
+<dt id="naz.codec.GSM7BitCodec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">GSM7BitCodec</code><a class="reference internal" href="_modules/naz/codec.html#GSM7BitCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.GSM7BitCodec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">codecs.Codec</span></code></p>
+<p>SMPP uses a 7-bit GSM character set.
+This class implements that encoding/decoding scheme.
+Users should never have to use this directly, instead; use <cite>naz.protocol.SubmitSM(encoding=”gsm0338”)</cite></p>
+<p>Example Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+
+<span class="n">codec</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">codec</span><span class="o">.</span><span class="n">GSM7BitCodec</span><span class="p">()</span>
+<span class="n">codec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;foo €&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
 <dl class="method">
-<dt id="naz.codec.BaseCodec.__init__">
-<em class="property">abstract </em><code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">encoding</em>, <em class="sig-param">errors</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dt id="naz.codec.GSM7BitCodec.decode">
+<em class="property">static </em><code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#GSM7BitCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.GSM7BitCodec.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a string decoded from the given bytes and its length.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC
-The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
-eg gsm0338, ucs2 etc</p></li>
+<li><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p></li>
 <li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.codec.BaseCodec.decode">
-<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec.decode" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a string decoded from the given bytes.</p>
+<dt id="naz.codec.GSM7BitCodec.encode">
+<em class="property">static </em><code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#GSM7BitCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.GSM7BitCodec.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an encoded version of the string as a bytes object and its length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p>
+</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="naz.codec.BaseCodec.encode">
-<em class="property">abstract </em><code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#BaseCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.BaseCodec.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>return an encoded version of the string as a bytes object</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -226,66 +220,62 @@ eg gsm0338, ucs2 etc</p></li>
 </dd></dl>
 
 <dl class="class">
-<dt id="naz.codec.SimpleCodec">
-<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">SimpleCodec</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#naz.codec.BaseCodec" title="naz.codec.BaseCodec"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.codec.BaseCodec</span></code></a></p>
-<p>This is an implementation of <cite>BaseCodec</cite></p>
-<p>SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
-This class can also be used with the usual <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">python standard encodings</a></p>
-<p>example usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ncodec</span> <span class="o">=</span> <span class="n">SimpleCodec</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;ucs2&quot;</span><span class="p">)</span>
-
-<span class="n">ncodec</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;Zoë&quot;</span><span class="p">)</span>
-<span class="n">ncodec</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;ZoÃ«&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
+<dt id="naz.codec.UCS2Codec">
+<em class="property">class </em><code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">UCS2Codec</code><a class="reference internal" href="_modules/naz/codec.html#UCS2Codec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.UCS2Codec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">codecs.Codec</span></code></p>
+<p>This class implements the UCS2 encoding/decoding scheme.
+Users should never have to use this directly, instead; use <cite>naz.protocol.SubmitSM(encoding=”ucs2”)</cite></p>
+<p>UCS2 is for all intents &amp; purposes assumed to be the same as big endian UTF16.</p>
 <dl class="method">
-<dt id="naz.codec.SimpleCodec.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dt id="naz.codec.UCS2Codec.decode">
+<em class="property">static </em><code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#UCS2Codec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.UCS2Codec.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a string decoded from the given bytes and its length.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p><a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC
-The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec</p>
-</p></li>
+<li><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p></li>
 <li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p>
 </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
-<dt id="naz.codec.SimpleCodec.decode">
-<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.decode" title="Permalink to this definition">¶</a></dt>
-<dd><p>return a string decoded from the given bytes.</p>
+<dt id="naz.codec.UCS2Codec.encode">
+<em class="property">static </em><code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#UCS2Codec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.UCS2Codec.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>return an encoded version of the string as a bytes object and its length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>) – the bytes to decode</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <p>same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p>
+</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></p>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</p>
 </dd>
 </dl>
 </dd></dl>
 
-<dl class="method">
-<dt id="naz.codec.SimpleCodec.encode">
-<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param">input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#SimpleCodec.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.SimpleCodec.encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>return an encoded version of the string as a bytes object</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the string to encode</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
-</dd>
-</dl>
 </dd></dl>
 
+<dl class="function">
+<dt id="naz.codec.register_codecs">
+<code class="sig-prename descclassname">naz.codec.</code><code class="sig-name descname">register_codecs</code><span class="sig-paren">(</span><em class="sig-param">custom_codecs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/codec.html#register_codecs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.codec.register_codecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register codecs, both custom and naz inbuilt ones.
+Custom codecs that have same encoding as inbuilt ones will take precedence.
+Users should never have to use this directly,
+instead; use <cite>naz.Client(custom_codecs={“my_encoding”: codecs.CodecInfo(name=”my_encoding”, encode=…, decode=…)})</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>custom_codecs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">CodecInfo</span></code>]]) – a list of custom codecs to register.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

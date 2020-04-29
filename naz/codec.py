@@ -78,7 +78,7 @@ class GSM7BitCodec(codecs.Codec):
 
     # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
     @staticmethod
-    def encode(input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
+    def encode(input: str, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object and its length.
 
@@ -109,7 +109,7 @@ class GSM7BitCodec(codecs.Codec):
         return (obj_bytes, len(obj_bytes))
 
     @staticmethod
-    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
+    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
         """
         return a string decoded from the given bytes and its length.
 
@@ -202,7 +202,7 @@ class UCS2Codec(codecs.Codec):
 
     # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
     @staticmethod
-    def encode(input: typing.Text, errors: str = "strict") -> typing.Tuple[bytes, int]:
+    def encode(input: str, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
         return an encoded version of the string as a bytes object and its length.
 
@@ -214,7 +214,7 @@ class UCS2Codec(codecs.Codec):
         return codecs.utf_16_be_encode(input, errors)
 
     @staticmethod
-    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[typing.Text, int]:
+    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
         """
         return a string decoded from the given bytes and its length.
 

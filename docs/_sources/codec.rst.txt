@@ -2,6 +2,6 @@ codec
 ---------------
 
 .. automodule:: naz.codec
-    :members: BaseCodec, SimpleCodec
+    :members: GSM7BitCodec, UCS2Codec, register_codecs
     :show-inheritance:
 
