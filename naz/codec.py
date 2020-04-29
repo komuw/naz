@@ -32,9 +32,8 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 
-import sys
-import abc
 import codecs
+import typing
 
 
 # An alternative to using this codec module is to use: https://github.com/dsch/gsm0338
@@ -47,6 +46,19 @@ class NazCodecException(Exception):
 
 class GSM7BitCodec(codecs.Codec):
     """
+    SMPP uses a 7-bit GSM character set.
+    This class implements that encoding/decoding scheme.
+    Users should never have to use this directly, instead; use `naz.protocol.SubmitSM(encoding="gsm0338")`
+
+    Example Usage:
+
+    .. highlight:: python
+    .. code-block:: python
+
+        import naz
+
+        codec = naz.codec.GSM7BitCodec()
+        codec.encode("foo €")
     """
 
     gsm_basic_charset = (
@@ -64,56 +76,46 @@ class GSM7BitCodec(codecs.Codec):
 
     gsm_extension_map = dict((l, i) for i, l in enumerate(gsm_extension))
 
-    def encode(self, input, errors="strict"):
+    # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+    @staticmethod
+    def encode(input: str, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
-        errors can be 'strict', 'replace' or 'ignore'
-        eg:
-            xcodec.encode("Zoë","gsm0338") will fail with UnicodeEncodeError
-            but
-            xcodec.encode("Zoë","gsm0338", 'replace') will return b'Zo?'
-            and
-            xcodec.encode("Zoë","gsm0338", 'ignore') will return b'Zo'
+        return an encoded version of the string as a bytes object and its length.
+
+        Parameters:
+            input: the string to encode
+            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
+        # for the types of this method,
+        # see: https://github.com/python/typeshed/blob/f7d240f06e5608a20b2daac4e96fe085c0577239/stdlib/2and3/codecs.pyi#L21-L22
         result = []
         for position, c in enumerate(input):
-            idx = self.gsm_basic_charset_map.get(c)
+            idx = GSM7BitCodec.gsm_basic_charset_map.get(c)
             if idx is not None:
                 result.append(chr(idx))
                 continue
-            idx = self.gsm_extension_map.get(c)
+            idx = GSM7BitCodec.gsm_extension_map.get(c)
             if idx is not None:
                 result.append(chr(27) + chr(idx))
             else:
-                result.append(self.handle_encode_error(c, errors, position, input))
+                result.append(GSM7BitCodec._handle_encode_error(c, errors, position, input))
 
         obj = "".join(result)
         # this is equivalent to;
         # import six; six.b('someString')
         # see:
         # https://github.com/benjaminp/six/blob/68112f3193c7d4bef5ad86ed1b6ed528edd9093d/six.py#L625
-        obj = obj.encode("latin-1")
-        return (obj, len(obj))
-
-    def handle_encode_error(self, char, handler_type, position, obj):
-        handler = getattr(self, "handle_encode_%s_error" % (handler_type,), None)
-        if handler is None:
-            raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
-        return handler(char, position, obj)
+        obj_bytes = obj.encode("latin-1")
+        return (obj_bytes, len(obj_bytes))
 
     @staticmethod
-    def handle_encode_strict_error(char, position, obj):
-        raise UnicodeEncodeError("gsm0338", char, position, position + 1, repr(obj))
-
-    @staticmethod
-    def handle_encode_ignore_error(char, position, obj):
-        return ""
-
-    def handle_encode_replace_error(self, char, position, obj):
-        return chr(self.gsm_basic_charset_map.get("?"))
-
-    def decode(self, input, errors="strict"):
+    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
         """
-        errors can be 'strict', 'replace' or 'ignore'
+        return a string decoded from the given bytes and its length.
+
+        Parameters:
+            input: the bytes to decode
+            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
         res = iter(input)
         result = []
@@ -121,157 +123,147 @@ class GSM7BitCodec(codecs.Codec):
             try:
                 if c == 27:
                     c = next(res)
-                    result.append(self.gsm_extension[c])
+                    result.append(GSM7BitCodec.gsm_extension[c])
                 else:
-                    result.append(self.gsm_basic_charset[c])
+                    result.append(GSM7BitCodec.gsm_basic_charset[c])
             except IndexError as indexErrorException:
                 result.append(
-                    self.handle_decode_error(c, errors, position, input, indexErrorException)
+                    GSM7BitCodec._handle_decode_error(
+                        c, errors, position, input, indexErrorException
+                    )
                 )
 
         obj = "".join(result)
         return (obj, len(obj))
 
-    def handle_decode_error(self, char, handler_type, position, obj, indexErrorException):
-        handler = getattr(self, "handle_decode_%s_error" % (handler_type,), None)
+    @staticmethod
+    def _handle_encode_error(char, handler_type, position, obj):
+        handler = None
+        if handler_type == "strict":
+            handler = GSM7BitCodec._handle_encode_strict_error
+        elif handler_type == "ignore":
+            handler = GSM7BitCodec._handle_encode_ignore_error
+        elif handler_type == "replace":
+            handler = GSM7BitCodec._handle_encode_replace_error
+
         if handler is None:
-            raise NazCodecException("Invalid errors type %s for GSM7BitCodec", handler_type)
-        return handler(char, position, obj, indexErrorException)
+            raise NazCodecException("Invalid errors type {0} for GSM7BitCodec".format(handler_type))
+        return handler(char, position, obj)
 
     @staticmethod
-    def handle_decode_strict_error(char, position, obj, indexErrorException):
-        # https://github.com/google/pytype/issues/349
-        raise UnicodeDecodeError(
-            "gsm0338",
-            chr(char).encode("latin-1"),
-            position,
-            position + 1,
-            repr(obj),  # pytype: disable=wrong-arg-types
-        ) from indexErrorException
+    def _handle_encode_strict_error(char, position, obj):
+        raise UnicodeEncodeError("gsm0338", char, position, position + 1, repr(obj))
 
     @staticmethod
-    def handle_decode_ignore_error(char, position, obj, indexErrorException):
+    def _handle_encode_ignore_error(char, position, obj):
         return ""
 
     @staticmethod
-    def handle_decode_replace_error(char, position, obj, indexErrorException):
+    def _handle_encode_replace_error(char, position, obj):
+        return chr(GSM7BitCodec.gsm_basic_charset_map.get("?"))
+
+    @staticmethod
+    def _handle_decode_error(char, handler_type, position, obj, indexErrorException):
+        handler = None
+        if handler_type == "strict":
+            handler = GSM7BitCodec._handle_decode_strict_error
+        elif handler_type == "ignore":
+            handler = GSM7BitCodec._handle_decode_ignore_error
+        elif handler_type == "replace":
+            handler = GSM7BitCodec._handle_decode_replace_error
+
+        if handler is None:
+            raise NazCodecException("Invalid errors type {0} for GSM7BitCodec".format(handler_type))
+        return handler(char, position, obj, indexErrorException)
+
+    @staticmethod
+    def _handle_decode_strict_error(char, position, obj, indexErrorException):
+        # https://github.com/google/pytype/issues/349
+        raise UnicodeDecodeError(
+            "gsm0338", chr(char).encode("latin-1"), position, position + 1, repr(obj),
+        ) from indexErrorException
+
+    @staticmethod
+    def _handle_decode_ignore_error(char, position, obj, indexErrorException):
+        return ""
+
+    @staticmethod
+    def _handle_decode_replace_error(char, position, obj, indexErrorException):
         return "?"
 
 
 class UCS2Codec(codecs.Codec):
     """
-    UCS2 is for all intents & purposes assumed to be the same as
-    big endian UTF16.
+    This class implements the UCS2 encoding/decoding scheme.
+    Users should never have to use this directly, instead; use `naz.protocol.SubmitSM(encoding="ucs2")`
+
+    UCS2 is for all intents & purposes assumed to be the same as big endian UTF16.
     """
 
-    def encode(self, input, errors="strict"):
-        # https://github.com/google/pytype/issues/348
-        return codecs.utf_16_be_encode(input, errors)  # pytype: disable=module-attr
-
-    def decode(self, input, errors="strict"):
-        return codecs.utf_16_be_decode(input, errors)  # pytype: disable=module-attr
-
-
-class BaseCodec(abc.ABC):
-    """
-    This is the interface that must be implemented to satisfy naz's encoding/decoding.
-    User implementations should inherit this class and
-    implement the :func:`__init__ <BaseCodec.__init__>`, :func:`encode <BaseCodec.encode>` and :func:`decode <BaseCodec.decode>`
-    methods with the type signatures shown.
-
-    naz calls an implementation of this class to encode/decode messages.
-    """
-
-    @abc.abstractmethod
-    def __init__(self, encoding: str, errors: str) -> None:
+    # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+    @staticmethod
+    def encode(input: str, errors: str = "strict") -> typing.Tuple[bytes, int]:
         """
-        Parameters:
-            encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
-                      eg gsm0338, ucs2 etc
-            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
-        """
-        self.encoding = encoding
-        self.errors = errors
-
-    @abc.abstractmethod
-    def encode(self, input: str) -> bytes:
-        """
-        return an encoded version of the string as a bytes object
+        return an encoded version of the string as a bytes object and its length.
 
         Parameters:
             input: the string to encode
+            errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
-        raise NotImplementedError("encode method must be implemented.")
+        # https://github.com/google/pytype/issues/348
+        return codecs.utf_16_be_encode(input, errors)
 
-    def decode(self, input: bytes) -> str:
+    @staticmethod
+    def decode(input: bytes, errors: str = "strict") -> typing.Tuple[str, int]:
         """
-        return a string decoded from the given bytes.
+        return a string decoded from the given bytes and its length.
 
         Parameters:
             input: the bytes to decode
-        """
-        raise NotImplementedError("decode method must be implemented.")
-
-
-class SimpleCodec(BaseCodec):
-    """
-    This is an implementation of `BaseCodec`
-
-    SMPP uses a 7-bit GSM character set. This class implements that encoding/decoding scheme.
-    This class can also be used with the usual `python standard encodings <https://docs.python.org/3/library/codecs.html#standard-encodings>`_
-
-    example usage:
-
-    .. highlight:: python
-    .. code-block:: python
-
-       ncodec = SimpleCodec(encoding="ucs2")
-
-       ncodec.encode("Zoë")
-       ncodec.decode(b'Zo\xc3\xab')
-    """
-
-    custom_codecs = {"gsm0338": GSM7BitCodec(), "ucs2": UCS2Codec()}
-
-    def __init__(self, encoding: str = "gsm0338", errors: str = "strict") -> None:
-        """
-        Parameters:
-            encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC
-                      The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
         """
-        if not isinstance(encoding, str):
-            raise ValueError(
-                "`encoding` should be of type:: `str` You entered: {0}".format(type(encoding))
-            )
-        if not isinstance(errors, str):
-            raise ValueError(
-                "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
-            )
-        self.encoding = encoding
-        self.errors = errors
+        return codecs.utf_16_be_decode(input, errors)
 
-    def encode(self, input: str) -> bytes:
-        if not isinstance(input, str):
-            raise NazCodecException("Only strings accepted for encoding.")
-        encoding = self.encoding or sys.getdefaultencoding()
-        if encoding in self.custom_codecs:
-            encoder = self.custom_codecs[encoding].encode
-        else:
-            encoder = codecs.getencoder(encoding)
 
-        obj, _ = encoder(input, self.errors)
-        return obj
+_INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
+    #  mypy issue; https://github.com/python/mypy/issues/8732
+    # pytype issue; https://github.com/google/pytype/issues/574
+    "ucs2": codecs.CodecInfo(
+        name="ucs2",
+        encode=UCS2Codec.encode,
+        decode=UCS2Codec.decode,  # pytype: disable=wrong-arg-types
+    ),
+    "gsm0338": codecs.CodecInfo(
+        name="gsm0338",
+        encode=GSM7BitCodec.encode,
+        decode=GSM7BitCodec.decode,  # pytype: disable=wrong-arg-types
+    ),
+}
 
-    def decode(self, input: bytes) -> str:
-        if not isinstance(input, (bytes, bytearray)):
-            raise NazCodecException("Only bytestrings accepted for decoding.")
-        encoding = self.encoding or sys.getdefaultencoding()
-        if encoding in self.custom_codecs:
-            decoder = self.custom_codecs[encoding].decode
-        else:
-            decoder = codecs.getdecoder(encoding)
 
-        obj, _ = decoder(input, self.errors)
-        return obj
+def register_codecs(custom_codecs: typing.Union[None, typing.Dict[str, codecs.CodecInfo]] = None):
+    """
+    Register codecs, both custom and naz inbuilt ones.
+    Custom codecs that have same encoding as inbuilt ones will take precedence.
+    Users should never have to use this directly,
+    instead; use `naz.Client(custom_codecs={"my_encoding": codecs.CodecInfo(name="my_encoding", encode=..., decode=...)})`
+
+    Parameters:
+        custom_codecs: a list of custom codecs to register.
+    """
+    if custom_codecs is None:
+        custom_codecs = {}
+
+    # Note: Search function registration is not currently reversible,
+    # which may cause problems in some cases, such as unit testing or module reloading.
+    # https://docs.python.org/3.7/library/codecs.html#codecs.register
+
+    def _codec_search_function(_encoding):
+        """
+        We should try and get codecs from the custom_codecs first.
+        This way, if someone had overridden an inbuilt codec, their
+        implementation is chosen first and cached.
+        """
+        return custom_codecs.get(_encoding, _INBUILT_CODECS.get(_encoding))
+
+    codecs.register(_codec_search_function)

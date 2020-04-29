@@ -3,6 +3,7 @@
 
 import os
 import json
+import codecs
 import struct
 import asyncio
 from unittest import TestCase, mock, skip
@@ -196,7 +197,7 @@ class TestClient(TestCase):
             "addr_npi": DummyClientArg,
             "address_range": DummyClientArg,
             "sequence_generator": DummyClientArg,
-            "codec": DummyClientArg,
+            "custom_codecs": DummyClientArg,
             "enquire_link_interval": DummyClientArg,
             "rate_limiter": DummyClientArg,
             "hook": DummyClientArg,
@@ -215,8 +216,28 @@ class TestClient(TestCase):
         for exc in raised_exception.exception.args[0]:
             self.assertIsInstance(exc, ValueError)
 
+    def test_instantiate_custom_codecs(self):
+        def mock_create_client():
+            naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                broker=self.broker,
+                custom_codecs={"encoding": {"someKey": "someValue"}},
+            )
+
+        self.assertRaises(ValueError, mock_create_client)
+        with self.assertRaises(ValueError) as raised_exception:
+            mock_create_client()
+
+        self.assertIn(
+            "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo`",
+            str(raised_exception.exception),
+        )
+
     def test_instantiate_bad_encoding(self):
-        encoding = "unknownEncoding"
+        encoding = "unknownSmppEncoding"
 
         def mock_create_client():
             naz.Client(
@@ -225,16 +246,54 @@ class TestClient(TestCase):
                 system_id="smppclient1",
                 password=os.getenv("password", "password"),
                 broker=self.broker,
-                codec=naz.codec.SimpleCodec(encoding=encoding),
+                custom_codecs={
+                    encoding: codecs.CodecInfo(
+                        name=encoding,
+                        encode=naz.codec.UCS2Codec.encode,
+                        decode=naz.codec.UCS2Codec.decode,
+                    ),
+                },
             )
 
         self.assertRaises(ValueError, mock_create_client)
         with self.assertRaises(ValueError) as raised_exception:
             mock_create_client()
         self.assertIn(
-            "That encoding: `{0}` is not recognised.".format(encoding),
+            "That encoding: `{0}` is not a recognised SMPP encoding".format(encoding),
             str(raised_exception.exception),
         )
+
+    def test_custom_encodings(self):
+        """
+        tests that any of the encodings allowed by SMPP spec[1] can be used.
+        1. https://github.com/komuw/naz/blob/c47f5030b720f3bac400dd6bd457b4415b0d5b7b/naz/state.py#L328
+        2. Also see section 5.2.19 of SMPP spec
+        """
+
+        class ExampleCodec(codecs.Codec):
+            def encode(self, input, errors="strict"):
+                return codecs.utf_8_encode(input, errors)
+
+            def decode(self, input, errors="strict"):
+                return codecs.utf_8_decode(input, errors)
+
+        for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
+            naz.Client(
+                smsc_host="127.0.0.1",
+                smsc_port=2775,
+                system_id="smppclient1",
+                password=os.getenv("password", "password"),
+                broker=self.broker,
+                logger=naz.log.SimpleLogger(
+                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                ),
+                socket_timeout=0.0000001,
+                custom_codecs={
+                    encoding: codecs.CodecInfo(
+                        name=encoding, encode=ExampleCodec.encode, decode=ExampleCodec.decode,
+                    ),
+                },
+            )
 
     def test_can_connect(self):
         self._run(self.cli.connect())
@@ -1052,29 +1111,6 @@ class TestClient(TestCase):
         ) as mock_naz_unbind_and_disconnect:
             self._run(self.cli._parse_response_pdu(pdu=b"\x00\x00\x00\x15\x80"))
             self.assertTrue(mock_naz_unbind_and_disconnect.mock.called)
-
-    def test_custom_encodings(self):
-        """
-        tests that any of the encodings allowed by SMPP spec[1] can be used.
-        1. https://github.com/komuw/naz/blob/c47f5030b720f3bac400dd6bd457b4415b0d5b7b/naz/state.py#L328
-        2. Also see section 5.2.19 of SMPP spec
-        """
-        for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
-            cli = naz.Client(
-                smsc_host="127.0.0.1",
-                smsc_port=2775,
-                system_id="smppclient1",
-                password=os.getenv("password", "password"),
-                broker=self.broker,
-                logger=naz.log.SimpleLogger(
-                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
-                ),
-                socket_timeout=0.0000001,
-                codec=naz.codec.SimpleCodec(encoding=encoding),
-            )
-            self._run(cli.connect())
-            self.assertTrue(hasattr(cli.reader, "read"))
-            self.assertTrue(hasattr(cli.writer, "write"))
 
     def test_enquire_link_resp_sending(self):
         with mock.patch("naz.broker.SimpleBroker.dequeue", new=AsyncMock()) as mock_naz_dequeue:

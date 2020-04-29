@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.state &mdash; naz v0.7.9 documentation</title>
+  <title>naz.state &mdash; naz v0.8.0 documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.7.9
+                v0.8.0
               </div>
             
           
@@ -502,7 +502,11 @@
     <span class="c1">#   3. https://docs.python.org/3/library/codecs.html#standard-encodings</span>
 
     <span class="c1"># The attributes of this class are equivalent to some of the names found in the python standard-encodings documentation</span>
-    <span class="c1"># ie; https://docs.python.org/3/library/codecs.html#standard-encodings</span>
+    <span class="c1"># We cant use all python standard encodings[1]</span>
+    <span class="c1"># We can only use the ones defined in SMPP spec[2];</span>
+    <span class="c1">#</span>
+    <span class="c1"># 1. https://docs.python.org/3/library/codecs.html#standard-encodings</span>
+    <span class="c1"># 2. section 5.2.19 of smpp ver 3.4 spec document.</span>
 
     <span class="n">gsm0338</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span>
         <span class="n">code</span><span class="o">=</span><span class="s2">&quot;gsm0338&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00000000</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;SMSC Default Alphabet&quot;</span>
@@ -549,7 +553,7 @@
     <span class="p">)</span>
     <span class="c1"># reservedI= DataCoding(code=&quot;reservedI&quot;, value=0b00001011, description= &quot;reserved&quot;)</span>
     <span class="c1"># reservedII= DataCoding(code=&quot;reservedII&quot;, value=0b00001100, description= &quot;reserved&quot;)</span>
-    <span class="n">euc_kr</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;euc_kr&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001110</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;KS C 5601&quot;</span><span class="p">)</span></div>
+    <span class="n">euc_kr</span><span class="p">:</span> <span class="n">DataCoding</span> <span class="o">=</span> <span class="n">DataCoding</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="s2">&quot;euc_kr&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mb">0b00001110</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;KS C 5601&quot;</span><span class="p">)</span>
 
     <span class="c1"># not the same as iso2022_jp but ... ¯\_(ツ)_/¯</span>
     <span class="c1"># iso-2022-jp=DataCoding(code=&quot;iso-2022-jp&quot;, value=0b00001101, description=&quot;Extended Kanji JIS(X 0212 - 1990)&quot;)</span>
@@ -559,6 +563,21 @@
     <span class="c1"># 0b1101xxxx GSM MWI control - see [GSM 03.38]</span>
     <span class="c1"># 0b1110xxxx reserved</span>
     <span class="c1"># 0b1111xxxx GSM message class control - see [GSM 03.38]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_data_coding</span><span class="p">(</span><span class="n">encoding</span><span class="p">):</span>
+        <span class="c1"># NB:</span>
+        <span class="c1"># We cant use all python standard encodings[1]</span>
+        <span class="c1"># We can only use the ones defined in SMPP spec[2];</span>
+        <span class="c1">#</span>
+        <span class="c1"># 1. https://docs.python.org/3/library/codecs.html#standard-encodings</span>
+        <span class="c1"># 2. section 5.2.19 of smpp ver 3.4 spec document.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SmppDataCoding</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;That encoding: `</span><span class="si">{0}</span><span class="s2">` is not a recognised SMPP encoding.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span>
+            <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
 
 
 <div class="viewcode-block" id="SmppOptionalTag"><a class="viewcode-back" href="../../state.html#naz.state.SmppOptionalTag">[docs]</a><span class="k">class</span> <span class="nc">SmppOptionalTag</span><span class="p">:</span>

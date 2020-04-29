@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>correlater &mdash; naz v0.7.9 documentation</title>
+  <title>correlater &mdash; naz v0.8.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.9
+                v0.8.0
               </div>
             
           
@@ -233,9 +233,7 @@ with a submit_sm_resp. However receipted_message_id is an optional parameter tha
 <p>A simple implementation of BaseCorrelater.
 It stores the correlation/relation between a given SMPP sequence_number(and/or smsc_message_id) and a user supplied log_id and/or hook_metadata.</p>
 <p>SimpleCorrelater also features an auto-expiration of dictionary keys(and their values) based on time.</p>
-<blockquote>
-<div><p>The storage is done in memory using a python dictionary. The storage looks like:</p>
-</div></blockquote>
+<p>The storage is done in memory using a python dictionary. The storage looks like:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
      <span class="s2">&quot;sequence_number1&quot;</span><span class="p">:</span> <span class="p">{</span>
          <span class="s2">&quot;log_id&quot;</span><span class="p">:</span> <span class="s2">&quot;log_id1&quot;</span><span class="p">,</span>

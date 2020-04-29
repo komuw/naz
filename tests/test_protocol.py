@@ -152,3 +152,41 @@ class TestProtocol(TestCase):
             )
 
         self.assertRaises(ValueError, create)
+
+    def test_instantiate_bad_encoding(self):
+        encoding = "unknownSmppEncoding"
+
+        def mock_submit_sm():
+            naz.protocol.SubmitSM(
+                version=1,
+                log_id="some-log-id",
+                short_message="hello",
+                source_addr="546464",
+                destination_addr="24292",
+                encoding=encoding,
+            )
+
+        self.assertRaises(ValueError, mock_submit_sm)
+        with self.assertRaises(ValueError) as raised_exception:
+            mock_submit_sm()
+        self.assertIn(
+            "That encoding: `{0}` is not a recognised SMPP encoding".format(encoding),
+            str(raised_exception.exception),
+        )
+
+    def test_inbuilt_encodings(self):
+        """
+        tests that any of the encodings allowed by SMPP spec[1] can be used.
+        1. https://github.com/komuw/naz/blob/c47f5030b720f3bac400dd6bd457b4415b0d5b7b/naz/state.py#L328
+        2. Also see section 5.2.19 of SMPP spec
+        """
+        for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
+            proto = naz.protocol.SubmitSM(
+                version=1,
+                log_id="some-log-id",
+                short_message="hello",
+                source_addr="546464",
+                destination_addr="24292",
+                encoding=encoding,
+            )
+            self.assertTrue(proto.data_coding)

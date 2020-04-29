@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; naz v0.7.9 documentation</title>
+  <title>Index &mdash; naz v0.8.0 documentation</title>
   
 
   
@@ -61,7 +61,7 @@
             
             
               <div class="version">
-                v0.7.9
+                v0.8.0
               </div>
             
           
@@ -195,10 +195,6 @@
       <ul>
         <li><a href="client.html#naz.client.Client.__init__">(naz.client.Client method)</a>
 </li>
-        <li><a href="codec.html#naz.codec.BaseCodec.__init__">(naz.codec.BaseCodec method)</a>
-</li>
-        <li><a href="codec.html#naz.codec.SimpleCodec.__init__">(naz.codec.SimpleCodec method)</a>
-</li>
         <li><a href="correlater.html#naz.correlater.SimpleCorrelater.__init__">(naz.correlater.SimpleCorrelater method)</a>
 </li>
         <li><a href="hooks.html#naz.hooks.SimpleHook.__init__">(naz.hooks.SimpleHook method)</a>
@@ -242,8 +238,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="broker.html#naz.broker.BaseBroker">BaseBroker (class in naz.broker)</a>
 </li>
-      <li><a href="codec.html#naz.codec.BaseCodec">BaseCodec (class in naz.codec)</a>
-</li>
       <li><a href="correlater.html#naz.correlater.BaseCorrelater">BaseCorrelater (class in naz.correlater)</a>
 </li>
       <li><a href="hooks.html#naz.hooks.BaseHook">BaseHook (class in naz.hooks)</a>
@@ -266,10 +260,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="client.html#naz.client.Client">Client (class in naz.client)</a>
 </li>
-      <li><a href="state.html#naz.state.CommandStatus.code">code (naz.state.CommandStatus attribute)</a>
+      <li><a href="state.html#naz.state.CommandStatus.code">code() (naz.state.CommandStatus property)</a>
 
       <ul>
-        <li><a href="state.html#naz.state.DataCoding.code">(naz.state.DataCoding attribute)</a>
+        <li><a href="state.html#naz.state.DataCoding.code">(naz.state.DataCoding property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -288,10 +282,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="state.html#naz.state.DataCoding">DataCoding (class in naz.state)</a>
 </li>
-      <li><a href="codec.html#naz.codec.BaseCodec.decode">decode() (naz.codec.BaseCodec method)</a>
+      <li><a href="codec.html#naz.codec.GSM7BitCodec.decode">decode() (naz.codec.GSM7BitCodec static method)</a>
 
       <ul>
-        <li><a href="codec.html#naz.codec.SimpleCodec.decode">(naz.codec.SimpleCodec method)</a>
+        <li><a href="codec.html#naz.codec.UCS2Codec.decode">(naz.codec.UCS2Codec static method)</a>
 </li>
       </ul></li>
       <li><a href="client.html#naz.client.Client.deliver_sm_resp">deliver_sm_resp() (naz.client.Client method)</a>
@@ -308,10 +302,10 @@
       </ul></li>
       <li><a href="client.html#naz.client.Client.dequeue_messages">dequeue_messages() (naz.client.Client method)</a>
 </li>
-      <li><a href="state.html#naz.state.CommandStatus.description">description (naz.state.CommandStatus attribute)</a>
+      <li><a href="state.html#naz.state.CommandStatus.description">description() (naz.state.CommandStatus property)</a>
 
       <ul>
-        <li><a href="state.html#naz.state.DataCoding.description">(naz.state.DataCoding attribute)</a>
+        <li><a href="state.html#naz.state.DataCoding.description">(naz.state.DataCoding property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -322,10 +316,10 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="log.html#naz.log.BreachHandler.emit">emit() (naz.log.BreachHandler method)</a>
 </li>
-      <li><a href="codec.html#naz.codec.BaseCodec.encode">encode() (naz.codec.BaseCodec method)</a>
+      <li><a href="codec.html#naz.codec.GSM7BitCodec.encode">encode() (naz.codec.GSM7BitCodec static method)</a>
 
       <ul>
-        <li><a href="codec.html#naz.codec.SimpleCodec.encode">(naz.codec.SimpleCodec method)</a>
+        <li><a href="codec.html#naz.codec.UCS2Codec.encode">(naz.codec.UCS2Codec static method)</a>
 </li>
       </ul></li>
       <li><a href="broker.html#naz.broker.BaseBroker.enqueue">enqueue() (naz.broker.BaseBroker method)</a>
@@ -378,6 +372,10 @@
         <li><a href="correlater.html#naz.correlater.SimpleCorrelater.get">(naz.correlater.SimpleCorrelater method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="codec.html#naz.codec.GSM7BitCodec">GSM7BitCodec (class in naz.codec)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -480,6 +478,8 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="client.html#naz.client.Client.receive_data">receive_data() (naz.client.Client method)</a>
 </li>
+      <li><a href="codec.html#naz.codec.register_codecs">register_codecs() (in module naz.codec)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -495,8 +495,6 @@
       <li><a href="client.html#naz.client.Client.shutdown">shutdown() (naz.client.Client method)</a>
 </li>
       <li><a href="broker.html#naz.broker.SimpleBroker">SimpleBroker (class in naz.broker)</a>
-</li>
-      <li><a href="codec.html#naz.codec.SimpleCodec">SimpleCodec (class in naz.codec)</a>
 </li>
       <li><a href="correlater.html#naz.correlater.SimpleCorrelater">SimpleCorrelater (class in naz.correlater)</a>
 </li>
@@ -568,10 +566,12 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="client.html#naz.client.Client.unbind">unbind() (naz.client.Client method)</a>
+      <li><a href="codec.html#naz.codec.UCS2Codec">UCS2Codec (class in naz.codec)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="client.html#naz.client.Client.unbind">unbind() (naz.client.Client method)</a>
+</li>
       <li><a href="client.html#naz.client.Client.unbind_resp">unbind_resp() (naz.client.Client method)</a>
 </li>
   </ul></td>
@@ -580,10 +580,10 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="state.html#naz.state.CommandStatus.value">value (naz.state.CommandStatus attribute)</a>
+      <li><a href="state.html#naz.state.CommandStatus.value">value() (naz.state.CommandStatus property)</a>
 
       <ul>
-        <li><a href="state.html#naz.state.DataCoding.value">(naz.state.DataCoding attribute)</a>
+        <li><a href="state.html#naz.state.DataCoding.value">(naz.state.DataCoding property)</a>
 </li>
       </ul></li>
   </ul></td>

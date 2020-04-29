@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>protocol &mdash; naz v0.7.9 documentation</title>
+  <title>protocol &mdash; naz v0.8.0 documentation</title>
   
 
   
@@ -62,7 +62,7 @@
             
             
               <div class="version">
-                v0.7.9
+                v0.8.0
               </div>
             
           
@@ -170,18 +170,18 @@
 <span id="protocol"></span><h1>protocol<a class="headerlink" href="#module-naz.protocol" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="naz.protocol.DeliverSmResp">
-<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">DeliverSmResp</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">message_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">DeliverSmResp</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">message_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em>, <em class="sig-param">version=1</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.protocol.Message</span></code></a></p>
 <dl class="method">
 <dt id="naz.protocol.DeliverSmResp.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">message_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">message_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">smpp_command='deliver_sm_resp'</em>, <em class="sig-param">version=1</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#DeliverSmResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.DeliverSmResp.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this request</p></li>
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg deliver_sm_resp</p></li>
 <li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
 This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
-<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
 <li><p><strong>message_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – id of this message</p></li>
 <li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
@@ -223,18 +223,18 @@ like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres
 
 <dl class="class">
 <dt id="naz.protocol.EnquireLinkResp">
-<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">EnquireLinkResp</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">EnquireLinkResp</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em>, <em class="sig-param">version=1</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.protocol.Message</span></code></a></p>
 <dl class="method">
 <dt id="naz.protocol.EnquireLinkResp.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">log_id</em>, <em class="sig-param">sequence_number</em>, <em class="sig-param">smpp_command='enquire_link_resp'</em>, <em class="sig-param">version=1</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#EnquireLinkResp.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.EnquireLinkResp.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this request</p></li>
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg enquire_link_resp</p></li>
 <li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
 This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
-<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
 <li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
 </ul>
@@ -340,11 +340,12 @@ This is a bit similar to: <a class="reference external" href="http://docs.celery
 
 <dl class="class">
 <dt id="naz.protocol.SubmitSM">
-<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">SubmitSM</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">naz.protocol.</code><code class="sig-name descname">SubmitSM</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">version=1</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#naz.protocol.Message" title="naz.protocol.Message"><code class="xref py py-class docutils literal notranslate"><span class="pre">naz.protocol.Message</span></code></a></p>
 <p>The code representation of the <cite>submit_sm</cite> pdu that will get queued into a broker.</p>
 <p>Usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">naz</span>
 
 <span class="n">broker</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">broker</span><span class="o">.</span><span class="n">SimpleBroker</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">client</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
@@ -365,7 +366,7 @@ This is a bit similar to: <a class="reference external" href="http://docs.celery
 </div>
 <dl class="method">
 <dt id="naz.protocol.SubmitSM.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">version=1</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">short_message</em>, <em class="sig-param">source_addr</em>, <em class="sig-param">destination_addr</em>, <em class="sig-param">log_id</em>, <em class="sig-param">service_type='CMT'</em>, <em class="sig-param">source_addr_ton=1</em>, <em class="sig-param">source_addr_npi=1</em>, <em class="sig-param">dest_addr_ton=1</em>, <em class="sig-param">dest_addr_npi=1</em>, <em class="sig-param">esm_class=3</em>, <em class="sig-param">protocol_id=0</em>, <em class="sig-param">priority_flag=0</em>, <em class="sig-param">schedule_delivery_time=''</em>, <em class="sig-param">validity_period=''</em>, <em class="sig-param">registered_delivery=1</em>, <em class="sig-param">replace_if_present_flag=0</em>, <em class="sig-param">sm_default_msg_id=0</em>, <em class="sig-param">smpp_command='submit_sm'</em>, <em class="sig-param">version=1</em>, <em class="sig-param">hook_metadata=''</em>, <em class="sig-param">encoding='gsm0338'</em>, <em class="sig-param">errors='strict'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/protocol.html#SubmitSM.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.protocol.SubmitSM.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -375,7 +376,6 @@ This is a bit similar to: <a class="reference external" href="http://docs.celery
 <li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a unique identify of this request</p></li>
 <li><p><strong>version</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – This indicates the current version of the naz message protocol.
 This version will enable naz to be able to evolve in future; a future version of <cite>naz</cite> may ship with a different message protocol.</p></li>
-<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that to will later on be passed to <cite>naz.Client.hook</cite>. Your application can use it for correlation.</p></li>
 <li><p><strong>service_type</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Indicates the SMS Application service associated with the message</p></li>
 <li><p><strong>source_addr_ton</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Type of Number of message originator.</p></li>
@@ -390,6 +390,11 @@ This version will enable naz to be able to evolve in future; a future version of
 <li><p><strong>registered_delivery</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.</p></li>
 <li><p><strong>replace_if_present_flag</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Flag indicating if submitted message should replace an existing message.</p></li>
 <li><p><strong>sm_default_msg_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</p></li>
+<li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
+<li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC.
+The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.
+If you want to use your own custom codec implementation for an encoding, make sure to pass it to <code class="xref py py-attr docutils literal notranslate"><span class="pre">naz.Client.custom_codecs</span></code></p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>

@@ -1,5 +1,6 @@
 import os
 import struct
+import codecs
 import random
 import socket
 import string
@@ -11,6 +12,7 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
+from . import state
 from . import protocol
 from . import sequence
 from . import throttle
@@ -23,7 +25,6 @@ from . import broker as the_broker
 from .state import (
     SmppCommand,
     CommandStatus,
-    SmppDataCoding,
     SmppOptionalTag,
     SmppSessionState,
     SmppCommandStatus,
@@ -77,7 +78,6 @@ class Client:
         system_id: str,
         password: str,
         broker: the_broker.BaseBroker,
-        client_id: typing.Union[None, str] = None,
         # Reference made to NULL settings of Octet-String fields implies that the field
         # consists of a single NULL character, i.e., an octet encoded with value 0x00 (zero).
         # see section 3.1 of v3.4 smpp specification.
@@ -89,9 +89,10 @@ class Client:
         addr_npi: int = 0x00,
         address_range: str = "",
         interface_version: int = 0x34,
+        ### NON-SMPP ATTRIBUTES ###
+        client_id: typing.Union[None, str] = None,
         enquire_link_interval: float = 55.00,
         logger: typing.Union[None, logging.Logger] = None,
-        codec: typing.Union[None, the_codec.BaseCodec] = None,
         rate_limiter: typing.Union[None, ratelimiter.BaseRateLimiter] = None,
         hook: typing.Union[None, hooks.BaseHook] = None,
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator] = None,
@@ -99,6 +100,8 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater] = None,
         drain_duration: float = 8.00,
         socket_timeout: float = 30.0,
+        custom_codecs: typing.Union[None, typing.Dict[str, codecs.CodecInfo]] = None
+        ### NON-SMPP ATTRIBUTES ###
     ) -> None:
         """
         Parameters:
@@ -116,7 +119,6 @@ class Client:
             interface_version:	Indicates the version of the SMPP protocol supported by the ESME.
             enquire_link_interval:	time in seconds to wait before sending an enquire_link request to SMSC to check on its status
             logger: python `logger <https://docs.python.org/3/library/logging.html#logging.Logger>`_ instance to be used for logging
-            codec: python class instance, that is a child class of `naz.codec.BaseCodec` to be used to encode/decode messages.
             rate_limiter: python class instance implementing rate limitation
             hook: python class instance implemeting functionality/hooks to be called by naz \
                 just before sending request to SMSC and just after getting response from SMSC
@@ -126,6 +128,7 @@ class Client:
                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.
             drain_duration: duration in seconds that `naz` will wait for after receiving a termination signal.
             socket_timeout: duration that `naz` will wait, for socket/connection related activities with SMSC, before timing out
+            custom_codecs: a dictionary of encodings and their corresponding `codecs.CodecInfo <https://docs.python.org/3/library/codecs.html#codecs.CodecInfo>`_ that you would like to register.
 
         Raises:
             NazClientError: raised if there’s an error instantiating a naz Client.
@@ -144,7 +147,6 @@ class Client:
             interface_version=interface_version,
             enquire_link_interval=enquire_link_interval,
             logger=logger,
-            codec=codec,
             rate_limiter=rate_limiter,
             hook=hook,
             sequence_generator=sequence_generator,
@@ -152,6 +154,7 @@ class Client:
             correlation_handler=correlation_handler,
             drain_duration=drain_duration,
             socket_timeout=socket_timeout,
+            custom_codecs=custom_codecs,
         )
 
         self._PID = os.getpid()
@@ -192,11 +195,6 @@ class Client:
                 },
             )
         self._sanity_check_logger()
-
-        if codec is not None:
-            self.codec = codec
-        else:
-            self.codec = the_codec.SimpleCodec()
 
         self.enquire_link_interval = enquire_link_interval
 
@@ -251,8 +249,6 @@ class Client:
             SmppCommand.RESERVED_FOR_SMSC_VENDOR_B: [0x80010200, 0x800102FF],
         }
 
-        self.data_coding = self._find_data_coding(self.codec.encoding)
-
         self.reader: typing.Union[None, asyncio.streams.StreamReader] = None
         self.writer: typing.Union[None, asyncio.streams.StreamWriter] = None
 
@@ -288,6 +284,8 @@ class Client:
         self.SHOULD_SHUT_DOWN: bool = False
         self.drain_lock: asyncio.Lock = asyncio.Lock()
 
+        the_codec.register_codecs(custom_codecs)
+
         # For exceptions, we try and avoid catch-all blocks. Instead we catch only the exceptions we expect.
         # Exception hierarchy: https://docs.python.org/3/library/exceptions.html#exception-hierarchy
 
@@ -306,7 +304,6 @@ class Client:
         interface_version: int,
         enquire_link_interval: float,
         logger: typing.Union[None, logging.Logger],
-        codec: typing.Union[None, the_codec.BaseCodec],
         rate_limiter: typing.Union[None, ratelimiter.BaseRateLimiter],
         hook: typing.Union[None, hooks.BaseHook],
         sequence_generator: typing.Union[None, sequence.BaseSequenceGenerator],
@@ -314,6 +311,7 @@ class Client:
         correlation_handler: typing.Union[None, correlater.BaseCorrelater],
         drain_duration: float,
         socket_timeout: float,
+        custom_codecs: typing.Union[None, typing.Dict[str, codecs.CodecInfo]],
     ) -> None:
         """
         Checks that the arguments to `naz.Client` are okay.
@@ -412,14 +410,7 @@ class Client:
                     )
                 )
             )
-        if not isinstance(codec, (type(None), the_codec.BaseCodec)):
-            errors.append(
-                ValueError(
-                    "`codec` should be of type:: `None` or `naz.codec.BaseCodec` You entered: {0}".format(
-                        type(codec)
-                    )
-                )
-            )
+
         if not isinstance(rate_limiter, (type(None), ratelimiter.BaseRateLimiter)):
             errors.append(
                 ValueError(
@@ -476,6 +467,38 @@ class Client:
                     )
                 )
             )
+
+        if not isinstance(custom_codecs, (type(None), dict)):
+            errors.append(
+                ValueError(
+                    "`custom_codecs` should be of type:: `None` or `dict` You entered: {0}".format(
+                        type(custom_codecs)
+                    )
+                )
+            )
+
+        if custom_codecs:
+            if not isinstance(custom_codecs, dict):
+                raise ValueError(
+                    "`custom_codecs` should be of type:: `None` or `dict` You entered: {0}".format(
+                        type(custom_codecs)
+                    )
+                )
+            for _encoding, _codec_info in custom_codecs.items():
+                if not isinstance(_codec_info, codecs.CodecInfo):
+                    raise ValueError(
+                        "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo` You entered: {0}".format(
+                            type(custom_codecs)
+                        )
+                    )
+                if _encoding != _codec_info.name:
+                    raise ValueError(
+                        "the key `{0}` should be equal to codecs.CodecInfo.name".format(_encoding)
+                    )
+
+                # validate encoding is one allowed by SMPP
+                _ = state.SmppDataCoding._find_data_coding(_encoding)
+
         if len(errors):
             raise NazClientError(errors)
 
@@ -495,15 +518,6 @@ class Client:
             self.logger.log(level, log_data)
         except Exception:
             pass
-
-    @staticmethod
-    def _find_data_coding(encoding):
-        for key, val in SmppDataCoding.__dict__.items():
-            if not key.startswith("__"):
-                if encoding == val.code:
-                    return val.value
-
-        raise ValueError("That encoding: `{0}` is not recognised.".format(encoding))
 
     def _search_by_command_id_code(self, command_id_code: int) -> typing.Union[None, str]:
         for key, val in self.command_ids.items():
@@ -1167,6 +1181,8 @@ class Client:
         registered_delivery = proto_msg.registered_delivery
         replace_if_present_flag = proto_msg.replace_if_present_flag
         sm_default_msg_id = proto_msg.sm_default_msg_id
+        encoder = codecs.getencoder(proto_msg.encoding)
+        data_coding = proto_msg.data_coding
 
         self._log(
             logging.DEBUG,
@@ -1180,11 +1196,11 @@ class Client:
                 "smpp_command": smpp_command,
             },
         )
-        encoded_short_message = self.codec.encode(short_message)
+        encoded_short_message, _ = encoder(short_message, proto_msg.errors)
         sm_length = len(encoded_short_message)
 
         # body
-        # SUBMIT_SM KKKK
+        # SUBMIT_SM
         body = b""
         body = (
             body
@@ -1207,10 +1223,10 @@ class Client:
             + chr(0).encode("ascii")
             + struct.pack(">B", registered_delivery)
             + struct.pack(">B", replace_if_present_flag)
-            + struct.pack(">B", self.data_coding)
+            + struct.pack(">B", data_coding.value)
             + struct.pack(">B", sm_default_msg_id)
             + struct.pack(">B", sm_length)
-            + self.codec.encode(short_message)
+            + encoded_short_message
         )
 
         # header
