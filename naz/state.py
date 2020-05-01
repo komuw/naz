@@ -424,7 +424,20 @@ class SmppOptionalTag:
     # All optional parameters have the following general TLV (Tag, Length, Value) format.
     # Tag, Integer, 2octets
     # Length, Integer, 2octets
-    # Value, type varies, size varies. eg receipted_message_id is of type c-octet string of size 1-65
+    # Value, type varies, size varies. eg `receipted_message_id` is of type c-octet string of size 1-65
+    #
+    # As an example, to represent a `receipted_message_id`, we need;
+    #
+    # import naz, struct
+    # my_receipted_message_id = Tag + Length + Value
+    # Tag = naz.SmppOptionalTag.receipted_message_id
+    # Length = ?
+    # Value = "ThisIsSomeMessageId"
+    # Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
+    # Length = len(Value); assert Length <= 65 # Value is c-octet string of size 1-65
+    # my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned.
+    # >>> print(my_receipted_message_id)
+    # b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
 
     dest_addr_subunit = 0x0005
     dest_network_type = 0x0006
