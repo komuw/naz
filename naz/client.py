@@ -1712,7 +1712,7 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        retry_count = 0
+        receive_data_retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
@@ -1788,8 +1788,8 @@ class Client:
                 )
 
             if header_data == b"":
-                retry_count += 1
-                poll_read_interval = self._retry_after(retry_count)
+                receive_data_retry_count += 1
+                poll_read_interval = self._retry_after(receive_data_retry_count)
                 self._log(
                     logging.INFO,
                     {
@@ -1798,7 +1798,7 @@ class Client:
                         "state": "no data received from SMSC. sleeping for {0:.2f} seconds".format(
                             poll_read_interval
                         ),
-                        "retry_count": retry_count,
+                        "retry_count": receive_data_retry_count,
                     },
                 )
                 if self.SHOULD_SHUT_DOWN:
@@ -1807,7 +1807,7 @@ class Client:
                 continue
             else:
                 # we didn't fail to read from SMSC
-                retry_count = 0
+                receive_data_retry_count = 0
 
             # first 4bytes of header are the command_length
             total_pdu_length = struct.unpack(">I", header_data[:4])[0]
