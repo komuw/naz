@@ -1,5 +1,6 @@
 import abc
 import json
+import typing
 
 from . import state
 
@@ -147,7 +148,12 @@ class SubmitSM(Message):
         hook_metadata: str = "",
         encoding: str = "gsm0338",
         errors: str = "strict",
-        #### NON-SMPP ATTRIBUTES ###
+        ### NON-SMPP ATTRIBUTES ###
+        #### OPTIONAL SMPP PARAMETERS ###
+        # section 4.4.1 of smpp documentation
+        # TODO:
+        user_message_reference: typing.Union[None, int] = None,
+        #### OPTIONAL SMPP PARAMETERS ###
     ) -> None:
         """
         Parameters:
@@ -176,7 +182,9 @@ class SubmitSM(Message):
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.
                       If you want to use your own custom codec implementation for an encoding, make sure to pass it to :py:attr:`naz.Client.custom_codecs <naz.Client.custom_codecs>`
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            user_message_reference: ESME assigned message reference number.
         """
+
         self._validate_msg_type_args(
             short_message=short_message,
             source_addr=source_addr,
@@ -199,6 +207,7 @@ class SubmitSM(Message):
             sm_default_msg_id=sm_default_msg_id,
             encoding=encoding,
             errors=errors,
+            user_message_reference=user_message_reference,
         )
 
         self.smpp_command: str = state.SmppCommand.SUBMIT_SM
@@ -226,6 +235,12 @@ class SubmitSM(Message):
         self.errors = errors
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
+        self.optional_tags_dict = {}
+        if user_message_reference:
+            self.optional_tags_dict.update({"user_message_reference": user_message_reference})
+        print("lla")
+        print("hello")
+
     @staticmethod
     def _validate_msg_type_args(
         short_message: str,
@@ -249,6 +264,7 @@ class SubmitSM(Message):
         sm_default_msg_id: int,
         encoding: str,
         errors: str,
+        user_message_reference: typing.Union[None, int],
     ) -> None:
         if not isinstance(version, int):
             raise ValueError(
@@ -369,6 +385,14 @@ class SubmitSM(Message):
                 "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
             )
 
+        # optional smpp parameters
+        if not isinstance(user_message_reference, (type(None), int)):
+            raise ValueError(
+                "`user_message_reference` should be of type:: `None` or `int` You entered: {0}".format(
+                    type(user_message_reference)
+                )
+            )
+
     def to_json(self) -> str:
         _item = dict(
             smpp_command=self.smpp_command,
@@ -394,6 +418,7 @@ class SubmitSM(Message):
             encoding=self.encoding,
             errors=self.errors,
         )
+        _item.update(**self.optional_tags_dict)
         return json.dumps(_item)
 
     @staticmethod

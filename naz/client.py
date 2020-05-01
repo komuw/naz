@@ -1228,6 +1228,16 @@ class Client:
             + struct.pack(">B", sm_length)
             + encoded_short_message
         )
+        # check for optional SMPP parameters
+        import pdb
+
+        pdb.set_trace()
+        if proto_msg.optional_tags_dict:
+            oprional_params_pdu = _build_submit_sm_optional_params_pdu(proto_msg.optional_tags_dict)
+
+            def _build_submit_sm_optional_params_pdu(optional_tags_dict):
+                optional_tags_dict.get("user_message_reference")
+                struct.pack(">HHH", state.SmppOptionalTag.user_message_reference, L, V)
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
