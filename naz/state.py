@@ -418,6 +418,10 @@ class SmppDataCoding:
 class SmppOptionalTag:
     """
     Represensts the various SMPP Optional Parameter Tags.
+
+    Optional Parameters MUST always appear at the end of a message, in the `Optional Parameters` section of the SMPP PDU.
+    However, they may be included in ANY ORDER within the `Optional Parameters` section of the SMPP PDU
+    and NEED NOT be encoded in the order presented in the smpp document.
     """
 
     # see section 5.3.2 of smpp ver 3.4 spec document.
