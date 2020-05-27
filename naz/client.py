@@ -1229,6 +1229,7 @@ class Client:
             + encoded_short_message
         )
 
+        # TODO: move this method to its own
         def _build_submit_sm_optional_params_pdu(optional_tags_dict):
             # optional params may be included in ANY ORDER within
             # the `Optional Parameters` section of the SMPP PDU.
