@@ -207,7 +207,6 @@ class SubmitSM(Message):
             sm_default_msg_id=sm_default_msg_id,
             encoding=encoding,
             errors=errors,
-            user_message_reference=user_message_reference,
         )
 
         self.smpp_command: str = state.SmppCommand.SUBMIT_SM
@@ -236,9 +235,14 @@ class SubmitSM(Message):
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
         self.optional_tags_dict = {}
-
         if user_message_reference:
             self.optional_tags_dict.update({"user_message_reference": user_message_reference})
+
+        if self.optional_tags_dict:
+            # validate optional tags
+            for opt_name in self.optional_tags_dict.keys():
+                state.OptionalTag(name=opt_name, value=self.optional_tags_dict[opt_name])
+
         print("lla")
         print("hello")
 
@@ -265,7 +269,6 @@ class SubmitSM(Message):
         sm_default_msg_id: int,
         encoding: str,
         errors: str,
-        user_message_reference: typing.Union[None, int],
     ) -> None:
         if not isinstance(version, int):
             raise ValueError(
@@ -386,13 +389,7 @@ class SubmitSM(Message):
                 "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
             )
 
-        # optional smpp parameters
-        if not isinstance(user_message_reference, (type(None), int)):
-            raise ValueError(
-                "`user_message_reference` should be of type:: `None` or `int` You entered: {0}".format(
-                    type(user_message_reference)
-                )
-            )
+        # optional smpp parameters get validated on their own
 
     def to_json(self) -> str:
         _item = dict(
