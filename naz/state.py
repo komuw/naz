@@ -572,10 +572,12 @@ class OptionalTag:
             raise ValueError(
                 "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
             )
-        elif name in ("alert_on_message_delivery",):
-            # TODO: check how this is implemented in protocol.py
-            if value:
-                raise ValueError("`{0}` should have no value".format(name))
+        elif name in ("alert_on_message_delivery",) and not isinstance(value, bool):
+            # note that in smpp, `alert_on_message_delivery` has no value part in TLV
+            # but in naz we just use boolean to indicate whether someone wants to set it.
+            raise ValueError(
+                "`{0}` should be of type:: `bool` You entered: {1}".format(name, type(value))
+            )
 
     @property
     def tag(self) -> int:
