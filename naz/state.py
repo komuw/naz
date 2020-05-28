@@ -476,7 +476,7 @@ class OptionalTag:
         language_indicator=0x020D,
         sar_total_segments=0x020E,
         sar_segment_seqnum=0x020F,
-        SC_interface_version=0x0210,
+        sc_interface_version=0x0210,
         callback_num_pres_ind=0x0302,
         callback_num_atag=0x0303,
         number_of_messages=0x0304,
@@ -539,6 +539,12 @@ class OptionalTag:
             "sar_msg_ref_num",
             "language_indicator",
             "sar_total_segments",
+            "sar_segment_seqnum",
+            "sc_interface_version",
+            "callback_num_pres_ind",
+            "number_of_messages",
+            "dpf_result",
+            "set_dpf" "ms_availability_status",
         ) and not isinstance(value, int):
             raise ValueError(
                 "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
@@ -548,6 +554,8 @@ class OptionalTag:
             "receipted_message_id",
             "source_subaddress",
             "dest_subaddress",
+            "callback_num_atag",
+            "callback_num",
         ) and not isinstance(value, str):
             raise ValueError(
                 "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
@@ -579,6 +587,13 @@ class OptionalTag:
             "sar_msg_ref_num",
             "language_indicator",
             "sar_total_segments",
+            "sar_segment_seqnum",
+            "sc_interface_version",
+            "callback_num_pres_ind",
+            "number_of_messages",
+            "dpf_result",
+            "set_dpf",
+            "ms_availability_status",
         ):
             # see section 5.3.2.1 of smpp v3.4 documentation where for example
             # the length of `dest_addr_subunit` is listed as 2.
@@ -591,6 +606,8 @@ class OptionalTag:
             "receipted_message_id",
             "source_subaddress",
             "dest_subaddress",
+            "callback_num_atag",
+            "callback_num",
         ):
             # TODO: we should do assertions here. maybe??
             # eg the length for `receipted_message_id` should be <= 65
@@ -631,6 +648,13 @@ class OptionalTag:
             "user_response_code",
             "language_indicator",
             "sar_total_segments",
+            "sar_segment_seqnum",
+            "sc_interface_version",
+            "callback_num_pres_ind",
+            "number_of_messages",
+            "dpf_result",
+            "set_dpf",
+            "ms_availability_status",
         ):
             return struct.pack(">HHB", self.tag, self.length, self.value)
 
@@ -639,6 +663,8 @@ class OptionalTag:
             "receipted_message_id",
             "source_subaddress",
             "dest_subaddress",
+            "callback_num_atag",
+            "callback_num",
         ):
             # where self.value in the case of receipted_message_id is
             #  value.encode("ascii") + chr(0).encode("ascii")
@@ -703,7 +729,7 @@ class SmppOptionalTag:
     language_indicator = 0x020D
     sar_total_segments = 0x020E
     sar_segment_seqnum = 0x020F
-    SC_interface_version = 0x0210
+    sc_interface_version = 0x0210
     callback_num_pres_ind = 0x0302
     callback_num_atag = 0x0303
     number_of_messages = 0x0304
