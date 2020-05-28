@@ -573,6 +573,7 @@ class OptionalTag:
                 "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
             )
         elif name in ("alert_on_message_delivery",):
+            # TODO: check how this is implemented in protocol.py
             if value:
                 raise ValueError("`{0}` should have no value".format(name))
 
