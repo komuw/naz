@@ -528,9 +528,18 @@ class OptionalTag:
             "source_bearer_type",
             "source_telematics_id",
             "qos_time_to_live",
+            "payload_type",
+            # the type of `ms_msg_wait_facilities` is a bitMask. but it is treated as an int
+            "ms_msg_wait_facilities",
         ) and not isinstance(value, int):
             raise ValueError(
                 "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
+            )
+        elif name in ("additional_status_info_text", "receipted_message_id") and not isinstance(
+            value, str
+        ):
+            raise ValueError(
+                "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
             )
 
         # TODO: do lots of validations here.
@@ -553,11 +562,15 @@ class OptionalTag:
             "source_bearer_type",
             "source_telematics_id",
             "qos_time_to_live",
+            "payload_type",
         ):  # "user_message_reference",):
             # see section 5.3.2.1 of smpp v3.4 documentation where for example
             # the length of `dest_addr_subunit` is listed as 2.
+
+            # TODO: check whether this value is correct.
+            # smpp doc says: "Length of value part in octets". so it seems like we should take the length of the interger in `self.value`
             return 2
-        elif self.name in ("receipted_message_id",):
+        elif self.name in ("additional_status_info_text", "receipted_message_id",):
             # TODO: we should do assertions here. maybe??
             # eg the length for `receipted_message_id` should be <= 65
             return len(self.value)
@@ -580,9 +593,13 @@ class OptionalTag:
             "source_bearer_type",
             "source_telematics_id",
             "qos_time_to_live",
+            "payload_type",
         ):  # ("user_message_reference",):
+            # TODO: check whether to use `struct.pack(">H")` or `struct.pack(">B")`
+            # see: https://docs.python.org/3.8/library/struct.html#format-characters
+            # H is for `unsigned short size 2` and B is for `unsigned char size 1`
             return struct.pack(">HHH", self.tag, self.length, self.value)
-        elif self.name in ("receipted_message_id",):
+        elif self.name in ("additional_status_info_text", "receipted_message_id",):
             # where self.value in the case of receipted_message_id is
             #  value.encode("ascii") + chr(0).encode("ascii")
             return struct.pack(">HH", self.tag, self.length) + self.value
