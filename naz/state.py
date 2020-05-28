@@ -415,17 +415,15 @@ class SmppDataCoding:
             ) from e
 
 
-import typing
+import typing, struct
 
 
 class OptionalTag:
     """
     An SMPP OptionalTag.
-
     Optional Parameters MUST always appear at the end of a message, in the `Optional Parameters` section of the SMPP PDU.
     However, they may be included in ANY ORDER within the `Optional Parameters` section of the SMPP PDU
     and NEED NOT be encoded in the order presented in the smpp document.
-
     see section 5.3.2 of smpp ver 3.4 spec document.
     """
 
@@ -453,6 +451,21 @@ class OptionalTag:
             # TODO: we should do assertions here. maybe??
             # eg the length for `receipted_message_id` should be <= 65
             return len(self.value)
+        else:
+            raise ValueError(
+                "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
+                    self.name, self.tag
+                )
+            )
+
+    @property
+    def tlv(self) -> bytes:
+        if self.name in ("user_message_reference",):
+            return struct.pack(">HHH", self.tag, self.length, self.value)
+        elif self.name in ("receipted_message_id",):
+            # where self.value in the case of receipted_message_id is
+            #  value.encode("ascii") + chr(0).encode("ascii")
+            return struct.pack(">HH", self.tag, self.length) + self.value
         else:
             raise ValueError(
                 "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
