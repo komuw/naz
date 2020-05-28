@@ -546,6 +546,13 @@ class OptionalTag:
             "dpf_result",
             "set_dpf",
             "ms_availability_status",
+            "delivery_failure_reason",
+            "more_messages_to_send",
+            "message_state",
+            "display_time",
+            "sms_signal",
+            "ms_validity",
+            "its_reply_type",
         ) and not isinstance(value, int):
             raise ValueError(
                 "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
@@ -559,10 +566,15 @@ class OptionalTag:
             "callback_num",
             "network_error_code",
             "message_payload",
+            "ussd_service_op",
+            "its_session_info",
         ) and not isinstance(value, str):
             raise ValueError(
                 "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
             )
+        elif name in ("alert_on_message_delivery",):
+            if value:
+                raise ValueError("`{0}` should have no value".format(name))
 
     @property
     def tag(self) -> int:
@@ -597,6 +609,13 @@ class OptionalTag:
             "dpf_result",
             "set_dpf",
             "ms_availability_status",
+            "delivery_failure_reason",
+            "more_messages_to_send",
+            "message_state",
+            "display_time",
+            "sms_signal",
+            "ms_validity",
+            "its_reply_type",
         ):
             # see section 5.3.2.1 of smpp v3.4 documentation where for example
             # the length of `dest_addr_subunit` is listed as 2.
@@ -613,10 +632,17 @@ class OptionalTag:
             "callback_num",
             "network_error_code",
             "message_payload",
+            "ussd_service_op",
+            "its_session_info",
         ):
             # TODO: we should do assertions here. maybe??
             # eg the length for `receipted_message_id` should be <= 65
             return len(self.value)
+
+        elif self.name in ("alert_on_message_delivery",):
+            # see section 5.3.2.41 of smpp document
+            return 0
+
         else:
             raise ValueError(
                 "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
@@ -641,6 +667,7 @@ class OptionalTag:
             "source_port",
             "destination_port",
             "sar_msg_ref_num",
+            "sms_signal",
         ):
             # TODO: check whether to use `struct.pack(">H")` or `struct.pack(">B")`
             # see: https://docs.python.org/3.8/library/struct.html#format-characters
@@ -660,6 +687,12 @@ class OptionalTag:
             "dpf_result",
             "set_dpf",
             "ms_availability_status",
+            "delivery_failure_reason",
+            "more_messages_to_send",
+            "message_state",
+            "display_time",
+            "ms_validity",
+            "its_reply_type",
         ):
             return struct.pack(">HHB", self.tag, self.length, self.value)
 
@@ -672,10 +705,16 @@ class OptionalTag:
             "callback_num",
             "network_error_code",
             "message_payload",
+            "ussd_service_op",
+            "its_session_info",
         ):
             # where self.value in the case of receipted_message_id is
             #  value.encode("ascii") + chr(0).encode("ascii")
             return struct.pack(">HH", self.tag, self.length) + self.value
+
+        elif self.name in ("alert_on_message_delivery",):
+            # has no value
+            return struct.pack(">HH", self.tag, self.length)
         else:
             raise ValueError(
                 "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
