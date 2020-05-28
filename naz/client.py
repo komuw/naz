@@ -1233,21 +1233,13 @@ class Client:
         def _build_submit_sm_optional_params_pdu(optional_tags_dict):
             # optional params may be included in ANY ORDER within
             # the `Optional Parameters` section of the SMPP PDU.
-            # We(`naz`) are however, going to include them in the order listed in the smpp doc.
-            # Because you never know what smpp servers have been coded to accept.
             opt_pdu = b""
-            if optional_tags_dict.get("user_message_reference"):
-                import pdb
-
-                pdb.set_trace()
-                ans = struct.pack(
-                    ">HHH",
-                    state.SmppOptionalTag.user_message_reference,
-                    2,
-                    optional_tags_dict.get("user_message_reference"),
-                )
-                opt_pdu = opt_pdu + ans
-
+            for opt_name in state.OptionalTag.opt_name_tag.keys():
+                if optional_tags_dict.get(opt_name):
+                    opt_pdu = (
+                        opt_pdu
+                        + state.OptionalTag(name=opt_name, value=optional_tags_dict[opt_name]).tlv
+                    )
             return opt_pdu
 
         # check for optional SMPP parameters
@@ -1255,9 +1247,6 @@ class Client:
         if proto_msg.optional_tags_dict:
             optional_params_pdu = _build_submit_sm_optional_params_pdu(proto_msg.optional_tags_dict)
         body = body + optional_params_pdu
-        import pdb
-
-        pdb.set_trace()
 
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers

@@ -236,6 +236,7 @@ class SubmitSM(Message):
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
         self.optional_tags_dict = {}
+
         if user_message_reference:
             self.optional_tags_dict.update({"user_message_reference": user_message_reference})
         print("lla")
