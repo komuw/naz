@@ -277,17 +277,7 @@ class SubmitSM(Message):
         self.errors = errors
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
-        self.optional_tags_dict = {}
-        if user_message_reference:
-            self.optional_tags_dict.update({"user_message_reference": user_message_reference})
-
-        if self.optional_tags_dict:
-            # validate optional tags
-            for opt_name in self.optional_tags_dict.keys():
-                state.OptionalTag(name=opt_name, value=self.optional_tags_dict[opt_name])
-
-        print("lla")
-        print("hello")
+        self.optional_tags_dict = self._create_opt_tags()
 
     @staticmethod
     def _validate_msg_type_args(
@@ -433,6 +423,63 @@ class SubmitSM(Message):
             )
 
         # optional smpp parameters get validated on their own
+
+    @staticmethod
+    def _create_opt_tags(
+        dest_addr_subunit: typing.Union[None, int] = None,
+        dest_network_type: typing.Union[None, int] = None,
+        dest_bearer_type: typing.Union[None, int] = None,
+        dest_telematics_id: typing.Union[None, int] = None,
+        source_addr_subunit: typing.Union[None, int] = None,
+        source_network_type: typing.Union[None, int] = None,
+        source_bearer_type: typing.Union[None, int] = None,
+        source_telematics_id: typing.Union[None, int] = None,
+        qos_time_to_live: typing.Union[None, int] = None,
+        payload_type: typing.Union[None, int] = None,
+        ms_msg_wait_facilities: typing.Union[None, int] = None,
+        privacy_indicator: typing.Union[None, int] = None,
+        user_message_reference: typing.Union[None, int] = None,
+        user_response_code: typing.Union[None, int] = None,
+        source_port: typing.Union[None, int] = None,
+        destination_port: typing.Union[None, int] = None,
+        sar_msg_ref_num: typing.Union[None, int] = None,
+        language_indicator: typing.Union[None, int] = None,
+        sar_total_segments: typing.Union[None, int] = None,
+        sar_segment_seqnum: typing.Union[None, int] = None,
+        sc_interface_version: typing.Union[None, int] = None,
+        callback_num_pres_ind: typing.Union[None, int] = None,
+        number_of_messages: typing.Union[None, int] = None,
+        dpf_result: typing.Union[None, int] = None,
+        set_dpf: typing.Union[None, int] = None,
+        ms_availability_status: typing.Union[None, int] = None,
+        delivery_failure_reason: typing.Union[None, int] = None,
+        more_messages_to_send: typing.Union[None, int] = None,
+        message_state: typing.Union[None, int] = None,
+        display_time: typing.Union[None, int] = None,
+        sms_signal: typing.Union[None, int] = None,
+        ms_validity: typing.Union[None, int] = None,
+        its_reply_type: typing.Union[None, int] = None,
+        additional_status_info_text: typing.Union[None, str] = None,
+        receipted_message_id: typing.Union[None, str] = None,
+        source_subaddress: typing.Union[None, str] = None,
+        dest_subaddress: typing.Union[None, str] = None,
+        callback_num_atag: typing.Union[None, str] = None,
+        callback_num: typing.Union[None, str] = None,
+        network_error_code: typing.Union[None, str] = None,
+        message_payload: typing.Union[None, str] = None,
+        ussd_service_op: typing.Union[None, str] = None,
+        its_session_info: typing.Union[None, str] = None,
+        alert_on_message_delivery: bool = False,
+    ):
+        optional_tags_dict = {}
+        if user_message_reference:
+            optional_tags_dict.update({"user_message_reference": user_message_reference})
+
+        # validate optional tags
+        for opt_name in optional_tags_dict.keys():
+            state.OptionalTag(name=opt_name, value=optional_tags_dict[opt_name])
+
+        return optional_tags_dict
 
     def to_json(self) -> str:
         _item = dict(
