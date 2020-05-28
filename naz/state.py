@@ -544,7 +544,8 @@ class OptionalTag:
             "callback_num_pres_ind",
             "number_of_messages",
             "dpf_result",
-            "set_dpf" "ms_availability_status",
+            "set_dpf",
+            "ms_availability_status",
         ) and not isinstance(value, int):
             raise ValueError(
                 "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
@@ -556,6 +557,8 @@ class OptionalTag:
             "dest_subaddress",
             "callback_num_atag",
             "callback_num",
+            "network_error_code",
+            "message_payload",
         ) and not isinstance(value, str):
             raise ValueError(
                 "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
@@ -608,6 +611,8 @@ class OptionalTag:
             "dest_subaddress",
             "callback_num_atag",
             "callback_num",
+            "network_error_code",
+            "message_payload",
         ):
             # TODO: we should do assertions here. maybe??
             # eg the length for `receipted_message_id` should be <= 65
@@ -665,6 +670,8 @@ class OptionalTag:
             "dest_subaddress",
             "callback_num_atag",
             "callback_num",
+            "network_error_code",
+            "message_payload",
         ):
             # where self.value in the case of receipted_message_id is
             #  value.encode("ascii") + chr(0).encode("ascii")
