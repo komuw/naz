@@ -415,6 +415,57 @@ class SmppDataCoding:
             ) from e
 
 
+import typing
+
+
+class OptionalTag:
+    """
+    An SMPP OptionalTag.
+
+    Optional Parameters MUST always appear at the end of a message, in the `Optional Parameters` section of the SMPP PDU.
+    However, they may be included in ANY ORDER within the `Optional Parameters` section of the SMPP PDU
+    and NEED NOT be encoded in the order presented in the smpp document.
+
+    see section 5.3.2 of smpp ver 3.4 spec document.
+    """
+
+    def __init__(
+        self, name: str, value: typing.Union[int, str], tag: int
+    ):  # TODO: list all the union of value
+        self.name = name
+        # TODO: we must use the correct value here.
+        # ie, if it is for example `receipted_message_id`, then the value should be:
+        # self.value =  value.encode("ascii") + chr(0).encode("ascii")
+        self.value = value
+        self.tag = tag
+
+    @staticmethod
+    def _validate_args():
+        # TODO: do lots of validations here.
+        # eg if name is `user_message_reference` then value should be an int etc.
+        pass
+
+    @property
+    def length(self) -> int:
+        if self.name in ("user_message_reference",):
+            return 2
+        elif self.name in ("receipted_message_id",):
+            # TODO: we should do assertions here. maybe??
+            # eg the length for `receipted_message_id` should be <= 65
+            return len(self.value)
+        else:
+            raise ValueError(
+                "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
+                    self.name, self.tag
+                )
+            )
+
+
+user_message_reference = OptionalTag(name="user_message_reference", value=23, tag=0x0204)
+
+user_message_reference.length
+
+
 class SmppOptionalTag:
     """
     Represensts the various SMPP Optional Parameter Tags.

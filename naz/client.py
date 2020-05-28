@@ -1237,10 +1237,13 @@ class Client:
             # Because you never know what smpp servers have been coded to accept.
             opt_pdu = b""
             if optional_tags_dict.get("user_message_reference"):
+                import pdb
+
+                pdb.set_trace()
                 ans = struct.pack(
                     ">HHH",
                     state.SmppOptionalTag.user_message_reference,
-                    len(optional_tags_dict.get("user_message_reference")),
+                    2,
                     optional_tags_dict.get("user_message_reference"),
                 )
                 opt_pdu = opt_pdu + ans
