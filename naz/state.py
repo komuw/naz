@@ -531,20 +531,27 @@ class OptionalTag:
             "payload_type",
             # the type of `ms_msg_wait_facilities` is a bitMask. but it is treated as an int
             "ms_msg_wait_facilities",
+            "privacy_indicator",
+            "user_message_reference",
+            "user_response_code",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "language_indicator",
+            "sar_total_segments",
         ) and not isinstance(value, int):
             raise ValueError(
                 "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
             )
-        elif name in ("additional_status_info_text", "receipted_message_id") and not isinstance(
-            value, str
-        ):
+        elif name in (
+            "additional_status_info_text",
+            "receipted_message_id",
+            "source_subaddress",
+            "dest_subaddress",
+        ) and not isinstance(value, str):
             raise ValueError(
                 "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
             )
-
-        # TODO: do lots of validations here.
-        # eg if name is `user_message_reference` then value should be an int etc.
-        pass
 
     @property
     def tag(self) -> int:
@@ -563,14 +570,28 @@ class OptionalTag:
             "source_telematics_id",
             "qos_time_to_live",
             "payload_type",
-        ):  # "user_message_reference",):
+            "ms_msg_wait_facilities",
+            "privacy_indicator",
+            "user_message_reference",
+            "user_response_code",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "language_indicator",
+            "sar_total_segments",
+        ):
             # see section 5.3.2.1 of smpp v3.4 documentation where for example
             # the length of `dest_addr_subunit` is listed as 2.
 
             # TODO: check whether this value is correct.
             # smpp doc says: "Length of value part in octets". so it seems like we should take the length of the interger in `self.value`
             return 2
-        elif self.name in ("additional_status_info_text", "receipted_message_id",):
+        elif self.name in (
+            "additional_status_info_text",
+            "receipted_message_id",
+            "source_subaddress",
+            "dest_subaddress",
+        ):
             # TODO: we should do assertions here. maybe??
             # eg the length for `receipted_message_id` should be <= 65
             return len(self.value)
@@ -594,12 +615,31 @@ class OptionalTag:
             "source_telematics_id",
             "qos_time_to_live",
             "payload_type",
-        ):  # ("user_message_reference",):
+            "user_message_reference",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+        ):
             # TODO: check whether to use `struct.pack(">H")` or `struct.pack(">B")`
             # see: https://docs.python.org/3.8/library/struct.html#format-characters
             # H is for `unsigned short size 2` and B is for `unsigned char size 1`
             return struct.pack(">HHH", self.tag, self.length, self.value)
-        elif self.name in ("additional_status_info_text", "receipted_message_id",):
+
+        elif self.name in (
+            "ms_msg_wait_facilities",
+            "privacy_indicator",
+            "user_response_code",
+            "language_indicator",
+            "sar_total_segments",
+        ):
+            return struct.pack(">HHB", self.tag, self.length, self.value)
+
+        elif self.name in (
+            "additional_status_info_text",
+            "receipted_message_id",
+            "source_subaddress",
+            "dest_subaddress",
+        ):
             # where self.value in the case of receipted_message_id is
             #  value.encode("ascii") + chr(0).encode("ascii")
             return struct.pack(">HH", self.tag, self.length) + self.value
@@ -609,12 +649,6 @@ class OptionalTag:
                     self.name, self.tag
                 )
             )
-
-
-user_message_reference = OptionalTag(name="user_message_reference", value=23)
-
-user_message_reference.length
-user_message_reference.tag
 
 
 class SmppOptionalTag:
