@@ -499,8 +499,10 @@ class OptionalTag:
     )
 
     def __init__(
-        self, name: str, value: typing.Union[int, str],
-    ):  # TODO: list all the union of value
+        self, name: str, value: typing.Union[int, str],  # TODO: list all the union of value
+    ):
+        self._validate_args(name=name, value=value)
+
         self.name = name
         # TODO: we must use the correct value here.
         # ie, if it is for example `receipted_message_id`, then the value should be:
@@ -508,7 +510,29 @@ class OptionalTag:
         self.value = value
 
     @staticmethod
-    def _validate_args():
+    def _validate_args(
+        name: str, value: typing.Union[int, str],  # TODO: list all the union of value
+    ):
+        if name not in OptionalTag.opt_name_tag.keys():
+            raise ValueError(
+                "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(name)
+            )
+
+        if name in (
+            "dest_addr_subunit",
+            "dest_network_type",
+            "dest_bearer_type",
+            "dest_telematics_id",
+            "source_addr_subunit",
+            "source_network_type",
+            "source_bearer_type",
+            "source_telematics_id",
+            "qos_time_to_live",
+        ) and not isinstance(value, int):
+            raise ValueError(
+                "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
+            )
+
         # TODO: do lots of validations here.
         # eg if name is `user_message_reference` then value should be an int etc.
         pass
@@ -519,7 +543,19 @@ class OptionalTag:
 
     @property
     def length(self) -> int:
-        if self.name in ("user_message_reference",):
+        if self.name in (
+            "dest_addr_subunit",
+            "dest_network_type",
+            "dest_bearer_type",
+            "dest_telematics_id",
+            "source_addr_subunit",
+            "source_network_type",
+            "source_bearer_type",
+            "source_telematics_id",
+            "qos_time_to_live",
+        ):  # "user_message_reference",):
+            # see section 5.3.2.1 of smpp v3.4 documentation where for example
+            # the length of `dest_addr_subunit` is listed as 2.
             return 2
         elif self.name in ("receipted_message_id",):
             # TODO: we should do assertions here. maybe??
@@ -534,7 +570,17 @@ class OptionalTag:
 
     @property
     def tlv(self) -> bytes:
-        if self.name in ("user_message_reference",):
+        if self.name in (
+            "dest_addr_subunit",
+            "dest_network_type",
+            "dest_bearer_type",
+            "dest_telematics_id",
+            "source_addr_subunit",
+            "source_network_type",
+            "source_bearer_type",
+            "source_telematics_id",
+            "qos_time_to_live",
+        ):  # ("user_message_reference",):
             return struct.pack(">HHH", self.tag, self.length, self.value)
         elif self.name in ("receipted_message_id",):
             # where self.value in the case of receipted_message_id is
