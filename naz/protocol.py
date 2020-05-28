@@ -277,7 +277,52 @@ class SubmitSM(Message):
         self.errors = errors
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
-        self.optional_tags_dict = self._create_opt_tags()
+        self.optional_tags_dict = self._create_opt_tags(
+            dest_addr_subunit,
+            dest_network_type,
+            dest_bearer_type,
+            dest_telematics_id,
+            source_addr_subunit,
+            source_network_type,
+            source_bearer_type,
+            source_telematics_id,
+            qos_time_to_live,
+            payload_type,
+            ms_msg_wait_facilities,
+            privacy_indicator,
+            user_message_reference,
+            user_response_code,
+            source_port,
+            destination_port,
+            sar_msg_ref_num,
+            language_indicator,
+            sar_total_segments,
+            sar_segment_seqnum,
+            sc_interface_version,
+            callback_num_pres_ind,
+            number_of_messages,
+            dpf_result,
+            set_dpf,
+            ms_availability_status,
+            delivery_failure_reason,
+            more_messages_to_send,
+            message_state,
+            display_time,
+            sms_signal,
+            ms_validity,
+            its_reply_type,
+            additional_status_info_text,
+            receipted_message_id,
+            source_subaddress,
+            dest_subaddress,
+            callback_num_atag,
+            callback_num,
+            network_error_code,
+            message_payload,
+            ussd_service_op,
+            its_session_info,
+            alert_on_message_delivery,
+        )
 
     @staticmethod
     def _validate_msg_type_args(
@@ -425,55 +470,13 @@ class SubmitSM(Message):
         # optional smpp parameters get validated on their own
 
     @staticmethod
-    def _create_opt_tags(
-        dest_addr_subunit: typing.Union[None, int] = None,
-        dest_network_type: typing.Union[None, int] = None,
-        dest_bearer_type: typing.Union[None, int] = None,
-        dest_telematics_id: typing.Union[None, int] = None,
-        source_addr_subunit: typing.Union[None, int] = None,
-        source_network_type: typing.Union[None, int] = None,
-        source_bearer_type: typing.Union[None, int] = None,
-        source_telematics_id: typing.Union[None, int] = None,
-        qos_time_to_live: typing.Union[None, int] = None,
-        payload_type: typing.Union[None, int] = None,
-        ms_msg_wait_facilities: typing.Union[None, int] = None,
-        privacy_indicator: typing.Union[None, int] = None,
-        user_message_reference: typing.Union[None, int] = None,
-        user_response_code: typing.Union[None, int] = None,
-        source_port: typing.Union[None, int] = None,
-        destination_port: typing.Union[None, int] = None,
-        sar_msg_ref_num: typing.Union[None, int] = None,
-        language_indicator: typing.Union[None, int] = None,
-        sar_total_segments: typing.Union[None, int] = None,
-        sar_segment_seqnum: typing.Union[None, int] = None,
-        sc_interface_version: typing.Union[None, int] = None,
-        callback_num_pres_ind: typing.Union[None, int] = None,
-        number_of_messages: typing.Union[None, int] = None,
-        dpf_result: typing.Union[None, int] = None,
-        set_dpf: typing.Union[None, int] = None,
-        ms_availability_status: typing.Union[None, int] = None,
-        delivery_failure_reason: typing.Union[None, int] = None,
-        more_messages_to_send: typing.Union[None, int] = None,
-        message_state: typing.Union[None, int] = None,
-        display_time: typing.Union[None, int] = None,
-        sms_signal: typing.Union[None, int] = None,
-        ms_validity: typing.Union[None, int] = None,
-        its_reply_type: typing.Union[None, int] = None,
-        additional_status_info_text: typing.Union[None, str] = None,
-        receipted_message_id: typing.Union[None, str] = None,
-        source_subaddress: typing.Union[None, str] = None,
-        dest_subaddress: typing.Union[None, str] = None,
-        callback_num_atag: typing.Union[None, str] = None,
-        callback_num: typing.Union[None, str] = None,
-        network_error_code: typing.Union[None, str] = None,
-        message_payload: typing.Union[None, str] = None,
-        ussd_service_op: typing.Union[None, str] = None,
-        its_session_info: typing.Union[None, str] = None,
-        alert_on_message_delivery: bool = False,
-    ):
+    def _create_opt_tags(**kwargs):
+        import pdb
+
+        pdb.set_trace()
         optional_tags_dict = {}
-        if user_message_reference:
-            optional_tags_dict.update({"user_message_reference": user_message_reference})
+        # if user_message_reference:
+        #     optional_tags_dict.update({"user_message_reference": user_message_reference})
 
         # validate optional tags
         for opt_name in optional_tags_dict.keys():
