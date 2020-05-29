@@ -764,8 +764,11 @@ class OptionalTag:
             #  value.encode("ascii") + chr(0).encode("ascii")
             return struct.pack(">HH", self.tag, self.length) + self.value
         elif self.name in ("alert_on_message_delivery",):
-            # has no value
-            return struct.pack(">HH", self.tag, self.length)
+            if self.value:
+                # the TLV has no value field
+                return struct.pack(">HH", self.tag, self.length)
+            else:
+                return b""
         else:
             raise ValueError(
                 "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
