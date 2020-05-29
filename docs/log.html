@@ -201,7 +201,7 @@ By default, <cite>logging.StreamHandler</cite> is used.</p></li>
 <dl class="method">
 <dt id="naz.log.SimpleLogger.log">
 <code class="sig-name descname">log</code><span class="sig-paren">(</span><em class="sig-param">level</em>, <em class="sig-param">msg</em>, <em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/log.html#SimpleLogger.log"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.log.SimpleLogger.log" title="Permalink to this definition">¶</a></dt>
-<dd><p>Log ‘msg % args' with the integer severity ‘level'.</p>
+<dd><p>Log ‘msg % args’ with the integer severity ‘level’.</p>
 <p>To pass exception information, use the keyword argument exc_info with
 a true value, e.g.</p>
 <p>logger.log(level, “We have a %s”, “mysterious problem”, exc_info=1)</p>
@@ -253,7 +253,7 @@ except that it does not flush when the ring-buffer capacity is met but only when
 <li><p><strong>flushLevel</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the log level that will trigger this handler to flush logs to <code class="xref py py-attr docutils literal notranslate"><span class="pre">target</span></code></p></li>
 <li><p><strong>capacity</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – the maximum number of log records to store in the ring buffer</p></li>
 <li><p><strong>target</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Handler</span></code>]) – the <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Handler">log handler</a> that will be used.</p></li>
-<li><p><strong>flushOnClose</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to flush the buffer when the handler is closed even if the flush level hasn't been exceeded</p></li>
+<li><p><strong>flushOnClose</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – whether to flush the buffer when the handler is closed even if the flush level hasn’t been exceeded</p></li>
 <li><p><strong>heartbeatInterval</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – can be a float or None. If it is a float, then a heartbeat log record will be emitted every <code class="xref py py-attr docutils literal notranslate"><span class="pre">heartbeatInterval</span></code> seconds.
 If it is None(the default), then no heartbeat log record is emitted.
 If you do decide to set it, a good value is at least 1800(ie 30 minutes).</p></li>

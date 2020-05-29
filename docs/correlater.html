@@ -172,11 +172,11 @@
 <dt id="naz.correlater.BaseCorrelater">
 <em class="property">class </em><code class="sig-prename descclassname">naz.correlater.</code><code class="sig-name descname">BaseCorrelater</code><a class="reference internal" href="_modules/naz/correlater.html#BaseCorrelater"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.correlater.BaseCorrelater" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>Interface that must be implemented to satisfy naz's Correlater.
+<p>Interface that must be implemented to satisfy naz’s Correlater.
 User implementations should inherit this class and
 implement the <a class="reference internal" href="#naz.correlater.BaseCorrelater.get" title="naz.correlater.BaseCorrelater.get"><code class="xref py py-func docutils literal notranslate"><span class="pre">get</span></code></a> and <a class="reference internal" href="#naz.correlater.BaseCorrelater.put" title="naz.correlater.BaseCorrelater.put"><code class="xref py py-func docutils literal notranslate"><span class="pre">put</span></code></a> methods with the type signatures shown.</p>
 <p>A Correlater is class that naz uses to store relations between SMPP sequence numbers
-and user applications' log_id's and/or hook_metadata.</p>
+and user applications’ log_id’s and/or hook_metadata.</p>
 <div class="line-block">
 <div class="line">Note: This correlation is on a BEST effort basis; it is not guaranteed to be reliable.</div>
 <div class="line">One reason, among others, is that the SMPP specifiation mandates sequence numbers to wrap around after ≈ 2billion.</div>
@@ -213,8 +213,8 @@ with a submit_sm_resp. However receipted_message_id is an optional parameter tha
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
-<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user's application had previously supplied to naz to track/correlate different messages.</p></li>
-<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
 <li><p><strong>smsc_message_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique identifier of a particular message on the SMSC. It comes from SMSC</p></li>
 </ul>
 </dd>
@@ -298,8 +298,8 @@ After the expiration of max_ttl seconds, that item will be deleted.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>sequence_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – SMPP sequence_number</p></li>
-<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user's application had previously supplied to naz to track/correlate different messages.</p></li>
-<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user's application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
+<li><p><strong>log_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – an ID that a user’s application had previously supplied to naz to track/correlate different messages.</p></li>
+<li><p><strong>hook_metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – a string that a user’s application had previously supplied to naz that it may want to be correlated with the log_id.</p></li>
 <li><p><strong>smsc_message_id</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>]) – a unique identifier of a particular message on the SMSC. It comes from SMSC</p></li>
 </ul>
 </dd>

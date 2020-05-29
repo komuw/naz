@@ -172,12 +172,12 @@
 <dt id="naz.throttle.BaseThrottleHandler">
 <em class="property">class </em><code class="sig-prename descclassname">naz.throttle.</code><code class="sig-name descname">BaseThrottleHandler</code><a class="reference internal" href="_modules/naz/throttle.html#BaseThrottleHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.throttle.BaseThrottleHandler" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
-<p>This is the interface that must be implemented to satisfy naz's throttle handling.
+<p>This is the interface that must be implemented to satisfy naz’s throttle handling.
 User implementations should inherit this class and
 implement the <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.throttled" title="naz.throttle.BaseThrottleHandler.throttled"><code class="xref py py-func docutils literal notranslate"><span class="pre">throttled</span></code></a>, <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.not_throttled" title="naz.throttle.BaseThrottleHandler.not_throttled"><code class="xref py py-func docutils literal notranslate"><span class="pre">not_throttled</span></code></a>,
 <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.allow_request" title="naz.throttle.BaseThrottleHandler.allow_request"><code class="xref py py-func docutils literal notranslate"><span class="pre">allow_request</span></code></a> and
 <a class="reference internal" href="#naz.throttle.BaseThrottleHandler.throttle_delay" title="naz.throttle.BaseThrottleHandler.throttle_delay"><code class="xref py py-func docutils literal notranslate"><span class="pre">throttle_delay</span></code></a> methods with the type signatures shown.</p>
-<p>When an SMPP client exceeds it's rate limit, or when the SMSC is under load or for whatever reason;
+<p>When an SMPP client exceeds it’s rate limit, or when the SMSC is under load or for whatever reason;
 The SMSC may decide to start throtlling requests from that particular client.
 When it does so, it replies to the client with a throttling status. Under such conditions, it is important for the client to start
 rate limiting itself. The way naz implements this self imposed self-regulation is via Throttle Handlers.</p>
