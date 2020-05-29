@@ -641,20 +641,14 @@ class OptionalTag:
             "dest_addr_subunit",
             "dest_network_type",
             "dest_bearer_type",
-            "dest_telematics_id",
             "source_addr_subunit",
             "source_network_type",
             "source_bearer_type",
             "source_telematics_id",
-            "qos_time_to_live",
             "payload_type",
             "ms_msg_wait_facilities",
             "privacy_indicator",
-            "user_message_reference",
             "user_response_code",
-            "source_port",
-            "destination_port",
-            "sar_msg_ref_num",
             "language_indicator",
             "sar_total_segments",
             "sar_segment_seqnum",
@@ -668,16 +662,24 @@ class OptionalTag:
             "more_messages_to_send",
             "message_state",
             "display_time",
-            "sms_signal",
             "ms_validity",
             "its_reply_type",
         ):
-            # see section 5.3.2.1 of smpp v3.4 documentation where for example
-            # the length of `dest_addr_subunit` is listed as 2.
-
-            # TODO: check whether this value is correct.
-            # smpp doc says: "Length of value part in octets". so it seems like we should take the length of the interger in `self.value`
+            # This is for unsigned ints size 1
+            # smpp doc says: "Length of value part in octets".
+            return 1
+        elif self.name in (
+            "dest_telematics_id",
+            "user_message_reference",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "sms_signal",
+        ):
             return 2
+        elif self.name in ("qos_time_to_live",):
+            # This is for unsigned ints size 4
+            return 4
         elif self.name in (
             "additional_status_info_text",
             "receipted_message_id",
