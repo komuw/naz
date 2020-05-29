@@ -1229,22 +1229,10 @@ class Client:
             + encoded_short_message
         )
 
-        # TODO: move this method to its own
-        def _build_submit_sm_optional_params_pdu(optional_tags_dict):
-            # optional params may be included in ANY ORDER within
-            # the `Optional Parameters` section of the SMPP PDU.
-            opt_pdu = b""
-            for opt_name in optional_tags_dict.keys():
-                if optional_tags_dict.get(opt_name):
-                    opt_pdu = (
-                        opt_pdu + OptionalTag(name=opt_name, value=optional_tags_dict[opt_name]).tlv
-                    )
-            return opt_pdu
-
         # check for optional SMPP parameters
-        optional_params_pdu = b""
-        if proto_msg.optional_tags_dict:
-            optional_params_pdu = _build_submit_sm_optional_params_pdu(proto_msg.optional_tags_dict)
+        optional_params_pdu = self._build_submit_sm_optional_params_pdu(
+            proto_msg.optional_tags_dict
+        )
         body = body + optional_params_pdu
 
         # header
@@ -1308,6 +1296,18 @@ class Client:
             },
         )
         return full_pdu
+
+    @staticmethod
+    def _build_submit_sm_optional_params_pdu(optional_tags_dict):
+        # optional params may be included in ANY ORDER within
+        # the `Optional Parameters` section of the SMPP PDU.
+        opt_pdu = b""
+        for opt_name in optional_tags_dict.keys():
+            if optional_tags_dict.get(opt_name):
+                opt_pdu = (
+                    opt_pdu + OptionalTag(name=opt_name, value=optional_tags_dict[opt_name]).tlv
+                )
+        return opt_pdu
 
     async def re_establish_conn_bind(
         self, smpp_command: str, log_id: str, TESTING: bool = False
