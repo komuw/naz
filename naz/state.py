@@ -425,31 +425,29 @@ class OptionalTag:
     and NEED NOT be encoded in the order presented in the smpp document.
 
     see section 5.3.2 of smpp ver 3.4 spec document.
-
-    All optional parameters have the following general TLV (Tag, Length, Value) format.
-    Tag, Integer, 2octets
-    Length, Integer, 2octets
-    Value, type varies, size varies. eg `receipted_message_id` is of type c-octet string of size 1-65
-
-    As an example, to represent a `receipted_message_id`, we need;
-
-    .. highlight:: python
-    .. code-block:: python
-
-        import naz, struct
-        my_receipted_message_id = Tag + Length + Value
-        Tag = naz.OptionalTag.OPT_NAME_TAG['receipted_message_id']
-        Length = ?
-        Value = "ThisIsSomeMessageId"
-        Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
-        Length = len(Value); assert Length <= 65 # Value is c-octet string of size 1-65
-        my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned. Hence use ">H" in struct pack
-        >>> print(my_receipted_message_id)
-        b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
     """
 
+    # see section 5.3.2 of smpp ver 3.4 spec document.
+    # All optional parameters have the following general TLV (Tag, Length, Value) format.
+    # Tag, Integer, 2octets
+    # Length, Integer, 2octets
+    # Value, type varies, size varies. eg `receipted_message_id` is of type c-octet string of size 1-65
+
+    # As an example, to represent a `receipted_message_id`, we need;
+
+    # import naz, struct
+    # my_receipted_message_id = Tag + Length + Value
+    # Tag = naz.OptionalTag.OPT_NAME_TAG['receipted_message_id']
+    # Length = ?
+    # Value = "ThisIsSomeMessageId"
+    # Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
+    # Length = len(Value); assert Length <= 65 # Value is c-octet string of size 1-65
+    # my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned. Hence use ">H" in struct pack
+    # >>> print(my_receipted_message_id)
+    # b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
+
     # stores a mapping of optional parameter name to tag
-    OPT_NAME_TAG = dict(
+    OPT_NAME_TAG: typing.Dict[str, int] = dict(
         # dest_addr_subunit: It is used to route messages when received by a mobile station, for example to a smart card in the mobile station
         #                    or to an external device connected to the mobile station.
         dest_addr_subunit=0x0005,
@@ -548,21 +546,22 @@ class OptionalTag:
         its_session_info=0x1383,
     )
 
-    def __init__(
-        self, name: str, value: typing.Union[int, str, bool],
-    ):
+    def __init__(self, name: str, value: typing.Union[int, str, bool],) -> None:
+        """
+        Parameters:
+            name: the name of the SMPP optional parameter.
+            value: the value of the parameter
+        """
         self._validate_args(name=name, value=value)
 
         self.name = name
         if isinstance(value, str):
-            self.value: bytes = value.encode("ascii") + chr(0).encode("ascii")
+            self._value: bytes = value.encode("ascii") + chr(0).encode("ascii")
         else:
-            self.value = value
+            self._value = value
 
     @staticmethod
-    def _validate_args(
-        name: str, value: typing.Union[int, str, bool],
-    ):
+    def _validate_args(name: str, value: typing.Union[int, str, bool],) -> None:
         if name not in OptionalTag.OPT_NAME_TAG.keys():
             raise ValueError(
                 "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(name)
@@ -632,6 +631,10 @@ class OptionalTag:
     @property
     def tag(self) -> int:
         return self.OPT_NAME_TAG[self.name]
+
+    @property
+    def value(self) -> int:
+        return self._value
 
     @property
     def length(self) -> int:
