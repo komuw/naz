@@ -630,14 +630,26 @@ class OptionalTag:
 
     @property
     def tag(self) -> int:
+        """
+        Returns the Tag field of an optional smpp parameter.
+        The Tag field is used to uniquely identify the particular optional parameter in question.
+        """
         return self.OPT_NAME_TAG[self.name]
 
     @property
     def value(self) -> int:
+        """
+        Returns the Value field of an optional smpp parameter.
+        The Value field contains the actual data for the optional parameter in question.
+        """
         return self._value
 
     @property
     def length(self) -> int:
+        """
+        Returns the Value field of an optional smpp parameter.
+        The Length field indicates the length of the Value field in octets(integer).
+        """
         if self.name in (
             "dest_addr_subunit",
             "dest_network_type",
@@ -706,6 +718,9 @@ class OptionalTag:
 
     @property
     def tlv(self) -> bytes:
+        """
+        Returns the bytes representation of an optional smpp parameter.
+        """
         if self.name in (
             "dest_addr_subunit",
             "dest_network_type",
