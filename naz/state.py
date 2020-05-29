@@ -1,4 +1,5 @@
 import typing
+import struct
 
 # TODO: try and turn these classes to enum
 
@@ -413,9 +414,6 @@ class SmppDataCoding:
             raise ValueError(
                 "That encoding: `{0}` is not a recognised SMPP encoding.".format(encoding)
             ) from e
-
-
-import typing, struct
 
 
 class OptionalTag:
