@@ -445,7 +445,7 @@ class OptionalTag:
         Value = "ThisIsSomeMessageId"
         Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
         Length = len(Value); assert Length <= 65 # Value is c-octet string of size 1-65
-        my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned.
+        my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned. Hence use ">H" in struct pack
         >>> print(my_receipted_message_id)
         b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
     """
