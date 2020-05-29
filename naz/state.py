@@ -551,7 +551,7 @@ class OptionalTag:
     )
 
     def __init__(
-        self, name: str, value: typing.Union[int, str],  # TODO: list all the union of value
+        self, name: str, value: typing.Union[int, str, bool],
     ):
         self._validate_args(name=name, value=value)
 
@@ -563,7 +563,7 @@ class OptionalTag:
 
     @staticmethod
     def _validate_args(
-        name: str, value: typing.Union[int, str],  # TODO: list all the union of value
+        name: str, value: typing.Union[int, str, bool],
     ):
         if name not in OptionalTag.OPT_NAME_TAG.keys():
             raise ValueError(
