@@ -546,7 +546,7 @@ class OptionalTag:
         its_session_info=0x1383,
     )
 
-    def __init__(self, name: str, value: typing.Union[int, str, bool],) -> None:
+    def __init__(self, name: str, value: typing.Union[int, str, bool]) -> None:
         """
         Parameters:
             name: the name of the SMPP optional parameter.
@@ -555,10 +555,7 @@ class OptionalTag:
         self._validate_args(name=name, value=value)
 
         self.name = name
-        if isinstance(value, str):
-            self._value: bytes = value.encode("ascii") + chr(0).encode("ascii")
-        else:
-            self._value = value
+        self._value = value
 
     @staticmethod
     def _validate_args(name: str, value: typing.Union[int, str, bool],) -> None:
@@ -637,7 +634,7 @@ class OptionalTag:
         return self.OPT_NAME_TAG[self.name]
 
     @property
-    def value(self) -> int:
+    def value(self) -> typing.Union[int, str, bool]:
         """
         Returns the Value field of an optional smpp parameter.
         The Value field contains the actual data for the optional parameter in question.
@@ -705,6 +702,8 @@ class OptionalTag:
             "ussd_service_op",
             "its_session_info",
         ):
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.value, str)
             return len(self.value)
         elif self.name in ("alert_on_message_delivery",):
             # see section 5.3.2.41 of smpp document
@@ -778,9 +777,10 @@ class OptionalTag:
             "ussd_service_op",
             "its_session_info",
         ):
-            # where self.value in the case of receipted_message_id is
-            #  value.encode("ascii") + chr(0).encode("ascii")
-            return struct.pack(">HH", self.tag, self.length) + self.value
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.value, str)
+            _val = self.value.encode("ascii") + chr(0).encode("ascii")
+            return struct.pack(">HH", self.tag, self.length) + _val
         elif self.name in ("alert_on_message_delivery",):
             if self.value:
                 # the TLV has no value field
