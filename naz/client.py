@@ -1234,7 +1234,7 @@ class Client:
             # optional params may be included in ANY ORDER within
             # the `Optional Parameters` section of the SMPP PDU.
             opt_pdu = b""
-            for opt_name in state.OptionalTag.opt_name_tag.keys():
+            for opt_name in optional_tags_dict.keys():
                 if optional_tags_dict.get(opt_name):
                     opt_pdu = (
                         opt_pdu
