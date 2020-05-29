@@ -2,6 +2,7 @@ import os
 import signal
 import asyncio
 import argparse
+import logging
 from unittest import TestCase, mock
 
 import cli
@@ -9,6 +10,8 @@ import naz
 import docker
 
 from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
+
+logging.captureWarnings(True)
 
 
 def AsyncMock(*args, **kwargs):
