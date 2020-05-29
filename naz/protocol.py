@@ -151,7 +151,8 @@ class SubmitSM(Message):
         ### NON-SMPP ATTRIBUTES ###
         #### OPTIONAL SMPP PARAMETERS ###
         # section 4.4.1 of smpp documentation
-        # TODO:
+        # TODO: some of this parameters actually do not apply to SUBMIT_SM,
+        # TODO: trim to only those that apply to submit_sm
         dest_addr_subunit: typing.Union[None, int] = None,
         dest_network_type: typing.Union[None, int] = None,
         dest_bearer_type: typing.Union[None, int] = None,
@@ -219,13 +220,65 @@ class SubmitSM(Message):
             validity_period:	The validity period of this message.
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
-            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC
+            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned') short messages stored on the SMSC
             smpp_command: any one of the SMSC commands eg submit_sm
             encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC.
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.
                       If you want to use your own custom codec implementation for an encoding, make sure to pass it to :py:attr:`naz.Client.custom_codecs <naz.Client.custom_codecs>`
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            # Optional SMPP parameters.
+            dest_addr_subunit: It is used to route messages when received by a mobile station, for example to a smart card in the mobile station
+                               or to an external device connected to the mobile station.
+            dest_network_type: It is used to indicate a network type associated with the destination address of a message.
+            dest_bearer_type: It is is used to request the desired bearer for delivery of the message to the destination address. 
+            dest_telematics_id: It defines the telematic interworking to be used by the delivering system for the destination address. 
+            source_addr_subunit: It is used to indicate where a message originated in the mobile station,
+                                 for example a smart card in the mobile station or an external device connected to the mobile station.
+            source_network_type: It is used to indicate the network type associated with the device that originated the message. 
+            source_bearer_type: It indicates the wireless bearer over which the message originated. 
+            source_telematics_id: It indicates the type of telematics interface over which the message originated. 
+            qos_time_to_live: It defines the number of seconds which the sender requests the SMSC to keep the message if undelivered
+                              before it is deemed expired and not worth delivering. 
+            payload_type: It defines the higher layer PDU type contained in the message payload.
+            ms_msg_wait_facilities: It allows an indication to be provided to an MS that there are messages waiting for the subscriber on systems on the PLMN. 
+            privacy_indicator: It indicates the privacy level of the message.
             user_message_reference: ESME assigned message reference number.
+            user_response_code: It is a response code set by the user in a User Acknowledgement/Reply message. 
+            source_port: It is used to indicate the application port number associated with the source address of the message
+            destination_port: It is used to indicate the application port number associated with the destination address of the message.
+            sar_msg_ref_num: It is used to indicate the reference number for a particular concatenated short message.
+            language_indicator: It is used to indicate the language of the short message. 
+            sar_total_segments: It is used to indicate the total number of short messages within the concatenated short message.
+            sar_segment_seqnum: It is used to indicate the sequence number of a particular short message within the concatenated short message.
+            sc_interface_version: It is used to indicate the SMPP version supported by the SMSC. It is returned in the bind response PDUs.
+            callback_num_pres_ind: It controls the presentation indication and screening of the callback number at the mobile station.
+                                   If present, the :py:attr:`~callback_num` parameter must also be present.
+            number_of_messages: It is used to indicate the number of messages stored in a mailbox. 
+            dpf_result: It is used in the data_sm_resp PDU to indicate if delivery pending flag (DPF) was set for a delivery failure of the short message.
+            set_dpf: An ESME may use the set_dpf parameter to request the setting of a delivery pending flag (DPF) for certain delivery failure scenarios
+            ms_availability_status: It is used in the alert_notification operation to indicate the availability state of the MS to the ESME. 
+            delivery_failure_reason: It is used in the data_sm_resp operation to indicate the outcome of the message delivery attempt
+                                     (only applicable for transaction message mode). 
+            more_messages_to_send: It is used by the ESME in the `submit_sm` and `data_sm` operations to indicate to the SMSC
+                                   that there are further messages for the same destination SME.
+            message_state: It is used by the SMSC in the deliver_sm and data_sm PDUs to indicate to the ESME the final message state for an SMSC Delivery Receipt.
+            display_time: It is used to associate a display time of the short message on the MS.
+            sms_signal: It is used to provide a TDMA MS with alert tone information associated with the received short message.
+            ms_validity: It is used to provide an MS with validity information associated with the received short message.
+            its_reply_type: It indicates and controls the MS user's reply method to an SMS delivery message received from the ESME.
+                            It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].
+            additional_status_info_text: It gives an ASCII textual description of the meaning of a response PDU.
+            receipted_message_id: It indicates the ID of the message being receipted in an SMSC Delivery Receipt. 
+            source_subaddress: It specifies a subaddress associated with the originator of the message.
+            dest_subaddress: It specifies a subaddress associated with the destination of the message.
+            callback_num_atag: It associates an alphanumeric display with the call back number
+            callback_num: It associates a call back number with the message.
+            network_error_code: It is used to indicate the actual network error code for a delivery failure. 
+            message_payload: It contains the user data.
+            ussd_service_op: It is required to define the USSD service operation when SMPP is being used as an interface to a (GSM) USSD system.
+            its_session_info: It contains control information for the interactive session between an MS and an ESME.
+                              It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS]. 
+            alert_on_message_delivery: It is set to instruct a MS to alert the user (in a MS implementation specific manner) when the short message arrives at the MS.
         """
 
         self._validate_msg_type_args(

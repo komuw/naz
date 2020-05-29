@@ -279,7 +279,7 @@ like to save the <cite>Message</cite> into a broker like redis/rabbitmq/postgres
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>The message protocol for <cite>naz</cite>. It is the code representation of what
 gets queued into a naz broker.
-This is the interface that must be implemented to satisfy naz’s message protocol.</p>
+This is the interface that must be implemented to satisfy naz's message protocol.</p>
 <p>Users should only ever have to deal with the <a class="reference internal" href="#naz.protocol.SubmitSM" title="naz.protocol.SubmitSM"><code class="xref py py-class docutils literal notranslate"><span class="pre">SubmitSM</span></code></a> implementation</p>
 <dl class="method">
 <dt id="naz.protocol.Message.__init__">
@@ -389,12 +389,12 @@ This version will enable naz to be able to evolve in future; a future version of
 <li><p><strong>validity_period</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The validity period of this message.</p></li>
 <li><p><strong>registered_delivery</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.</p></li>
 <li><p><strong>replace_if_present_flag</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Flag indicating if submitted message should replace an existing message.</p></li>
-<li><p><strong>sm_default_msg_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicates the short message to send from a list of predefined (‘canned’) short messages stored on the SMSC</p></li>
+<li><p><strong>sm_default_msg_id</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – Indicates the short message to send from a list of predefined (‘canned') short messages stored on the SMSC</p></li>
 <li><p><strong>smpp_command</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – any one of the SMSC commands eg submit_sm</p></li>
 <li><p><strong>encoding</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – <a class="reference external" href="https://docs.python.org/3/library/codecs.html#standard-encodings">encoding</a> used to encode messages been sent to SMSC.
 The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.
 If you want to use your own custom codec implementation for an encoding, make sure to pass it to <code class="xref py py-attr docutils literal notranslate"><span class="pre">naz.Client.custom_codecs</span></code></p></li>
-<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – same meaning as the errors argument to pythons’ <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p></li>
+<li><p><strong>errors</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – same meaning as the errors argument to pythons' <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.encode">encode</a> method</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>

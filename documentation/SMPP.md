@@ -69,7 +69,7 @@ If the receiving entity finds an error in the PDU header, it should return a `ge
 #### 2.9 SMPP Timers
 It is recommended that each SMPP session be managed using configurable timers on both the ESME and SMSC communicating.
 (See section 7.2 of spec document.)                       
-**NB:** For first draft we will only support `enquire_link_timer` on it's expiration we will send an `enquire_link` request to SMSC. This timer specifies the time lapse allowed between operations after which an SMPP entity should interrogate whether it’s peer still has an active session.
+**NB:** For first draft we will only support `enquire_link_timer` on it's expiration we will send an `enquire_link` request to SMSC. This timer specifies the time lapse allowed between operations after which an SMPP entity should interrogate whether it's peer still has an active session.
 
 
 #### 2.10 Message Modes

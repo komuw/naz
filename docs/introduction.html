@@ -185,14 +185,14 @@
   <div class="section" id="introduction-to-naz">
 <h1>Introduction to naz<a class="headerlink" href="#introduction-to-naz" title="Permalink to this headline">¶</a></h1>
 <p>naz is an async SMPP client.
-It’s name is derived from Kenyan hip hop artiste, Nazizi.</p>
+It's name is derived from Kenyan hip hop artiste, Nazizi.</p>
 <p><cite>SMPP is a protocol designed for the transfer of short message data between External Short Messaging Entities(ESMEs),
 Routing Entities(REs) and Short Message Service Center(SMSC).</cite> - <a class="reference external" href="https://en.wikipedia.org/wiki/Short_Message_Peer-to-Peer">Wikipedia</a></p>
 <div class="line-block">
 <div class="line">naz currently only supports SMPP version 3.4.</div>
 <div class="line">naz has no third-party dependencies and it requires python version 3.7+</div>
 </div>
-<p>naz is in active development and it’s API may change in backward incompatible ways.</p>
+<p>naz is in active development and it's API may change in backward incompatible ways.</p>
 <p><strong>Table of Contents</strong></p>
 <div class="contents local topic" id="contents">
 <ul class="simple">
@@ -338,7 +338,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <h2><a class="toc-backref" href="#id7">3.1 async everywhere</a><a class="headerlink" href="#async-everywhere" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line">SMPP is an async protocol; the client can send a request and only get a response from SMSC/server 20mins later out of band.</div>
-<div class="line">It thus makes sense to write your SMPP client in an async manner. We leverage python3’s async/await to do so.</div>
+<div class="line">It thus makes sense to write your SMPP client in an async manner. We leverage python3's async/await to do so.</div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
 <span class="kn">import</span> <span class="nn">asyncio</span>
@@ -361,7 +361,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <h2><a class="toc-backref" href="#id9">3.2.1 logging</a><a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line">In <code class="docutils literal notranslate"><span class="pre">naz</span></code> you have the ability to annotate all the log events that naz will generate with anything you want.</div>
-<div class="line">So, for example if you wanted to annotate all log-events with a release version and your app’s running environment.</div>
+<div class="line">So, for example if you wanted to annotate all log-events with a release version and your app's running environment.</div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">naz</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">naz</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">SimpleLogger</span><span class="p">(</span>
@@ -419,7 +419,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <div class="section" id="hooks">
 <h2><a class="toc-backref" href="#id10">3.2.2 hooks</a><a class="headerlink" href="#hooks" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
-<div class="line">A hook is a class with two methods <cite>to_smsc</cite> and <cite>from_smsc</cite>, ie it implements naz’s <a class="reference external" href="https://komuw.github.io/naz/hooks.html#naz.hooks.BaseHook">naz.hooks.BaseHook</a> interface</div>
+<div class="line">A hook is a class with two methods <cite>to_smsc</cite> and <cite>from_smsc</cite>, ie it implements naz's <a class="reference external" href="https://komuw.github.io/naz/hooks.html#naz.hooks.BaseHook">naz.hooks.BaseHook</a> interface</div>
 <div class="line"><code class="docutils literal notranslate"><span class="pre">naz</span></code> will call the <cite>to_smsc</cite> method just before sending data to SMSC and also call the <cite>from_smsc</cite> method just after getting data from SMSC.</div>
 <div class="line">The default hook that naz uses is <code class="docutils literal notranslate"><span class="pre">naz.hooks.SimpleHook</span></code> which just logs the request and response.</div>
 <div class="line">If you wanted, for example to keep metrics of all requests and responses to SMSC in your prometheus setup;</div>
@@ -513,7 +513,7 @@ As an example, start the SMSC simulator(<code class="docutils literal notranslat
 <div class="line">By default, naz uses a simple token bucket rate limiting algorithm implemented in <code class="docutils literal notranslate"><span class="pre">naz.ratelimiter.SimpleRateLimiter</span></code></div>
 </div>
 <div class="line-block">
-<div class="line">You can customize naz’s ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the <a class="reference external" href="https://komuw.github.io/naz/ratelimiter.html#naz.ratelimiter.BaseRateLimiter">naz.ratelimiter.BaseRateLimiter</a> interface)</div>
+<div class="line">You can customize naz's ratelimiter or even write your own ratelimiter (if you decide to write your own, you just have to satisfy the <a class="reference external" href="https://komuw.github.io/naz/ratelimiter.html#naz.ratelimiter.BaseRateLimiter">naz.ratelimiter.BaseRateLimiter</a> interface)</div>
 </div>
 <div class="line-block">
 <div class="line">To customize the default ratelimiter, for example to send at a rate of 35 requests per second.</div>
@@ -552,10 +552,10 @@ As an example if you want to deny outgoing requests if the percentage of throttl
 <div class="section" id="broker">
 <h2><a class="toc-backref" href="#id14">3.5 Broker</a><a class="headerlink" href="#broker" title="Permalink to this headline">¶</a></h2>
 <p><cite>How does your application and naz talk with each other?</cite></p>
-<p>It’s via a broker interface. Your application queues messages to a broker, <code class="docutils literal notranslate"><span class="pre">naz</span></code> consumes from that broker and then naz sends those messages to SMSC/server.</p>
+<p>It's via a broker interface. Your application queues messages to a broker, <code class="docutils literal notranslate"><span class="pre">naz</span></code> consumes from that broker and then naz sends those messages to SMSC/server.</p>
 <p>You can implement the broker mechanism any way you like, so long as it satisfies the <a class="reference external" href="https://komuw.github.io/naz/broker.html#naz.broker.BaseBroker">naz.broker.BaseBroker</a> interface</p>
 <div class="line-block">
-<div class="line">Your application should call that class’s enqueue method to enqueue messages.</div>
+<div class="line">Your application should call that class's enqueue method to enqueue messages.</div>
 </div>
 <div class="line-block">
 <div class="line">naz ships with a simple broker implementation called <code class="docutils literal notranslate"><span class="pre">naz.broker.SimpleBroker</span></code></div>

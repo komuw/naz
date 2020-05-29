@@ -226,14 +226,14 @@
 <li><p><strong>hook</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="hooks.html#naz.hooks.BaseHook" title="naz.hooks.BaseHook"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseHook</span></code></a>]) – python class instance implemeting functionality/hooks to be called by naz                 just before sending request to SMSC and just after getting response from SMSC</p></li>
 <li><p><strong>sequence_generator</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="sequence.html#naz.sequence.BaseSequenceGenerator" title="naz.sequence.BaseSequenceGenerator"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseSequenceGenerator</span></code></a>]) – python class instance used to generate sequence_numbers</p></li>
 <li><p><strong>throttle_handler</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="throttle.html#naz.throttle.BaseThrottleHandler" title="naz.throttle.BaseThrottleHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseThrottleHandler</span></code></a>]) – python class instance implementing functionality of what todo when naz starts getting throttled responses from SMSC</p></li>
-<li><p><strong>correlation_handler</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="correlater.html#naz.correlater.BaseCorrelater" title="naz.correlater.BaseCorrelater"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCorrelater</span></code></a>]) – A python class instance that naz uses to store relations between                 SMPP sequence numbers and user applications’ log_id’s and/or hook_metadata.</p></li>
+<li><p><strong>correlation_handler</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <a class="reference internal" href="correlater.html#naz.correlater.BaseCorrelater" title="naz.correlater.BaseCorrelater"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCorrelater</span></code></a>]) – A python class instance that naz uses to store relations between                 SMPP sequence numbers and user applications' log_id's and/or hook_metadata.</p></li>
 <li><p><strong>drain_duration</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – duration in seconds that <cite>naz</cite> will wait for after receiving a termination signal.</p></li>
 <li><p><strong>socket_timeout</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – duration that <cite>naz</cite> will wait, for socket/connection related activities with SMSC, before timing out</p></li>
 <li><p><strong>custom_codecs</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">CodecInfo</span></code>]]) – a dictionary of encodings and their corresponding <a class="reference external" href="https://docs.python.org/3/library/codecs.html#codecs.CodecInfo">codecs.CodecInfo</a> that you would like to register.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="#naz.client.NazClientError" title="naz.client.NazClientError"><strong>NazClientError</strong></a> – raised if there’s an error instantiating a naz Client.</p>
+<dd class="field-even"><p><a class="reference internal" href="#naz.client.NazClientError" title="naz.client.NazClientError"><strong>NazClientError</strong></a> – raised if there's an error instantiating a naz Client.</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
@@ -361,7 +361,7 @@
 <dl class="method">
 <dt id="naz.client.Client.send_data">
 <em class="property">async </em><code class="sig-name descname">send_data</code><span class="sig-paren">(</span><em class="sig-param">smpp_command</em>, <em class="sig-param">msg</em>, <em class="sig-param">log_id</em>, <em class="sig-param">hook_metadata=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/client.html#Client.send_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.Client.send_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends PDU’s to SMSC over a network connection.
+<dd><p>Sends PDU's to SMSC over a network connection.
 This method does not block; it buffers the data and arranges for it to be sent out asynchronously.
 It also accts as a flow control method that interacts with the IO write buffer.</p>
 <dl class="field-list simple">
@@ -470,7 +470,7 @@ Has to be a class instance of <a class="reference internal" href="protocol.html#
 <dt id="naz.client.NazClientError">
 <em class="property">exception </em><code class="sig-prename descclassname">naz.client.</code><code class="sig-name descname">NazClientError</code><a class="reference internal" href="_modules/naz/client.html#NazClientError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.client.NazClientError" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
-<p>Error raised when there’s an error instantiating a naz Client.</p>
+<p>Error raised when there's an error instantiating a naz Client.</p>
 </dd></dl>
 
 </div>

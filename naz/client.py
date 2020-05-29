@@ -131,7 +131,7 @@ class Client:
             custom_codecs: a dictionary of encodings and their corresponding `codecs.CodecInfo <https://docs.python.org/3/library/codecs.html#codecs.CodecInfo>`_ that you would like to register.
 
         Raises:
-            NazClientError: raised if there’s an error instantiating a naz Client.
+            NazClientError: raised if there's an error instantiating a naz Client.
         """
         self._validate_client_args(
             smsc_host=smsc_host,
