@@ -720,6 +720,7 @@ class OptionalTag:
             "sar_msg_ref_num",
             "sms_signal",
         ):
+            # This is for unsigned ints size 2
             # TODO: check whether to use `struct.pack(">H")` or `struct.pack(">B")`
             # see: https://docs.python.org/3.8/library/struct.html#format-characters
             # H is for `unsigned short size 2` and B is for `unsigned char size 1`
@@ -744,6 +745,7 @@ class OptionalTag:
             "ms_validity",
             "its_reply_type",
         ):
+            # This is for unsigned ints size 1
             return struct.pack(">HHB", self.tag, self.length, self.value)
         elif self.name in (
             "additional_status_info_text",
