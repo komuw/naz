@@ -707,25 +707,11 @@ class OptionalTag:
             "dest_addr_subunit",
             "dest_network_type",
             "dest_bearer_type",
-            "dest_telematics_id",
             "source_addr_subunit",
             "source_network_type",
             "source_bearer_type",
             "source_telematics_id",
-            "qos_time_to_live",
             "payload_type",
-            "user_message_reference",
-            "source_port",
-            "destination_port",
-            "sar_msg_ref_num",
-            "sms_signal",
-        ):
-            # This is for unsigned ints size 2
-            # TODO: check whether to use `struct.pack(">H")` or `struct.pack(">B")`
-            # see: https://docs.python.org/3.8/library/struct.html#format-characters
-            # H is for `unsigned short size 2` and B is for `unsigned char size 1`
-            return struct.pack(">HHH", self.tag, self.length, self.value)
-        elif self.name in (
             "ms_msg_wait_facilities",
             "privacy_indicator",
             "user_response_code",
@@ -746,7 +732,22 @@ class OptionalTag:
             "its_reply_type",
         ):
             # This is for unsigned ints size 1
+            # B is for `unsigned char size 1`, H is for `unsigned short size 2` and I is  `unsigned int size 4`
+            # see: https://docs.python.org/3.8/library/struct.html#format-characters
             return struct.pack(">HHB", self.tag, self.length, self.value)
+        elif self.name in (
+            "dest_telematics_id",
+            "user_message_reference",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "sms_signal",
+        ):
+            # This is for unsigned ints size 2
+            return struct.pack(">HHH", self.tag, self.length, self.value)
+        elif self.name in ("qos_time_to_live",):
+            # This is for unsigned ints size 4
+            return struct.pack(">HHI", self.tag, self.length, self.value)
         elif self.name in (
             "additional_status_info_text",
             "receipted_message_id",
