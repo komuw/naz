@@ -556,10 +556,10 @@ class OptionalTag:
         self._validate_args(name=name, value=value)
 
         self.name = name
-        # TODO: we must use the correct value here.
-        # ie, if it is for example `receipted_message_id`, then the value should be:
-        # self.value =  value.encode("ascii") + chr(0).encode("ascii")
-        self.value = value
+        if isinstance(value, str):
+            self.value: bytes = value.encode("ascii") + chr(0).encode("ascii")
+        else:
+            self.value = value
 
     @staticmethod
     def _validate_args(
