@@ -440,7 +440,7 @@ class OptionalTag:
 
         import naz, struct
         my_receipted_message_id = Tag + Length + Value
-        Tag = naz.SmppOptionalTag.receipted_message_id
+        Tag = naz.OptionalTag.opt_name_tag['receipted_message_id']
         Length = ?
         Value = "ThisIsSomeMessageId"
         Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
@@ -724,77 +724,3 @@ class OptionalTag:
                     self.name, self.tag
                 )
             )
-
-
-class SmppOptionalTag:
-    """
-    Represensts the various SMPP Optional Parameter Tags.
-
-    Optional Parameters MUST always appear at the end of a message, in the `Optional Parameters` section of the SMPP PDU.
-    However, they may be included in ANY ORDER within the `Optional Parameters` section of the SMPP PDU
-    and NEED NOT be encoded in the order presented in the smpp document.
-    """
-
-    # see section 5.3.2 of smpp ver 3.4 spec document.
-    # All optional parameters have the following general TLV (Tag, Length, Value) format.
-    # Tag, Integer, 2octets
-    # Length, Integer, 2octets
-    # Value, type varies, size varies. eg `receipted_message_id` is of type c-octet string of size 1-65
-
-    # As an example, to represent a `receipted_message_id`, we need;
-
-    # import naz, struct
-    # my_receipted_message_id = Tag + Length + Value
-    # Tag = naz.SmppOptionalTag.receipted_message_id
-    # Length = ?
-    # Value = "ThisIsSomeMessageId"
-    # Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
-    # Length = len(Value); assert Length <= 65 # Value is c-octet string of size 1-65
-    # my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned.
-    # >>> print(my_receipted_message_id)
-    # b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
-
-    dest_addr_subunit = 0x0005
-    dest_network_type = 0x0006
-    dest_bearer_type = 0x0007
-    dest_telematics_id = 0x0008
-    source_addr_subunit = 0x000D
-    source_network_type = 0x000E
-    source_bearer_type = 0x000F
-    source_telematics_id = 0x0010
-    qos_time_to_live = 0x0017
-    payload_type = 0x0019
-    additional_status_info_text = 0x001D
-    receipted_message_id = 0x001E
-    ms_msg_wait_facilities = 0x0030
-    privacy_indicator = 0x0201
-    source_subaddress = 0x0202
-    dest_subaddress = 0x0203
-    user_message_reference = 0x0204
-    user_response_code = 0x0205
-    source_port = 0x020A
-    destination_port = 0x020B
-    sar_msg_ref_num = 0x020C
-    language_indicator = 0x020D
-    sar_total_segments = 0x020E
-    sar_segment_seqnum = 0x020F
-    sc_interface_version = 0x0210
-    callback_num_pres_ind = 0x0302
-    callback_num_atag = 0x0303
-    number_of_messages = 0x0304
-    callback_num = 0x0381
-    dpf_result = 0x0420
-    set_dpf = 0x0421
-    ms_availability_status = 0x0422
-    network_error_code = 0x0423
-    message_payload = 0x0424
-    delivery_failure_reason = 0x0425
-    more_messages_to_send = 0x0426
-    message_state = 0x0427
-    ussd_service_op = 0x0501
-    display_time = 0x1201
-    sms_signal = 0x1203
-    ms_validity = 0x1204
-    alert_on_message_delivery = 0x130C
-    its_reply_type = 0x1380
-    its_session_info = 0x1383

@@ -12,7 +12,6 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
-from . import state
 from . import protocol
 from . import sequence
 from . import throttle
@@ -23,9 +22,10 @@ from . import broker as the_broker
 
 
 from .state import (
+    OptionalTag,
     SmppCommand,
     CommandStatus,
-    SmppOptionalTag,
+    SmppDataCoding,
     SmppSessionState,
     SmppCommandStatus,
 )
@@ -497,7 +497,7 @@ class Client:
                     )
 
                 # validate encoding is one allowed by SMPP
-                _ = state.SmppDataCoding._find_data_coding(_encoding)
+                _ = SmppDataCoding._find_data_coding(_encoding)
 
         if len(errors):
             raise NazClientError(errors)
@@ -1237,8 +1237,7 @@ class Client:
             for opt_name in optional_tags_dict.keys():
                 if optional_tags_dict.get(opt_name):
                     opt_pdu = (
-                        opt_pdu
-                        + state.OptionalTag(name=opt_name, value=optional_tags_dict[opt_name]).tlv
+                        opt_pdu + OptionalTag(name=opt_name, value=optional_tags_dict[opt_name]).tlv
                     )
             return opt_pdu
 
@@ -2147,7 +2146,7 @@ class Client:
             try:
                 # get associated user supplied log_id if any
                 target_tag = struct.pack(
-                    ">H", SmppOptionalTag.receipted_message_id
+                    ">H", OptionalTag.opt_name_tag["receipted_message_id"]
                 )  # unsigned Int, 2octet
                 if target_tag in body_data:
                     # the PDU contains a `receipted_message_id` TLV optional tag
