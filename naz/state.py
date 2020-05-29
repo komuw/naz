@@ -440,7 +440,7 @@ class OptionalTag:
 
         import naz, struct
         my_receipted_message_id = Tag + Length + Value
-        Tag = naz.OptionalTag.opt_name_tag['receipted_message_id']
+        Tag = naz.OptionalTag.OPT_NAME_TAG['receipted_message_id']
         Length = ?
         Value = "ThisIsSomeMessageId"
         Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
@@ -451,7 +451,7 @@ class OptionalTag:
     """
 
     # stores a mapping of optional parameter name to tag
-    opt_name_tag = dict(
+    OPT_NAME_TAG = dict(
         dest_addr_subunit=0x0005,
         dest_network_type=0x0006,
         dest_bearer_type=0x0007,
@@ -513,7 +513,7 @@ class OptionalTag:
     def _validate_args(
         name: str, value: typing.Union[int, str],  # TODO: list all the union of value
     ):
-        if name not in OptionalTag.opt_name_tag.keys():
+        if name not in OptionalTag.OPT_NAME_TAG.keys():
             raise ValueError(
                 "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(name)
             )
@@ -581,7 +581,7 @@ class OptionalTag:
 
     @property
     def tag(self) -> int:
-        return self.opt_name_tag[self.name]
+        return self.OPT_NAME_TAG[self.name]
 
     @property
     def length(self) -> int:
