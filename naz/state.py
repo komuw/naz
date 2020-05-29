@@ -690,14 +690,10 @@ class OptionalTag:
             "ussd_service_op",
             "its_session_info",
         ):
-            # TODO: we should do assertions here. maybe??
-            # eg the length for `receipted_message_id` should be <= 65
             return len(self.value)
-
         elif self.name in ("alert_on_message_delivery",):
             # see section 5.3.2.41 of smpp document
             return 0
-
         else:
             raise ValueError(
                 "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
@@ -728,7 +724,6 @@ class OptionalTag:
             # see: https://docs.python.org/3.8/library/struct.html#format-characters
             # H is for `unsigned short size 2` and B is for `unsigned char size 1`
             return struct.pack(">HHH", self.tag, self.length, self.value)
-
         elif self.name in (
             "ms_msg_wait_facilities",
             "privacy_indicator",
@@ -750,7 +745,6 @@ class OptionalTag:
             "its_reply_type",
         ):
             return struct.pack(">HHB", self.tag, self.length, self.value)
-
         elif self.name in (
             "additional_status_info_text",
             "receipted_message_id",
@@ -766,7 +760,6 @@ class OptionalTag:
             # where self.value in the case of receipted_message_id is
             #  value.encode("ascii") + chr(0).encode("ascii")
             return struct.pack(">HH", self.tag, self.length) + self.value
-
         elif self.name in ("alert_on_message_delivery",):
             # has no value
             return struct.pack(">HH", self.tag, self.length)
