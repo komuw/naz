@@ -127,7 +127,7 @@ class TestClient(TestCase):
             password=os.getenv("password", "password"),
             broker=self.broker,
             logger=naz.log.SimpleLogger(
-                "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=200)
             ),  # run tests with debug so as to debug what is going on
             socket_timeout=0.0000001,
         )
