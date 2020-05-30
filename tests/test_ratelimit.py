@@ -1,8 +1,11 @@
 import time
 import asyncio
+import logging
 from unittest import TestCase, mock
 
 import naz
+
+logging.captureWarnings(True)
 
 
 def AsyncMock(*args, **kwargs):

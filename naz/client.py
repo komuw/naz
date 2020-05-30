@@ -478,26 +478,31 @@ class Client:
             )
 
         if custom_codecs:
-            if not isinstance(custom_codecs, dict):
-                raise ValueError(
-                    "`custom_codecs` should be of type:: `None` or `dict` You entered: {0}".format(
-                        type(custom_codecs)
-                    )
-                )
-            for _encoding, _codec_info in custom_codecs.items():
-                if not isinstance(_codec_info, codecs.CodecInfo):
+            try:
+                if not isinstance(custom_codecs, dict):
                     raise ValueError(
-                        "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo` You entered: {0}".format(
+                        "`custom_codecs` should be of type:: `None` or `dict` You entered: {0}".format(
                             type(custom_codecs)
                         )
                     )
-                if _encoding != _codec_info.name:
-                    raise ValueError(
-                        "the key `{0}` should be equal to codecs.CodecInfo.name".format(_encoding)
-                    )
+                for _encoding, _codec_info in custom_codecs.items():
+                    if not isinstance(_codec_info, codecs.CodecInfo):
+                        raise ValueError(
+                            "`custom_codecs` should be a dictionary of encoding(string) to `codecs.CodecInfo` You entered: {0}".format(
+                                type(custom_codecs)
+                            )
+                        )
+                    if _encoding != _codec_info.name:
+                        raise ValueError(
+                            "the key `{0}` should be equal to codecs.CodecInfo.name".format(
+                                _encoding
+                            )
+                        )
 
-                # validate encoding is one allowed by SMPP
-                _ = state.SmppDataCoding._find_data_coding(_encoding)
+                    # validate encoding is one allowed by SMPP
+                    _ = state.SmppDataCoding._find_data_coding(_encoding)
+            except ValueError as e:
+                errors.append(e)
 
         if len(errors):
             raise NazClientError(errors)

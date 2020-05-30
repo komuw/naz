@@ -6,10 +6,14 @@ import json
 import codecs
 import struct
 import asyncio
+import logging
 from unittest import TestCase, mock, skip
 
 import naz
 import docker
+
+
+logging.captureWarnings(True)
 
 
 def AsyncMock(*args, **kwargs):
@@ -120,6 +124,7 @@ class TestClient(TestCase):
         self.broker = naz.broker.SimpleBroker(maxsize=1000)
 
         smsc_port = 2775
+        self.socket_timeout = 0.01
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
             smsc_port=smsc_port,
@@ -127,9 +132,9 @@ class TestClient(TestCase):
             password=os.getenv("password", "password"),
             broker=self.broker,
             logger=naz.log.SimpleLogger(
-                "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=100)
             ),  # run tests with debug so as to debug what is going on
-            socket_timeout=0.0000001,
+            socket_timeout=self.socket_timeout,
         )
 
         self.docker_client = docker.from_env()
@@ -227,8 +232,8 @@ class TestClient(TestCase):
                 custom_codecs={"encoding": {"someKey": "someValue"}},
             )
 
-        self.assertRaises(ValueError, mock_create_client)
-        with self.assertRaises(ValueError) as raised_exception:
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
             mock_create_client()
 
         self.assertIn(
@@ -255,8 +260,8 @@ class TestClient(TestCase):
                 },
             )
 
-        self.assertRaises(ValueError, mock_create_client)
-        with self.assertRaises(ValueError) as raised_exception:
+        self.assertRaises(naz.client.NazClientError, mock_create_client)
+        with self.assertRaises(naz.client.NazClientError) as raised_exception:
             mock_create_client()
         self.assertIn(
             "That encoding: `{0}` is not a recognised SMPP encoding".format(encoding),
@@ -287,7 +292,7 @@ class TestClient(TestCase):
                 logger=naz.log.SimpleLogger(
                     "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
                 ),
-                socket_timeout=0.0000001,
+                socket_timeout=self.socket_timeout,
                 custom_codecs={
                     encoding: codecs.CodecInfo(
                         name=encoding, encode=ExampleCodec.encode, decode=ExampleCodec.decode,
