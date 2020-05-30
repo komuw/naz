@@ -24,14 +24,14 @@ class TestClient(TestCase):
         python -m unittest -v tests.test_client.TestClient.test_can_connect
     """
 
+    smsc_port = 2775
+
     def setUp(self):
         self.broker = naz.broker.SimpleBroker(maxsize=1000)
-
-        smsc_port = 2775
         self.socket_timeout = 0.01
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
-            smsc_port=smsc_port,
+            smsc_port=TestClient.smsc_port,
             system_id="smppclient1",
             password=os.getenv("password", "password"),
             broker=self.broker,
@@ -41,30 +41,33 @@ class TestClient(TestCase):
             socket_timeout=self.socket_timeout,
         )
 
-        self.docker_client = docker.from_env()
+    @classmethod
+    def setUpClass(cls):
+        docker_client = docker.from_env()
         smppSimulatorName = "nazTestSmppSimulator"
-        running_containers = self.docker_client.containers.list()
+        running_containers = docker_client.containers.list()
         for container in running_containers:
             container.kill()
 
-        self.smpp_server = self.docker_client.containers.run(
+        cls.smpp_server = docker_client.containers.run(
             "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
             detach=True,
-            # auto_remove=True,
+            auto_remove=True,
             labels={"name": "smpp_server", "use": "running_naz_tets"},
-            ports={"{0}/tcp".format(smsc_port): smsc_port, "8884/tcp": 8884},
+            ports={"{0}/tcp".format(TestClient.smsc_port): TestClient.smsc_port, "8884/tcp": 8884},
             stdout=True,
             stderr=True,
         )
         # sleep to give enough time for the smpp_server container to have started properly
-        time.sleep(self.socket_timeout * 20.0)
+        time.sleep(1.0)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         print("\n\t container logs 1: ")
-        print(self.smpp_server.logs())
+        print(cls.smpp_server.logs())
         print("\n\t ")
-        # self.smpp_server.remove(force=True)
+        cls.smpp_server.remove(force=True)
 
     @staticmethod
     def _run(coro):
