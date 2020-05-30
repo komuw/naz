@@ -105,7 +105,8 @@ jobs:
           naz-cli --client examples.example_config.client --dry-run
           printf "\n run tests:\n"
           coverage erase
-          export CI_ENVIRONMENT=Yes && coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s . && bash <(curl -s https://codecov.io/bash)
+          coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s .
+          bash <(curl -s https://codecov.io/bash)
           printf "\n check coverage:\n"
           coverage report --show-missing --fail-under=84
         env:

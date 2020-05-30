@@ -4,7 +4,7 @@ most recent version is listed first.
 
 ## **version:** v0.8.0
 - support Smpp Optional Tags in `submit_sm`: https://github.com/komuw/naz/pull/202
-- Fixed some flaky tests: https://github.com/komuw/naz/pull/204
+- Fixed some flaky tests: https://github.com/komuw/naz/pull/204, https://github.com/komuw/naz/pull/206  
 - Add ability to use different codecs for different messages while using the same `naz` client: https://github.com/komuw/naz/pull/201   
   With this change, message encoding is now a property of the message and not the client.
 

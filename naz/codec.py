@@ -256,6 +256,14 @@ def register_codecs(custom_codecs: typing.Union[None, typing.Dict[str, codecs.Co
     # Note: Search function registration is not currently reversible,
     # which may cause problems in some cases, such as unit testing or module reloading.
     # https://docs.python.org/3.7/library/codecs.html#codecs.register
+    #
+    # Note: Encodings are first looked up in the registry's cache.
+    # thus if you call `register_codecs` and then call it again with different
+    # codecs, the second codecs may not take effect.
+    # ie; codecs.lookup(encoding) will return the first codecs since they were stored
+    # in the cache.
+    # There doesn't appear to be away to clear codec cache at runtime.
+    # see: https://docs.python.org/3/library/codecs.html#codecs.lookup
 
     def _codec_search_function(_encoding):
         """
@@ -263,6 +271,9 @@ def register_codecs(custom_codecs: typing.Union[None, typing.Dict[str, codecs.Co
         This way, if someone had overridden an inbuilt codec, their
         implementation is chosen first and cached.
         """
-        return custom_codecs.get(_encoding, _INBUILT_CODECS.get(_encoding))
+        if custom_codecs.get(_encoding):
+            return custom_codecs.get(_encoding)
+        else:
+            return _INBUILT_CODECS.get(_encoding)
 
     codecs.register(_codec_search_function)

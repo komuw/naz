@@ -79,7 +79,7 @@ class SimpleRateLimiter(BaseRateLimiter):
             # todo: sleep in an exponetial manner upto a maximum then wrap around.
             await asyncio.sleep(self.delay_for_tokens)
             self.logger.log(
-                logging.INFO,
+                logging.DEBUG,
                 {
                     "event": "naz.SimpleRateLimiter.limit",
                     "stage": "end",

@@ -206,7 +206,7 @@ class SubmitSM(Message):
             validity_period:	The validity period of this message.
             registered_delivery:	Indicator to signify if an SMSC delivery receipt or an SME acknowledgement is required.
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
-            sm_default_msg_id:	Indicates the short message to send from a list of predefined (‘canned') short messages stored on the SMSC
+            sm_default_msg_id:	Indicates the short message to send from a list of predefined ('canned') short messages stored on the SMSC
             smpp_command: any one of the SMSC commands eg submit_sm
             encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC.
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.

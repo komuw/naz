@@ -1,41 +1,14 @@
 import os
 import signal
 import asyncio
-import argparse
-import logging
 from unittest import TestCase, mock
 
 import cli
 import naz
 import docker
 
+from .utils import AsyncMock, MockStreamWriter, MockArgumentParser
 from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
-
-logging.captureWarnings(True)
-
-
-def AsyncMock(*args, **kwargs):
-    """
-    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
-    """
-    m = mock.MagicMock(*args, **kwargs)
-
-    async def mock_coro(*args, **kwargs):
-        return m(*args, **kwargs)
-
-    mock_coro.mock = m
-    return mock_coro
-
-
-class MockArgumentParser:
-    def __init__(self, naz_config):
-        self.naz_config = naz_config
-
-    def add_argument(self, *args, **kwargs):
-        pass
-
-    def parse_args(self, args=None, namespace=None):
-        return argparse.Namespace(client=self.naz_config, dry_run=True)
 
 
 NAZ_CLIENT = naz.Client(
@@ -86,11 +59,7 @@ class TestCli(TestCase):
         self.bad_naz_config = "tests.test_cli.BAD_NAZ_CLIENT"
 
     def tearDown(self):
-        if os.environ.get("CI_ENVIRONMENT"):
-            print("\n\nrunning in CI env.\n")
-            self.smpp_server.remove(force=True)
-        else:
-            pass
+        self.smpp_server.remove(force=True)
 
     def test_bad_args(self):
         with self.assertRaises(SystemExit):
@@ -156,27 +125,6 @@ class TestCliSigHandling(TestCase):
 
     def test_termination_call_client_shutdown(self):
         with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
-
-            class MockStreamWriterTransport:
-                @staticmethod
-                def set_write_buffer_limits(value):
-                    return
-
-            class MockStreamWriter:
-                transport = MockStreamWriterTransport()
-
-                @staticmethod
-                def close():
-                    return
-
-                @staticmethod
-                def write(stuff):
-                    return
-
-                @staticmethod
-                async def drain():
-                    return
-
             self.client.writer = MockStreamWriter()
             self._run(
                 cli.utils.sig._handle_termination_signal(

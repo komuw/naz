@@ -2,114 +2,18 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import os
+import time
 import json
 import codecs
 import struct
 import asyncio
-import logging
 from unittest import TestCase, mock, skip
 
 import naz
 import docker
 
 
-logging.captureWarnings(True)
-
-
-def AsyncMock(*args, **kwargs):
-    """
-    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
-    """
-    m = mock.MagicMock(*args, **kwargs)
-
-    async def mock_coro(*args, **kwargs):
-        return m(*args, **kwargs)
-
-    mock_coro.mock = m
-    return mock_coro
-
-
-class MockStreamWriter:
-    """
-    This is a mock of python's StreamWriter;
-    https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamWriter
-    """
-
-    def __init__(self, _is_closing=False):
-        self.transport = self._create_transport(_is_closing=_is_closing)
-
-    async def drain(self):
-        pass
-
-    def close(self):
-        # when this is called, we set the transport to be in closed/closing state
-        self.transport = self._create_transport(_is_closing=True)
-
-    def write(self, data):
-        pass
-
-    def get_extra_info(self, name, default=None):
-        # when this is called, we set the transport to be in open state.
-        # this is because this method is called in `naz.Client.connect`
-        # so it is the only chance we have of 're-establishing' connection
-        self.transport = self._create_transport(_is_closing=False)
-
-        return self.transport
-
-    def _create_transport(self, _is_closing):
-        class MockTransport:
-            def __init__(self, _is_closing):
-                self._is_closing = _is_closing
-
-            def set_write_buffer_limits(self, n):
-                pass
-
-            def is_closing(self):
-                return self._is_closing
-
-            def settimeout(self, socket_timeout):
-                pass
-
-        return MockTransport(_is_closing=_is_closing)
-
-
-class MockStreamReader:
-    """
-    This is a mock of python's StreamReader;
-    https://docs.python.org/3/library/asyncio-stream.html#asyncio.StreamReader
-    """
-
-    def __init__(self, pdu):
-        self.pdu = pdu
-
-        blocks = []
-        blocks.append(self.pdu)
-        self.data = b"".join(blocks)
-
-    async def read(self, n=-1):
-        if n == 0:
-            return b""
-
-        if n == -1:
-            _to_read_data = self.data  # read all data
-            _remaining_data = b""
-        else:
-            _to_read_data = self.data[:n]
-            _remaining_data = self.data[n:]
-
-        self.data = _remaining_data
-        return _to_read_data
-
-    async def readexactly(self, n):
-        _to_read_data = self.data[:n]
-        _remaining_data = self.data[n:]
-
-        if len(_to_read_data) != n:
-            # unable to read exactly n bytes
-            raise asyncio.IncompleteReadError(partial=_to_read_data, expected=n)
-
-        self.data = _remaining_data
-        return _to_read_data
+from .utils import AsyncMock, MockStreamWriter, MockStreamReader
 
 
 class TestClient(TestCase):
@@ -120,46 +24,46 @@ class TestClient(TestCase):
         python -m unittest -v tests.test_client.TestClient.test_can_connect
     """
 
-    def setUp(self):
-        self.broker = naz.broker.SimpleBroker(maxsize=1000)
+    smsc_port = 2775
 
-        smsc_port = 2775
-        self.socket_timeout = 0.01
-        self.cli = naz.Client(
-            smsc_host="127.0.0.1",
-            smsc_port=smsc_port,
-            system_id="smppclient1",
-            password=os.getenv("password", "password"),
-            broker=self.broker,
-            logger=naz.log.SimpleLogger(
-                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=100)
-            ),  # run tests with debug so as to debug what is going on
-            socket_timeout=self.socket_timeout,
-        )
-
-        self.docker_client = docker.from_env()
+    @classmethod
+    def setUpClass(cls):
+        docker_client = docker.from_env()
         smppSimulatorName = "nazTestSmppSimulator"
-        running_containers = self.docker_client.containers.list()
+        running_containers = docker_client.containers.list()
         for container in running_containers:
-            container.stop()
-
-        self.smpp_server = self.docker_client.containers.run(
+            container.kill()
+        cls.smpp_server = docker_client.containers.run(
             "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
             detach=True,
             auto_remove=True,
             labels={"name": "smpp_server", "use": "running_naz_tets"},
-            ports={"{0}/tcp".format(smsc_port): smsc_port, "8884/tcp": 8884},
+            ports={"{0}/tcp".format(TestClient.smsc_port): TestClient.smsc_port, "8884/tcp": 8884},
             stdout=True,
             stderr=True,
         )
+        # sleep to give enough time for the smpp_server container to have started properly
+        time.sleep(1.0)
 
-    def tearDown(self):
-        if os.environ.get("CI_ENVIRONMENT"):
-            print("\n\nrunning in CI env.\n")
-            self.smpp_server.remove(force=True)
-        else:
-            pass
+    @classmethod
+    def tearDownClass(cls):
+        cls.smpp_server.remove(force=True)
+
+    def setUp(self):
+        self.broker = naz.broker.SimpleBroker(maxsize=1000)
+        self.socket_timeout = 0.01
+        self.cli = naz.Client(
+            smsc_host="127.0.0.1",
+            smsc_port=TestClient.smsc_port,
+            system_id="smppclient1",
+            password=os.getenv("password", "password"),
+            broker=self.broker,
+            logger=naz.log.SimpleLogger(
+                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=10)
+            ),  # run tests with debug so as to debug what is going on
+            socket_timeout=self.socket_timeout,
+        )
 
     @staticmethod
     def _run(coro):
@@ -276,10 +180,13 @@ class TestClient(TestCase):
         """
 
         class ExampleCodec(codecs.Codec):
-            def encode(self, input, errors="strict"):
+            # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+            @staticmethod
+            def encode(input, errors="strict"):
                 return codecs.utf_8_encode(input, errors)
 
-            def decode(self, input, errors="strict"):
+            @staticmethod
+            def decode(input, errors="strict"):
                 return codecs.utf_8_decode(input, errors)
 
         for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:
@@ -290,7 +197,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 broker=self.broker,
                 logger=naz.log.SimpleLogger(
-                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=10)
                 ),
                 socket_timeout=self.socket_timeout,
                 custom_codecs={
@@ -304,6 +211,7 @@ class TestClient(TestCase):
         self._run(self.cli.connect())
         self.assertTrue(hasattr(self.cli.reader, "read"))
         self.assertTrue(hasattr(self.cli.writer, "write"))
+        self.assertEqual(self.cli.current_session_state, naz.state.SmppSessionState.OPEN)
 
     def test_can_bind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
