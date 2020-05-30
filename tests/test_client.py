@@ -58,7 +58,7 @@ class TestClient(TestCase):
             stderr=True,
         )
         # sleep to give enough time for the smpp_server container to have started properly
-        time.sleep(self.socket_timeout)
+        time.sleep(self.socket_timeout * 2.0)
 
     def tearDown(self):
         self.smpp_server.remove(force=True)
