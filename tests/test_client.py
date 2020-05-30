@@ -58,7 +58,7 @@ class TestClient(TestCase):
             stderr=True,
         )
         # sleep to give enough time for the smpp_server container to have started properly
-        time.sleep(60.0)
+        time.sleep(0.8)
 
     def tearDown(self):
         print("\n\t container logs 1: ")
