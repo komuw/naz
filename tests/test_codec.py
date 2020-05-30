@@ -203,3 +203,4 @@ class TestCodecRegistration(TestCase):
         self.assertNotEqual(new_codec.encode, naz.codec.GSM7BitCodec.encode)
         self.assertNotEqual(new_codec.decode, naz.codec.GSM7BitCodec.decode)
         self.assertEqual(new_codec.encode, OverridingCodec.encode)
+        self.assertEqual(new_codec.decode, OverridingCodec.decode)
