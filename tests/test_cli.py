@@ -2,29 +2,14 @@ import os
 import signal
 import asyncio
 import argparse
-import logging
 from unittest import TestCase, mock
 
 import cli
 import naz
 import docker
 
+from .utils import AsyncMock, MockStreamWriter
 from examples.example_klasses import ExampleRedisBroker, MySeqGen, MyRateLimiter
-
-logging.captureWarnings(True)
-
-
-def AsyncMock(*args, **kwargs):
-    """
-    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
-    """
-    m = mock.MagicMock(*args, **kwargs)
-
-    async def mock_coro(*args, **kwargs):
-        return m(*args, **kwargs)
-
-    mock_coro.mock = m
-    return mock_coro
 
 
 class MockArgumentParser:
@@ -156,27 +141,6 @@ class TestCliSigHandling(TestCase):
 
     def test_termination_call_client_shutdown(self):
         with mock.patch("naz.Client.unbind", new=AsyncMock()) as mock_naz_unbind:
-
-            class MockStreamWriterTransport:
-                @staticmethod
-                def set_write_buffer_limits(value):
-                    return
-
-            class MockStreamWriter:
-                transport = MockStreamWriterTransport()
-
-                @staticmethod
-                def close():
-                    return
-
-                @staticmethod
-                def write(stuff):
-                    return
-
-                @staticmethod
-                async def drain():
-                    return
-
             self.client.writer = MockStreamWriter()
             self._run(
                 cli.utils.sig._handle_termination_signal(

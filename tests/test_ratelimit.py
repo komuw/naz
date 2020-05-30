@@ -1,24 +1,10 @@
 import time
 import asyncio
-import logging
 from unittest import TestCase, mock
 
 import naz
 
-logging.captureWarnings(True)
-
-
-def AsyncMock(*args, **kwargs):
-    """
-    see: https://blog.miguelgrinberg.com/post/unit-testing-asyncio-code
-    """
-    m = mock.MagicMock(*args, **kwargs)
-
-    async def mock_coro(*args, **kwargs):
-        return m(*args, **kwargs)
-
-    mock_coro.mock = m
-    return mock_coro
+from .utils import AsyncMock
 
 
 class TestRateLimit(TestCase):
