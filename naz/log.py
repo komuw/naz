@@ -171,7 +171,7 @@ class SimpleLogger(logging.Logger):
         try:
             msg = json.dumps(input_msg)
         except Exception as e:
-            msg = "naz.SimpleLogger error: {0}".format(str(e))
+            msg = "naz.SimpleLogger error: {0}".format(repr(e))
         return msg
 
 
