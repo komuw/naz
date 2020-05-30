@@ -36,7 +36,7 @@ class TestClient(TestCase):
             password=os.getenv("password", "password"),
             broker=self.broker,
             logger=naz.log.SimpleLogger(
-                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=100)
+                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=10)
             ),  # run tests with debug so as to debug what is going on
             socket_timeout=self.socket_timeout,
         )
@@ -58,7 +58,7 @@ class TestClient(TestCase):
             stderr=True,
         )
         # sleep to give enough time for the smpp_server container to have started properly
-        time.sleep(self.socket_timeout * 2.0)
+        time.sleep(self.socket_timeout * 10.0)
 
     def tearDown(self):
         self.smpp_server.remove(force=True)
@@ -195,7 +195,7 @@ class TestClient(TestCase):
                 password=os.getenv("password", "password"),
                 broker=self.broker,
                 logger=naz.log.SimpleLogger(
-                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=200)
+                    "TestClient", level="DEBUG", handler=naz.log.BreachHandler(capacity=10)
                 ),
                 socket_timeout=self.socket_timeout,
                 custom_codecs={
