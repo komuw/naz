@@ -51,7 +51,7 @@ class TestClient(TestCase):
             "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
             detach=True,
-            auto_remove=True,
+            # auto_remove=True,
             labels={"name": "smpp_server", "use": "running_naz_tets"},
             ports={"{0}/tcp".format(smsc_port): smsc_port, "8884/tcp": 8884},
             stdout=True,
@@ -64,7 +64,7 @@ class TestClient(TestCase):
         print("\n\t container logs 1: ")
         print(self.smpp_server.logs())
         print("\n\t ")
-        self.smpp_server.remove(force=True)
+        # self.smpp_server.remove(force=True)
 
     @staticmethod
     def _run(coro):
