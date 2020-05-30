@@ -58,7 +58,7 @@ class TestClient(TestCase):
             stderr=True,
         )
         # sleep to give enough time for the smpp_server container to have started properly
-        time.sleep(0.8)
+        time.sleep(self.socket_timeout * 10.0)
 
     def tearDown(self):
         print("\n\t container logs 1: ")
@@ -212,6 +212,7 @@ class TestClient(TestCase):
         self._run(self.cli.connect())
         self.assertTrue(hasattr(self.cli.reader, "read"))
         self.assertTrue(hasattr(self.cli.writer, "write"))
+        self.assertEqual(self.cli.current_session_state, naz.state.SmppSessionState.OPEN)
 
     def test_can_bind(self):
         with mock.patch("naz.Client.send_data", new=AsyncMock()) as mock_naz_send_data:
