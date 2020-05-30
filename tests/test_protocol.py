@@ -149,7 +149,6 @@ class TestProtocol(TestCase):
 
         for k, v in _args.items():
             with self.assertRaises(ValueError):
-
                 make_create_submitSm_message(k, v)
 
     def test_bad_protol_version(self):
