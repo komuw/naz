@@ -101,11 +101,6 @@ jobs:
           naz-cli --version
           naz-cli --help
           naz-cli --client examples.example_config.client --dry-run
-          # python -m unittest -v --failfast tests.test_client.TestClient.test_can_connect
-          # python -m unittest -v --failfast tests.test_client.TestClient.test_can_connect
-          # python -m unittest -v --failfast tests.test_client.TestClient.test_can_connect
-          # python -m unittest -v --failfast tests.test_client.TestClient.test_can_connect
-          # python -m unittest -v --failfast tests.test_client.TestClient.test_can_connect
           coverage erase
           coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s .
           bash <(curl -s https://codecov.io/bash)

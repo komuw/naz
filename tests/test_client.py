@@ -26,21 +26,6 @@ class TestClient(TestCase):
 
     smsc_port = 2775
 
-    def setUp(self):
-        self.broker = naz.broker.SimpleBroker(maxsize=1000)
-        self.socket_timeout = 0.01
-        self.cli = naz.Client(
-            smsc_host="127.0.0.1",
-            smsc_port=TestClient.smsc_port,
-            system_id="smppclient1",
-            password=os.getenv("password", "password"),
-            broker=self.broker,
-            logger=naz.log.SimpleLogger(
-                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=10)
-            ),  # run tests with debug so as to debug what is going on
-            socket_timeout=self.socket_timeout,
-        )
-
     @classmethod
     def setUpClass(cls):
         docker_client = docker.from_env()
@@ -48,7 +33,6 @@ class TestClient(TestCase):
         running_containers = docker_client.containers.list()
         for container in running_containers:
             container.kill()
-
         cls.smpp_server = docker_client.containers.run(
             "komuw/smpp_server:v0.3",
             name=smppSimulatorName,
@@ -64,10 +48,22 @@ class TestClient(TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        print("\n\t container logs 1: ")
-        print(cls.smpp_server.logs())
-        print("\n\t ")
         cls.smpp_server.remove(force=True)
+
+    def setUp(self):
+        self.broker = naz.broker.SimpleBroker(maxsize=1000)
+        self.socket_timeout = 0.01
+        self.cli = naz.Client(
+            smsc_host="127.0.0.1",
+            smsc_port=TestClient.smsc_port,
+            system_id="smppclient1",
+            password=os.getenv("password", "password"),
+            broker=self.broker,
+            logger=naz.log.SimpleLogger(
+                "TestClient", level="INFO", handler=naz.log.BreachHandler(capacity=10)
+            ),  # run tests with debug so as to debug what is going on
+            socket_timeout=self.socket_timeout,
+        )
 
     @staticmethod
     def _run(coro):
