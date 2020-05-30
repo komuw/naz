@@ -611,7 +611,9 @@ class Client:
             OSError,
             ConnectionError,
             TimeoutError,
-            # Note that `asyncio.TimeoutError` is raised with no msg/args. So it will appear in logs as an empty string
+            # Note that `asyncio.TimeoutError` is raised with no msg/args.
+            # So if logged as str(e) it would appear in logs as an empty string.
+            # Instead we use repr(e) and it will appear as "TimeoutError()"
             # https://github.com/python/cpython/blob/723f71abf7ab0a7be394f9f7b2daa9ecdf6fb1eb/Lib/asyncio/tasks.py#L490
             asyncio.TimeoutError,
             socket.error,
@@ -621,7 +623,7 @@ class Client:
         ) as e:
             self._log(
                 logging.ERROR,
-                {"event": "naz.Client.connect", "stage": "end", "log_id": log_id, "error": str(e)},
+                {"event": "naz.Client.connect", "stage": "end", "log_id": log_id, "error": repr(e)},
             )
 
     async def tranceiver_bind(self, log_id: str = "") -> None:
@@ -673,7 +675,7 @@ class Client:
                 {
                     "event": "naz.Client.tranceiver_bind",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "smpp_command": smpp_command,
                 },
             )
@@ -704,7 +706,7 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": "correlater put error",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -787,7 +789,7 @@ class Client:
                     {
                         "event": "naz.Client.enquire_link",
                         "stage": "end",
-                        "error": str(e),
+                        "error": repr(e),
                         "log_id": log_id,
                         "smpp_command": smpp_command,
                     },
@@ -816,7 +818,7 @@ class Client:
                         "smpp_command": smpp_command,
                         "log_id": log_id,
                         "state": "correlater put error",
-                        "error": str(e),
+                        "error": repr(e),
                     },
                 )
 
@@ -872,7 +874,7 @@ class Client:
                 {
                     "event": "naz.Client.enquire_link_resp",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "log_id": log_id,
                     "smpp_command": smpp_command,
                 },
@@ -964,7 +966,7 @@ class Client:
                 {
                     "event": "naz.Client.deliver_sm_resp",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "log_id": log_id,
                     "smpp_command": smpp_command,
                 },
@@ -1037,7 +1039,7 @@ class Client:
                 {
                     "event": "naz.Client.send_message",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "log_id": proto_msg.log_id,
                     "smpp_command": smpp_command,
                     "short_message": proto_msg.short_message,
@@ -1247,7 +1249,7 @@ class Client:
                 {
                     "event": "naz.Client._build_submit_sm_pdu",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "log_id": log_id,
                     "smpp_command": smpp_command,
                 },
@@ -1276,7 +1278,7 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": "correlater put error",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -1465,7 +1467,7 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": "to_smsc hook error",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -1508,7 +1510,7 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": "unable to write to SMSC",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -1578,7 +1580,7 @@ class Client:
                         "event": "naz.Client.dequeue_messages",
                         "stage": "end",
                         "state": "dequeue_messages error",
-                        "error": str(e),
+                        "error": repr(e),
                     },
                 )
                 continue
@@ -1593,7 +1595,7 @@ class Client:
                             "event": "naz.Client.dequeue_messages",
                             "stage": "end",
                             "state": "dequeue_messages error",
-                            "error": str(e),
+                            "error": repr(e),
                         },
                     )
 
@@ -1611,7 +1613,7 @@ class Client:
                                 poll_queue_interval
                             ),
                             "dequeue_retry_count": dequeue_retry_count,
-                            "error": str(e),
+                            "error": repr(e),
                         },
                     )
                     if self.SHOULD_SHUT_DOWN:
@@ -1648,7 +1650,7 @@ class Client:
                             "event": "naz.Client.dequeue_messages",
                             "stage": "end",
                             "state": "dequeue_messages error",
-                            "error": str(e),
+                            "error": repr(e),
                         },
                     )
                     continue
@@ -1691,7 +1693,7 @@ class Client:
                             "event": "naz.Client.dequeue_messages",
                             "stage": "end",
                             "state": "dequeue_messages error",
-                            "error": str(e),
+                            "error": repr(e),
                         },
                     )
                     continue
@@ -1755,7 +1757,7 @@ class Client:
                         "state": "unable to read exactly {0}bytes of smpp header.".format(
                             self._header_pdu_length
                         ),
-                        "error": str(e),
+                        "error": repr(e),
                     },
                 )
                 # close connection. it will be automatically reconnected later
@@ -1778,7 +1780,7 @@ class Client:
                         "event": "naz.Client.receive_data",
                         "stage": "end",
                         "state": "unable to read from SMSC",
-                        "error": str(e),
+                        "error": repr(e),
                     },
                 )
 
@@ -1836,7 +1838,7 @@ class Client:
                             "event": "naz.Client.receive_data",
                             "stage": "end",
                             "state": "unable to read from SMSC",
-                            "error": str(e),
+                            "error": repr(e),
                         },
                     )
                     if self.SHOULD_SHUT_DOWN:
@@ -1851,7 +1853,7 @@ class Client:
                             "state": "unable to read from SMSC. sleeping for {0:.2f} seconds".format(
                                 _read_smsc_interval
                             ),
-                            "error": str(e),
+                            "error": repr(e),
                         },
                     )
                     await asyncio.sleep(_read_smsc_interval)
@@ -1906,7 +1908,7 @@ class Client:
                     "event": "naz.Client._parse_response_pdu",
                     "stage": "end",
                     "state": "parse SMSC response error.",
-                    "error": str(e),
+                    "error": repr(e),
                     "pdu": log_pdu,
                 },
             )
@@ -1942,7 +1944,7 @@ class Client:
                     "stage": "start",
                     "log_id": log_id,
                     "state": "correlater get error",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -2044,7 +2046,7 @@ class Client:
                 {
                     "event": "naz.Client.command_handlers",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": commandStatus.description,
@@ -2096,7 +2098,7 @@ class Client:
                         "smpp_command": smpp_command,
                         "log_id": log_id,
                         "state": "correlater put error",
-                        "error": str(e),
+                        "error": repr(e),
                     },
                 )
         elif smpp_command == SmppCommand.DELIVER_SM:
@@ -2167,7 +2169,7 @@ class Client:
                         "stage": "start",
                         "log_id": log_id,
                         "state": "correlater get error",
-                        "error": str(e),
+                        "error": repr(e),
                     },
                 )
         elif smpp_command == SmppCommand.ENQUIRE_LINK:
@@ -2209,7 +2211,7 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": "from_smsc hook error",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -2243,7 +2245,7 @@ class Client:
                 {
                     "event": "naz.Client.unbind",
                     "stage": "end",
-                    "error": str(e),
+                    "error": repr(e),
                     "log_id": log_id,
                     "smpp_command": smpp_command,
                 },
@@ -2272,7 +2274,7 @@ class Client:
                     "smpp_command": smpp_command,
                     "log_id": log_id,
                     "state": "correlater put error",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
 
@@ -2352,7 +2354,7 @@ class Client:
                     "event": "naz.Client._unbind_and_disconnect",
                     "stage": "end",
                     "state": "unable to write to SMSC",
-                    "error": str(e),
+                    "error": repr(e),
                 },
             )
         self._log(logging.DEBUG, {"event": "naz.Client._unbind_and_disconnect", "stage": "end"})
