@@ -258,7 +258,7 @@ def register_codecs(custom_codecs: typing.Union[None, typing.Dict[str, codecs.Co
     # which may cause problems in some cases, such as unit testing or module reloading.
     # https://docs.python.org/3.7/library/codecs.html#codecs.register
     #
-    # Note: Encodings are first looked up in the registry’s cache.
+    # Note: Encodings are first looked up in the registry's cache.
     # thus if you call `register_codecs` and then call it again with different
     # codecs, the second codecs may not take effect.
     # ie; codecs.lookup(encoding) will return the first codecs since they were stored
