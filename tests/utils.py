@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import argparse
 from unittest import mock
 
 
@@ -104,3 +105,14 @@ class MockStreamReader:
 
         self.data = _remaining_data
         return _to_read_data
+
+
+class MockArgumentParser:
+    def __init__(self, naz_config):
+        self.naz_config = naz_config
+
+    def add_argument(self, *args, **kwargs):
+        pass
+
+    def parse_args(self, args=None, namespace=None):
+        return argparse.Namespace(client=self.naz_config, dry_run=True)
