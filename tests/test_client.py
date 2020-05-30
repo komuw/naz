@@ -2,6 +2,7 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import os
+import time
 import json
 import codecs
 import struct
@@ -44,7 +45,7 @@ class TestClient(TestCase):
         smppSimulatorName = "nazTestSmppSimulator"
         running_containers = self.docker_client.containers.list()
         for container in running_containers:
-            container.stop()
+            container.kill()
 
         self.smpp_server = self.docker_client.containers.run(
             "komuw/smpp_server:v0.3",
@@ -56,12 +57,11 @@ class TestClient(TestCase):
             stdout=True,
             stderr=True,
         )
+        # sleep to give enough time for the smpp_server container to have started properly
+        time.sleep(self.socket_timeout)
 
     def tearDown(self):
-        if os.environ.get("CI_ENVIRONMENT"):
-            self.smpp_server.remove(force=True)
-        else:
-            pass
+        self.smpp_server.remove(force=True)
 
     @staticmethod
     def _run(coro):

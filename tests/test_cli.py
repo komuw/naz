@@ -59,10 +59,7 @@ class TestCli(TestCase):
         self.bad_naz_config = "tests.test_cli.BAD_NAZ_CLIENT"
 
     def tearDown(self):
-        if os.environ.get("CI_ENVIRONMENT"):
-            self.smpp_server.remove(force=True)
-        else:
-            pass
+        self.smpp_server.remove(force=True)
 
     def test_bad_args(self):
         with self.assertRaises(SystemExit):
