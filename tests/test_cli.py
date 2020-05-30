@@ -60,7 +60,6 @@ class TestCli(TestCase):
 
     def tearDown(self):
         if os.environ.get("CI_ENVIRONMENT"):
-            print("\n\nrunning in CI env.\n")
             self.smpp_server.remove(force=True)
         else:
             pass
