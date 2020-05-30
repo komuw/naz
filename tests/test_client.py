@@ -178,10 +178,13 @@ class TestClient(TestCase):
         """
 
         class ExampleCodec(codecs.Codec):
-            def encode(self, input, errors="strict"):
+            # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+            @staticmethod
+            def encode(input, errors="strict"):
                 return codecs.utf_8_encode(input, errors)
 
-            def decode(self, input, errors="strict"):
+            @staticmethod
+            def decode(input, errors="strict"):
                 return codecs.utf_8_decode(input, errors)
 
         for encoding in ["gsm0338", "ucs2", "ascii", "latin_1", "iso2022jp", "iso8859_5"]:

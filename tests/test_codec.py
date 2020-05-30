@@ -151,10 +151,13 @@ class TestCodecRegistration(TestCase):
             codecs.lookup(_sheng_encoding)
 
         class KenyanShengCodec(codecs.Codec):
-            def encode(self, input, errors="strict"):
+            # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+            @staticmethod
+            def encode(input, errors="strict"):
                 return codecs.utf_8_encode(input, errors)
 
-            def decode(self, input, errors="strict"):
+            @staticmethod
+            def decode(input, errors="strict"):
                 return codecs.utf_8_decode(input, errors)
 
         custom_codecs = {
@@ -178,10 +181,13 @@ class TestCodecRegistration(TestCase):
         """
 
         class OverridingCodec(codecs.Codec):
-            def encode(self, input, errors="strict"):
+            # All the methods have to be staticmethods because they are passed to `codecs.CodecInfo`
+            @staticmethod
+            def encode(input, errors="strict"):
                 return codecs.utf_8_encode(input, errors)
 
-            def decode(self, input, errors="strict"):
+            @staticmethod
+            def decode(input, errors="strict"):
                 return codecs.utf_8_decode(input, errors)
 
         custom_codecs = {
@@ -195,4 +201,5 @@ class TestCodecRegistration(TestCase):
 
         new_codec = codecs.lookup("gsm0338")
         self.assertNotEqual(new_codec.encode, naz.codec.GSM7BitCodec.encode)
+        self.assertNotEqual(new_codec.decode, naz.codec.GSM7BitCodec.decode)
         self.assertEqual(new_codec.encode, OverridingCodec.encode)
