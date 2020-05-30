@@ -31,9 +31,12 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 import codecs
+import logging
 from unittest import TestCase
 
 import naz
+
+logging.captureWarnings(True)
 
 
 class TestCodec(TestCase):

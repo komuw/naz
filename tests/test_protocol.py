@@ -2,9 +2,12 @@
 # see: https://python-packaging.readthedocs.io/en/latest/testing.html
 
 import json
+import logging
 from unittest import TestCase
 
 import naz
+
+logging.captureWarnings(True)
 
 
 class TestProtocol(TestCase):
