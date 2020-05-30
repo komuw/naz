@@ -27,7 +27,7 @@ class TestClient(TestCase):
         self.broker = naz.broker.SimpleBroker(maxsize=1000)
 
         smsc_port = 2775
-        self.socket_timeout = 0.05
+        self.socket_timeout = 0.01
         self.cli = naz.Client(
             smsc_host="127.0.0.1",
             smsc_port=smsc_port,

@@ -97,10 +97,10 @@ setup(
             "redis==3.2.1",
             "pika==1.0.1",
         ],
-        "test": ["flake8", "pylint", "black", "bandit", "mypy", "pytype", "docker==4.0.1"],
+        "test": ["flake8", "pylint", "black", "bandit", "mypy", "pytype", "docker==4.2.0"],
         "benchmarks": [
             "asyncpg==0.18.3",
-            "docker==4.0.1",
+            "docker==4.2.0",
             "prometheus_client==0.6.0",
             "aioredis==1.2.0",
             "pythonfuzz==1.0.3",
