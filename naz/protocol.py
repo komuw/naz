@@ -254,8 +254,6 @@ class SubmitSM(Message):
             source_addr=source_addr,
             destination_addr=destination_addr,
             log_id=log_id,
-            version=version,
-            hook_metadata=hook_metadata,
             service_type=service_type,
             source_addr_ton=source_addr_ton,
             source_addr_npi=source_addr_npi,
@@ -269,6 +267,9 @@ class SubmitSM(Message):
             registered_delivery=registered_delivery,
             replace_if_present_flag=replace_if_present_flag,
             sm_default_msg_id=sm_default_msg_id,
+            smpp_command=smpp_command,
+            version=version,
+            hook_metadata=hook_metadata,
             encoding=encoding,
             errors=errors,
         )
@@ -335,6 +336,7 @@ class SubmitSM(Message):
         source_addr: str,
         destination_addr: str,
         log_id: str,
+        smpp_command: str,
         version: int,
         hook_metadata: str,
         service_type: str,
@@ -382,6 +384,18 @@ class SubmitSM(Message):
         if not isinstance(log_id, str):
             raise ValueError(
                 "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
+            )
+        if not isinstance(smpp_command, str):
+            raise ValueError(
+                "`smpp_command` should be of type:: `str` You entered: {0}".format(
+                    type(smpp_command)
+                )
+            )
+        if smpp_command != state.SmppCommand.SUBMIT_SM:
+            raise ValueError(
+                "`smpp_command` should be:: `naz.state.SmppCommand.SUBMIT_SM` You entered: {0}".format(
+                    smpp_command
+                )
             )
         if not isinstance(hook_metadata, str):
             raise ValueError(
