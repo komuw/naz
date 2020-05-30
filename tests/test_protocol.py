@@ -135,10 +135,21 @@ class TestProtocol(TestCase):
             "sm_default_msg_id": BadArg,
         }
 
-        def mock_create_submitSm_message():
-            naz.protocol.SubmitSM(**_args)
+        def make_create_submitSm_message(k, v):
+            _all_args = dict(
+                version=1,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                log_id="some-log-id",
+                short_message="Hello, thanks for shopping with us.",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
+            _all_args.update({k: v})
+            naz.protocol.SubmitSM(**_all_args)
 
-        self.assertRaises(ValueError, mock_create_submitSm_message)
+        for k, v in _args.items():
+            with self.assertRaises(ValueError):
+                make_create_submitSm_message(k, v)
 
     def test_bad_protol_version(self):
         def create():
@@ -281,3 +292,55 @@ class TestSubmitSMProtocol(TestCase):
         self.assertEqual(_in_dict["user_message_reference"], user_message_reference)
         self.assertEqual(_in_dict["source_subaddress"], source_subaddress)
         self.assertEqual(type(proto), type(naz.protocol.SubmitSM(**_in_dict)))
+
+    def test_bad_optional_params(self):
+        class BadArg:
+            pass
+
+        _args = {
+            # bad args
+            "user_message_reference": BadArg,
+            "source_port": BadArg,
+            "source_addr_subunit": BadArg,
+            "destination_port": BadArg,
+            "dest_addr_subunit": BadArg,
+            "sar_msg_ref_num": BadArg,
+            "sar_total_segments": BadArg,
+            "sar_segment_seqnum": BadArg,
+            "more_messages_to_send": BadArg,
+            "payload_type": BadArg,
+            "message_payload": BadArg,
+            "privacy_indicator": BadArg,
+            "callback_num": BadArg,
+            "callback_num_pres_ind": BadArg,
+            "callback_num_atag": BadArg,
+            "source_subaddress": BadArg,
+            "dest_subaddress": BadArg,
+            "user_response_code": BadArg,
+            "display_time": BadArg,
+            "sms_signal": BadArg,
+            "ms_validity": BadArg,
+            "ms_msg_wait_facilities": BadArg,
+            "number_of_messages": BadArg,
+            "alert_on_message_delivery": BadArg,
+            "language_indicator": BadArg,
+            "its_reply_type": BadArg,
+            "its_session_info": BadArg,
+            "ussd_service_op": BadArg,
+        }
+
+        def make_create_submitSm_message(k, v):
+            _all_args = dict(
+                version=1,
+                smpp_command=naz.SmppCommand.SUBMIT_SM,
+                log_id="some-log-id",
+                short_message="Hello, thanks for shopping with us.",
+                source_addr="254722111111",
+                destination_addr="254722999999",
+            )
+            _all_args.update({k: v})
+            naz.protocol.SubmitSM(**_all_args)
+
+        for k, v in _args.items():
+            with self.assertRaises(ValueError):
+                make_create_submitSm_message(k, v)
