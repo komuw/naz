@@ -501,7 +501,7 @@ class Client:
 
                     # validate encoding is one allowed by SMPP
                     _ = state.SmppDataCoding._find_data_coding(_encoding)
-            except Exception as e:
+            except ValueError as e:
                 errors.append(e)
 
         if len(errors):
