@@ -197,6 +197,7 @@ class TestCodecRegistration(TestCase):
     There's a C api for that `_PyCodec_Forget`
     https://sourcegraph.com/github.com/python/cpython@3.8/-/blob/Python/codecs.c#L193
     We need to figure out how to call it or find other alternatives.
+    I have sent an email to Marc-Andre Lemburg asking for advice.
     """
     )
     def test_codec_overriding(self):
