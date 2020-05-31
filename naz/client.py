@@ -2357,6 +2357,7 @@ class Client:
             async with self.drain_lock:
                 await self.writer.drain()
             self.writer.write_eof()
+            self.writer = None
         except (
             ConnectionError,
             TimeoutError,

@@ -1072,3 +1072,26 @@ class TestClient(TestCase):
                 mock_naz_enqueue.mock.call_args[0][1].smpp_command, naz.SmppCommand.SUBMIT_SM
             )
             self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].short_message, short_message)
+
+    def test_issues_203(self):
+        """
+        test to prove we have fixed: https://github.com/komuw/naz/issues/203
+
+        1. connect to smsc
+        2. bind
+        3. unbind & disconnect
+        4. send `submit_sm`
+        """
+        self._run(self.cli.connect())
+        self._run(self.cli.tranceiver_bind())
+        self.assertIsNotNone(self.cli.writer)
+
+        self._run(self.cli._unbind_and_disconnect())
+        self.assertIsNone(self.cli.writer)
+
+        self._run(
+            self.cli.send_data(
+                smpp_command=naz.SmppCommand.SUBMIT_SM, msg=b"someMessage", log_id="log_id"
+            )
+        )
+        self.assertIsNotNone(self.cli.writer)
