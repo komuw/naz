@@ -574,6 +574,7 @@ class TestClient(TestCase):
                 smpp_command=naz.SmppCommand.SUBMIT_SM,
                 source_addr="2547000000",
                 destination_addr="254711999999",
+                ms_validity=1,  # optional smpp param for submit_sm
             )
 
             self._run(self.cli.connect())
