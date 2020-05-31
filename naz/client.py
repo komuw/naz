@@ -2153,7 +2153,7 @@ class Client:
             try:
                 # get associated user supplied log_id if any
                 target_tag = struct.pack(
-                    ">H", OptionalTag.OPT_NAME_TAG["receipted_message_id"]
+                    ">H", OptionalTag.NAME_to_TAG["receipted_message_id"]
                 )  # unsigned Int, 2octet
                 if target_tag in body_data:
                     # the PDU contains a `receipted_message_id` TLV optional tag

@@ -437,7 +437,7 @@ class OptionalTag:
 
     # import naz, struct
     # my_receipted_message_id = Tag + Length + Value
-    # Tag = naz.OptionalTag.OPT_NAME_TAG['receipted_message_id']
+    # Tag = naz.OptionalTag.NAME_to_TAG['receipted_message_id']
     # Length = ?
     # Value = "ThisIsSomeMessageId"
     # Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
@@ -447,7 +447,7 @@ class OptionalTag:
     # b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
 
     # stores a mapping of optional parameter name to tag
-    OPT_NAME_TAG: typing.Dict[str, int] = dict(
+    NAME_to_TAG: typing.Dict[str, int] = dict(
         # dest_addr_subunit: It is used to route messages when received by a mobile station, for example to a smart card in the mobile station
         #                    or to an external device connected to the mobile station.
         dest_addr_subunit=0x0005,
@@ -559,7 +559,7 @@ class OptionalTag:
 
     @staticmethod
     def _validate_args(name: str, value: typing.Union[int, str, bool],) -> None:
-        if name not in OptionalTag.OPT_NAME_TAG.keys():
+        if name not in OptionalTag.NAME_to_TAG.keys():
             raise ValueError(
                 "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(name)
             )
@@ -631,7 +631,7 @@ class OptionalTag:
         Returns the Tag field of an optional smpp parameter.
         The Tag field is used to uniquely identify the particular optional parameter in question.
         """
-        return self.OPT_NAME_TAG[self.name]
+        return self.NAME_to_TAG[self.name]
 
     @property
     def value(self) -> typing.Union[int, str, bool]:
