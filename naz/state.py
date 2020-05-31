@@ -710,8 +710,8 @@ class OptionalTag:
             return 0
         else:
             raise ValueError(
-                "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
-                    self.name, self.tag
+                "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(
+                    self.name
                 )
             )
 
@@ -789,7 +789,7 @@ class OptionalTag:
                 return b""
         else:
             raise ValueError(
-                "The OptionalTag with name `{0}` and tag `{1}` is not a recognised SMPP OptionalTag.".format(
-                    self.name, self.tag
+                "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(
+                    self.name
                 )
             )
