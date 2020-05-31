@@ -164,6 +164,7 @@
             
   <h1>Source code for naz.state</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">struct</span>
 
 <span class="c1"># TODO: try and turn these classes to enum</span>
 
@@ -580,61 +581,383 @@
             <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span></div>
 
 
-<div class="viewcode-block" id="SmppOptionalTag"><a class="viewcode-back" href="../../state.html#naz.state.SmppOptionalTag">[docs]</a><span class="k">class</span> <span class="nc">SmppOptionalTag</span><span class="p">:</span>
+<div class="viewcode-block" id="OptionalTag"><a class="viewcode-back" href="../../state.html#naz.state.OptionalTag">[docs]</a><span class="k">class</span> <span class="nc">OptionalTag</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Represensts the various SMPP Optional Parameter Tags.</span>
+<span class="sd">    An SMPP OptionalTag.</span>
+
+<span class="sd">    Optional Parameters MUST always appear at the end of a message, in the `Optional Parameters` section of the SMPP PDU.</span>
+<span class="sd">    However, they may be included in ANY ORDER within the `Optional Parameters` section of the SMPP PDU</span>
+<span class="sd">    and NEED NOT be encoded in the order presented in the smpp document.</span>
+
+<span class="sd">    see section 5.3.2 of smpp ver 3.4 spec document.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># see section 5.3.2 of smpp ver 3.4 spec document.</span>
     <span class="c1"># All optional parameters have the following general TLV (Tag, Length, Value) format.</span>
     <span class="c1"># Tag, Integer, 2octets</span>
     <span class="c1"># Length, Integer, 2octets</span>
-    <span class="c1"># Value, type varies, size varies. eg receipted_message_id is of type c-octet string of size 1-65</span>
+    <span class="c1"># Value, type varies, size varies. eg `receipted_message_id` is of type c-octet string of size 1-65</span>
 
-    <span class="n">dest_addr_subunit</span> <span class="o">=</span> <span class="mh">0x0005</span>
-    <span class="n">dest_network_type</span> <span class="o">=</span> <span class="mh">0x0006</span>
-    <span class="n">dest_bearer_type</span> <span class="o">=</span> <span class="mh">0x0007</span>
-    <span class="n">dest_telematics_id</span> <span class="o">=</span> <span class="mh">0x0008</span>
-    <span class="n">source_addr_subunit</span> <span class="o">=</span> <span class="mh">0x000D</span>
-    <span class="n">source_network_type</span> <span class="o">=</span> <span class="mh">0x000E</span>
-    <span class="n">source_bearer_type</span> <span class="o">=</span> <span class="mh">0x000F</span>
-    <span class="n">source_telematics_id</span> <span class="o">=</span> <span class="mh">0x0010</span>
-    <span class="n">qos_time_to_live</span> <span class="o">=</span> <span class="mh">0x0017</span>
-    <span class="n">payload_type</span> <span class="o">=</span> <span class="mh">0x0019</span>
-    <span class="n">additional_status_info_text</span> <span class="o">=</span> <span class="mh">0x001D</span>
-    <span class="n">receipted_message_id</span> <span class="o">=</span> <span class="mh">0x001E</span>
-    <span class="n">ms_msg_wait_facilities</span> <span class="o">=</span> <span class="mh">0x0030</span>
-    <span class="n">privacy_indicator</span> <span class="o">=</span> <span class="mh">0x0201</span>
-    <span class="n">source_subaddress</span> <span class="o">=</span> <span class="mh">0x0202</span>
-    <span class="n">dest_subaddress</span> <span class="o">=</span> <span class="mh">0x0203</span>
-    <span class="n">user_message_reference</span> <span class="o">=</span> <span class="mh">0x0204</span>
-    <span class="n">user_response_code</span> <span class="o">=</span> <span class="mh">0x0205</span>
-    <span class="n">source_port</span> <span class="o">=</span> <span class="mh">0x020A</span>
-    <span class="n">destination_port</span> <span class="o">=</span> <span class="mh">0x020B</span>
-    <span class="n">sar_msg_ref_num</span> <span class="o">=</span> <span class="mh">0x020C</span>
-    <span class="n">language_indicator</span> <span class="o">=</span> <span class="mh">0x020D</span>
-    <span class="n">sar_total_segments</span> <span class="o">=</span> <span class="mh">0x020E</span>
-    <span class="n">sar_segment_seqnum</span> <span class="o">=</span> <span class="mh">0x020F</span>
-    <span class="n">SC_interface_version</span> <span class="o">=</span> <span class="mh">0x0210</span>
-    <span class="n">callback_num_pres_ind</span> <span class="o">=</span> <span class="mh">0x0302</span>
-    <span class="n">callback_num_atag</span> <span class="o">=</span> <span class="mh">0x0303</span>
-    <span class="n">number_of_messages</span> <span class="o">=</span> <span class="mh">0x0304</span>
-    <span class="n">callback_num</span> <span class="o">=</span> <span class="mh">0x0381</span>
-    <span class="n">dpf_result</span> <span class="o">=</span> <span class="mh">0x0420</span>
-    <span class="n">set_dpf</span> <span class="o">=</span> <span class="mh">0x0421</span>
-    <span class="n">ms_availability_status</span> <span class="o">=</span> <span class="mh">0x0422</span>
-    <span class="n">network_error_code</span> <span class="o">=</span> <span class="mh">0x0423</span>
-    <span class="n">message_payload</span> <span class="o">=</span> <span class="mh">0x0424</span>
-    <span class="n">delivery_failure_reason</span> <span class="o">=</span> <span class="mh">0x0425</span>
-    <span class="n">more_messages_to_send</span> <span class="o">=</span> <span class="mh">0x0426</span>
-    <span class="n">message_state</span> <span class="o">=</span> <span class="mh">0x0427</span>
-    <span class="n">ussd_service_op</span> <span class="o">=</span> <span class="mh">0x0501</span>
-    <span class="n">display_time</span> <span class="o">=</span> <span class="mh">0x1201</span>
-    <span class="n">sms_signal</span> <span class="o">=</span> <span class="mh">0x1203</span>
-    <span class="n">ms_validity</span> <span class="o">=</span> <span class="mh">0x1204</span>
-    <span class="n">alert_on_message_delivery</span> <span class="o">=</span> <span class="mh">0x130C</span>
-    <span class="n">its_reply_type</span> <span class="o">=</span> <span class="mh">0x1380</span>
-    <span class="n">its_session_info</span> <span class="o">=</span> <span class="mh">0x1383</span></div>
+    <span class="c1"># As an example, to represent a `receipted_message_id`, we need;</span>
+
+    <span class="c1"># import naz, struct</span>
+    <span class="c1"># my_receipted_message_id = Tag + Length + Value</span>
+    <span class="c1"># Tag = naz.OptionalTag.NAME_to_TAG[&#39;receipted_message_id&#39;]</span>
+    <span class="c1"># Length = ?</span>
+    <span class="c1"># Value = &quot;ThisIsSomeMessageId&quot;</span>
+    <span class="c1"># Value = Value.encode(&quot;ascii&quot;) + chr(0).encode(&quot;ascii&quot;) # since it is a c-octet string so it is a series of null-terminated ASCII chars</span>
+    <span class="c1"># Length = len(Value); assert Length &lt;= 65 # Value is c-octet string of size 1-65</span>
+    <span class="c1"># my_receipted_message_id = struct.pack(&quot;&gt;HH&quot;, Tag, Length) + Value # Tag &amp; Length are each Int, 2octet. Ints in smpp are unsigned. Hence use &quot;&gt;H&quot; in struct pack</span>
+    <span class="c1"># &gt;&gt;&gt; print(my_receipted_message_id)</span>
+    <span class="c1"># b&#39;\x00\x1e\x00\x14ThisIsSomeMessageId\x00&#39;</span>
+
+    <span class="c1"># stores a mapping of optional parameter name to tag</span>
+    <span class="n">NAME_to_TAG</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="c1"># dest_addr_subunit: It is used to route messages when received by a mobile station, for example to a smart card in the mobile station</span>
+        <span class="c1">#                    or to an external device connected to the mobile station.</span>
+        <span class="n">dest_addr_subunit</span><span class="o">=</span><span class="mh">0x0005</span><span class="p">,</span>
+        <span class="c1"># dest_network_type: It is used to indicate a network type associated with the destination address of a message.</span>
+        <span class="n">dest_network_type</span><span class="o">=</span><span class="mh">0x0006</span><span class="p">,</span>
+        <span class="c1"># dest_bearer_type: It is is used to request the desired bearer for delivery of the message to the destination address.</span>
+        <span class="n">dest_bearer_type</span><span class="o">=</span><span class="mh">0x0007</span><span class="p">,</span>
+        <span class="c1"># dest_telematics_id: It defines the telematic interworking to be used by the delivering system for the destination address.</span>
+        <span class="n">dest_telematics_id</span><span class="o">=</span><span class="mh">0x0008</span><span class="p">,</span>
+        <span class="c1"># source_addr_subunit: It is used to indicate where a message originated in the mobile station,</span>
+        <span class="c1">#                      for example a smart card in the mobile station or an external device connected to the mobile station.</span>
+        <span class="n">source_addr_subunit</span><span class="o">=</span><span class="mh">0x000D</span><span class="p">,</span>
+        <span class="c1"># source_network_type: It is used to indicate the network type associated with the device that originated the message.</span>
+        <span class="n">source_network_type</span><span class="o">=</span><span class="mh">0x000E</span><span class="p">,</span>
+        <span class="c1"># source_bearer_type: It indicates the wireless bearer over which the message originated.</span>
+        <span class="n">source_bearer_type</span><span class="o">=</span><span class="mh">0x000F</span><span class="p">,</span>
+        <span class="c1"># source_telematics_id: It indicates the type of telematics interface over which the message originated.</span>
+        <span class="n">source_telematics_id</span><span class="o">=</span><span class="mh">0x0010</span><span class="p">,</span>
+        <span class="c1"># qos_time_to_live: It defines the number of seconds which the sender requests the SMSC to keep the message if undelivered</span>
+        <span class="c1">#                   before it is deemed expired and not worth delivering.</span>
+        <span class="n">qos_time_to_live</span><span class="o">=</span><span class="mh">0x0017</span><span class="p">,</span>
+        <span class="c1"># payload_type: It defines the higher layer PDU type contained in the message payload.</span>
+        <span class="n">payload_type</span><span class="o">=</span><span class="mh">0x0019</span><span class="p">,</span>
+        <span class="c1"># additional_status_info_text: It gives an ASCII textual description of the meaning of a response PDU.</span>
+        <span class="n">additional_status_info_text</span><span class="o">=</span><span class="mh">0x001D</span><span class="p">,</span>
+        <span class="c1"># receipted_message_id: It indicates the ID of the message being receipted in an SMSC Delivery Receipt.</span>
+        <span class="n">receipted_message_id</span><span class="o">=</span><span class="mh">0x001E</span><span class="p">,</span>
+        <span class="c1"># ms_msg_wait_facilities: It allows an indication to be provided to an MS that there are messages waiting for the subscriber on systems on the PLMN.</span>
+        <span class="n">ms_msg_wait_facilities</span><span class="o">=</span><span class="mh">0x0030</span><span class="p">,</span>
+        <span class="c1"># privacy_indicator: It indicates the privacy level of the message.</span>
+        <span class="n">privacy_indicator</span><span class="o">=</span><span class="mh">0x0201</span><span class="p">,</span>
+        <span class="c1"># source_subaddress: It specifies a subaddress associated with the originator of the message.</span>
+        <span class="n">source_subaddress</span><span class="o">=</span><span class="mh">0x0202</span><span class="p">,</span>
+        <span class="c1"># dest_subaddress: It specifies a subaddress associated with the destination of the message.</span>
+        <span class="n">dest_subaddress</span><span class="o">=</span><span class="mh">0x0203</span><span class="p">,</span>
+        <span class="c1"># user_message_reference: ESME assigned message reference number.</span>
+        <span class="n">user_message_reference</span><span class="o">=</span><span class="mh">0x0204</span><span class="p">,</span>
+        <span class="c1"># user_response_code: It is a response code set by the user in a User Acknowledgement/Reply message.</span>
+        <span class="n">user_response_code</span><span class="o">=</span><span class="mh">0x0205</span><span class="p">,</span>
+        <span class="c1"># source_port: It is used to indicate the application port number associated with the source address of the message</span>
+        <span class="n">source_port</span><span class="o">=</span><span class="mh">0x020A</span><span class="p">,</span>
+        <span class="c1"># destination_port: It is used to indicate the application port number associated with the destination address of the message.</span>
+        <span class="n">destination_port</span><span class="o">=</span><span class="mh">0x020B</span><span class="p">,</span>
+        <span class="c1"># sar_msg_ref_num: It is used to indicate the reference number for a particular concatenated short message.</span>
+        <span class="n">sar_msg_ref_num</span><span class="o">=</span><span class="mh">0x020C</span><span class="p">,</span>
+        <span class="c1"># language_indicator: It is used to indicate the language of the short message.</span>
+        <span class="n">language_indicator</span><span class="o">=</span><span class="mh">0x020D</span><span class="p">,</span>
+        <span class="c1"># sar_total_segments: It is used to indicate the total number of short messages within the concatenated short message.</span>
+        <span class="n">sar_total_segments</span><span class="o">=</span><span class="mh">0x020E</span><span class="p">,</span>
+        <span class="c1"># sar_segment_seqnum: It is used to indicate the sequence number of a particular short message within the concatenated short message.</span>
+        <span class="n">sar_segment_seqnum</span><span class="o">=</span><span class="mh">0x020F</span><span class="p">,</span>
+        <span class="c1"># sc_interface_version: It is used to indicate the SMPP version supported by the SMSC. It is returned in the bind response PDUs.</span>
+        <span class="n">sc_interface_version</span><span class="o">=</span><span class="mh">0x0210</span><span class="p">,</span>
+        <span class="c1"># callback_num_pres_ind: It controls the presentation indication and screening of the callback number at the mobile station.</span>
+        <span class="c1">#                        If present, the :py:attr:`~callback_num` parameter must also be present.</span>
+        <span class="n">callback_num_pres_ind</span><span class="o">=</span><span class="mh">0x0302</span><span class="p">,</span>
+        <span class="c1"># callback_num_atag: It associates an alphanumeric display with the call back number</span>
+        <span class="n">callback_num_atag</span><span class="o">=</span><span class="mh">0x0303</span><span class="p">,</span>
+        <span class="c1"># number_of_messages: It is used to indicate the number of messages stored in a mailbox.</span>
+        <span class="n">number_of_messages</span><span class="o">=</span><span class="mh">0x0304</span><span class="p">,</span>
+        <span class="c1"># callback_num: It associates a call back number with the message.</span>
+        <span class="n">callback_num</span><span class="o">=</span><span class="mh">0x0381</span><span class="p">,</span>
+        <span class="c1"># dpf_result: It is used in the data_sm_resp PDU to indicate if delivery pending flag (DPF) was set for a delivery failure of the short message.</span>
+        <span class="n">dpf_result</span><span class="o">=</span><span class="mh">0x0420</span><span class="p">,</span>
+        <span class="c1"># set_dpf: An ESME may use the set_dpf parameter to request the setting of a delivery pending flag (DPF) for certain delivery failure scenarios</span>
+        <span class="n">set_dpf</span><span class="o">=</span><span class="mh">0x0421</span><span class="p">,</span>
+        <span class="c1"># ms_availability_status: It is used in the alert_notification operation to indicate the availability state of the MS to the ESME.</span>
+        <span class="n">ms_availability_status</span><span class="o">=</span><span class="mh">0x0422</span><span class="p">,</span>
+        <span class="c1"># network_error_code: It is used to indicate the actual network error code for a delivery failure.</span>
+        <span class="n">network_error_code</span><span class="o">=</span><span class="mh">0x0423</span><span class="p">,</span>
+        <span class="c1"># message_payload: It contains the user data.</span>
+        <span class="n">message_payload</span><span class="o">=</span><span class="mh">0x0424</span><span class="p">,</span>
+        <span class="c1"># delivery_failure_reason: It is used in the data_sm_resp operation to indicate the outcome of the message delivery attempt</span>
+        <span class="c1">#                          (only applicable for transaction message mode).</span>
+        <span class="n">delivery_failure_reason</span><span class="o">=</span><span class="mh">0x0425</span><span class="p">,</span>
+        <span class="c1"># more_messages_to_send: It is used by the ESME in the `submit_sm` and `data_sm` operations to indicate to the SMSC</span>
+        <span class="c1">#                        that there are further messages for the same destination SME.</span>
+        <span class="n">more_messages_to_send</span><span class="o">=</span><span class="mh">0x0426</span><span class="p">,</span>
+        <span class="c1"># message_state: It is used by the SMSC in the deliver_sm and data_sm PDUs to indicate to the ESME the final message state for an SMSC Delivery Receipt.</span>
+        <span class="n">message_state</span><span class="o">=</span><span class="mh">0x0427</span><span class="p">,</span>
+        <span class="c1"># ussd_service_op: It is required to define the USSD service operation when SMPP is being used as an interface to a (GSM) USSD system.</span>
+        <span class="n">ussd_service_op</span><span class="o">=</span><span class="mh">0x0501</span><span class="p">,</span>
+        <span class="c1"># display_time: It is used to associate a display time of the short message on the MS.</span>
+        <span class="n">display_time</span><span class="o">=</span><span class="mh">0x1201</span><span class="p">,</span>
+        <span class="c1"># sms_signal: It is used to provide a TDMA MS with alert tone information associated with the received short message.</span>
+        <span class="n">sms_signal</span><span class="o">=</span><span class="mh">0x1203</span><span class="p">,</span>
+        <span class="c1"># ms_validity: It is used to provide an MS with validity information associated with the received short message.</span>
+        <span class="n">ms_validity</span><span class="o">=</span><span class="mh">0x1204</span><span class="p">,</span>
+        <span class="c1"># alert_on_message_delivery: It is set to instruct a MS to alert the user (in a MS implementation specific manner) when the short message arrives at the MS.</span>
+        <span class="n">alert_on_message_delivery</span><span class="o">=</span><span class="mh">0x130C</span><span class="p">,</span>
+        <span class="c1"># its_reply_type: It indicates and controls the MS user&#39;s reply method to an SMS delivery message received from the ESME.</span>
+        <span class="c1">#                 It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].</span>
+        <span class="n">its_reply_type</span><span class="o">=</span><span class="mh">0x1380</span><span class="p">,</span>
+        <span class="c1"># its_session_info: It contains control information for the interactive session between an MS and an ESME.</span>
+        <span class="c1">#                   It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].</span>
+        <span class="n">its_session_info</span><span class="o">=</span><span class="mh">0x1383</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="OptionalTag.__init__"><a class="viewcode-back" href="../../state.html#naz.state.OptionalTag.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters:</span>
+<span class="sd">            name: the name of the SMPP optional parameter.</span>
+<span class="sd">            value: the value of the parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_validate_args</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_args</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">],)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">OptionalTag</span><span class="o">.</span><span class="n">NAME_to_TAG</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The OptionalTag with name `</span><span class="si">{0}</span><span class="s2">` is not a recognised SMPP OptionalTag.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;dest_addr_subunit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_network_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_bearer_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_telematics_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_addr_subunit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_network_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_bearer_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_telematics_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;qos_time_to_live&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;payload_type&quot;</span><span class="p">,</span>
+            <span class="c1"># the type of `ms_msg_wait_facilities` is a bitMask. but it is treated as an int</span>
+            <span class="s2">&quot;ms_msg_wait_facilities&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;privacy_indicator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_message_reference&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_response_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_port&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;destination_port&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_msg_ref_num&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;language_indicator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_total_segments&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_segment_seqnum&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sc_interface_version&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num_pres_ind&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;number_of_messages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dpf_result&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;set_dpf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_availability_status&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;delivery_failure_reason&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;more_messages_to_send&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message_state&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;display_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sms_signal&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_validity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;its_reply_type&quot;</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`</span><span class="si">{0}</span><span class="s2">` should be of type:: `int` You entered: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;additional_status_info_text&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;receipted_message_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_subaddress&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_subaddress&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num_atag&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;network_error_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message_payload&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ussd_service_op&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;its_session_info&quot;</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`</span><span class="si">{0}</span><span class="s2">` should be of type:: `str` You entered: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;alert_on_message_delivery&quot;</span><span class="p">,)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="c1"># note that in smpp, `alert_on_message_delivery` has no value part in TLV</span>
+            <span class="c1"># but in naz we just use boolean to indicate whether someone wants to set it.</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;`</span><span class="si">{0}</span><span class="s2">` should be of type:: `bool` You entered: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Tag field of an optional smpp parameter.</span>
+<span class="sd">        The Tag field is used to uniquely identify the particular optional parameter in question.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">NAME_to_TAG</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Value field of an optional smpp parameter.</span>
+<span class="sd">        The Value field contains the actual data for the optional parameter in question.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the Value field of an optional smpp parameter.</span>
+<span class="sd">        The Length field indicates the length of the Value field in octets(integer).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;dest_addr_subunit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_network_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_bearer_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_addr_subunit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_network_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_bearer_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_telematics_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;payload_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_msg_wait_facilities&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;privacy_indicator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_response_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;language_indicator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_total_segments&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_segment_seqnum&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sc_interface_version&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num_pres_ind&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;number_of_messages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dpf_result&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;set_dpf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_availability_status&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;delivery_failure_reason&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;more_messages_to_send&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message_state&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;display_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_validity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;its_reply_type&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># This is for unsigned ints size 1</span>
+            <span class="c1"># smpp doc says: &quot;Length of value part in octets&quot;.</span>
+            <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;dest_telematics_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_message_reference&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_port&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;destination_port&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_msg_ref_num&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sms_signal&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;qos_time_to_live&quot;</span><span class="p">,):</span>
+            <span class="c1"># This is for unsigned ints size 4</span>
+            <span class="k">return</span> <span class="mi">4</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;additional_status_info_text&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;receipted_message_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_subaddress&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_subaddress&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num_atag&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;network_error_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message_payload&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ussd_service_op&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;its_session_info&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;alert_on_message_delivery&quot;</span><span class="p">,):</span>
+            <span class="c1"># see section 5.3.2.41 of smpp document</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The OptionalTag with name `</span><span class="si">{0}</span><span class="s2">` is not a recognised SMPP OptionalTag.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tlv</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the bytes representation of an optional smpp parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;dest_addr_subunit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_network_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_bearer_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_addr_subunit&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_network_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_bearer_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_telematics_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;payload_type&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_msg_wait_facilities&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;privacy_indicator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_response_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;language_indicator&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_total_segments&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_segment_seqnum&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sc_interface_version&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num_pres_ind&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;number_of_messages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dpf_result&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;set_dpf&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_availability_status&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;delivery_failure_reason&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;more_messages_to_send&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message_state&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;display_time&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ms_validity&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;its_reply_type&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># This is for unsigned ints size 1</span>
+            <span class="c1"># B is for `unsigned char size 1`, H is for `unsigned short size 2` and I is  `unsigned int size 4`</span>
+            <span class="c1"># see: https://docs.python.org/3.8/library/struct.html#format-characters</span>
+            <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;HHB&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;dest_telematics_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user_message_reference&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_port&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;destination_port&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sar_msg_ref_num&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;sms_signal&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># This is for unsigned ints size 2</span>
+            <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;HHH&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;qos_time_to_live&quot;</span><span class="p">,):</span>
+            <span class="c1"># This is for unsigned ints size 4</span>
+            <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;HHI&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="s2">&quot;additional_status_info_text&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;receipted_message_id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;source_subaddress&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dest_subaddress&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num_atag&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;callback_num&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;network_error_code&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;message_payload&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ussd_service_op&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;its_session_info&quot;</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="c1"># make mypy happy; https://github.com/python/mypy/issues/4805</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="n">_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">chr</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;HH&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="o">+</span> <span class="n">_val</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;alert_on_message_delivery&quot;</span><span class="p">,):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="c1"># the TLV has no value field</span>
+                <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;&gt;HH&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="sa">b</span><span class="s2">&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;The OptionalTag with name `</span><span class="si">{0}</span><span class="s2">` is not a recognised SMPP OptionalTag.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+                <span class="p">)</span>
+            <span class="p">)</span></div>
 </pre></div>
 
            </div>

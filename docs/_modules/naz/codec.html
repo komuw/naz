@@ -391,7 +391,6 @@
 
 
 <span class="n">_INBUILT_CODECS</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">codecs</span><span class="o">.</span><span class="n">CodecInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="c1">#  mypy issue; https://github.com/python/mypy/issues/8732</span>
     <span class="c1"># pytype issue; https://github.com/google/pytype/issues/574</span>
     <span class="s2">&quot;ucs2&quot;</span><span class="p">:</span> <span class="n">codecs</span><span class="o">.</span><span class="n">CodecInfo</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ucs2&quot;</span><span class="p">,</span>
@@ -422,6 +421,14 @@
     <span class="c1"># Note: Search function registration is not currently reversible,</span>
     <span class="c1"># which may cause problems in some cases, such as unit testing or module reloading.</span>
     <span class="c1"># https://docs.python.org/3.7/library/codecs.html#codecs.register</span>
+    <span class="c1">#</span>
+    <span class="c1"># Note: Encodings are first looked up in the registry&#39;s cache.</span>
+    <span class="c1"># thus if you call `register_codecs` and then call it again with different</span>
+    <span class="c1"># codecs, the second codecs may not take effect.</span>
+    <span class="c1"># ie; codecs.lookup(encoding) will return the first codecs since they were stored</span>
+    <span class="c1"># in the cache.</span>
+    <span class="c1"># There doesn&#39;t appear to be away to clear codec cache at runtime.</span>
+    <span class="c1"># see: https://docs.python.org/3/library/codecs.html#codecs.lookup</span>
 
     <span class="k">def</span> <span class="nf">_codec_search_function</span><span class="p">(</span><span class="n">_encoding</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -429,7 +436,10 @@
 <span class="sd">        This way, if someone had overridden an inbuilt codec, their</span>
 <span class="sd">        implementation is chosen first and cached.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">custom_codecs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_encoding</span><span class="p">,</span> <span class="n">_INBUILT_CODECS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_encoding</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">custom_codecs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_encoding</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">custom_codecs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_encoding</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_INBUILT_CODECS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_encoding</span><span class="p">)</span>
 
     <span class="n">codecs</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">_codec_search_function</span><span class="p">)</span></div>
 </pre></div>

@@ -219,6 +219,80 @@
 </dd></dl>
 
 <dl class="class">
+<dt id="naz.state.OptionalTag">
+<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">OptionalTag</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/state.html#OptionalTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.OptionalTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>An SMPP OptionalTag.</p>
+<p>Optional Parameters MUST always appear at the end of a message, in the <cite>Optional Parameters</cite> section of the SMPP PDU.
+However, they may be included in ANY ORDER within the <cite>Optional Parameters</cite> section of the SMPP PDU
+and NEED NOT be encoded in the order presented in the smpp document.</p>
+<p>see section 5.3.2 of smpp ver 3.4 spec document.</p>
+<dl class="method">
+<dt id="naz.state.OptionalTag.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/naz/state.html#OptionalTag.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.OptionalTag.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – the name of the SMPP optional parameter.</p></li>
+<li><p><strong>value</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]) – the value of the parameter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.OptionalTag.length">
+<em class="property">property </em><code class="sig-name descname">length</code><a class="headerlink" href="#naz.state.OptionalTag.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Value field of an optional smpp parameter.
+The Length field indicates the length of the Value field in octets(integer).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.OptionalTag.tag">
+<em class="property">property </em><code class="sig-name descname">tag</code><a class="headerlink" href="#naz.state.OptionalTag.tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Tag field of an optional smpp parameter.
+The Tag field is used to uniquely identify the particular optional parameter in question.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.OptionalTag.tlv">
+<em class="property">property </em><code class="sig-name descname">tlv</code><a class="headerlink" href="#naz.state.OptionalTag.tlv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the bytes representation of an optional smpp parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="naz.state.OptionalTag.value">
+<em class="property">property </em><code class="sig-name descname">value</code><a class="headerlink" href="#naz.state.OptionalTag.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the Value field of an optional smpp parameter.
+The Value field contains the actual data for the optional parameter in question.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="naz.state.SmppCommand">
 <em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppCommand</code><a class="reference internal" href="_modules/naz/state.html#SmppCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppCommand" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
@@ -237,13 +311,6 @@
 <em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppDataCoding</code><a class="reference internal" href="_modules/naz/state.html#SmppDataCoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppDataCoding" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represensts the various SMPP data encodings.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="naz.state.SmppOptionalTag">
-<em class="property">class </em><code class="sig-prename descclassname">naz.state.</code><code class="sig-name descname">SmppOptionalTag</code><a class="reference internal" href="_modules/naz/state.html#SmppOptionalTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#naz.state.SmppOptionalTag" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Represensts the various SMPP Optional Parameter Tags.</p>
 </dd></dl>
 
 <dl class="class">
