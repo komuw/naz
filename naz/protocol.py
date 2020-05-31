@@ -112,6 +112,7 @@ class SubmitSM(Message):
             source_addr="255700111222",
             destination_addr="255799000888",
             log_id="some-id",
+            ms_validity=1,
         )
         await client.send_message(msg)
     """
