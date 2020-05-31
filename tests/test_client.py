@@ -574,6 +574,7 @@ class TestClient(TestCase):
                 smpp_command=naz.SmppCommand.SUBMIT_SM,
                 source_addr="2547000000",
                 destination_addr="254711999999",
+                ms_validity=1,  # optional smpp param for submit_sm
             )
 
             self._run(self.cli.connect())
@@ -785,7 +786,7 @@ class TestClient(TestCase):
             with mock.patch(
                 "naz.hooks.SimpleHook.from_smsc", new=AsyncMock()
             ) as mock_hook_from_smsc:
-                tag = naz.SmppOptionalTag.receipted_message_id
+                tag = naz.OptionalTag.NAME_to_TAG["receipted_message_id"]
                 length = 0x0018  # 24 in length
                 tag_n_len = struct.pack(">HH", tag, length)
                 # DELIVER_SM has same message_id as SUBMIT_SM_RESP but DIFFERENT sequence_number

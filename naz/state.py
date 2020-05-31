@@ -1,4 +1,5 @@
 import typing
+import struct
 
 # TODO: try and turn these classes to enum
 
@@ -415,58 +416,380 @@ class SmppDataCoding:
             ) from e
 
 
-class SmppOptionalTag:
+class OptionalTag:
     """
-    Represensts the various SMPP Optional Parameter Tags.
+    An SMPP OptionalTag.
+
+    Optional Parameters MUST always appear at the end of a message, in the `Optional Parameters` section of the SMPP PDU.
+    However, they may be included in ANY ORDER within the `Optional Parameters` section of the SMPP PDU
+    and NEED NOT be encoded in the order presented in the smpp document.
+
+    see section 5.3.2 of smpp ver 3.4 spec document.
     """
 
     # see section 5.3.2 of smpp ver 3.4 spec document.
     # All optional parameters have the following general TLV (Tag, Length, Value) format.
     # Tag, Integer, 2octets
     # Length, Integer, 2octets
-    # Value, type varies, size varies. eg receipted_message_id is of type c-octet string of size 1-65
+    # Value, type varies, size varies. eg `receipted_message_id` is of type c-octet string of size 1-65
 
-    dest_addr_subunit = 0x0005
-    dest_network_type = 0x0006
-    dest_bearer_type = 0x0007
-    dest_telematics_id = 0x0008
-    source_addr_subunit = 0x000D
-    source_network_type = 0x000E
-    source_bearer_type = 0x000F
-    source_telematics_id = 0x0010
-    qos_time_to_live = 0x0017
-    payload_type = 0x0019
-    additional_status_info_text = 0x001D
-    receipted_message_id = 0x001E
-    ms_msg_wait_facilities = 0x0030
-    privacy_indicator = 0x0201
-    source_subaddress = 0x0202
-    dest_subaddress = 0x0203
-    user_message_reference = 0x0204
-    user_response_code = 0x0205
-    source_port = 0x020A
-    destination_port = 0x020B
-    sar_msg_ref_num = 0x020C
-    language_indicator = 0x020D
-    sar_total_segments = 0x020E
-    sar_segment_seqnum = 0x020F
-    SC_interface_version = 0x0210
-    callback_num_pres_ind = 0x0302
-    callback_num_atag = 0x0303
-    number_of_messages = 0x0304
-    callback_num = 0x0381
-    dpf_result = 0x0420
-    set_dpf = 0x0421
-    ms_availability_status = 0x0422
-    network_error_code = 0x0423
-    message_payload = 0x0424
-    delivery_failure_reason = 0x0425
-    more_messages_to_send = 0x0426
-    message_state = 0x0427
-    ussd_service_op = 0x0501
-    display_time = 0x1201
-    sms_signal = 0x1203
-    ms_validity = 0x1204
-    alert_on_message_delivery = 0x130C
-    its_reply_type = 0x1380
-    its_session_info = 0x1383
+    # As an example, to represent a `receipted_message_id`, we need;
+
+    # import naz, struct
+    # my_receipted_message_id = Tag + Length + Value
+    # Tag = naz.OptionalTag.NAME_to_TAG['receipted_message_id']
+    # Length = ?
+    # Value = "ThisIsSomeMessageId"
+    # Value = Value.encode("ascii") + chr(0).encode("ascii") # since it is a c-octet string so it is a series of null-terminated ASCII chars
+    # Length = len(Value); assert Length <= 65 # Value is c-octet string of size 1-65
+    # my_receipted_message_id = struct.pack(">HH", Tag, Length) + Value # Tag & Length are each Int, 2octet. Ints in smpp are unsigned. Hence use ">H" in struct pack
+    # >>> print(my_receipted_message_id)
+    # b'\x00\x1e\x00\x14ThisIsSomeMessageId\x00'
+
+    # stores a mapping of optional parameter name to tag
+    NAME_to_TAG: typing.Dict[str, int] = dict(
+        # dest_addr_subunit: It is used to route messages when received by a mobile station, for example to a smart card in the mobile station
+        #                    or to an external device connected to the mobile station.
+        dest_addr_subunit=0x0005,
+        # dest_network_type: It is used to indicate a network type associated with the destination address of a message.
+        dest_network_type=0x0006,
+        # dest_bearer_type: It is is used to request the desired bearer for delivery of the message to the destination address.
+        dest_bearer_type=0x0007,
+        # dest_telematics_id: It defines the telematic interworking to be used by the delivering system for the destination address.
+        dest_telematics_id=0x0008,
+        # source_addr_subunit: It is used to indicate where a message originated in the mobile station,
+        #                      for example a smart card in the mobile station or an external device connected to the mobile station.
+        source_addr_subunit=0x000D,
+        # source_network_type: It is used to indicate the network type associated with the device that originated the message.
+        source_network_type=0x000E,
+        # source_bearer_type: It indicates the wireless bearer over which the message originated.
+        source_bearer_type=0x000F,
+        # source_telematics_id: It indicates the type of telematics interface over which the message originated.
+        source_telematics_id=0x0010,
+        # qos_time_to_live: It defines the number of seconds which the sender requests the SMSC to keep the message if undelivered
+        #                   before it is deemed expired and not worth delivering.
+        qos_time_to_live=0x0017,
+        # payload_type: It defines the higher layer PDU type contained in the message payload.
+        payload_type=0x0019,
+        # additional_status_info_text: It gives an ASCII textual description of the meaning of a response PDU.
+        additional_status_info_text=0x001D,
+        # receipted_message_id: It indicates the ID of the message being receipted in an SMSC Delivery Receipt.
+        receipted_message_id=0x001E,
+        # ms_msg_wait_facilities: It allows an indication to be provided to an MS that there are messages waiting for the subscriber on systems on the PLMN.
+        ms_msg_wait_facilities=0x0030,
+        # privacy_indicator: It indicates the privacy level of the message.
+        privacy_indicator=0x0201,
+        # source_subaddress: It specifies a subaddress associated with the originator of the message.
+        source_subaddress=0x0202,
+        # dest_subaddress: It specifies a subaddress associated with the destination of the message.
+        dest_subaddress=0x0203,
+        # user_message_reference: ESME assigned message reference number.
+        user_message_reference=0x0204,
+        # user_response_code: It is a response code set by the user in a User Acknowledgement/Reply message.
+        user_response_code=0x0205,
+        # source_port: It is used to indicate the application port number associated with the source address of the message
+        source_port=0x020A,
+        # destination_port: It is used to indicate the application port number associated with the destination address of the message.
+        destination_port=0x020B,
+        # sar_msg_ref_num: It is used to indicate the reference number for a particular concatenated short message.
+        sar_msg_ref_num=0x020C,
+        # language_indicator: It is used to indicate the language of the short message.
+        language_indicator=0x020D,
+        # sar_total_segments: It is used to indicate the total number of short messages within the concatenated short message.
+        sar_total_segments=0x020E,
+        # sar_segment_seqnum: It is used to indicate the sequence number of a particular short message within the concatenated short message.
+        sar_segment_seqnum=0x020F,
+        # sc_interface_version: It is used to indicate the SMPP version supported by the SMSC. It is returned in the bind response PDUs.
+        sc_interface_version=0x0210,
+        # callback_num_pres_ind: It controls the presentation indication and screening of the callback number at the mobile station.
+        #                        If present, the :py:attr:`~callback_num` parameter must also be present.
+        callback_num_pres_ind=0x0302,
+        # callback_num_atag: It associates an alphanumeric display with the call back number
+        callback_num_atag=0x0303,
+        # number_of_messages: It is used to indicate the number of messages stored in a mailbox.
+        number_of_messages=0x0304,
+        # callback_num: It associates a call back number with the message.
+        callback_num=0x0381,
+        # dpf_result: It is used in the data_sm_resp PDU to indicate if delivery pending flag (DPF) was set for a delivery failure of the short message.
+        dpf_result=0x0420,
+        # set_dpf: An ESME may use the set_dpf parameter to request the setting of a delivery pending flag (DPF) for certain delivery failure scenarios
+        set_dpf=0x0421,
+        # ms_availability_status: It is used in the alert_notification operation to indicate the availability state of the MS to the ESME.
+        ms_availability_status=0x0422,
+        # network_error_code: It is used to indicate the actual network error code for a delivery failure.
+        network_error_code=0x0423,
+        # message_payload: It contains the user data.
+        message_payload=0x0424,
+        # delivery_failure_reason: It is used in the data_sm_resp operation to indicate the outcome of the message delivery attempt
+        #                          (only applicable for transaction message mode).
+        delivery_failure_reason=0x0425,
+        # more_messages_to_send: It is used by the ESME in the `submit_sm` and `data_sm` operations to indicate to the SMSC
+        #                        that there are further messages for the same destination SME.
+        more_messages_to_send=0x0426,
+        # message_state: It is used by the SMSC in the deliver_sm and data_sm PDUs to indicate to the ESME the final message state for an SMSC Delivery Receipt.
+        message_state=0x0427,
+        # ussd_service_op: It is required to define the USSD service operation when SMPP is being used as an interface to a (GSM) USSD system.
+        ussd_service_op=0x0501,
+        # display_time: It is used to associate a display time of the short message on the MS.
+        display_time=0x1201,
+        # sms_signal: It is used to provide a TDMA MS with alert tone information associated with the received short message.
+        sms_signal=0x1203,
+        # ms_validity: It is used to provide an MS with validity information associated with the received short message.
+        ms_validity=0x1204,
+        # alert_on_message_delivery: It is set to instruct a MS to alert the user (in a MS implementation specific manner) when the short message arrives at the MS.
+        alert_on_message_delivery=0x130C,
+        # its_reply_type: It indicates and controls the MS user's reply method to an SMS delivery message received from the ESME.
+        #                 It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].
+        its_reply_type=0x1380,
+        # its_session_info: It contains control information for the interactive session between an MS and an ESME.
+        #                   It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].
+        its_session_info=0x1383,
+    )
+
+    def __init__(self, name: str, value: typing.Union[int, str, bool]) -> None:
+        """
+        Parameters:
+            name: the name of the SMPP optional parameter.
+            value: the value of the parameter
+        """
+        self._validate_args(name=name, value=value)
+
+        self.name = name
+        self._value = value
+
+    @staticmethod
+    def _validate_args(name: str, value: typing.Union[int, str, bool],) -> None:
+        if name not in OptionalTag.NAME_to_TAG.keys():
+            raise ValueError(
+                "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(name)
+            )
+
+        if name in (
+            "dest_addr_subunit",
+            "dest_network_type",
+            "dest_bearer_type",
+            "dest_telematics_id",
+            "source_addr_subunit",
+            "source_network_type",
+            "source_bearer_type",
+            "source_telematics_id",
+            "qos_time_to_live",
+            "payload_type",
+            # the type of `ms_msg_wait_facilities` is a bitMask. but it is treated as an int
+            "ms_msg_wait_facilities",
+            "privacy_indicator",
+            "user_message_reference",
+            "user_response_code",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "language_indicator",
+            "sar_total_segments",
+            "sar_segment_seqnum",
+            "sc_interface_version",
+            "callback_num_pres_ind",
+            "number_of_messages",
+            "dpf_result",
+            "set_dpf",
+            "ms_availability_status",
+            "delivery_failure_reason",
+            "more_messages_to_send",
+            "message_state",
+            "display_time",
+            "sms_signal",
+            "ms_validity",
+            "its_reply_type",
+        ) and not isinstance(value, int):
+            raise ValueError(
+                "`{0}` should be of type:: `int` You entered: {1}".format(name, type(value))
+            )
+        elif name in (
+            "additional_status_info_text",
+            "receipted_message_id",
+            "source_subaddress",
+            "dest_subaddress",
+            "callback_num_atag",
+            "callback_num",
+            "network_error_code",
+            "message_payload",
+            "ussd_service_op",
+            "its_session_info",
+        ) and not isinstance(value, str):
+            raise ValueError(
+                "`{0}` should be of type:: `str` You entered: {1}".format(name, type(value))
+            )
+        elif name in ("alert_on_message_delivery",) and not isinstance(value, bool):
+            # note that in smpp, `alert_on_message_delivery` has no value part in TLV
+            # but in naz we just use boolean to indicate whether someone wants to set it.
+            raise ValueError(
+                "`{0}` should be of type:: `bool` You entered: {1}".format(name, type(value))
+            )
+
+    @property
+    def tag(self) -> int:
+        """
+        Returns the Tag field of an optional smpp parameter.
+        The Tag field is used to uniquely identify the particular optional parameter in question.
+        """
+        return self.NAME_to_TAG[self.name]
+
+    @property
+    def value(self) -> typing.Union[int, str, bool]:
+        """
+        Returns the Value field of an optional smpp parameter.
+        The Value field contains the actual data for the optional parameter in question.
+        """
+        return self._value
+
+    @property
+    def length(self) -> int:
+        """
+        Returns the Value field of an optional smpp parameter.
+        The Length field indicates the length of the Value field in octets(integer).
+        """
+        if self.name in (
+            "dest_addr_subunit",
+            "dest_network_type",
+            "dest_bearer_type",
+            "source_addr_subunit",
+            "source_network_type",
+            "source_bearer_type",
+            "source_telematics_id",
+            "payload_type",
+            "ms_msg_wait_facilities",
+            "privacy_indicator",
+            "user_response_code",
+            "language_indicator",
+            "sar_total_segments",
+            "sar_segment_seqnum",
+            "sc_interface_version",
+            "callback_num_pres_ind",
+            "number_of_messages",
+            "dpf_result",
+            "set_dpf",
+            "ms_availability_status",
+            "delivery_failure_reason",
+            "more_messages_to_send",
+            "message_state",
+            "display_time",
+            "ms_validity",
+            "its_reply_type",
+        ):
+            # This is for unsigned ints size 1
+            # smpp doc says: "Length of value part in octets".
+            return 1
+        elif self.name in (
+            "dest_telematics_id",
+            "user_message_reference",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "sms_signal",
+        ):
+            return 2
+        elif self.name in ("qos_time_to_live",):
+            # This is for unsigned ints size 4
+            return 4
+        elif self.name in (
+            "additional_status_info_text",
+            "receipted_message_id",
+            "source_subaddress",
+            "dest_subaddress",
+            "callback_num_atag",
+            "callback_num",
+            "network_error_code",
+            "message_payload",
+            "ussd_service_op",
+            "its_session_info",
+        ):
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.value, str)
+            return len(self.value)
+        elif self.name in ("alert_on_message_delivery",):
+            # see section 5.3.2.41 of smpp document
+            return 0
+        else:
+            raise ValueError(
+                "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(
+                    self.name
+                )
+            )
+
+    @property
+    def tlv(self) -> bytes:
+        """
+        Returns the bytes representation of an optional smpp parameter.
+        """
+        if self.name in (
+            "dest_addr_subunit",
+            "dest_network_type",
+            "dest_bearer_type",
+            "source_addr_subunit",
+            "source_network_type",
+            "source_bearer_type",
+            "source_telematics_id",
+            "payload_type",
+            "ms_msg_wait_facilities",
+            "privacy_indicator",
+            "user_response_code",
+            "language_indicator",
+            "sar_total_segments",
+            "sar_segment_seqnum",
+            "sc_interface_version",
+            "callback_num_pres_ind",
+            "number_of_messages",
+            "dpf_result",
+            "set_dpf",
+            "ms_availability_status",
+            "delivery_failure_reason",
+            "more_messages_to_send",
+            "message_state",
+            "display_time",
+            "ms_validity",
+            "its_reply_type",
+        ):
+            # This is for unsigned ints size 1
+            # B is for `unsigned char size 1`, H is for `unsigned short size 2` and I is  `unsigned int size 4`
+            # see: https://docs.python.org/3.8/library/struct.html#format-characters
+            return struct.pack(">HHB", self.tag, self.length, self.value)
+        elif self.name in (
+            "dest_telematics_id",
+            "user_message_reference",
+            "source_port",
+            "destination_port",
+            "sar_msg_ref_num",
+            "sms_signal",
+        ):
+            # This is for unsigned ints size 2
+            return struct.pack(">HHH", self.tag, self.length, self.value)
+        elif self.name in ("qos_time_to_live",):
+            # This is for unsigned ints size 4
+            return struct.pack(">HHI", self.tag, self.length, self.value)
+        elif self.name in (
+            "additional_status_info_text",
+            "receipted_message_id",
+            "source_subaddress",
+            "dest_subaddress",
+            "callback_num_atag",
+            "callback_num",
+            "network_error_code",
+            "message_payload",
+            "ussd_service_op",
+            "its_session_info",
+        ):
+            # make mypy happy; https://github.com/python/mypy/issues/4805
+            assert isinstance(self.value, str)
+            _val = self.value.encode("ascii") + chr(0).encode("ascii")
+            return struct.pack(">HH", self.tag, self.length) + _val
+        elif self.name in ("alert_on_message_delivery",):
+            if self.value:
+                # the TLV has no value field
+                return struct.pack(">HH", self.tag, self.length)
+            else:
+                return b""
+        else:
+            raise ValueError(
+                "The OptionalTag with name `{0}` is not a recognised SMPP OptionalTag.".format(
+                    self.name
+                )
+            )

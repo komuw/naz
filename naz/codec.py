@@ -226,7 +226,6 @@ class UCS2Codec(codecs.Codec):
 
 
 _INBUILT_CODECS: typing.Dict[str, codecs.CodecInfo] = {
-    #  mypy issue; https://github.com/python/mypy/issues/8732
     # pytype issue; https://github.com/google/pytype/issues/574
     "ucs2": codecs.CodecInfo(
         name="ucs2",

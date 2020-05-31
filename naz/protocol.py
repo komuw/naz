@@ -1,5 +1,6 @@
 import abc
 import json
+import typing
 
 from . import state
 
@@ -117,6 +118,7 @@ class SubmitSM(Message):
 
     def __init__(
         self,
+        #### MANDATORY SMPP PARAMETERS ###
         short_message: str,
         source_addr: str,
         destination_addr: str,
@@ -141,13 +143,47 @@ class SubmitSM(Message):
         registered_delivery: int = 0b00000001,  # see section 5.2.17
         replace_if_present_flag: int = 0x00000000,
         sm_default_msg_id: int = 0x00000000,
+        #### MANDATORY SMPP PARAMETERS ###
+        ###
         ### NON-SMPP ATTRIBUTES ###
         smpp_command: str = state.SmppCommand.SUBMIT_SM,
         version: int = 1,
         hook_metadata: str = "",
         encoding: str = "gsm0338",
         errors: str = "strict",
-        #### NON-SMPP ATTRIBUTES ###
+        ### NON-SMPP ATTRIBUTES ###
+        ###
+        #### OPTIONAL SMPP PARAMETERS ###
+        # section 4.4.1 of smpp documentation
+        user_message_reference: typing.Union[None, int] = None,
+        source_port: typing.Union[None, int] = None,
+        source_addr_subunit: typing.Union[None, int] = None,
+        destination_port: typing.Union[None, int] = None,
+        dest_addr_subunit: typing.Union[None, int] = None,
+        sar_msg_ref_num: typing.Union[None, int] = None,
+        sar_total_segments: typing.Union[None, int] = None,
+        sar_segment_seqnum: typing.Union[None, int] = None,
+        more_messages_to_send: typing.Union[None, int] = None,
+        payload_type: typing.Union[None, int] = None,
+        message_payload: typing.Union[None, str] = None,
+        privacy_indicator: typing.Union[None, int] = None,
+        callback_num: typing.Union[None, str] = None,
+        callback_num_pres_ind: typing.Union[None, int] = None,
+        callback_num_atag: typing.Union[None, str] = None,
+        source_subaddress: typing.Union[None, str] = None,
+        dest_subaddress: typing.Union[None, str] = None,
+        user_response_code: typing.Union[None, int] = None,
+        display_time: typing.Union[None, int] = None,
+        sms_signal: typing.Union[None, int] = None,
+        ms_validity: typing.Union[None, int] = None,
+        ms_msg_wait_facilities: typing.Union[None, int] = None,
+        number_of_messages: typing.Union[None, int] = None,
+        alert_on_message_delivery: bool = False,
+        language_indicator: typing.Union[None, int] = None,
+        its_reply_type: typing.Union[None, int] = None,
+        its_session_info: typing.Union[None, str] = None,
+        ussd_service_op: typing.Union[None, str] = None,
+        #### OPTIONAL SMPP PARAMETERS ###
     ) -> None:
         """
         Parameters:
@@ -172,19 +208,52 @@ class SubmitSM(Message):
             replace_if_present_flag:	Flag indicating if submitted message should replace an existing message.
             sm_default_msg_id:	Indicates the short message to send from a list of predefined ('canned') short messages stored on the SMSC
             smpp_command: any one of the SMSC commands eg submit_sm
-
             encoding: `encoding <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ used to encode messages been sent to SMSC.
                       The encoding should be one of the encodings recognised by the SMPP specification. See section 5.2.19 of SMPP spec.
                       If you want to use your own custom codec implementation for an encoding, make sure to pass it to :py:attr:`naz.Client.custom_codecs <naz.Client.custom_codecs>`
             errors:	same meaning as the errors argument to pythons' `encode <https://docs.python.org/3/library/codecs.html#codecs.encode>`_ method
+            # Optional SMPP parameters.
+            user_message_reference: ESME assigned message reference number.
+            source_port: It is used to indicate the application port number associated with the source address of the message
+            source_addr_subunit: It is used to indicate where a message originated in the mobile station,
+                                 for example a smart card in the mobile station or an external device connected to the mobile station.
+            destination_port: It is used to indicate the application port number associated with the destination address of the message.
+            dest_addr_subunit: It is used to route messages when received by a mobile station, for example to a smart card in the mobile station
+                               or to an external device connected to the mobile station.
+            sar_msg_ref_num: It is used to indicate the reference number for a particular concatenated short message.
+            sar_total_segments: It is used to indicate the total number of short messages within the concatenated short message.
+            sar_segment_seqnum: It is used to indicate the sequence number of a particular short message within the concatenated short message.
+            more_messages_to_send: It is used by the ESME in the `submit_sm` and `data_sm` operations to indicate to the SMSC
+                                   that there are further messages for the same destination SME.
+            payload_type: It defines the higher layer PDU type contained in the message payload.
+            message_payload: It contains the user data.
+            privacy_indicator: It indicates the privacy level of the message.
+            callback_num: It associates a call back number with the message.
+            callback_num_pres_ind: It controls the presentation indication and screening of the callback number at the mobile station.
+                                   If present, the :py:attr:`~callback_num` parameter must also be present.
+            callback_num_atag: It associates an alphanumeric display with the call back number
+            source_subaddress: It specifies a subaddress associated with the originator of the message.
+            dest_subaddress: It specifies a subaddress associated with the destination of the message.
+            user_response_code: It is a response code set by the user in a User Acknowledgement/Reply message.
+            display_time: It is used to associate a display time of the short message on the MS.
+            sms_signal: It is used to provide a TDMA MS with alert tone information associated with the received short message.
+            ms_validity: It is used to provide an MS with validity information associated with the received short message.
+            ms_msg_wait_facilities: It allows an indication to be provided to an MS that there are messages waiting for the subscriber on systems on the PLMN.
+            number_of_messages: It is used to indicate the number of messages stored in a mailbox.
+            alert_on_message_delivery: It is set to instruct a MS to alert the user (in a MS implementation specific manner) when the short message arrives at the MS.
+            language_indicator: It is used to indicate the language of the short message.
+            its_reply_type: It indicates and controls the MS user's reply method to an SMS delivery message received from the ESME.
+                            It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].
+            its_session_info: It contains control information for the interactive session between an MS and an ESME.
+                              It is a required parameter for the CDMA Interactive Teleservice as defined by the Korean PCS carriers [KORITS].
+            ussd_service_op: It is required to define the USSD service operation when SMPP is being used as an interface to a (GSM) USSD system.
         """
+
         self._validate_msg_type_args(
             short_message=short_message,
             source_addr=source_addr,
             destination_addr=destination_addr,
             log_id=log_id,
-            version=version,
-            hook_metadata=hook_metadata,
             service_type=service_type,
             source_addr_ton=source_addr_ton,
             source_addr_npi=source_addr_npi,
@@ -198,6 +267,9 @@ class SubmitSM(Message):
             registered_delivery=registered_delivery,
             replace_if_present_flag=replace_if_present_flag,
             sm_default_msg_id=sm_default_msg_id,
+            smpp_command=smpp_command,
+            version=version,
+            hook_metadata=hook_metadata,
             encoding=encoding,
             errors=errors,
         )
@@ -227,12 +299,44 @@ class SubmitSM(Message):
         self.errors = errors
         self.data_coding = state.SmppDataCoding._find_data_coding(self.encoding)
 
+        self.optional_tags_dict = self._create_opt_tags(
+            user_message_reference=user_message_reference,
+            source_port=source_port,
+            source_addr_subunit=source_addr_subunit,
+            destination_port=destination_port,
+            dest_addr_subunit=dest_addr_subunit,
+            sar_msg_ref_num=sar_msg_ref_num,
+            sar_total_segments=sar_total_segments,
+            sar_segment_seqnum=sar_segment_seqnum,
+            more_messages_to_send=more_messages_to_send,
+            payload_type=payload_type,
+            message_payload=message_payload,
+            privacy_indicator=privacy_indicator,
+            callback_num=callback_num,
+            callback_num_pres_ind=callback_num_pres_ind,
+            callback_num_atag=callback_num_atag,
+            source_subaddress=source_subaddress,
+            dest_subaddress=dest_subaddress,
+            user_response_code=user_response_code,
+            display_time=display_time,
+            sms_signal=sms_signal,
+            ms_validity=ms_validity,
+            ms_msg_wait_facilities=ms_msg_wait_facilities,
+            number_of_messages=number_of_messages,
+            alert_on_message_delivery=alert_on_message_delivery,
+            language_indicator=language_indicator,
+            its_reply_type=its_reply_type,
+            its_session_info=its_session_info,
+            ussd_service_op=ussd_service_op,
+        )
+
     @staticmethod
     def _validate_msg_type_args(
         short_message: str,
         source_addr: str,
         destination_addr: str,
         log_id: str,
+        smpp_command: str,
         version: int,
         hook_metadata: str,
         service_type: str,
@@ -280,6 +384,18 @@ class SubmitSM(Message):
         if not isinstance(log_id, str):
             raise ValueError(
                 "`log_id` should be of type:: `str` You entered: {0}".format(type(log_id))
+            )
+        if not isinstance(smpp_command, str):
+            raise ValueError(
+                "`smpp_command` should be of type:: `str` You entered: {0}".format(
+                    type(smpp_command)
+                )
+            )
+        if smpp_command != state.SmppCommand.SUBMIT_SM:
+            raise ValueError(
+                "`smpp_command` should be:: `naz.state.SmppCommand.SUBMIT_SM` You entered: {0}".format(
+                    smpp_command
+                )
             )
         if not isinstance(hook_metadata, str):
             raise ValueError(
@@ -370,6 +486,21 @@ class SubmitSM(Message):
                 "`errors` should be of type:: `str` You entered: {0}".format(type(errors))
             )
 
+        # note: optional smpp parameters get validated on their own in `_create_opt_tags`
+
+    @staticmethod
+    def _create_opt_tags(**kwargs):
+        optional_tags_dict = {}
+        for opt_name in kwargs.keys():
+            if kwargs[opt_name] is not None:
+                optional_tags_dict.update({opt_name: kwargs[opt_name]})
+
+        # validate optional tags
+        for opt_name in optional_tags_dict.keys():
+            state.OptionalTag(name=opt_name, value=optional_tags_dict[opt_name])
+
+        return optional_tags_dict
+
     def to_json(self) -> str:
         _item = dict(
             smpp_command=self.smpp_command,
@@ -395,6 +526,7 @@ class SubmitSM(Message):
             encoding=self.encoding,
             errors=self.errors,
         )
+        _item.update(**self.optional_tags_dict)
         return json.dumps(_item)
 
     @staticmethod

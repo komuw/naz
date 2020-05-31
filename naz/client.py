@@ -12,7 +12,6 @@ import logging
 # pytype: disable=pyi-error
 from . import log
 from . import hooks
-from . import state
 from . import protocol
 from . import sequence
 from . import throttle
@@ -23,9 +22,10 @@ from . import broker as the_broker
 
 
 from .state import (
+    OptionalTag,
     SmppCommand,
     CommandStatus,
-    SmppOptionalTag,
+    SmppDataCoding,
     SmppSessionState,
     SmppCommandStatus,
 )
@@ -500,7 +500,7 @@ class Client:
                         )
 
                     # validate encoding is one allowed by SMPP
-                    _ = state.SmppDataCoding._find_data_coding(_encoding)
+                    _ = SmppDataCoding._find_data_coding(_encoding)
             except ValueError as e:
                 errors.append(e)
 
@@ -1236,6 +1236,12 @@ class Client:
             + encoded_short_message
         )
 
+        # check for optional SMPP parameters
+        optional_params_pdu = self._build_submit_sm_optional_params_pdu(
+            proto_msg.optional_tags_dict
+        )
+        body = body + optional_params_pdu
+
         # header
         command_length = self._header_pdu_length + len(body)  # 16 is for headers
         command_id = self.command_ids[smpp_command]
@@ -1297,6 +1303,18 @@ class Client:
             },
         )
         return full_pdu
+
+    @staticmethod
+    def _build_submit_sm_optional_params_pdu(optional_tags_dict):
+        # optional params may be included in ANY ORDER within
+        # the `Optional Parameters` section of the SMPP PDU.
+        opt_pdu = b""
+        for opt_name in optional_tags_dict.keys():
+            if optional_tags_dict.get(opt_name):
+                opt_pdu = (
+                    opt_pdu + OptionalTag(name=opt_name, value=optional_tags_dict[opt_name]).tlv
+                )
+        return opt_pdu
 
     async def re_establish_conn_bind(
         self, smpp_command: str, log_id: str, TESTING: bool = False
@@ -1709,7 +1727,7 @@ class Client:
         Parameters:
             TESTING: indicates whether this method is been called while running tests.
         """
-        retry_count = 0
+        receive_data_retry_count = 0
         while True:
             self._log(logging.INFO, {"event": "naz.Client.receive_data", "stage": "start"})
             if self.SHOULD_SHUT_DOWN:
@@ -1785,8 +1803,8 @@ class Client:
                 )
 
             if header_data == b"":
-                retry_count += 1
-                poll_read_interval = self._retry_after(retry_count)
+                receive_data_retry_count += 1
+                poll_read_interval = self._retry_after(receive_data_retry_count)
                 self._log(
                     logging.INFO,
                     {
@@ -1795,7 +1813,7 @@ class Client:
                         "state": "no data received from SMSC. sleeping for {0:.2f} seconds".format(
                             poll_read_interval
                         ),
-                        "retry_count": retry_count,
+                        "retry_count": receive_data_retry_count,
                     },
                 )
                 if self.SHOULD_SHUT_DOWN:
@@ -1804,7 +1822,7 @@ class Client:
                 continue
             else:
                 # we didn't fail to read from SMSC
-                retry_count = 0
+                receive_data_retry_count = 0
 
             # first 4bytes of header are the command_length
             total_pdu_length = struct.unpack(">I", header_data[:4])[0]
@@ -2135,7 +2153,7 @@ class Client:
             try:
                 # get associated user supplied log_id if any
                 target_tag = struct.pack(
-                    ">H", SmppOptionalTag.receipted_message_id
+                    ">H", OptionalTag.NAME_to_TAG["receipted_message_id"]
                 )  # unsigned Int, 2octet
                 if target_tag in body_data:
                     # the PDU contains a `receipted_message_id` TLV optional tag

@@ -98,12 +98,16 @@ jobs:
 
       - name: run tests
         run: |
+          printf "\n check naz version:\n"
           naz-cli --version
           naz-cli --help
+          printf "\n dry-run naz:\n"
           naz-cli --client examples.example_config.client --dry-run
+          printf "\n run tests:\n"
           coverage erase
           coverage run --omit="*tests*,*examples/*,*.virtualenvs/*,*virtualenv/*,*.venv/*,*__init__*" -m unittest discover -v -s .
           bash <(curl -s https://codecov.io/bash)
+          printf "\n check coverage:\n"
           coverage report --show-missing --fail-under=84
         env:
           PYTHONASYNCIODEBUG: '1'
