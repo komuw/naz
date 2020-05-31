@@ -3,6 +3,7 @@ most recent version is listed first.
 
 
 ## **version:** v0.8.0
+- Bugfix - RuntimeError: Cannot call `write()` after `write_eof()`: https://github.com/komuw/naz/pull/208   
 - support Smpp Optional Tags in `submit_sm`: https://github.com/komuw/naz/pull/202, https://github.com/komuw/naz/pull/207  
 - Fixed some flaky tests: https://github.com/komuw/naz/pull/204, https://github.com/komuw/naz/pull/206  
 - Add ability to use different codecs for different messages while using the same `naz` client: https://github.com/komuw/naz/pull/201   

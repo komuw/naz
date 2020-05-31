@@ -1084,10 +1084,14 @@ class TestClient(TestCase):
         """
         self._run(self.cli.connect())
         self._run(self.cli.tranceiver_bind())
+        self.assertIsNotNone(self.cli.writer)
 
         self._run(self.cli._unbind_and_disconnect())
+        self.assertIsNone(self.cli.writer)
+
         self._run(
             self.cli.send_data(
                 smpp_command=naz.SmppCommand.SUBMIT_SM, msg=b"someMessage", log_id="log_id"
             )
         )
+        self.assertIsNotNone(self.cli.writer)
