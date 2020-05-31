@@ -2522,6 +2522,7 @@
             <span class="k">async</span> <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">drain_lock</span><span class="p">:</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write_eof</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">except</span> <span class="p">(</span>
             <span class="ne">ConnectionError</span><span class="p">,</span>
             <span class="ne">TimeoutError</span><span class="p">,</span>
