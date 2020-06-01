@@ -7,7 +7,7 @@ import json
 import codecs
 import struct
 import asyncio
-from unittest import TestCase, mock, skip
+from unittest import TestCase, mock
 
 import naz
 import docker
@@ -866,22 +866,26 @@ class TestClient(TestCase):
             )
             self.assertTrue(mock_naz_tranceiver_bind.mock.called)
 
-    @skip("TODO:fix this. It does not work.")
     def test_issues_112(self):
         """
         test to prove we have fixed: https://github.com/komuw/naz/issues/112
 
-        Run `Client.enquire_link`. Check if `StreamWriter.write` was called twice(one for `tranceiver_bind` and another for `enquire_link`)
-        If `StreamWriter.write` was called, it means that our `enquire_link` call didnt get a:
-          enquire_link cannot be sent to SMSC when the client session state is: OPEN error.
+        Run `Client.enquire_link`.
+        Check if `StreamWriter.write` was called twice(one for `tranceiver_bind` and another for `enquire_link`)
         """
         with mock.patch("asyncio.streams.StreamWriter.write") as mock_naz_writer:
             self._run(self.cli.connect())
             self._run(self.cli.tranceiver_bind())
-            # self.cli.current_session_state = naz.SmppSessionState.BOUND_TRX
+            for item in (self.cli.system_id, self.cli.password):
+                # system_id & password are only sent in `tranceiver_bind`
+                self.assertIn(item.encode("ascii"), mock_naz_writer.call_args[0][0])
+
             self._run(self.cli.enquire_link(TESTING=True))
             self.assertTrue(mock_naz_writer.called)
             self.assertEqual(mock_naz_writer.call_count, 2)
+            # assert `enquire_link` command_id is in the sent data
+            _command_id = struct.pack(">I", self.cli.command_ids["enquire_link"])
+            self.assertIn(_command_id, mock_naz_writer.call_args[0][0])
 
     def test_command_id_lookup(self):
         command_id = self.cli._search_by_command_id_code(
