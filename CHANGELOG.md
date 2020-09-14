@@ -4,7 +4,7 @@ most recent version is listed first.
 
 ## **version:** v0.8.1
 - Fix a previously skipped test: https://github.com/komuw/naz/pull/209  
-
+- Reconnect after `unbind_and_disconnect` in `recieve_data` lifecycle: https://github.com/komuw/naz/pull/212
 
 ## **version:** v0.8.0
 - Bugfix - RuntimeError: Cannot call `write()` after `write_eof()`: https://github.com/komuw/naz/pull/208   

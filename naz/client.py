@@ -1780,6 +1780,8 @@ class Client:
                 )
                 # close connection. it will be automatically reconnected later
                 await self._unbind_and_disconnect()
+                await self.re_establish_conn_bind(smpp_command="", log_id="")
+
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
                     return header_data
