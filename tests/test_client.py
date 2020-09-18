@@ -1077,6 +1077,24 @@ class TestClient(TestCase):
             )
             self.assertEqual(mock_naz_enqueue.mock.call_args[0][1].short_message, short_message)
 
+    def test_issues_197(self):
+        """
+        test to prove we have fixed: https://github.com/komuw/naz/issues/197
+        ie;
+        During shutdown, close the writer & not reader
+
+        1. connect to smsc
+        2. bind
+        3. unbind & disconnect
+        """
+        self._run(self.cli.connect())
+        self._run(self.cli.tranceiver_bind())
+        self.assertIsNotNone(self.cli.writer)
+
+        self._run(self.cli._unbind_and_disconnect())
+        self.assertIsNone(self.cli.writer)
+        self.assertIsNotNone(self.cli.reader)
+
     def test_issues_203(self):
         """
         test to prove we have fixed: https://github.com/komuw/naz/issues/203
