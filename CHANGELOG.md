@@ -6,7 +6,7 @@ most recent version is listed first.
 ## **version:** v0.8.1
 - Fix a previously skipped test: https://github.com/komuw/naz/pull/209  
 - Reconnect after `unbind_and_disconnect` in `recieve_data` lifecycle: https://github.com/komuw/naz/pull/212
-- When unbinding and disconetting from SMSC, set SMPP session state to CLOSED: https://github.com/komuw/naz/pull/213
+- When unbinding and disconnecting from SMSC, set SMPP session state to CLOSED: https://github.com/komuw/naz/pull/213
 
 
 ## **version:** v0.8.0
