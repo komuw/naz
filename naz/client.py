@@ -1417,6 +1417,7 @@ class Client:
                     "error": error_msg,
                 },
             )
+            await self.re_establish_conn_bind(smpp_command=smpp_command, log_id=log_id)
             return None
         elif (
             self.current_session_state == SmppSessionState.OPEN
@@ -1780,7 +1781,6 @@ class Client:
                 )
                 # close connection. it will be automatically reconnected later
                 await self._unbind_and_disconnect()
-                await self.re_establish_conn_bind(smpp_command="", log_id="")
 
                 if TESTING:
                     # offer escape hatch for tests to come out of endless loop
@@ -2350,6 +2350,7 @@ class Client:
             # 2. unbind
             # 3. drain
             # 4. close connection
+            # 5. set state to closed
             # in that order
 
             # see: https://github.com/komuw/naz/issues/117
@@ -2360,6 +2361,7 @@ class Client:
                 await self.writer.drain()
             self.writer.write_eof()
             self.writer = None
+            self.current_session_state = SmppSessionState.CLOSED
         except (
             ConnectionError,
             TimeoutError,
