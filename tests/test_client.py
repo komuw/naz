@@ -1098,6 +1098,8 @@ class TestClient(TestCase):
     def test_issues_203(self):
         """
         test to prove we have fixed: https://github.com/komuw/naz/issues/203
+        ie;
+        If we close connection, we should thereafter still be able to send_data.
 
         1. connect to smsc
         2. bind
