@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>naz.client &mdash; naz v0.8.0 documentation</title>
+  <title>naz.client &mdash; naz v0.8.0-beta documentation</title>
   
 
   
@@ -60,7 +60,7 @@
             
             
               <div class="version">
-                v0.8.0
+                v0.8.0-beta
               </div>
             
           
@@ -1582,6 +1582,7 @@
                     <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">error_msg</span><span class="p">,</span>
                 <span class="p">},</span>
             <span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">re_establish_conn_bind</span><span class="p">(</span><span class="n">smpp_command</span><span class="o">=</span><span class="n">smpp_command</span><span class="p">,</span> <span class="n">log_id</span><span class="o">=</span><span class="n">log_id</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">==</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">OPEN</span>
@@ -1945,6 +1946,7 @@
                 <span class="p">)</span>
                 <span class="c1"># close connection. it will be automatically reconnected later</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unbind_and_disconnect</span><span class="p">()</span>
+
                 <span class="k">if</span> <span class="n">TESTING</span><span class="p">:</span>
                     <span class="c1"># offer escape hatch for tests to come out of endless loop</span>
                     <span class="k">return</span> <span class="n">header_data</span>
@@ -2513,6 +2515,7 @@
             <span class="c1"># 2. unbind</span>
             <span class="c1"># 3. drain</span>
             <span class="c1"># 4. close connection</span>
+            <span class="c1"># 5. set state to closed</span>
             <span class="c1"># in that order</span>
 
             <span class="c1"># see: https://github.com/komuw/naz/issues/117</span>
@@ -2523,6 +2526,7 @@
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write_eof</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_session_state</span> <span class="o">=</span> <span class="n">SmppSessionState</span><span class="o">.</span><span class="n">CLOSED</span>
         <span class="k">except</span> <span class="p">(</span>
             <span class="ne">ConnectionError</span><span class="p">,</span>
             <span class="ne">TimeoutError</span><span class="p">,</span>
