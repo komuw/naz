@@ -1,3 +1,4 @@
+import os
 import signal
 import asyncio
 import logging
@@ -36,6 +37,10 @@ async def _signal_handling(logger: logging.Logger, client: naz.Client) -> None:
 async def _handle_termination_signal(
     logger: logging.Logger, _signal: "signal.Signals", client: naz.Client
 ) -> None:
+    """
+    Handle termination signal by cleanly shutting down the `naz` client.
+    At the end of it, send a `SIGKILL` signal to `naz` to make sure it exists.
+    """
     logger.log(
         logging.INFO,
         {
@@ -52,4 +57,6 @@ async def _handle_termination_signal(
         logging.INFO,
         {"event": "naz.cli.signals", "stage": "end", "state": "client has succesfully shutdown"},
     )
+
+    os.kill(client._PID, signal.SIGKILL)
     return
